@@ -1,0 +1,124 @@
+GrenadeBase = GrenadeBase or class(ProjectileBase)
+GrenadeBase.EVENT_IDS = {detonate = 1}
+local mvec1 = Vector3()
+local mvec2 = Vector3()
+function GrenadeBase:_setup_server_data()
+	self._slot_mask = managers.slot:get_mask("trip_mine_targets")
+	if self._init_timer then
+		self._timer = self._init_timer
+	end
+end
+function GrenadeBase:update(unit, t, dt)
+	if self._timer then
+		self._timer = self._timer - dt
+		if self._timer <= 0 then
+			self._timer = nil
+			self:_detonate()
+			return
+		end
+	end
+	GrenadeBase.super.update(self, unit, t, dt)
+end
+function GrenadeBase:clbk_impact(...)
+	self:_detonate()
+end
+function GrenadeBase:_on_collision(col_ray)
+	self:_detonate()
+end
+function GrenadeBase:_detonate()
+	print("no _detonate function for grenade base")
+end
+function GrenadeBase:_detonate_on_client()
+	print("no _detonate_on_client function for grenade base")
+end
+function GrenadeBase:sync_net_event(event_id)
+	if event_id == GrenadeBase.EVENT_IDS.detonate then
+		self:_detonate_on_client()
+	end
+end
+function GrenadeBase:add_damage_result(unit, is_dead, damage_percent)
+	if not alive(self._thrower_unit) or self._thrower_unit ~= managers.player:player_unit() then
+		return
+	end
+	local unit_type = unit:base()._tweak_table
+	local is_civlian = unit:character_damage().is_civilian(unit_type)
+	local is_gangster = unit:character_damage().is_gangster(unit_type)
+	local is_cop = unit:character_damage().is_cop(unit_type)
+	if is_civlian then
+		return
+	end
+	local weapon_id = tweak_data.blackmarket.projectiles[self:projectile_entry()].weapon_id
+	if weapon_id then
+		managers.statistics:shot_fired({
+			hit = true,
+			name_id = weapon_id,
+			skip_bullet_count = true
+		})
+	end
+	table.insert(self._damage_results, is_dead)
+	local hit_count = #self._damage_results
+	local kill_count = 0
+	for i, death in ipairs(self._damage_results) do
+		kill_count = kill_count + (death and 1 or 0)
+	end
+	local count_pass, grenade_type_pass, kill_pass, distance_pass, enemy_pass, flying_strike_pass, timer_pass, all_pass, memory
+	for achievement, achievement_data in pairs(tweak_data.achievement.grenade_achievements) do
+		if achievement_data.count then
+			count_pass = (achievement_data.kill and kill_count or hit_count) >= achievement_data.count
+		end
+		grenade_type_pass = not achievement_data.grenade_type or achievement_data.grenade_type == self:projectile_entry()
+		kill_pass = not achievement_data.kill or is_dead
+		enemy_pass = not achievement_data.enemy or unit_type == achievement_data.enemy
+		flying_strike_pass = not achievement_data.flying_strike
+		if unit_type == "spooc" then
+			local spooc_action = unit:movement()._active_actions[1]
+			if spooc_action and spooc_action:type() == "spooc" and not flying_strike_pass then
+				flying_strike_pass = spooc_action:is_flying_strike()
+			end
+		end
+		distance_pass = not achievement_data.distance
+		if not distance_pass then
+			mvector3.set(mvec1, self._spawn_position)
+			mvector3.set(mvec2, unit:position())
+			local distance = mvector3.distance_sq(mvec1, mvec2)
+			distance_pass = distance >= achievement_data.distance * achievement_data.distance
+		end
+		timer_pass = not achievement_data.timer
+		if achievement_data.timer and is_dead then
+			memory = managers.job:get_memory(achievement)
+			local t = Application:time()
+			if memory then
+				table.insert(memory, t)
+				for i = #memory, 1, -1 do
+					if t - memory[i] >= achievement_data.timer then
+						table.remove(memory, i)
+					end
+				end
+				timer_pass = #memory >= achievement_data.kill_count
+				managers.job:set_memory(achievement, memory)
+			else
+				managers.job:set_memory(achievement, {t})
+			end
+		end
+		all_pass = count_pass and grenade_type_pass and kill_pass and distance_pass and enemy_pass and flying_strike_pass and timer_pass
+		if all_pass then
+			if achievement_data.stat then
+				managers.achievment:award_progress(achievement_data.stat)
+			elseif achievement_data.award then
+				managers.achievment:award(achievement_data.award)
+			end
+		end
+	end
+end
+function GrenadeBase:clbk_impact(tag, unit, body, other_unit, other_body, position, normal, collision_velocity, velocity, other_velocity, new_velocity, direction, damage, ...)
+	self:_detonate(tag, unit, body, other_unit, other_body, position, normal, collision_velocity, velocity, other_velocity, new_velocity, direction, damage, ...)
+end
+function GrenadeBase:save(data)
+	local state = {}
+	state.timer = self._timer
+	data.GrenadeBase = state
+end
+function GrenadeBase:load(data)
+	local state = data.GrenadeBase
+	self._timer = state.timer
+end
