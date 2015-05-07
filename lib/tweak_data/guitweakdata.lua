@@ -329,6 +329,14 @@ function GuiTweakData:init()
 		store = 358150,
 		image = "guis/dlcs/bbq/textures/pd2/content_updates/bbq"
 	}
+	local springcleaning = {
+		id = "springcleaning",
+		name_id = "menu_content_springcleaning",
+		desc_id = "menu_content_springcleaning_desc",
+		date_id = "menu_content_springcleaning_date",
+		webpage = "http://steamcommunity.com/games/218620/announcements/detail/177107167839449807",
+		image = "guis/textures/pd2/content_updates/springcleaning"
+	}
 	local west = {
 		id = "west",
 		name_id = "menu_content_west",
@@ -336,6 +344,22 @@ function GuiTweakData:init()
 		date_id = "menu_content_west_date",
 		store = 349830,
 		image = "guis/dlcs/west/textures/pd2/content_updates/west"
+	}
+	local bsides = {
+		id = "bsides",
+		name_id = "menu_content_bsides",
+		desc_id = "menu_content_bsides_desc",
+		date_id = "menu_content_bsides_date",
+		store = 368870,
+		image = "guis/textures/pd2/content_updates/bsides"
+	}
+	local shoutout = {
+		id = "shoutout",
+		name_id = "menu_content_shoutout",
+		desc_id = "menu_content_shoutout_desc",
+		date_id = "menu_content_shoutout_date",
+		webpage = "http://www.overkillsoftware.com/meltdown/",
+		image = "guis/textures/pd2/content_updates/shoutout"
 	}
 	self.content_updates = {
 		title_id = "menu_content_updates",
@@ -384,7 +408,10 @@ function GuiTweakData:init()
 			hlm2_deluxe,
 			springbreak,
 			bbq,
-			west
+			springcleaning,
+			west,
+			bsides,
+			shoutout
 		}
 	elseif SystemInfo:platform() == Idstring("PS3") then
 		self.content_updates.item_list = {

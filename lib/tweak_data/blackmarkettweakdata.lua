@@ -1942,6 +1942,12 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.lone.value = 0
 	self.masks.lone.type = "helmet"
 	self.masks.lone.skip_mask_on_sequence = true
+	self.masks.grendel = {}
+	self.masks.grendel.unit = "units/pd2_dlc_shoutout_raid/masks/grendel/msk_grendel"
+	self.masks.grendel.name_id = "bm_msk_grendel"
+	self.masks.grendel.pcs = {}
+	self.masks.grendel.value = 0
+	self.masks.grendel.global_value = "infamous"
 	if SystemInfo:platform() == Idstring("PS3") then
 		self.masks.sweettooth = {}
 		self.masks.sweettooth.unit = "units/payday2/masks/msk_sweettooth/msk_sweettooth"

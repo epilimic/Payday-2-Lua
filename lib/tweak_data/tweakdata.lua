@@ -955,16 +955,17 @@ function TweakData:init()
 		0
 	}
 	self.experience_manager.job_completion = {
-		2000,
-		4000,
-		10000,
-		16000,
-		20000,
-		28000,
-		32000
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0
 	}
 	self.experience_manager.stage_failed_multiplier = 0.01
 	self.experience_manager.in_custody_multiplier = 0.7
+	self.experience_manager.pro_job_multiplier = 1.2
 	self.experience_manager.difficulty_multiplier = {
 		2,
 		5,
@@ -2081,6 +2082,13 @@ function TweakData:init()
 			},
 			job = "cage"
 		},
+		death_shoutout = {
+			award = "melt_1",
+			difficulty = {
+				"overkill_290"
+			},
+			job = "shoutout_raid"
+		},
 		not_for_old_men = {
 			award = "gage4_11",
 			stealth = true,
@@ -2127,8 +2135,7 @@ function TweakData:init()
 			difficulties = {
 				"overkill_145"
 			},
-			timer = 50,
-			is_shortterm = true
+			total_time = 50
 		}
 	}
 	self.achievement.job_list = {}
@@ -2136,7 +2143,9 @@ function TweakData:init()
 		"ukrainian_job_prof",
 		"mallcrasher",
 		"four_stores",
-		"nightclub"
+		"nightclub",
+		"pines",
+		"shoutout_raid"
 	}
 	self.achievement.job_list.hector = {
 		"watchdogs_wrapper",
@@ -2166,6 +2175,7 @@ function TweakData:init()
 		"arm_fac",
 		"arm_par",
 		"arm_und",
+		"arm_for",
 		"kosugi",
 		"gallery",
 		"rat",
@@ -2988,6 +2998,7 @@ function TweakData:init()
 	self.projectiles.dynamite.player_damage = 10
 	self.projectiles.dynamite.range = 1000
 	self.projectiles.dynamite.name_id = "bm_grenade_frag"
+	self.projectiles.dynamite.effect_name = "effects/payday2/particles/explosions/dynamite_explosion"
 	self.voting = {}
 	self.voting.timeout = 30
 	self.voting.cooldown = 50
@@ -3368,6 +3379,7 @@ function TweakData:set_hud_values()
 	self.hud.ammo_font_size = 30 * self.scale.hud_default_font_multiplier
 	self.hud.weapon_ammo_font_size = 24 * self.scale.hud_default_font_multiplier
 	self.hud.name_label_font_size = 24 * self.scale.hud_default_font_multiplier
+	self.hud.small_name_label_font_size = 17 * self.scale.hud_default_font_multiplier
 	self.hud.equipment_font_size = 24 * self.scale.hud_default_font_multiplier
 	self.hud.hint_font_size = 28 * self.scale.hud_default_font_multiplier * lang_mods.hint_font_size
 	self.hud.active_objective_title_font_size = 24 * self.scale.hud_default_font_multiplier * lang_mods.active_objective_title_font_size

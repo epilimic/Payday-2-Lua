@@ -13,15 +13,20 @@ function ElementVehicleOperator:_get_unit(unit_id)
 	end
 end
 function ElementVehicleOperator:_apply_opreator(unit)
-	if unit and unit:vehicle_driving() then
-		local call = unit:vehicle_driving()[self._values.operation]
-		if call then
-			call(unit:vehicle_driving())
+	if unit then
+		local extension = unit:npc_vehicle_driving() or unit:vehicle_driving()
+		if extension then
+			local call = extension[self._values.operation]
+			if call then
+				call(extension, tonumber(self._values.damage))
+			else
+				Application:error("Vehicle Operator applied to a unit that doesn't support the specified operation - opertion: ", self._values.operation)
+			end
 		else
-			Application:error("Vehicle Operator applied to a unit that doesn't support the specified operation - unit id: " .. id .. ", opertion: " .. self._values.operation)
+			Application:error("Vehicle Operator applied to a unit that isn't a vehicle: ", inspect(unit))
 		end
 	else
-		Application:warn("Vehicle Operator applied to a unit that doesn't exist or is not a vehicle - unit id: ")
+		Application:warn("Vehicle Operator applied to a unit that doesn't exist - operator: ", inspect(self._unit))
 	end
 end
 function ElementVehicleOperator:on_executed(instigator)

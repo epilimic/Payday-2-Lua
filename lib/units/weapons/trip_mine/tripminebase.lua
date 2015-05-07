@@ -51,7 +51,7 @@ function TripMineBase:get_name_id()
 	return "trip_mine"
 end
 function TripMineBase:interaction_text_id()
-	return self._sensor_upgrade and ((self._activate_timer or self._armed) and "hud_int_equipment_sensor_mode_trip_mine" or "hud_int_equipment_normal_mode_trip_mine") or "debug_interact_trip_mine"
+	return self._sensor_upgrade and (self:armed() and "hud_int_equipment_sensor_mode_trip_mine" or "hud_int_equipment_normal_mode_trip_mine") or "debug_interact_trip_mine"
 end
 function TripMineBase:sync_setup(sensor_upgrade)
 	if self._validate_clbk_id then
@@ -64,6 +64,7 @@ function TripMineBase:setup(sensor_upgrade)
 	self._slotmask = managers.slot:get_mask("trip_mine_targets")
 	self._first_armed = false
 	self._armed = false
+	self._startup_armed = true
 	self._sensor_upgrade = sensor_upgrade
 	self:set_active(false)
 	self._unit:sound_source():post_event("trip_mine_attach")
@@ -113,19 +114,26 @@ function TripMineBase:active()
 	return self._active
 end
 function TripMineBase:armed()
+	if self._activate_timer then
+		return self._startup_armed
+	end
 	return self._armed
 end
 function TripMineBase:_set_armed(armed)
-	self._armed = not self._activate_timer and armed
-	self._g_laser:set_visibility(self._armed)
-	self._g_laser_sensor:set_visibility(self._sensor_upgrade and not self._armed)
-	if self._use_draw_laser then
-		self._laser_brush:set_color(self._armed and self._laser_color or self._sensor_upgrade and self._laser_sensor_color or self._laser_color)
-	end
-	if not self._first_armed and self._armed then
-		self._first_armed = true
-		self._activate_timer = nil
-		self._unit:sound_source():post_event("trip_mine_beep_armed")
+	if not self._activate_timer then
+		self._armed = armed
+		self._g_laser:set_visibility(self._armed)
+		self._g_laser_sensor:set_visibility(self._sensor_upgrade and not self._armed)
+		if self._use_draw_laser then
+			self._laser_brush:set_color(self._armed and self._laser_color or self._sensor_upgrade and self._laser_sensor_color or self._laser_color)
+		end
+		if not self._first_armed then
+			self._first_armed = true
+			self._activate_timer = nil
+			self._unit:sound_source():post_event("trip_mine_beep_armed")
+		end
+	else
+		self._startup_armed = armed
 	end
 	self._unit:sound_source():post_event(self._armed and "trip_mine_arm" or "trip_mine_disarm")
 	self._unit:interaction():set_dirty(true)
@@ -174,7 +182,8 @@ function TripMineBase:update(unit, t, dt)
 		self._activate_timer = self._activate_timer - dt
 		if 0 >= self._activate_timer then
 			self._activate_timer = nil
-			self:set_armed(true)
+			self:set_armed(self._startup_armed)
+			self._startup_armed = nil
 		end
 		return
 	end
@@ -245,6 +254,13 @@ function TripMineBase:_check()
 	end
 	local ray = self:_raycast()
 	if ray and ray.unit and not tweak_data.character[ray.unit:base()._tweak_table].is_escort then
+		if ray.unit:movement() and ray.unit:movement():team() then
+			local team_id_player = tweak_data.levels:get_default_team_ID("player")
+			local team_id_ray = ray.unit:movement():team().id
+			if not managers.groupai:state():team_data(team_id_player).foes[team_id_ray] then
+				return
+			end
+		end
 		self._explode_timer = tweak_data.weapon.trip_mines.delay + managers.player:upgrade_value("trip_mine", "explode_timer_delay", 0)
 		self._explode_ray = ray
 		self._unit:sound_source():post_event("trip_mine_beep_explode")
@@ -272,15 +288,7 @@ function TripMineBase:_explode(col_ray)
 	end
 	local damage_size = tweak_data.weapon.trip_mines.damage_size * managers.player:upgrade_value("trip_mine", "explosion_size_multiplier_1", 1) * managers.player:upgrade_value("trip_mine", "explosion_size_multiplier_2", 1) * managers.player:upgrade_value("trip_mine", "damage_multiplier", 1)
 	local player = managers.player:player_unit()
-	if alive(player) then
-		player:character_damage():damage_explosion({
-			position = self._position,
-			range = damage_size,
-			damage = 6
-		})
-	else
-		player = nil
-	end
+	managers.explosion:give_local_player_dmg(self._position, damage_size, tweak_data.weapon.trip_mines.player_damage)
 	self._unit:set_extension_update_enabled(Idstring("base"), false)
 	self._deactive_timer = 5
 	self:_play_sound_and_effects()
@@ -356,6 +364,7 @@ end
 function TripMineBase:sync_trip_mine_explode(user_unit, ray_from, ray_to, damage_size, damage)
 	self:_play_sound_and_effects()
 	self._unit:set_slot(0)
+	managers.explosion:give_local_player_dmg(self._position, damage_size, tweak_data.weapon.trip_mines.player_damage)
 	local bodies = World:find_bodies("intersect", "cylinder", ray_from, ray_to, damage_size, managers.slot:get_mask("explosion_targets"))
 	for _, hit_body in ipairs(bodies) do
 		local apply_dmg = hit_body:extension() and hit_body:extension().damage

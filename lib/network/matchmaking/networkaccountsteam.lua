@@ -314,6 +314,18 @@ end
 function NetworkAccountSTEAM:lan_connection()
 	return true
 end
+function NetworkAccountSTEAM:set_playing(state)
+	Steam:set_playing(state)
+end
+function NetworkAccountSTEAM:_load_globals()
+	if Global.steam and Global.steam.account then
+		Global.steam.account = nil
+	end
+end
+function NetworkAccountSTEAM:_save_globals()
+	Global.steam = Global.steam or {}
+	Global.steam.account = {}
+end
 function NetworkAccountSTEAM.output_global_stats(file)
 	local num_days = 100
 	local sa = Steam:sa_handler()

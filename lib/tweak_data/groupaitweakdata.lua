@@ -1746,6 +1746,7 @@ function GroupAITweakData:_init_task_data(difficulty_index, difficulty)
 			1
 		}
 	}
+	self.street = deep_clone(self.besiege)
 end
 function GroupAITweakData:_read_mission_preset(tweak_data)
 	if not Global.game_settings then

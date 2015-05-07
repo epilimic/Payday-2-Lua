@@ -1962,7 +1962,8 @@ function MenuComponentManager:create_lootdrop_casino_gui(node)
 		self._lootscreen_casino_hud:show()
 		self._lootdrop_casino_gui = CasinoLootDropScreenGui:new(self._ws, self._fullscreen_ws, self._lootscreen_casino_hud)
 		self._lootdrop_casino_gui:set_layer(parent_layer + 1)
-		self._lootscreen_casino_hud:feed_lootdrop(lootdrop_data)
+		self._lootscreen_casino_hud:make_cards(peer, max_pc, card_left_pc, card_right_pc)
+		self._lootscreen_casino_hud:make_lootdrop(lootdrop_data)
 		if not managers.menu:is_pc_controller() then
 			managers.menu:active_menu().input:deactivate_controller_mouse()
 		end

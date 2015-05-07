@@ -719,6 +719,33 @@ function BlackMarketManager:outfit_string()
 	s = s .. " " .. tostring(managers.skilltree:pack_to_string())
 	return s
 end
+function BlackMarketManager:outfit_string_from_list(outfit)
+	local s = ""
+	s = s .. outfit.mask.mask_id
+	s = s .. " " .. outfit.mask.blueprint.color.id
+	s = s .. " " .. outfit.mask.blueprint.pattern.id
+	s = s .. " " .. outfit.mask.blueprint.material.id
+	s = s .. " " .. outfit.armor .. "-" .. outfit.armor_current
+	s = s .. " " .. outfit.character
+	local primary_string = managers.weapon_factory:blueprint_to_string(outfit.primary.factory_id, outfit.primary.blueprint)
+	primary_string = string.gsub(primary_string, " ", "_")
+	s = s .. " " .. outfit.primary.factory_id .. " " .. primary_string
+	local secondary_string = managers.weapon_factory:blueprint_to_string(outfit.secondary.factory_id, outfit.secondary.blueprint)
+	secondary_string = string.gsub(secondary_string, " ", "_")
+	s = s .. " " .. outfit.secondary.factory_id .. " " .. secondary_string
+	local equipped_deployable = outfit.deployable
+	if equipped_deployable then
+		s = s .. " " .. outfit.deployable
+		s = s .. " " .. tostring(outfit.deployable_amount)
+	else
+		s = s .. " " .. "nil" .. " " .. "0"
+	end
+	s = s .. " " .. tostring(outfit.concealment_modifier)
+	s = s .. " " .. tostring(outfit.melee_weapon)
+	s = s .. " " .. tostring(outfit.grenade)
+	s = s .. " " .. managers.skilltree:pack_to_string_from_list(outfit.skills)
+	return s
+end
 function BlackMarketManager:load_equipped_weapons()
 	do
 		local weapon = self:equipped_primary()
@@ -1291,6 +1318,10 @@ function BlackMarketManager:get_inventory_masks()
 	end
 	return masks
 end
+function BlackMarketManager:get_global_value(category, name_id)
+	local data = tweak_data.blackmarket[category][name_id]
+	return data.infamous and "infamous" or data.global_value or data.dlc or data.dlcs and data.dlcs[1] or "normal"
+end
 function BlackMarketManager:get_crafted_category(category)
 	if not self._global.crafted_items then
 		return
@@ -1528,13 +1559,13 @@ end
 function BlackMarketManager:get_suspicion_offset_of_local(lerp)
 	local con_mul, index = self:_get_concealment_from_local_player()
 	local val = self:_calculate_suspicion_offset(index, lerp or 1)
-	return val, index == 1
+	return val, index == 1, index == #tweak_data.weapon.stats.concealment - 1
 end
 function BlackMarketManager:get_suspicion_offset_from_custom_data(data, lerp)
 	local index = self:get_real_visibility_index_from_custom_data(data)
 	index = math.clamp(index, 1, #tweak_data.weapon.stats.concealment)
 	local val = self:_calculate_suspicion_offset(index, lerp or 1)
-	return val, index == 1
+	return val, index == 1, index == #tweak_data.weapon.stats.concealment - 1
 end
 function BlackMarketManager:visibility_modifiers()
 	local skill_bonuses = 0
@@ -2029,7 +2060,7 @@ function BlackMarketManager:aquire_default_weapons(only_enable)
 		end
 	end
 	local melee_weapon = self._global and self._global.melee_weapons and self._global.melee_weapons[self._defaults.melee_weapon]
-	if melee_weapon and not melee_weapon.unlocked and not managers.upgrades:aquired(self._defaults.melee_weapon) then
+	if melee_weapon and not melee_weapon.unlocked and not managers.upgrades:aquired(self._defaults.melee_weapon, UpgradesManager.AQUIRE_STRINGS[1]) then
 		if only_enable then
 			self._global.melee_weapons[self._defaults.melee_weapon].unlocked = true
 		else
@@ -2501,7 +2532,7 @@ end
 function BlackMarketManager:aquire_default_masks()
 	print("BlackMarketManager:aquire_default_masks()", self._global.crafted_items.masks)
 	if not self._global.crafted_items.masks then
-		self:on_buy_mask(self._defaults.mask, "normal", 1)
+		self:on_buy_mask(self._defaults.mask, "normal", 1, nil)
 	end
 end
 function BlackMarketManager:can_modify_mask(slot)
@@ -2882,12 +2913,12 @@ function BlackMarketManager:finish_customize_mask()
 	end
 	managers.achievment:award("masked_villain")
 end
-function BlackMarketManager:on_buy_mask_to_inventory(mask_id, global_value, slot)
-	self:on_buy_mask(mask_id, global_value, slot)
+function BlackMarketManager:on_buy_mask_to_inventory(mask_id, global_value, slot, item_id)
+	self:on_buy_mask(mask_id, global_value, slot, item_id)
 	self:remove_item(global_value, "masks", mask_id)
 	self:alter_global_value_item(global_value, "masks", slot, mask_id, INV_TO_CRAFT)
 end
-function BlackMarketManager:on_buy_mask(mask_id, global_value, slot)
+function BlackMarketManager:on_buy_mask(mask_id, global_value, slot, item_id)
 	local category = "masks"
 	self._global.crafted_items[category] = self._global.crafted_items[category] or {}
 	local default_blueprint = self:get_mask_default_blueprint(mask_id)
@@ -3471,7 +3502,7 @@ function BlackMarketManager:_cleanup_blackmarket()
 	end
 	local cleanup_mask = false
 	for i, mask in pairs(crafted_masks) do
-		cleanup_mask = not tweak_data.blackmarket.masks[mask.mask_id]
+		cleanup_mask = not tweak_data.blackmarket.masks[mask.mask_id] or tweak_data.blackmarket.masks[mask.mask_id].inaccessible
 		cleanup_mask = cleanup_mask or not chk_global_value_func(mask.global_value)
 		local blueprint = mask.blueprint or {}
 		if not cleanup_mask then
@@ -3487,7 +3518,7 @@ function BlackMarketManager:_cleanup_blackmarket()
 		if cleanup_mask then
 			if i == 1 then
 				self._global.crafted_items.masks[i] = false
-				self:on_buy_mask(self._defaults.mask, "normal", 1)
+				self:on_buy_mask(self._defaults.mask, "normal", 1, nil)
 			else
 				Application:error("BlackMarketManager:_cleanup_blackmarket() Mask or component of mask invalid, Selling the mask!", "mask_id", mask.mask_id, "global_value", mask.global_value, "blueprint", inspect(blueprint))
 				self:on_sell_mask(i, true)
@@ -3642,6 +3673,8 @@ function BlackMarketManager:_cleanup_blackmarket()
 					for item, num in pairs(items) do
 						local item_tweak_data = bm_tweak_data[category][item]
 						if not item_tweak_data then
+							add_invalid_item_func(global_value, category, item)
+						elseif item_tweak_data.inaccessible then
 							add_invalid_item_func(global_value, category, item)
 						else
 							local global_values = {}

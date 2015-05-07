@@ -113,14 +113,19 @@ function UpgradesManager:_autochange_tree(exlude_tree)
 	end
 	return n_tree
 end
-function UpgradesManager:aquired(id)
-	local count = 0
-	for key, aquired in pairs(self._global.aquired[id] or {}) do
-		if aquired then
-			count = count + 1
+function UpgradesManager:aquired(id, identifier)
+	if identifier then
+		local identify_key = Idstring(identifier):key()
+		return self._global.aquired[id] and not not self._global.aquired[id][identify_key]
+	else
+		local count = 0
+		for key, aquired in pairs(self._global.aquired[id] or {}) do
+			if aquired then
+				count = count + 1
+			end
 		end
+		return count > 0
 	end
-	return count > 0
 end
 function UpgradesManager:aquire_default(id, identifier)
 	if not tweak_data.upgrades.definitions[id] then

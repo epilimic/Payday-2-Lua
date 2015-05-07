@@ -299,6 +299,12 @@ function CarryTweakData:init(tweak_data)
 	self.vehicle_falcogini.unit = ""
 	self.vehicle_falcogini.bag_value = "vehicle_falcogini"
 	self.vehicle_falcogini.AI_carry = {SO_category = ""}
+	self.warhead = {}
+	self.warhead.type = "very_heavy"
+	self.warhead.name_id = "hud_carry_warhead"
+	self.warhead.bag_value = "warhead"
+	self.warhead.visual_object = "g_explosives_bag"
+	self.warhead.unit = "units/pd2_dlc1/pickups/gen_pku_explosivesbag/gen_pku_explosivesbag"
 end
 function CarryTweakData:get_carry_ids()
 	local t = {}

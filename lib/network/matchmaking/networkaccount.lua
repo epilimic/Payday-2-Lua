@@ -27,3 +27,9 @@ end
 function NetworkAccount:_standard_username(name)
 	return name
 end
+function NetworkAccount:set_playing(state)
+end
+function NetworkAccount:_load_globals()
+end
+function NetworkAccount:_save_globals()
+end

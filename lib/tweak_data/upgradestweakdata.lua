@@ -126,12 +126,6 @@ function UpgradesTweakData:_init_pd2_values()
 	self.explosive_bullet.range = 200
 	self.explosive_bullet.feedback_range = self.explosive_bullet.range
 	self.explosive_bullet.camera_shake_max_mul = 2
-	self.flame_bullet = {}
-	self.flame_bullet.curve_pow = 0.5
-	self.flame_bullet.player_dmg_mul = 0.1
-	self.flame_bullet.range = 200
-	self.flame_bullet.feedback_range = self.explosive_bullet.range
-	self.flame_bullet.camera_shake_max_mul = 2
 	self.values.player.crime_net_deal = {0.9, 0.8}
 	self.values.player.corpse_alarm_pager_bluff = {true}
 	self.values.player.marked_enemy_extra_damage = {true}
@@ -1619,7 +1613,7 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[46] = {
 		name_id = "weapons",
-		upgrades = {"gre_m79", "b682"}
+		upgrades = {"gre_m79"}
 	}
 	self.level_tree[47] = {
 		name_id = "weapons",

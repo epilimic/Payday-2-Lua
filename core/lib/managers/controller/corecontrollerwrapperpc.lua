@@ -87,6 +87,8 @@ function ControllerWrapperPC:virtual_connect2(controller_id, controller, input_n
 		end
 		if controller:has_button(Idstring(input_name_str)) or controller:has_axis(Idstring(input_name_str)) then
 			self._virtual_controller:connect(controller, Idstring(connect_src_type), Idstring(input_name_str), Idstring("range"), min_src, max_src, Idstring(connect_dest_type), Idstring(connection_name), Idstring("range"), min_dest, max_dest)
+		elseif self._virtual_controller:has_button(Idstring(input_name_str)) or self._virtual_controller:has_axis(Idstring(input_name_str)) then
+			self._virtual_controller:connect(self._virtual_controller, Idstring(connect_src_type), Idstring(input_name_str), Idstring("range"), min_src, max_src, Idstring(connect_dest_type), Idstring(connection_name), Idstring("range"), min_dest, max_dest)
 		else
 			Application:error("Invalid input name \"" .. tostring(input_name_str) .. "\". Controller type: \"" .. tostring(controller_id) .. "\", Connection name: \"" .. tostring(connection_name) .. "\".")
 		end

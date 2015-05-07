@@ -369,15 +369,15 @@ function UnitNetworkHandler:sync_body_damage_lock(body, damage, sender)
 		return
 	end
 	if not body:extension() then
-		print("[UnitNetworkHandler:sync_body_damage_bullet] body has no extension", body:name(), body:unit():name())
+		print("[UnitNetworkHandler:sync_body_damage_lock] body has no extension", body:name(), body:unit():name())
 		return
 	end
 	if not body:extension().damage then
-		print("[UnitNetworkHandler:sync_body_damage_bullet] body has no damage extension", body:name(), body:unit():name())
+		print("[UnitNetworkHandler:sync_body_damage_lock] body has no damage extension", body:name(), body:unit():name())
 		return
 	end
 	if not body:extension().damage.damage_lock then
-		print("[UnitNetworkHandler:sync_body_damage_bullet] body has no damage damage_lock function", body:name(), body:unit():name())
+		print("[UnitNetworkHandler:sync_body_damage_lock] body has no damage damage_lock function", body:name(), body:unit():name())
 		return
 	end
 	body:extension().damage:damage_lock(nil, nil, nil, nil, damage)
@@ -512,7 +512,6 @@ function UnitNetworkHandler:interaction_set_active(unit, u_id, active, tweak_dat
 	if not alive(unit) then
 		local u_data = managers.enemy:get_corpse_unit_data_from_id(u_id)
 		if not u_data then
-			debug_pause("[UnitNetworkHandler:sync_interaction_set_active] could not resolve unit.")
 			return
 		end
 		unit = u_data.unit
@@ -2063,10 +2062,12 @@ function UnitNetworkHandler:sync_vehicle_driving(action, unit, player)
 	if not alive(unit) then
 		return
 	end
+	local ext = unit:npc_vehicle_driving()
+	ext = ext or unit:vehicle_driving()
 	if action == "start" then
-		unit:vehicle_driving():sync_start(player)
+		ext:sync_start(player)
 	elseif action == "stop" then
-		unit:vehicle_driving():sync_stop()
+		ext:sync_stop()
 	end
 end
 function UnitNetworkHandler:sync_vehicle_set_input(unit, accelerate, steer, brake, handbrake, gear_up, gear_down, forced_gear)
@@ -2081,12 +2082,12 @@ function UnitNetworkHandler:sync_vehicle_state(unit, position, rotation, velocit
 	end
 	unit:vehicle_driving():sync_state(position, rotation, velocity)
 end
-function UnitNetworkHandler:sync_enter_vehicle_host(vehicle, peer_id, player)
-	Application:debug("[DRIVING_NET] sync_enter_vehicle_host")
+function UnitNetworkHandler:sync_enter_vehicle_host(vehicle, seat_name, peer_id, player)
+	Application:debug("[DRIVING_NET] sync_enter_vehicle_host", seat_name)
 	if not alive(vehicle) then
 		return
 	end
-	managers.player:server_enter_vehicle(vehicle, peer_id, player)
+	managers.player:server_enter_vehicle(vehicle, peer_id, player, seat_name)
 end
 function UnitNetworkHandler:sync_vehicle_player(action, vehicle, peer_id, player, seat_name)
 	Application:debug("[DRIVING_NET] sync_vehicle_player " .. action)
@@ -2096,21 +2097,75 @@ function UnitNetworkHandler:sync_vehicle_player(action, vehicle, peer_id, player
 		managers.player:sync_exit_vehicle(peer_id, player)
 	end
 end
-function UnitNetworkHandler:sync_vehicles_data(vehicle, state, occupant_driver, occupant_left, occupant_back_left, occupant_back_right)
+function UnitNetworkHandler:sync_vehicle_data(vehicle, state_name, occupant_driver, occupant_left, occupant_back_left, occupant_back_right, is_trunk_open)
 	Application:debug("[DRIVING_NET] sync_vehicles_data")
 	if not alive(vehicle) then
 		return
 	end
-	managers.vehicle:sync_vehicles_data(vehicle, state, occupant_driver, occupant_left, occupant_back_left, occupant_back_right)
+	managers.vehicle:sync_vehicle_data(vehicle, state_name, occupant_driver, occupant_left, occupant_back_left, occupant_back_right, is_trunk_open)
 end
-function UnitNetworkHandler:sync_ai_vehicle_action(action, vehicle, seat_name, unit)
-	Application:debug("[DRIVING_NET] sync_ai_vehicle_action")
-	if not alive(vehicle) or not alive(unit) then
+function UnitNetworkHandler:sync_npc_vehicle_data(vehicle, state_name, target_unit)
+	Application:debug("[DRIVING_NET] sync_npc_vehicle_data", vehicle, state_name)
+	if not alive(vehicle) then
+		return
+	end
+	managers.vehicle:sync_npc_vehicle_data(vehicle, state_name, target_unit)
+end
+function UnitNetworkHandler:sync_vehicle_loot(vehicle, carry_id1, multiplier1, carry_id2, multiplier2, carry_id3, multiplier3)
+	Application:debug("[DRIVING_NET] sync_vehicle_loot")
+	if not alive(vehicle) then
+		return
+	end
+	managers.vehicle:sync_vehicle_loot(vehicle, carry_id1, multiplier1, carry_id2, multiplier2, carry_id3, multiplier3)
+end
+function UnitNetworkHandler:sync_ai_vehicle_action(action, vehicle, data, unit)
+	Application:debug("[DRIVING_NET] sync_ai_vehicle_action: ", action, data)
+	if not alive(vehicle) then
 		return
 	end
 	if action == "health" then
-		vehicle:character_damage():sync_vehicle_health(seat_name)
+		vehicle:character_damage():sync_vehicle_health(data)
+	elseif action == "revive" then
+		vehicle:character_damage():sync_vehicle_revive(data)
+	elseif action == "state" then
+		vehicle:vehicle_driving():sync_vehicle_state(data)
 	else
-		vehicle:vehicle_driving():sync_ai_vehicle_action(action, seat_name, unit)
+		if not alive(unit) then
+			return
+		end
+		vehicle:vehicle_driving():sync_ai_vehicle_action(action, data, unit)
 	end
+end
+function UnitNetworkHandler:server_store_loot_in_vehicle(vehicle, loot_bag)
+	Application:debug("[DRIVING_NET] server_store_loot_in_vehicle")
+	if not alive(vehicle) or not alive(loot_bag) then
+		return
+	end
+	vehicle:vehicle_driving():server_store_loot_in_vehicle(loot_bag)
+end
+function UnitNetworkHandler:sync_vehicle_change_stance(shooting_unit, stance)
+	Application:debug("[DRIVING_NET] sync_vehicle_change_stance")
+	if not alive(shooting_unit) then
+		return
+	end
+	shooting_unit:movement():sync_vehicle_change_stance(stance)
+end
+function UnitNetworkHandler:sync_store_loot_in_vehicle(vehicle, loot_bag, carry_id, multiplier)
+	Application:debug("[DRIVING_NET] sync_store_loot_in_vehicle")
+	if not alive(vehicle) or not alive(loot_bag) then
+		return
+	end
+	vehicle:vehicle_driving():sync_store_loot_in_vehicle(loot_bag, carry_id, multiplier)
+end
+function UnitNetworkHandler:server_give_vehicle_loot_to_player(vehicle, peer_id)
+	Application:debug("[DRIVING_NET] server_give_vehicle_loot_to_player")
+	vehicle:vehicle_driving():server_give_vehicle_loot_to_player(peer_id)
+end
+function UnitNetworkHandler:sync_give_vehicle_loot_to_player(vehicle, carry_id, multiplier, peer_id)
+	Application:debug("[DRIVING_NET] sync_give_vehicle_loot_to_player")
+	vehicle:vehicle_driving():sync_give_vehicle_loot_to_player(carry_id, multiplier, peer_id)
+end
+function UnitNetworkHandler:sync_vehicle_interact_trunk(vehicle, peer_id)
+	Application:debug("[DRIVING_NET] sync_vehicle_interact_trunk")
+	vehicle:vehicle_driving():_interact_trunk(vehicle)
 end

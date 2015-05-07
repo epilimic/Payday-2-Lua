@@ -1596,6 +1596,7 @@ function WeaponTweakData:_init_data_player_weapons(tweak_data)
 	self.trip_mines = {}
 	self.trip_mines.delay = 0.3
 	self.trip_mines.damage = 100
+	self.trip_mines.player_damage = 6
 	self.trip_mines.damage_size = 300
 	self.trip_mines.alert_radius = 5000
 	self:_init_stats()

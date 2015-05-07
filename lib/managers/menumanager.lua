@@ -1527,7 +1527,8 @@ function MenuCallbackHandler:open_contract_node(item)
 			difficulty = is_professional and "hard" or "normal",
 			difficulty_id = is_professional and 3 or 2,
 			professional = is_professional,
-			customize_contract = true
+			customize_contract = true,
+			contract_visuals = job_tweak.contract_visuals
 		}
 	})
 end
@@ -2016,6 +2017,7 @@ function MenuCallbackHandler:leave_lobby()
 	no_button.cancel_button = true
 	dialog_data.button_list = {yes_button, no_button}
 	managers.system_menu:show(dialog_data)
+	return true
 end
 function MenuCallbackHandler:_dialog_leave_lobby_yes()
 	if managers.network:session() then
@@ -2327,6 +2329,7 @@ function MenuCallbackHandler:end_game()
 end
 function MenuCallbackHandler:_dialog_end_game_yes()
 	managers.job:clear_saved_ghost_bonus()
+	managers.experience:mission_xp_clear()
 	managers.statistics:stop_session({quit = true})
 	managers.savefile:save_progress()
 	managers.job:deactivate_current_job()
@@ -2362,6 +2365,7 @@ function MenuCallbackHandler:abort_mission()
 end
 function MenuCallbackHandler:load_start_menu_lobby()
 	managers.job:clear_saved_ghost_bonus()
+	managers.experience:mission_xp_clear()
 	managers.network:session():load_lobby()
 end
 function MenuCallbackHandler:_dialog_end_game_no()

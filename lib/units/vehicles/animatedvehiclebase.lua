@@ -5,9 +5,6 @@ function AnimatedVehicleBase:init(unit)
 	if unit:anim_state_machine() then
 		self:_set_anim_lod(0)
 	end
-	if unit:anim_state_machine() then
-		self:_set_anim_lod(0)
-	end
 	self._body_name = self._body_name or "a_body"
 end
 function AnimatedVehicleBase:update(unit, t, dt)
@@ -133,6 +130,9 @@ function AnimatedVehicleBase:spawn_module(module_unit_name, align_obj_name, modu
 	end
 end
 function AnimatedVehicleBase:clbk_module_unit_destroyed(module_id, module_unit)
+	if not self._modules then
+		return
+	end
 	local entry = self._modules[module_id]
 	self._modules[module_id] = nil
 	if not next(self._modules) then
@@ -187,13 +187,23 @@ function AnimatedVehicleBase:save(save_data)
 		end
 		managers.enemy:add_delayed_clbk("clbk_send_modules" .. tostring(self._unit:key()), callback(self, self, "clbk_send_modules", module_units_to_sync), TimerManager:game():time() + 0.1)
 	end
+	if self._saved_poses then
+		save_data.anim_vehicle_base = save_data.anim_vehicle_base or {}
+		save_data.anim_vehicle_base.saved_poses = self._saved_poses
+	end
+end
+function AnimatedVehicleBase:load(save_data)
+	if not save_data.anim_vehicle_base then
+		return
+	end
+	self._saved_poses = save_data.anim_vehicle_base.saved_poses
 end
 function AnimatedVehicleBase:destroy(unit)
 	if self._modules then
 		local modules = self._modules
 		self._modules = nil
 		for module_id, entry in pairs(modules) do
-			entry.unit:remove_destroy_listener(entry.destroy_clbk_key)
+			entry.unit:base():remove_destroy_listener(entry.destroy_clbk_key)
 			entry.unit:set_slot(0)
 		end
 	end

@@ -132,7 +132,7 @@ function CivilianLogicEscort._upd_pathing(data, my_data)
 				my_data.advance_path = path
 			else
 				print("[CivilianLogicEscort:_upd_pathing] advance_path failed")
-				data.objective_failed_clbk(data.unit, data.objective)
+				managers.groupai:state():on_civilian_objective_failed(data.unit, data.objective)
 				return
 			end
 		end
@@ -143,7 +143,7 @@ function CivilianLogicEscort._upd_pathing(data, my_data)
 				my_data.coarse_path = path
 				my_data.coarse_path_index = 1
 			else
-				data.objective_failed_clbk(data.unit, data.objective)
+				managers.groupai:state():on_civilian_objective_failed(data.unit, data.objective)
 				return
 			end
 		end
@@ -219,11 +219,12 @@ function CivilianLogicEscort.too_scared_to_move(data)
 	if nobody_close then
 		return "abandoned"
 	end
+	local player_team_id = tweak_data.levels:get_default_team_ID("player")
 	local nobody_close = true
 	local min_dis_sq = data.char_tweak.escort_scared_dist
 	min_dis_sq = min_dis_sq * min_dis_sq
 	for c_key, c_data in pairs(managers.enemy:all_enemies()) do
-		if not c_data.unit:anim_data().surrender and c_data.unit:brain()._current_logic_name ~= "trade" and min_dis_sq > mvector3.distance_sq(c_data.m_pos, data.m_pos) and math.abs(c_data.m_pos.z - data.m_pos.z) < 250 then
+		if not c_data.unit:anim_data().surrender and c_data.unit:brain()._current_logic_name ~= "trade" and not not c_data.unit:movement():team().foes[player_team_id] and min_dis_sq > mvector3.distance_sq(c_data.m_pos, data.m_pos) and math.abs(c_data.m_pos.z - data.m_pos.z) < 250 then
 			nobody_close = nil
 		else
 		end
@@ -241,7 +242,8 @@ function CivilianLogicEscort._begin_advance_action(data, my_data)
 		type = "walk",
 		nav_path = my_data.advance_path,
 		variant = haste,
-		body_part = 2
+		body_part = 2,
+		end_rot = objective.rot
 	}
 	my_data.advancing = data.unit:brain():action_request(new_action_data)
 	if my_data.advancing then

@@ -136,7 +136,7 @@ function MoneyManager:on_mission_completed(num_winners)
 	self:_set_crew_payout(crew_value)
 	self:_add_to_total(total_payout)
 end
-function MoneyManager:get_contract_money_by_stars(job_stars, risk_stars, job_days, job_id, level_id)
+function MoneyManager:get_contract_money_by_stars(job_stars, risk_stars, job_days, job_id, level_id, extra_params)
 	local job_and_difficulty_stars = job_stars + risk_stars
 	local job_stars = job_stars
 	local difficulty_stars = risk_stars
@@ -150,8 +150,10 @@ function MoneyManager:get_contract_money_by_stars(job_stars, risk_stars, job_day
 	params.num_winners = 1
 	params.on_last_stage = true
 	params.player_stars = player_stars
-	params.secured_bags = 0
-	params.small_value = 0
+	params.bonus_bags_value = extra_params and extra_params.bonus_bags_value or 0
+	params.mandatory_bags_value = extra_params and extra_params.mandatory_bags_value or 0
+	params.small_value = extra_params and extra_params.small_value or 0
+	params.vehicle_value = extra_params and extra_params.vehicle_value or 0
 	local stage_value, job_value, bag_value, vehicle_value, small_value, crew_value, total_payout, risk_table, job_table = self:get_money_by_params(params)
 	local stage_risk_value = risk_table.stage_risk
 	local job_risk_value = risk_table.job_risk
@@ -159,18 +161,13 @@ function MoneyManager:get_contract_money_by_stars(job_stars, risk_stars, job_day
 	local total_stage_risk_value = stage_risk_value
 	local total_job_value = job_value
 	local total_job_risk_value = job_risk_value
-	total_payout = total_stage_value + total_stage_risk_value + total_job_value + total_job_risk_value
-	return total_payout, {
-		stage_value,
-		total_stage_value,
-		stage_risk_value,
-		total_stage_risk_value
-	}, {
-		job_value,
-		total_job_value,
-		job_risk_value,
-		total_job_risk_value
-	}
+	local base_payout = stage_value + job_value + bag_value + vehicle_value + small_value + crew_value
+	local risk_payout = risk_table.stage_risk + risk_table.job_risk + risk_table.bag_risk + risk_table.vehicle_risk + risk_table.small_risk
+	if base_payout + risk_payout ~= total_payout then
+		Application:error("[MoneyManager:get_contract_money_by_stars] math not add up!", "total_payout", total_payout, "base_payout", base_payout, "risk_payout", risk_payout)
+		total_payout = base_payout + risk_payout
+	end
+	return total_payout, base_payout, risk_payout
 end
 function MoneyManager:get_money_by_job(job_id, difficulty)
 	if not job_id or not tweak_data.narrative.jobs[job_id] then
@@ -222,8 +219,8 @@ function MoneyManager:get_money_by_params(params)
 		cash_skill_bonus = cash_skill_bonus * managers.player:team_upgrade_value("cash", "stealth_money_multiplier", 1)
 		bag_skill_bonus = bag_skill_bonus * managers.player:team_upgrade_value("cash", "stealth_bags_multiplier", 1)
 	end
-	local bonus_bags = params.secured_bags or managers.loot:get_secured_bonus_bags_value(params.level_id)
-	local mandatory_bags = params.secured_bags or managers.loot:get_secured_mandatory_bags_value()
+	local bonus_bags = params.bonus_bags_value or managers.loot:get_secured_bonus_bags_value(params.level_id)
+	local mandatory_bags = params.mandatory_bags_value or managers.loot:get_secured_mandatory_bags_value()
 	local real_small_value = params.small_value or math.round(managers.loot:get_real_total_small_loot_value())
 	local bonus_vehicles = params.vehicle_value or math.round(managers.loot:get_secured_bonus_bags_value(nil, true))
 	local offshore_rate = self:get_tweak_value("money_manager", "offshore_rate")
@@ -858,7 +855,7 @@ function MoneyManager:get_cost_of_premium_contract(job_id, difficulty_id)
 		return 0
 	end
 	local stars = job_data.jc / 10
-	local total_payout, stage_payout_table, job_payout_table = self:get_contract_money_by_stars(stars, difficulty_id - 2, #tweak_data.narrative:job_chain(job_id), job_id)
+	local total_payout, base_payout, risk_payout = self:get_contract_money_by_stars(stars, difficulty_id - 2, #tweak_data.narrative:job_chain(job_id), job_id)
 	local diffs = {
 		"easy",
 		"normal",

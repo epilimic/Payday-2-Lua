@@ -1,4 +1,6 @@
 HUDHitDirection = HUDHitDirection or class()
+HUDHitDirection.UNIT_TYPE_HIT_PLAYER = 1
+HUDHitDirection.UNIT_TYPE_HIT_VEHICLE = 2
 function HUDHitDirection:init(hud)
 	self._hud_panel = hud.panel
 	if self._hud_panel:child("hit_direction_panel") then
@@ -61,8 +63,10 @@ function HUDHitDirection:init(hud)
 	})
 	down:set_y(tw * 1.5)
 	down:set_center_x(down:parent():w() / 2)
+	self._unit_type_hit = HUDHitDirection.UNIT_TYPE_HIT_PLAYER
 end
-function HUDHitDirection:on_hit_direction(dir)
+function HUDHitDirection:on_hit_direction(dir, unit_type_hit)
+	self._unit_type_hit = unit_type_hit
 	local direction = self._hit_direction_panel:child(dir)
 	direction:stop()
 	direction:animate(callback(self, self, "_animate_hit_direction"))
@@ -77,7 +81,11 @@ function HUDHitDirection:_animate_hit_direction(direction)
 		local dt = coroutine.yield()
 		t = t - dt
 		red_t = math.clamp(red_t - dt, 0, 1)
-		direction:set_color(Color(1, red_t / st_red_t, red_t / st_red_t))
+		if self._unit_type_hit == HUDHitDirection.UNIT_TYPE_HIT_VEHICLE then
+			direction:set_color(Color(1, 1, red_t / st_red_t))
+		else
+			direction:set_color(Color(1, red_t / st_red_t, red_t / st_red_t))
+		end
 		direction:set_alpha(t / st)
 	end
 	direction:set_alpha(0)

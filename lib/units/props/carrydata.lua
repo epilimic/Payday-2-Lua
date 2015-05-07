@@ -282,6 +282,15 @@ function CarryData:_unregister_steal_SO()
 	self._steal_SO_data = nil
 end
 function CarryData:_chk_register_steal_SO()
+	local body = self._unit:body("hinge_body_1") or self._unit:body(0)
+	if not self._has_body_activation_clbk then
+		self._has_body_activation_clbk = {
+			[body:key()] = true
+		}
+		self._unit:add_body_activation_callback(callback(self, self, "clbk_body_active_state"))
+		body:set_activate_tag(Idstring("bag_moving"))
+		body:set_deactivate_tag(Idstring("bag_still"))
+	end
 	if not Network:is_server() or not managers.navigation:is_data_ready() then
 		return
 	end
@@ -292,15 +301,6 @@ function CarryData:_chk_register_steal_SO()
 	end
 	if self._steal_SO_data then
 		return
-	end
-	local body = self._unit:body("hinge_body_1") or self._unit:body(0)
-	if not self._has_body_activation_clbk then
-		self._has_body_activation_clbk = {
-			[body:key()] = true
-		}
-		self._unit:add_body_activation_callback(callback(self, self, "clbk_body_active_state"))
-		body:set_activate_tag(Idstring("bag_moving"))
-		body:set_deactivate_tag(Idstring("bag_still"))
 	end
 	local is_body_active = body:active()
 	if is_body_active then

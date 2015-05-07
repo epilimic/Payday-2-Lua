@@ -1365,7 +1365,9 @@ function HUDStageEndScreen:stage_init(t, dt)
 	local heat = managers.job:last_known_heat() or managers.job:has_active_job() and managers.job:get_job_heat(managers.job:current_job_id()) or 0
 	local heat_color = managers.job:get_heat_color(heat)
 	local bonuses_list = {
+		"bonus_mission_xp",
 		"bonus_days",
+		"bonus_pro_job",
 		"bonus_low_level",
 		"bonus_risk",
 		"bonus_failed",
@@ -1379,9 +1381,17 @@ function HUDStageEndScreen:stage_init(t, dt)
 		"heat_xp"
 	}
 	local bonuses_params = {}
+	bonuses_params.bonus_mission_xp = {
+		color = tweak_data.screen_colors.text,
+		title = managers.localization:to_upper_text("menu_es_mission_xp_bonus")
+	}
 	bonuses_params.bonus_days = {
 		color = tweak_data.screen_colors.text,
 		title = managers.localization:to_upper_text("menu_es_day_bonus")
+	}
+	bonuses_params.bonus_pro_job = {
+		color = tweak_data.screen_colors.text,
+		title = managers.localization:to_upper_text("menu_es_pro_job_bonus")
 	}
 	bonuses_params.bonus_low_level = {
 		color = tweak_data.screen_colors.important_1,

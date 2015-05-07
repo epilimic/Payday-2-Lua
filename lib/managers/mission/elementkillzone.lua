@@ -17,6 +17,8 @@ function ElementKillZone:on_executed(instigator)
 				self._values.type
 			}
 			instigator:network():send_to_unit(rpc_params)
+		elseif Application:production_build() and instigator.chracter_damage and Network:is_server() then
+			managers.killzone:set_unit(instigator, self._values.type)
 		else
 			Application:error("Unsupported unit type added to killzone:   " .. inspect(instigator))
 		end

@@ -94,30 +94,31 @@ function BootupState:setup()
 	local legal_text = managers.localization:text("legal_text")
 	local item_layer = self._back_drop_gui:background_layers()
 	local intro_trailer_layer = self._back_drop_gui:foreground_layers()
-	self._play_data_list = {
-		{
-			visible = not is_win32,
-			layer = item_layer,
-			gui = Idstring("guis/autosave_warning"),
-			width = 600,
-			height = 200,
-			can_skip = false,
-			fade_in = 1.25,
-			duration = is_win32 and 0 or 6,
-			fade_out = 1.25
-		},
-		{
-			visible = show_esrb,
-			layer = item_layer,
-			texture = "guis/textures/esrb_rating",
-			width = esrb_y * 2,
-			height = esrb_y,
-			can_skip = has_full_game,
-			fade_in = 1.25,
-			duration = show_esrb and 6.5 or 0,
-			fade_out = 1.25
-		},
-		{
+	self._play_data_list = {}
+	table.insert(self._play_data_list, {
+		visible = not is_win32,
+		layer = item_layer,
+		gui = Idstring("guis/autosave_warning"),
+		width = 600,
+		height = 200,
+		can_skip = false,
+		fade_in = 1.25,
+		duration = is_win32 and 0 or 6,
+		fade_out = 1.25
+	})
+	table.insert(self._play_data_list, {
+		visible = show_esrb,
+		layer = item_layer,
+		texture = "guis/textures/esrb_rating",
+		width = esrb_y * 2,
+		height = esrb_y,
+		can_skip = has_full_game,
+		fade_in = 1.25,
+		duration = show_esrb and 6.5 or 0,
+		fade_out = 1.25
+	})
+	if not Application:production_build() then
+		table.insert(self._play_data_list, {
 			visible = is_win32,
 			layer = intro_trailer_layer,
 			video = "movies/intro_trailer",
@@ -125,32 +126,32 @@ function BootupState:setup()
 			height = res.y,
 			padding = 200,
 			can_skip = true
-		},
-		{
-			layer = item_layer,
-			text = legal_text,
-			font = tweak_data.menu.pd2_medium_font,
-			font_size = 24,
-			wrap = true,
-			word_wrap = true,
-			vertical = "center",
-			width = safe_rect_pixels.width,
-			height = safe_rect_pixels.height,
-			padding = 200,
-			can_skip = can_skip,
-			fade_in = 1.25,
-			duration = 6,
-			fade_out = 1.25
-		},
-		{
-			layer = item_layer,
-			video = "movies/game_intro",
-			width = res.x,
-			height = res.y,
-			padding = 200,
-			can_skip = true
-		}
-	}
+		})
+	end
+	table.insert(self._play_data_list, {
+		layer = item_layer,
+		text = legal_text,
+		font = tweak_data.menu.pd2_medium_font,
+		font_size = 24,
+		wrap = true,
+		word_wrap = true,
+		vertical = "center",
+		width = safe_rect_pixels.width,
+		height = safe_rect_pixels.height,
+		padding = 200,
+		can_skip = can_skip,
+		fade_in = 1.25,
+		duration = 6,
+		fade_out = 1.25
+	})
+	table.insert(self._play_data_list, {
+		layer = item_layer,
+		video = "movies/game_intro",
+		width = res.x,
+		height = res.y,
+		padding = 200,
+		can_skip = true
+	})
 	self._full_panel = self._full_workspace:panel()
 	self._panel = self._workspace:panel()
 	self._full_panel:rect({

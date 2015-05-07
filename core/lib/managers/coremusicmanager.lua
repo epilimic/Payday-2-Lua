@@ -10,23 +10,28 @@ function CoreMusicManager:init()
 	self._path_map = {}
 	self._event_map = {}
 	local temp_list = {}
-	local events = Application:editor() and PackageManager:has(Idstring("bnk"), Idstring("soundbanks/music")) and SoundDevice:events("soundbanks/music")
-	if events then
-		for k, v in pairs(events) do
-			if not temp_list[v.path] then
-				temp_list[v.path] = 1
-				table.insert(self._path_list, v.path)
+	if Application:editor() then
+		local music_tracks = self:music_tracks()
+		for _, track in pairs(music_tracks) do
+			local events = PackageManager:has(Idstring("bnk"), Idstring(track)) and SoundDevice:events(track)
+			if events then
+				for k, v in pairs(events) do
+					if not temp_list[v.path] then
+						temp_list[v.path] = 1
+						table.insert(self._path_list, v.path)
+					end
+					self._path_map[k] = v.path
+					if not self._event_map[v.path] then
+						self._event_map[v.path] = {}
+					end
+					table.insert(self._event_map[v.path], k)
+				end
 			end
-			self._path_map[k] = v.path
-			if not self._event_map[v.path] then
-				self._event_map[v.path] = {}
-			end
-			table.insert(self._event_map[v.path], k)
 		end
-	end
-	table.sort(self._path_list)
-	for k, v in pairs(self._event_map) do
-		table.sort(v)
+		table.sort(self._path_list)
+		for k, v in pairs(self._event_map) do
+			table.sort(v)
+		end
 	end
 	self._has_music_control = true
 	self._external_media_playing = false
@@ -41,6 +46,9 @@ function CoreMusicManager:init_finalize()
 	managers.savefile:add_load_sequence_done_callback_handler(callback(self, self, "on_load_complete"))
 end
 function CoreMusicManager:init_globals()
+end
+function CoreMusicManager:music_tracks()
+	return {}
 end
 function CoreMusicManager:check_music_switch()
 	local switches = tweak_data.levels:get_music_switches()

@@ -9,11 +9,15 @@ function TradeManager:init()
 end
 function TradeManager:save(save_data)
 	if not next(self._criminals_to_respawn) then
+		local my_save_data = {}
+		save_data.trade = my_save_data
+		my_save_data.trade_countdown = self._trade_countdown or false
 		return
 	end
 	local my_save_data = {}
 	save_data.trade = my_save_data
 	my_save_data.criminals = self._criminals_to_respawn
+	my_save_data.trade_countdown = self._trade_countdown or false
 	my_save_data.outfits = {}
 	for _, crim in ipairs(self._criminals_to_respawn) do
 		if crim.peer_id then
@@ -29,23 +33,28 @@ function TradeManager:load(load_data)
 	if not my_load_data then
 		return
 	end
-	self._criminals_to_respawn = my_load_data.criminals
-	self._criminals_to_add = {}
-	for _, crim in ipairs(self._criminals_to_respawn) do
-		if not crim.ai and not managers.network:session():peer(crim.peer_id) then
-			if crim.peer_id then
-				self._criminals_to_add[crim.peer_id] = crim
-				local peer = managers.network:session():peer(crim.peer_id)
-				local outfit = my_load_data.outfits[crim.peer_id]
-				crim.outfit = outfit
+	if my_load_data.trade_countdown ~= nil then
+		self:set_trade_countdown(my_load_data.trade_countdown)
+	end
+	if my_load_data.criminals then
+		self._criminals_to_respawn = my_load_data.criminals
+		self._criminals_to_add = {}
+		for _, crim in ipairs(self._criminals_to_respawn) do
+			if not crim.ai and not managers.network:session():peer(crim.peer_id) then
+				if crim.peer_id then
+					self._criminals_to_add[crim.peer_id] = crim
+					local peer = managers.network:session():peer(crim.peer_id)
+					local outfit = my_load_data.outfits[crim.peer_id]
+					crim.outfit = outfit
+				end
+			else
+				if crim.peer_id then
+					local peer = managers.network:session():peer(crim.peer_id)
+					local outfit = my_load_data.outfits[crim.peer_id]
+					peer:set_outfit_string(outfit.outfit, outfit.version)
+				end
+				managers.criminals:add_character(crim.id, nil, crim.peer_id, crim.ai)
 			end
-		else
-			if crim.peer_id then
-				local peer = managers.network:session():peer(crim.peer_id)
-				local outfit = my_load_data.outfits[crim.peer_id]
-				peer:set_outfit_string(outfit.outfit, outfit.version)
-			end
-			managers.criminals:add_character(crim.id, nil, crim.peer_id, crim.ai)
 		end
 	end
 end

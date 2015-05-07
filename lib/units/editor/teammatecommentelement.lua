@@ -34,7 +34,7 @@ function TeammateCommentUnitElement:test_element()
 		self._ss:set_position(self._unit:position())
 		self._ss:set_orientation(self._unit:rotation())
 		self._ss:set_switch("int_ext", "third")
-		for i = self._hed.test_robber, 4 do
+		for i = self._hed.test_robber, 10 do
 			self._ss:set_switch("robber", "rb" .. tostring(i))
 			if self._ss:post_event(self._hed.comment) then
 				break

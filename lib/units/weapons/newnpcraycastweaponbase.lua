@@ -78,7 +78,7 @@ function NewNPCRaycastWeaponBase:setup(setup_data)
 	self._hit_player = setup_data.hit_player and true or false
 	self._setup = setup_data
 end
-function NewRaycastWeaponBase:assemble(factory_id)
+function NewNPCRaycastWeaponBase:assemble(factory_id)
 	NewNPCRaycastWeaponBase.super:assemble(factory_id)
 	self._ammo_data = managers.weapon_factory:get_ammo_data_from_weapon(self._factory_id, self._blueprint) or {}
 	local ammo_muzzle_effect = self._ammo_data and self._ammo_data.muzzleflash

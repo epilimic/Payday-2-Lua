@@ -3,14 +3,21 @@ VehicleOperatorUnitElement.ACTIONS = {
 	"none",
 	"lock",
 	"unlock",
-	"secure"
+	"secure",
+	"break_down",
+	"repair",
+	"damage",
+	"activate",
+	"deactivate"
 }
 function VehicleOperatorUnitElement:init(unit)
 	VehicleOperatorUnitElement.super.init(self, unit)
 	self._hed.operation = "none"
+	self._hed.damage = "0"
 	self._hed.elements = {}
 	table.insert(self._save_values, "use_instigator")
 	table.insert(self._save_values, "operation")
+	table.insert(self._save_values, "damage")
 	table.insert(self._save_values, "elements")
 	self._actions = VehicleOperatorUnitElement.ACTIONS
 end
@@ -49,15 +56,17 @@ function VehicleOperatorUnitElement:draw_links_unselected(...)
 	VehicleOperatorUnitElement.super.draw_links_unselected(self, ...)
 	for _, id in ipairs(self._hed.elements) do
 		local unit = managers.editor:unit_with_id(id)
-		local params = {
-			from_unit = unit,
-			to_unit = self._unit,
-			r = 0,
-			g = 0,
-			b = 0.5
-		}
-		self:_draw_link(params)
-		Application:draw(unit, 0, 0, 0.5)
+		if alive(unit) then
+			local params = {
+				from_unit = unit,
+				to_unit = self._unit,
+				r = 0,
+				g = 0,
+				b = 0.5
+			}
+			self:_draw_link(params)
+			Application:draw(unit, 0, 0, 0.5)
+		end
 	end
 end
 function VehicleOperatorUnitElement:draw_links_selected(...)
@@ -108,6 +117,7 @@ function VehicleOperatorUnitElement:_build_panel(panel, panel_sizer)
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
 	self:_build_value_combobox(panel, panel_sizer, "operation", self._actions, "Select an operation for the selected elements")
+	self:_build_value_number(panel, panel_sizer, "damage", {floats = 0, min = 1}, "Specify the amount of damage.")
 	local toolbar = EWS:ToolBar(panel, "", "TB_FLAT,TB_NODIVIDER")
 	toolbar:add_tool("ADD_UNIT_LIST", "Add unit from unit list", CoreEws.image_path("world_editor\\unit_by_name_list.png"), nil)
 	toolbar:connect("ADD_UNIT_LIST", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "add_unit_list_btn"), nil)

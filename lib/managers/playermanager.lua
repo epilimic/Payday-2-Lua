@@ -121,6 +121,7 @@ function PlayerManager:update(t, dt)
 		self._is_local_close_to_hostage = alive(local_player) and managers.groupai and managers.groupai:state():is_a_hostage_within(local_player:movement():m_pos(), tweak_data.upgrades.hostage_near_player_radius)
 		self._hostage_close_to_local_t = t + tweak_data.upgrades.hostage_near_player_check_t
 	end
+	self:_update_hostage_skills()
 end
 function PlayerManager:add_listener(key, events, clbk)
 	self._listener_holder:add(key, events, clbk)
@@ -239,12 +240,14 @@ function PlayerManager:spawn_dropin_penalty(dead, bleed_out, health, used_deploy
 	player:character_damage():set_health(math.max(min_health, health) * player:character_damage():_max_health())
 	if dead or bleed_out then
 		print("[PlayerManager:spawn_dead] Killing")
+		player:network():send("sync_player_movement_state", "dead", player:character_damage():down_time(), player:id())
 		managers.groupai:state():on_player_criminal_death(Global.local_member:peer():id())
 		player:base():set_enabled(false)
 		game_state_machine:change_state_by_name("ingame_waiting_for_respawn")
 		player:character_damage():set_invulnerable(true)
+		player:character_damage():set_health(0)
 		player:base():_unregister()
-		player:base():set_slot(player, 0)
+		World:delete_unit(player)
 	end
 end
 function PlayerManager:nr_players()
@@ -714,14 +717,20 @@ function PlayerManager:get_skill_exp_multiplier(whisper_mode)
 	return multiplier
 end
 function PlayerManager:update_hostage_skills()
-	if self:get_hostage_bonus_multiplier("health") ~= 1 then
-		local player_unit = self:player_unit()
-		if alive(player_unit) then
-			local damage_ext = player_unit:character_damage()
-			if damage_ext then
-				damage_ext:change_health(0)
+	self._hostage_skills_update = true
+end
+function PlayerManager:_update_hostage_skills()
+	if self._hostage_skills_update then
+		if self:get_hostage_bonus_multiplier("health") ~= 1 then
+			local player_unit = self:player_unit()
+			if alive(player_unit) then
+				local damage_ext = player_unit:character_damage()
+				if damage_ext then
+					damage_ext:change_health(0)
+				end
 			end
 		end
+		self._hostage_skills_update = nil
 	end
 end
 function PlayerManager:get_hostage_bonus_multiplier(category)
@@ -2251,18 +2260,25 @@ end
 function PlayerManager:on_peer_synch_request(peer)
 	self:player_unit():network():synch_to_peer(peer)
 end
-function PlayerManager:enter_vehicle(vehicle)
+function PlayerManager:enter_vehicle(vehicle, locator)
 	local peer_id = managers.network:session():local_peer():id()
 	local player = self:local_player()
+	local seat = vehicle:vehicle_driving():get_available_seat(locator:position())
 	if Network:is_server() then
-		self:server_enter_vehicle(vehicle, peer_id, player)
+		self:server_enter_vehicle(vehicle, peer_id, player, seat.name)
 	else
-		managers.network:session():send_to_host("sync_enter_vehicle_host", vehicle, peer_id, player)
+		managers.network:session():send_to_host("sync_enter_vehicle_host", vehicle, seat.name, peer_id, player)
 	end
 end
-function PlayerManager:server_enter_vehicle(vehicle, peer_id, player)
+function PlayerManager:server_enter_vehicle(vehicle, peer_id, player, seat_name)
 	local vehicle_ext = vehicle:vehicle_driving()
-	local seat = vehicle_ext:reserve_seat(player, player:position())
+	local seat
+	if seat_name == nil then
+		local pos = player:position()
+		seat = vehicle_ext:reserve_seat(player, pos, nil)
+	else
+		seat = vehicle_ext:reserve_seat(player, nil, seat_name)
+	end
 	if seat ~= nil then
 		managers.network:session():send_to_peers_synched("sync_vehicle_player", "enter", vehicle, peer_id, player, seat.name)
 		self:_enter_vehicle(vehicle, peer_id, player, seat.name)
@@ -2285,6 +2301,7 @@ function PlayerManager:_enter_vehicle(vehicle, peer_id, player, seat_name)
 	if self:local_player() == player then
 		self:set_player_state("driving")
 	end
+	managers.hud:update_vehicle_label_by_id(vehicle:unit_data().name_label_id, vehicle_ext:_number_in_the_vehicle())
 	managers.vehicle:on_player_entered_vehicle(vehicle, player)
 end
 function PlayerManager:get_vehicle()
@@ -2326,6 +2343,7 @@ function PlayerManager:_exit_vehicle(peer_id, player)
 	local vehicle_ext = vehicle_data.vehicle_unit:vehicle_driving()
 	vehicle_ext:exit_vehicle(player)
 	self._global.synced_vehicle_data[peer_id] = nil
+	managers.hud:update_vehicle_label_by_id(vehicle_data.vehicle_unit:unit_data().name_label_id, vehicle_ext:_number_in_the_vehicle())
 	managers.vehicle:on_player_exited_vehicle(vehicle_data.vehicle, player)
 end
 function PlayerManager:on_hallowSPOOCed()

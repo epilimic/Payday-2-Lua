@@ -4,11 +4,19 @@ PlayerDriving.IDS_STEER_LEFT_STATE = Idstring("fps/wheel_turn_left")
 PlayerDriving.IDS_STEER_RIGHT_REDIRECT = Idstring("steering_wheel_right")
 PlayerDriving.IDS_STEER_RIGHT_STATE = Idstring("fps/wheel_turn_right")
 PlayerDriving.IDS_STEER_IDLE_REDIRECT = Idstring("steering_wheel_idle")
+PlayerDriving.IDS_PASSENGER_REDIRECT = Idstring("passenger_vehicle")
+PlayerDriving.IDS_EQUIP = Idstring("equip")
+PlayerDriving.EXIT_VEHICLE_TIMER = 1
+PlayerDriving.STANCE_NORMAL = 0
+PlayerDriving.STANCE_SHOOTING = 1
 function PlayerDriving:init(unit)
 	PlayerDriving.super.init(self, unit)
 	self._vehicle = nil
 	self._dt = 0
 	self._move_x = 0
+	self._stance = PlayerDriving.STANCE_NORMAL
+	self._wheel_idle = false
+	self._respawn_hint_shown = false
 end
 function PlayerDriving:enter(state_data, enter_data)
 	print("PlayerDriving:enter( enter_data )")
@@ -25,32 +33,35 @@ function PlayerDriving:_enter(enter_data)
 		return
 	end
 	self._seat = self._vehicle_ext:find_seat_for_player(self._unit)
-	local rot = self._seat.object:rotation()
-	self._unit:set_rotation(rot)
-	local pos = self._seat.object:position()
-	self._unit:set_position(pos)
-	self._unit:camera():set_rotation(rot)
-	self._unit:camera():set_position(pos)
-	self._unit:camera():camera_unit():base():set_spin(0)
-	self._unit:camera():camera_unit():base():set_pitch(0)
+	self._wheel_idle = false
+	self:_postion_player_on_seat(self._seat)
+	self._unit:inventory():add_listener("PlayerDriving", {"equip"}, callback(self, self, "on_inventory_event"))
+	self._current_weapon = self._unit:inventory():equipped_unit()
+	if self._current_weapon then
+		table.insert(self._current_weapon:base()._setup.ignore_units, self._vehicle_unit)
+	end
 	if self._seat.driving then
-		self._camera_unit:base():set_limits(30, 20)
-		self._unit:inventory():hide_equipped_unit()
+		self:_set_camera_limits("driving")
 		if self._vehicle_unit:damage():has_sequence("local_driving_enter") then
 			self._vehicle_unit:damage():run_sequence("local_driving_enter")
 		end
 		self._camera_unit:anim_state_machine():set_global(self._vehicle_ext._tweak_data.animations.vehicle_id, 1)
 	else
-		self._camera_unit:base():set_limits(80, 30)
+		self:_set_camera_limits("passenger")
+		if not self._seat.allow_shooting then
+			self._unit:camera():play_redirect(self.IDS_PASSENGER_REDIRECT)
+		end
 	end
 	self._unit:camera():set_shaker_parameter("breathing", "amplitude", 0)
-	self:_setup_controller()
 	self._unit:camera()._camera_unit:base():animate_fov(self._vehicle_ext._tweak_data.fov, 0.33)
+	self:_setup_controller()
+	self:_upd_attention()
 end
 function PlayerDriving:exit(state_data, new_state_name)
 	print("[DRIVING] PlayerDriving: Exiting vehicle")
 	PlayerDriving.super.exit(self, state_data, new_state_name)
 	self:_clear_controller()
+	self:_interupt_action_exit_vehicle()
 	local exit_position = self._vehicle_ext:find_exit_position(self._unit)
 	local exit_rot = exit_position:rotation()
 	self._unit:set_rotation(exit_rot)
@@ -62,23 +73,30 @@ function PlayerDriving:exit(state_data, new_state_name)
 	self._unit:camera():camera_unit():base():set_pitch(0)
 	self._unit:camera():camera_unit():base():set_target_tilt(0)
 	self._unit:camera():camera_unit():base().bipod_location = nil
-	self._unit:camera():camera_unit():base():remove_limits()
 	if self._vehicle_unit:damage():has_sequence("local_driving_exit") then
 		self._vehicle_unit:damage():run_sequence("local_driving_exit")
 	end
 	if self._seat.driving then
 		self._unit:inventory():show_equipped_unit()
 	end
+	self._unit:camera():play_redirect(self.IDS_EQUIP)
 	managers.player:exit_vehicle()
 	self._dye_risk = nil
 	self._state_data.in_air = false
+	self._stance = PlayerDriving.STANCE_NORMAL
 	local exit_data = {}
 	exit_data.skip_equip = true
 	local velocity = self._unit:mover():velocity()
 	self:_activate_mover(PlayerStandard.MOVER_STAND, velocity)
 	self._ext_network:send("set_pose", 1)
+	self._unit:inventory():remove_listener("PlayerDriving")
+	if self._current_weapon then
+		table.delete(self._current_weapon:base()._setup.ignore_units, self._vehicle_unit)
+	end
 	self:_upd_attention()
-	self._unit:camera()._camera_unit:base():animate_fov(75, 0.33)
+	self:_remove_camera_limits()
+	self._camera_unit:base():animate_fov(75, 0.33)
+	self._camera_unit:anim_state_machine():set_global(self._vehicle_ext._tweak_data.animations.vehicle_id, 0)
 	return exit_data
 end
 function PlayerDriving:update(t, dt)
@@ -91,26 +109,175 @@ function PlayerDriving:update(t, dt)
 		return
 	end
 	self:_update_input(dt)
+	local input = self:_get_input()
+	self:_update_hud(t, input)
+	self:_update_action_timers(t, input)
+	self:_check_action_exit_vehicle(t, input)
 	if self._seat.driving then
-		self:_update_check_actions_driver(t, dt)
+		self:_update_check_actions_driver(t, dt, input)
+	elseif self._seat.allow_shooting or self._stance == PlayerDriving.STANCE_SHOOTING then
+		self:_update_check_actions_passenger(t, dt, input)
 	else
-		self:_update_check_actions(t, dt)
+		self:_update_check_actions_passenger_no_shoot(t, dt, input)
 	end
+	self._ext_movement:set_m_pos(self._unit:position())
 end
 function PlayerDriving:set_tweak_data(name)
 end
-function PlayerDriving:_update_check_actions_driver(t, dt)
-	local input = self:_get_input()
+function PlayerDriving:_update_hud(t, dt)
+	if self._vehicle_ext.respawn_available then
+		if not self._respawn_hint_shown and self._seat.driving then
+			local string_macros = {}
+			BaseInteractionExt:_add_string_macros(string_macros)
+			local text = managers.localization:text("hud_int_press_respawn", string_macros)
+			self._respawn_hint_shown = true
+			managers.hud:show_hint({text = text, time = 30})
+		end
+	elseif self._respawn_hint_shown then
+		managers.hud:stop_hint()
+		self._respawn_hint_shown = false
+	end
+end
+function PlayerDriving:_update_check_actions_driver(t, dt, input)
 	if input.btn_stats_screen_press then
 		self._unit:base():set_stats_screen_visible(true)
 	elseif input.btn_stats_screen_release then
 		self._unit:base():set_stats_screen_visible(false)
 	end
-	self:_update_foley(t, input)
+end
+function PlayerDriving:_update_check_actions_passenger(t, dt, input)
+	self:_update_check_actions(t, dt)
+	self:_check_action_shooting_stance(t, input)
+end
+function PlayerDriving:_update_check_actions_passenger_no_shoot(t, dt, input)
+	if input.btn_stats_screen_press then
+		self._unit:base():set_stats_screen_visible(true)
+	elseif input.btn_stats_screen_release then
+		self._unit:base():set_stats_screen_visible(false)
+	end
+	self:_check_action_shooting_stance(t, input)
+end
+function PlayerDriving:_check_action_shooting_stance(t, input)
+	if self._vehicle_ext:shooting_stance_allowed() then
+		if input.btn_duck_press and self._seat.shooting_pos and self._seat.has_shooting_mode and not self._unit:base():stats_screen_visible() then
+			if self._stance == PlayerDriving.STANCE_NORMAL then
+				self:_enter_shooting_stance()
+			else
+				self:_exit_shooting_stance()
+			end
+			self._ext_network:send("sync_vehicle_change_stance", self._stance)
+		end
+	elseif self._stance == PlayerDriving.STANCE_SHOOTING then
+		self:_exit_shooting_stance()
+	end
+end
+function PlayerDriving:_enter_shooting_stance()
+	self._stance = PlayerDriving.STANCE_SHOOTING
+	self:_postion_player_on_seat()
+	self:_set_camera_limits("shooting")
+	self._unit:camera():play_redirect(self.IDS_EQUIP)
+end
+function PlayerDriving:_exit_shooting_stance()
+	self._stance = PlayerDriving.STANCE_NORMAL
+	self:_postion_player_on_seat(self._seat)
+	self:_set_camera_limits("passenger")
+	if not self._seat.allow_shooting then
+		local t = managers.player:player_timer():time()
+		self:_interupt_action_steelsight()
+		self:_interupt_action_throw_grenade(t)
+		self:_interupt_action_charging_weapon(t)
+		self:_interupt_action_melee(t)
+		self._unit:camera():play_redirect(self.IDS_PASSENGER_REDIRECT)
+	else
+		self._unit:camera():play_redirect(self.IDS_EQUIP)
+	end
+end
+function PlayerDriving:_check_action_exit_vehicle(t, input)
+	if input.btn_interact_press then
+		if self._vehicle_ext.respawn_available then
+			if self._seat.driving then
+				self._vehicle_ext:respawn_vehicle()
+			elseif self._stance == PlayerDriving.STANCE_SHOOTING then
+				self:_start_action_intimidate(t)
+			else
+				self:_start_action_exit_vehicle(t)
+			end
+		elseif self._stance == PlayerDriving.STANCE_SHOOTING then
+			self:_start_action_intimidate(t)
+		else
+			self:_start_action_exit_vehicle(t)
+		end
+	end
+	if input.btn_interact_release then
+		self:_interupt_action_exit_vehicle()
+	end
+end
+function PlayerDriving:_start_action_exit_vehicle(t)
+	if not self._vehicle_ext:allow_exit() then
+		return
+	end
+	if self:is_deploying() then
+		return
+	end
+	local deploy_timer = PlayerDriving.EXIT_VEHICLE_TIMER
+	self._exit_vehicle_expire_t = t + deploy_timer
+	managers.hud:show_progress_timer_bar(0, deploy_timer)
+	local text = managers.localization:text("hud_action_exit_vehicle")
+	managers.hud:show_progress_timer({text = text, icon = nil})
+end
+function PlayerDriving:_interacting()
+	return PlayerDriving.super._interacting(self) or self._exit_vehicle_expire_t
+end
+function PlayerDriving:_interupt_action_exit_vehicle(t, input, complete)
+	if self._exit_vehicle_expire_t then
+		self._exit_vehicle_expire_t = nil
+		managers.hud:hide_progress_timer_bar(complete)
+		managers.hud:remove_progress_timer()
+	end
+end
+function PlayerDriving:_update_action_timers(t, input)
+	if self._exit_vehicle_expire_t then
+		local deploy_timer = PlayerDriving.EXIT_VEHICLE_TIMER
+		managers.hud:set_progress_timer_bar_width(deploy_timer - (self._exit_vehicle_expire_t - t), deploy_timer)
+		if t >= self._exit_vehicle_expire_t then
+			self:_end_action_exit_vehicle()
+			self._exit_vehicle_expire_t = nil
+		end
+	end
+end
+function PlayerDriving:_end_action_exit_vehicle()
+	managers.hud:hide_progress_timer_bar(true)
+	managers.hud:remove_progress_timer()
+	self:cb_leave()
 end
 function PlayerDriving:_check_action_run(...)
 end
 function PlayerDriving:pre_destroy(unit)
+end
+function PlayerDriving:stance()
+	return self._stance
+end
+function PlayerDriving:_set_camera_limits(mode)
+	if mode == "driving" then
+		self._camera_unit:base():set_limits(60, 20)
+	elseif mode == "passenger" then
+		self._camera_unit:base():set_limits(80, 30)
+	elseif mode == "shooting" then
+		self._camera_unit:base():set_limits(nil, 40)
+	end
+end
+function PlayerDriving:_remove_camera_limits()
+	self._unit:camera():camera_unit():base():remove_limits()
+end
+function PlayerDriving:_postion_player_on_seat(seat)
+	local rot = self._seat.object:rotation()
+	self._unit:set_rotation(rot)
+	local pos = self._seat.object:position()
+	self._unit:set_position(pos)
+	self._unit:camera():set_rotation(rot)
+	self._unit:camera():set_position(pos)
+	self._unit:camera():camera_unit():base():set_spin(0)
+	self._unit:camera():camera_unit():base():set_pitch(0)
 end
 function PlayerDriving:destroy()
 end
@@ -125,12 +292,9 @@ function PlayerDriving:_get_vehicle()
 end
 function PlayerDriving:_setup_controller()
 	self._controller = self._unit:base():controller()
-	self._leave_cb = callback(self, self, "cb_leave")
-	self._controller:add_trigger("interact", self._leave_cb)
 end
 function PlayerDriving:_clear_controller()
 	if self._controller then
-		self._controller:remove_trigger("interact", self._leave_cb)
 	end
 end
 function PlayerDriving:set_controller_enabled(enabled)
@@ -153,15 +317,16 @@ function PlayerDriving:cb_leave()
 end
 function PlayerDriving:_update_input(dt)
 	if self._seat.driving then
-		local move_d = self._controller:get_input_axis("move")
+		local move_d = self._controller:get_input_axis("drive")
 		local direction = 1
 		local forced_gear = -1
 		local vehicle_state = self._vehicle:get_state()
 		local steer = self._vehicle:get_steer()
-		if steer == 0 then
+		if steer == 0 and not self._wheel_idle then
 			self._unit:camera():play_redirect(self.IDS_STEER_IDLE_REDIRECT)
 			self._vehicle_unit:anim_stop(Idstring("anim_steering_wheel_left"))
 			self._vehicle_unit:anim_stop(Idstring("anim_steering_wheel_right"))
+			self._wheel_idle = true
 		end
 		if steer > 0 then
 			self._vehicle_unit:anim_stop(Idstring("anim_steering_wheel_right"))
@@ -169,6 +334,7 @@ function PlayerDriving:_update_input(dt)
 			self._vehicle_unit:anim_set_time(Idstring("anim_steering_wheel_left"), math.abs(steer) * anim_length)
 			self._vehicle_unit:anim_play(Idstring("anim_steering_wheel_left"))
 			self._unit:camera():play_redirect_timeblend(self.IDS_STEER_LEFT_STATE, self.IDS_STEER_LEFT_REDIRECT, 0, math.abs(steer))
+			self._wheel_idle = false
 		end
 		if steer < 0 then
 			self._vehicle_unit:anim_stop(Idstring("anim_steering_wheel_left"))
@@ -176,6 +342,7 @@ function PlayerDriving:_update_input(dt)
 			self._vehicle_unit:anim_set_time(Idstring("anim_steering_wheel_right"), math.abs(steer) * anim_length)
 			self._vehicle_unit:anim_play(Idstring("anim_steering_wheel_right"))
 			self._unit:camera():play_redirect_timeblend(self.IDS_STEER_RIGHT_STATE, self.IDS_STEER_RIGHT_REDIRECT, 0, math.abs(steer))
+			self._wheel_idle = false
 		end
 		local speed_anim_length = self._vehicle_unit:anim_length(Idstring("ag_speedometer"))
 		local rpm_anim_length = self._vehicle_unit:anim_length(Idstring("ag_rpm_meter"))
@@ -256,9 +423,17 @@ function PlayerDriving:_update_input(dt)
 		elseif back_light_effect then
 			back_light_effect:set_visibility(false)
 		end
-		self._vehicle_ext:set_input(accelerate, self._move_x * -1, brake, handbrake, false, false, forced_gear)
+		self._vehicle_ext:set_input(accelerate, self._move_x * -1, brake, handbrake, false, false, forced_gear, dt, move_d.y)
 	else
 	end
+end
+function PlayerDriving:on_inventory_event(unit, event)
+	local weapon = self._unit:inventory():equipped_unit()
+	table.insert(weapon:base()._setup.ignore_units, self._vehicle_unit)
+	if self._current_weapon then
+		table.delete(self._current_weapon:base()._setup.ignore_units, self._vehicle_unit)
+	end
+	self._current_weapon = weapon
 end
 function PlayerDriving:smoothstep(a, b, step, n)
 	local v = step / n

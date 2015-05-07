@@ -186,7 +186,7 @@ function HUDMissionBriefing:init(hud, workspace)
 	if contact_pattern then
 		self._backdrop:set_pattern(contact_pattern, 0.1, "add")
 	end
-	local padding_y = 70
+	local padding_y = 60
 	self._paygrade_panel = self._background_layer_one:panel({
 		h = 70,
 		w = 210,

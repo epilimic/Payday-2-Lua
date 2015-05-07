@@ -305,17 +305,17 @@ function MenuInput:mouse_pressed(o, button, x, y)
 					if row_item.gui_slider_marker:inside(x, y) then
 						self._slider_marker = {
 							button = button,
-							item = self._logic:selected_item(),
+							item = row_item.item,
 							row_item = row_item
 						}
 					elseif row_item.gui_slider:inside(x, y) then
 						local where = (x - row_item.gui_slider:world_left()) / (row_item.gui_slider:world_right() - row_item.gui_slider:world_left())
-						local item = self._logic:selected_item()
+						local item = row_item.item
 						item:set_value_by_percentage(where * 100)
 						self._logic:trigger_item(true, item)
 						self._slider_marker = {
 							button = button,
-							item = self._logic:selected_item(),
+							item = row_item.item,
 							row_item = row_item
 						}
 					end
@@ -511,6 +511,9 @@ function MenuInput:update(t, dt)
 	elseif self._controller and managers.menu:active_menu().renderer.special_btn_pressed then
 		if self._controller:get_input_pressed("menu_toggle_voice_message") then
 			managers.menu:active_menu().renderer:special_btn_pressed(Idstring("voice_message"))
+		end
+		if self._controller:get_input_pressed("menu_modify_item") then
+			managers.menu:active_menu().renderer:special_btn_pressed(Idstring("menu_modify_item"))
 		end
 		if self._controller:get_input_pressed("menu_casino_bet") then
 			managers.menu:active_menu().renderer:special_btn_pressed(Idstring("start_bet"))

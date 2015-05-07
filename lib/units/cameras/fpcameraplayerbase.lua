@@ -282,7 +282,8 @@ function FPCameraPlayerBase:_update_rot(axis)
 	self._parent_unit:m_position(new_head_pos)
 	mvector3.add(new_head_pos, self._head_stance.translation)
 	self._input.look = axis
-	local stick_input_x, stick_input_y = self._look_function(self._input.look, dt)
+	self._input.look_multiplier = self._parent_unit:base():controller():get_setup():get_connection("look"):get_multiplier()
+	local stick_input_x, stick_input_y = self._look_function(axis, self._input.look_multiplier, dt)
 	local look_polar_spin = data.spin - stick_input_x
 	local look_polar_pitch = math.clamp(data.pitch + stick_input_y, -85, 85)
 	if self._limits then
@@ -333,9 +334,14 @@ function FPCameraPlayerBase:_update_rot(axis)
 	if player_state == "driving" then
 		local vehicle = managers.player:get_vehicle().vehicle_unit:vehicle()
 		local vehicle_ext = managers.player:get_vehicle().vehicle_unit:vehicle_driving()
+		local seat = vehicle_ext:find_seat_for_player(managers.player:player_unit())
 		local obj_pos, obj_rot = vehicle_ext:get_object_placement(managers.player:local_player())
 		if obj_pos == nil or obj_rot == nil then
 			return
+		end
+		local stance = managers.player:local_player():movement():current_state():stance()
+		if stance == PlayerDriving.STANCE_SHOOTING then
+			mvector3.add(obj_pos, seat.shooting_pos:rotate_with(vehicle:rotation()))
 		end
 		local camera_rot = mrot3
 		mrotation.set_zero(camera_rot)
@@ -354,7 +360,6 @@ function FPCameraPlayerBase:_update_rot(axis)
 		mvector3.rotate_with(target_camera, vehicle:rotation())
 		local pos = obj_pos + target
 		local camera_pos = obj_pos + target_camera
-		local seat = vehicle_ext:find_seat_for_player(managers.player:player_unit())
 		if seat.driving then
 			self:set_position(pos)
 			self:set_rotation(hands_rot)
@@ -381,6 +386,13 @@ function FPCameraPlayerBase:_update_rot(axis)
 		self:set_rotation(new_shoulder_rot)
 		self._parent_unit:camera():set_position(self._output_data.position)
 		self._parent_unit:camera():set_rotation(self._output_data.rotation)
+	end
+	if player_state == "bipod" and not self._parent_unit:movement()._current_state:in_steelsight() then
+		self:set_position(PlayerBipod._shoulder_pos or new_shoulder_pos)
+		self:set_rotation(bipod_rot)
+		self:set_fov_instant(40)
+	elseif not self._parent_unit:movement()._current_state:in_steelsight() then
+		PlayerBipod:set_shoulder_pos(bipod_pos)
 	end
 end
 function FPCameraPlayerBase:_get_aim_assist(t, dt)
@@ -444,26 +456,26 @@ function FPCameraPlayerBase:_horizonatal_recoil_kick(t, dt)
 	end
 	return r_value
 end
-function FPCameraPlayerBase:_pc_look_function(stick_input, dt)
+function FPCameraPlayerBase:_pc_look_function(stick_input, stick_input_multiplier, dt)
 	return stick_input.x, stick_input.y
 end
-function FPCameraPlayerBase:_gamepad_look_function(stick_input, dt)
-	if mvector3.length(stick_input) > self._tweak_data.look_speed_dead_zone then
+function FPCameraPlayerBase:_gamepad_look_function(stick_input, stick_input_multiplier, dt)
+	if mvector3.length(stick_input) > self._tweak_data.look_speed_dead_zone * stick_input_multiplier.x then
 		local x = stick_input.x
 		local y = stick_input.y
 		stick_input = Vector3(x / (1.3 - 0.3 * (1 - math.abs(y))), y / (1.3 - 0.3 * (1 - math.abs(x))), 0)
-		local look_speed = self:_get_look_speed(stick_input, dt)
+		local look_speed = self:_get_look_speed(stick_input, stick_input_multiplier, dt)
 		local stick_input_x = stick_input.x * dt * look_speed
 		local stick_input_y = stick_input.y * dt * look_speed
 		return stick_input_x, stick_input_y
 	end
 	return 0, 0
 end
-function FPCameraPlayerBase:_get_look_speed(stick_input, dt)
+function FPCameraPlayerBase:_get_look_speed(stick_input, stick_input_multiplier, dt)
 	if self._parent_unit:movement()._current_state:in_steelsight() then
 		return self._tweak_data.look_speed_steel_sight
 	end
-	if not (mvector3.length(stick_input) > self._tweak_data.look_speed_transition_occluder) or not (math.abs(stick_input.x) > self._tweak_data.look_speed_transition_zone) then
+	if not (mvector3.length(stick_input) > self._tweak_data.look_speed_transition_occluder * stick_input_multiplier.x) or not (math.abs(stick_input.x) > self._tweak_data.look_speed_transition_zone * stick_input_multiplier.x) then
 		self._camera_properties.look_speed_transition_timer = 0
 		return self._tweak_data.look_speed_standard
 	end
@@ -713,7 +725,7 @@ function FPCameraPlayerBase:clbk_aim_assist(col_ray)
 		local ray = col_ray.ray
 		local r1 = self._parent_unit:camera():rotation()
 		local r2 = self._aim_assist.mrotation or Rotation()
-		mrotation.set_look_at(r2, ray, math.UP)
+		mrotation.set_look_at(r2, ray, r1:z())
 		local yaw = mrotation.yaw(r1) - mrotation.yaw(r2)
 		local pitch = mrotation.pitch(r1) - mrotation.pitch(r2)
 		if yaw > 180 then

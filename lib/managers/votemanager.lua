@@ -96,6 +96,9 @@ function VoteManager:_request_vote(vote_type, vote_network, peer_id)
 	if self._type then
 		return
 	end
+	if self._cooldown or self._vote_cooldown and self._vote_cooldown[peer_id] then
+		return false
+	end
 	self._voted = self.VOTES.yes
 	self._peer_to_exclude = peer_id
 	self._cooldown = TimerManager:wall():time() + tweak_data.voting.cooldown
@@ -237,8 +240,10 @@ function VoteManager:_stop()
 	managers.system_menu:close("vote_data")
 end
 function VoteManager:_restart_counter()
-	self._callback_type = "restart"
-	self._callback_counter = TimerManager:wall():time() + tweak_data.voting.restart_delay
+	if not self._stopped then
+		self._callback_type = "restart"
+		self._callback_counter = TimerManager:wall():time() + tweak_data.voting.restart_delay
+	end
 end
 function VoteManager:_message(response, peer_id, kick_peer_id)
 	local peer = managers.network:session():peer(peer_id)
@@ -381,6 +386,12 @@ function VoteManager:update(t, dt)
 			self._callback_counter_print = nil
 		end
 	end
+end
+function VoteManager:stop()
+	self._callback_type = nil
+	self._callback_counter = nil
+	self._callback_counter_print = nil
+	self._stopped = true
 end
 function VoteManager:message_vote()
 	if not self._type or self._voted or not managers.network:session() then

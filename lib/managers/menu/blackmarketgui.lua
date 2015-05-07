@@ -555,7 +555,7 @@ function BlackMarketGuiTabItem:select_slot(slot, instant)
 		slot = (self._slot_selected or self._slots[slot]) and slot
 	end
 	if not slot then
-		slot = 1
+		slot = self._slot_selected or 1
 		for i, d in pairs(self._slots) do
 			if d._data and d._data.equipped then
 				slot = i
@@ -564,6 +564,9 @@ function BlackMarketGuiTabItem:select_slot(slot, instant)
 	end
 	local no_sound = false
 	if self._slots[slot] and self._slots[slot]._name == "empty" then
+		if slot > self._slot_selected then
+			return self:select_slot(slot - 1, instant)
+		end
 		slot = self._slot_selected
 		no_sound = true
 	end
@@ -745,6 +748,17 @@ function BlackMarketGuiSlotItem:init(main_panel, data, x, y, w, h)
 				end
 				if icon_data.name == "new_drop" and data.new_drop_data then
 					data.new_drop_data.icon = new_icon
+				end
+				if icon_data.spin then
+					local spin_animation = function(o)
+						local dt
+						while true do
+							dt = coroutine.yield()
+							o:rotate(dt * 180)
+						end
+					end
+					new_icon:animate(spin_animation)
+					self._loading_icon = new_icon
 				end
 			end
 			if icon_data.borders then
@@ -2907,7 +2921,7 @@ function BlackMarketGui:_update_borders()
 		})
 	end
 end
-function BlackMarketGui:_set_detection(value, maxed_reached)
+function BlackMarketGui:_set_detection(value, maxed_reached, min_reached)
 	local detection_value = self._detection_panel:child("detection_value")
 	detection_value:set_text(math.round(value * 100))
 	local detection_ring_left_bg = self._detection_panel:child("detection_left_bg")
@@ -2920,6 +2934,10 @@ function BlackMarketGui:_set_detection(value, maxed_reached)
 		detection_text:set_text(utf8.to_upper(managers.localization:text("bm_menu_stats_max_detection")))
 		detection_text:set_color(Color(255, 255, 42, 0) / 255)
 		detection_value:set_color(Color(255, 255, 42, 0) / 255)
+	elseif min_reached then
+		detection_text:set_text(utf8.to_upper(managers.localization:text("bm_menu_stats_min_detection")))
+		detection_text:set_color(tweak_data.screen_colors.ghost_color)
+		detection_value:set_color(tweak_data.screen_colors.text)
 	else
 		detection_text:set_text(utf8.to_upper(managers.localization:text("bm_menu_stats_detection")))
 		detection_text:set_color(tweak_data.screen_colors.text)
@@ -3990,7 +4008,7 @@ function BlackMarketGui:show_stats()
 			self._stats_texts[stat.name].name:set_text(utf8.to_upper(managers.localization:text("bm_menu_" .. stat.name)))
 			value = mod_stats.chosen[stat.name]
 			equip = mod_stats.equip[stat.name]
-			if tweak_parts then
+			if tweak_parts and tweak_parts.stats then
 			else
 				stat_changed = tweak_parts.stats[stat.stat_name or stat.name] and value ~= 0 and 1 or 0.5
 			end
@@ -4120,7 +4138,7 @@ function BlackMarketGui:enter_text(o, s)
 	if self._renaming_item then
 		local m = tweak_data:get_raw_value("gui", "rename_max_letters") or 20
 		local n = utf8.len(self._renaming_item.custom_name)
-		s = s:sub(1, m - n)
+		s = utf8.sub(s, 1, m - n)
 		self._renaming_item.custom_name = self._renaming_item.custom_name .. tostring(s)
 		self:update_info_text()
 	end
@@ -4199,8 +4217,8 @@ function BlackMarketGui:update_info_text()
 	}
 	local ignore_lock = false
 	self._stats_text_modslist:set_text("")
-	local suspicion, max_reached = managers.blackmarket:get_suspicion_offset_of_local(tweak_data.player.SUSPICION_OFFSET_LERP or 0.75)
-	self:_set_detection(suspicion, max_reached)
+	local suspicion, max_reached, min_reached = managers.blackmarket:get_suspicion_offset_of_local(tweak_data.player.SUSPICION_OFFSET_LERP or 0.75)
+	self:_set_detection(suspicion, max_reached, min_reached)
 	self:_set_rename_info_text(nil)
 	local is_renaming_this = self._renaming_item and not self._data.is_loadout and self._renaming_item.category == slot_data.category and self._renaming_item.slot == slot_data.slot
 	if identifier == self.identifiers.weapon then
@@ -4637,6 +4655,12 @@ function BlackMarketGui:update_info_text()
 				updated_texts[3].text = updated_texts[3].text .. "\n" .. managers.localization:to_upper_text("bm_menu_missing_to_finalize_mask", {missed_mods = list_of_mods}) .. "\n"
 			else
 				updated_texts[3].text = managers.localization:to_upper_text("bm_menu_missing_to_finalize_mask", {missed_mods = list_of_mods}) .. "\n"
+			end
+		elseif price and price > managers.money:total() then
+			if slot_data.dlc_locked then
+				updated_texts[3].text = updated_texts[3].text .. "\n" .. managers.localization:to_upper_text("bm_menu_not_enough_cash") .. "\n"
+			else
+				updated_texts[3].text = managers.localization:to_upper_text("bm_menu_not_enough_cash") .. "\n"
 			end
 		end
 	elseif identifier == self.identifiers.deployable then
@@ -6015,13 +6039,11 @@ function BlackMarketGui:populate_melee_weapons(data)
 				melee_weapon_id
 			}
 		end
-		if new_data.unlocked then
-			new_data.comparision_data = managers.blackmarket:get_melee_weapon_stats(melee_weapon_id)
-		end
+		new_data.comparision_data = managers.blackmarket:get_melee_weapon_stats(melee_weapon_id)
 		if new_data.unlocked and not new_data.equipped then
 			table.insert(new_data, "lo_mw_equip")
 		end
-		if new_data.unlocked and data.allow_preview and m_tweak_data.unit then
+		if data.allow_preview and m_tweak_data.unit then
 			table.insert(new_data, "lo_mw_preview")
 		end
 		data[i] = new_data
@@ -6110,8 +6132,12 @@ function BlackMarketGui:populate_masks(data)
 	local index = 0
 	for i, crafted in pairs(crafted_category) do
 		index = i - start_crafted_item + 1
+		local guis_mask_id = crafted.mask_id
+		if tweak_data.blackmarket.masks[guis_mask_id].guis_id then
+			guis_mask_id = tweak_data.blackmarket.masks[guis_mask_id].guis_id
+		end
 		guis_catalog = "guis/"
-		local bundle_folder = tweak_data.blackmarket.masks[crafted.mask_id] and tweak_data.blackmarket.masks[crafted.mask_id].texture_bundle_folder
+		local bundle_folder = tweak_data.blackmarket.masks[guis_mask_id] and tweak_data.blackmarket.masks[guis_mask_id].texture_bundle_folder
 		if bundle_folder then
 			guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
 		end
@@ -6127,11 +6153,12 @@ function BlackMarketGui:populate_masks(data)
 		new_data.slot = i
 		new_data.unlocked = true
 		new_data.equipped = crafted.equipped
-		new_data.bitmap_texture = guis_catalog .. "textures/pd2/blackmarket/icons/masks/" .. new_data.name
+		new_data.bitmap_texture = guis_catalog .. "textures/pd2/blackmarket/icons/masks/" .. guis_mask_id
 		new_data.stream = false
 		new_data.holding = currently_holding and hold_crafted_item.slot == i
-		local is_locked = tweak_data.lootdrop.global_values[new_data.global_value] and tweak_data.lootdrop.global_values[new_data.global_value].dlc and not tweak_data.dlc[new_data.global_value].free and not managers.dlc:has_dlc(new_data.global_value)
+		local is_locked = tweak_data.lootdrop.global_values[new_data.global_value] and tweak_data.lootdrop.global_values[new_data.global_value].dlc and not managers.dlc:is_dlc_unlocked(new_data.global_value)
 		local locked_parts = {}
+		local mask_is_locked = is_locked
 		if not is_locked then
 			local name_converter = {
 				material = "materials",
@@ -6148,8 +6175,16 @@ function BlackMarketGui:populate_masks(data)
 		end
 		if is_locked then
 			new_data.unlocked = false
-			new_data.lock_texture = self:get_lock_icon(new_data, "guis/textures/pd2/lock_incompatible")
-			new_data.dlc_locked = tweak_data.lootdrop.global_values[new_data.global_value].unlock_id or "bm_menu_dlc_locked"
+			if mask_is_locked then
+				new_data.lock_texture = self:get_lock_icon(new_data, "guis/textures/pd2/lock_incompatible")
+				new_data.dlc_locked = tweak_data.lootdrop.global_values[new_data.global_value] and tweak_data.lootdrop.global_values[new_data.global_value].unlock_id or "bm_menu_dlc_locked"
+			elseif 0 < table.size(locked_parts) then
+				local t, gv = next(locked_parts)
+				if gv then
+					new_data.lock_texture = self:get_lock_icon(new_data, "guis/textures/pd2/lock_incompatible")
+					new_data.dlc_locked = tweak_data.lootdrop.global_values[gv] and tweak_data.lootdrop.global_values[gv].unlock_id or "bm_menu_dlc_locked"
+				end
+			end
 		end
 		if currently_holding then
 			if i ~= 1 then
@@ -6881,8 +6916,12 @@ function BlackMarketGui:populate_buy_mask(data)
 		data[i] = nil
 	end
 	for i = 1, #data.on_create_data do
+		local guis_mask_id = data.on_create_data[i].mask_id
+		if tweak_data.blackmarket.masks[guis_mask_id].guis_id then
+			guis_mask_id = tweak_data.blackmarket.masks[guis_mask_id].guis_id
+		end
 		guis_catalog = "guis/"
-		local bundle_folder = tweak_data.blackmarket.masks[data.on_create_data[i].mask_id] and tweak_data.blackmarket.masks[data.on_create_data[i].mask_id].texture_bundle_folder
+		local bundle_folder = tweak_data.blackmarket.masks[guis_mask_id] and tweak_data.blackmarket.masks[guis_mask_id].texture_bundle_folder
 		if bundle_folder then
 			guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
 		end
@@ -6895,7 +6934,7 @@ function BlackMarketGui:populate_buy_mask(data)
 		new_data.unlocked = managers.blackmarket:get_item_amount(new_data.global_value, "masks", new_data.name, true) or 0
 		new_data.equipped = false
 		new_data.num_backs = data.prev_node_data.num_backs + 1
-		new_data.bitmap_texture = guis_catalog .. "textures/pd2/blackmarket/icons/masks/" .. new_data.name
+		new_data.bitmap_texture = guis_catalog .. "textures/pd2/blackmarket/icons/masks/" .. guis_mask_id
 		new_data.stream = false
 		if not new_data.global_value then
 			Application:debug("BlackMarketGui:populate_buy_mask( data ) Missing global value on mask", new_data.name)
@@ -7774,11 +7813,15 @@ function BlackMarketGui:choose_mask_slot_unlock_callback(data)
 	managers.menu:show_confirm_blackmarket_buy_mask_slot(params)
 end
 function BlackMarketGui:choose_mask_buy_callback(data)
+	local masks_data = tweak_data.blackmarket.masks
 	local masks = managers.blackmarket:get_inventory_masks() or {}
 	local new_node_data = {}
 	local items = {}
 	local itemids = {}
 	local function func_add_item(global_value, item_id, item)
+		if not masks_data[item_id] or masks_data[item_id].inaccessible then
+			return
+		end
 		local category = tweak_data.lootdrop.global_values[global_value].category
 		if category then
 			global_value = category
@@ -7793,8 +7836,8 @@ function BlackMarketGui:choose_mask_buy_callback(data)
 	for _, mask in ipairs(masks) do
 		func_add_item(mask.global_value, mask.mask_id, mask)
 	end
-	for mask_id, mask in pairs(tweak_data.blackmarket.masks) do
-		if mask_id ~= "character_locked" and (mask.pc or mask.pcs) then
+	for mask_id, mask in pairs(masks_data) do
+		if mask.pc or mask.pcs then
 			local global_values = {}
 			if mask.dlc or mask.dlcs then
 				local dlcs = {}

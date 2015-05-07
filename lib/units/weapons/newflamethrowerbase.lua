@@ -5,7 +5,6 @@ function NewFlamethrowerBase:init(...)
 	self:setup_default()
 end
 function NewFlamethrowerBase:setup_default()
-	self._damage = tweak_data.weapon[self._name_id].DAMAGE
 	self._rays = tweak_data.weapon[self._name_id].rays or 6
 	self._range = tweak_data.weapon[self._name_id].flame_max_range or 1000
 	self._flame_max_range = tweak_data.weapon[self._name_id].flame_max_range
@@ -163,8 +162,6 @@ function NewFlamethrowerBase:_fire_raycast(user_unit, from_pos, direction, dmg_m
 			weapon_unit = self._unit,
 			skip_bullet_count = true
 		})
-	end
-	if result then
 	end
 	return result
 end

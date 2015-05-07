@@ -95,6 +95,24 @@ function HuskPlayerInventory:synch_weapon_gadget_state(state)
 		end
 	end
 end
+function HuskPlayerInventory:on_melee_item_shown()
+	local selection = self._available_selections[self._equipped_selection]
+	if not selection then
+		return
+	end
+	if selection.use_data.equip.align_place == "left_hand" and alive(selection.unit) then
+		self:_link_weapon(selection.unit, self._align_places.right_hand)
+	end
+end
+function HuskPlayerInventory:on_melee_item_hidden()
+	local selection = self._available_selections[self._equipped_selection]
+	if not selection then
+		return
+	end
+	if selection.use_data.equip.align_place == "left_hand" and alive(selection.unit) then
+		self:_link_weapon(selection.unit, self._align_places.left_hand)
+	end
+end
 function HuskPlayerInventory._get_weapon_name_from_sync_index(w_index)
 	if w_index <= #tweak_data.character.weap_unit_names then
 		return tweak_data.character.weap_unit_names[w_index]

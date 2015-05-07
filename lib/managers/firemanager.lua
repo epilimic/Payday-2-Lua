@@ -87,16 +87,14 @@ function FireManager:_add_doted_enemy(enemy_unit, fire_damage_received_time, wea
 				contains = true
 			end
 		end
-		if contains == false then
-			local fire_dot_length = 10
-			local fire_dot_damage = 1
+		if not contains then
 			local dot_info = {
 				enemy_unit = enemy_unit,
 				fire_damage_received_time = fire_damage_received_time,
 				weapon_unit = weapon_unit,
 				fire_dot_counter = 0,
-				dot_length = fire_dot_length,
-				dot_damage = fire_dot_damage
+				dot_length = dot_length,
+				dot_damage = dot_damage
 			}
 			table.insert(self._doted_enemies, dot_info)
 			self:_start_enemy_fire_effect(dot_info)
@@ -215,6 +213,7 @@ function FireManager:detect_and_give_dmg(params)
 	local push_units = false
 	local fire_dot_data = params.fire_dot_data
 	local results = {}
+	local alert_radius = params.alert_radius or 3000
 	if params.push_units ~= nil then
 		push_units = params.push_units
 	end
@@ -236,7 +235,7 @@ function FireManager:detect_and_give_dmg(params)
 	managers.groupai:state():propagate_alert({
 		"fire",
 		hit_pos,
-		3000,
+		alert_radius,
 		alert_filter,
 		alert_unit
 	})

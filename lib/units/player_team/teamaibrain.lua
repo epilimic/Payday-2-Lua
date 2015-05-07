@@ -122,3 +122,7 @@ function TeamAIBrain:on_cool_state_changed(state)
 end
 function TeamAIBrain:clbk_attention_notice_sneak(observer_unit, status)
 end
+function TeamAIBrain:_chk_enable_bodybag_interaction()
+	TeamAIBrain.super._chk_enable_bodybag_interaction(self)
+	self._unit:interaction():set_tweak_data("dead")
+end

@@ -148,6 +148,7 @@ function CopActionHurt:init(action_desc, common_data)
 	local ignite_character = action_desc.ignite_character
 	local is_fire_dot_damage = not action_desc.fire_dot_data
 	local fire_dot_data = action_desc.fire_dot_data
+	local start_dot_damage_roll = action_desc.start_dot_damage_roll or 101
 	if action_type == "fatal" then
 		redir_res = self._ext_movement:play_redirect("fatal")
 		if not redir_res then
@@ -162,266 +163,261 @@ function CopActionHurt:init(action_desc, common_data)
 			return
 		end
 		managers.hud:set_mugshot_tased(self._unit:unit_data().mugshot_id)
-	else
-		if action_type == "fire_hurt" or action_type == "light_hurt" and action_desc.variant == "fire" then
-			local fire_dot_max_distance = 3000
-			local fire_dot_trigger_chance = 30
-			if fire_dot_data then
-				fire_dot_max_distance = tonumber(fire_dot_data.dot_trigger_max_distance)
-				fire_dot_trigger_chance = tonumber(fire_dot_data.dot_trigger_chance)
+	elseif action_type == "fire_hurt" or action_type == "light_hurt" and action_desc.variant == "fire" then
+		local fire_dot_max_distance = 3000
+		local fire_dot_trigger_chance = 30
+		local distance = 1000
+		local hit_loc = action_desc.hit_pos
+		local char_tweak = tweak_data.character[self._unit:base()._tweak_table]
+		local use_animation_on_fire_damage
+		if fire_dot_data then
+			fire_dot_max_distance = tonumber(fire_dot_data.dot_trigger_max_distance)
+			fire_dot_trigger_chance = tonumber(fire_dot_data.dot_trigger_chance)
+		end
+		if hit_loc and action_desc.attacker_unit and action_desc.attacker_unit.position then
+			distance = mvector3.distance(hit_loc, action_desc.attacker_unit:position())
+		end
+		if char_tweak.use_animation_on_fire_damage == nil then
+			use_animation_on_fire_damage = true
+		else
+			use_animation_on_fire_damage = char_tweak.use_animation_on_fire_damage
+		end
+		local flammable
+		if char_tweak.flammable == nil then
+			flammable = true
+		else
+			flammable = char_tweak.flammable
+		end
+		if not is_fire_dot_damage and fire_dot_max_distance > distance and start_dot_damage_roll <= fire_dot_trigger_chance and flammable then
+			if Network:is_server() then
+				managers.fire:add_doted_enemy(self._unit, t, self._ext_inventory:equipped_unit(), fire_dot_data.dot_length, fire_dot_data.dot_tick_damage)
 			end
-			local hit_loc = action_desc.hit_pos
-			local distance = 1000
-			if hit_loc and action_desc.attacker_unit and action_desc.attacker_unit.position then
-				distance = mvector3.distance(hit_loc, action_desc.attacker_unit:position())
+			if ignite_character == "dragonsbreath" then
+				self:_dragons_breath_sparks()
 			end
-			local start_dot_damage = math.random(1, 100)
-			local char_tweak = tweak_data.character[self._unit:base()._tweak_table]
-			local use_animation_on_fire_damage
-			if char_tweak.use_animation_on_fire_damage == nil then
-				use_animation_on_fire_damage = true
-			else
-				use_animation_on_fire_damage = char_tweak.use_animation_on_fire_damage
-			end
-			local flammable
-			if char_tweak.flammable == nil then
-				flammable = true
-			else
-				flammable = char_tweak.flammable
-			end
-			if not is_fire_dot_damage and fire_dot_max_distance > distance and fire_dot_trigger_chance >= start_dot_damage and flammable then
-				if Network:is_server() then
-					managers.fire:add_doted_enemy(self._unit, t, self._ext_inventory:equipped_unit(), fire_dot_data.dot_length, fire_dot_data.dot_tick_damage)
-				end
-				if ignite_character == "dragonsbreath" then
-					self:_dragons_breath_sparks()
-				end
-				if self._unit:character_damage() ~= nil and self._unit:character_damage().get_last_time_unit_got_fire_damage ~= nil then
-					local last_fire_recieved = self._unit:character_damage():get_last_time_unit_got_fire_damage()
-					if last_fire_recieved == nil or t - last_fire_recieved > 5 then
-						if use_animation_on_fire_damage then
-							Application:debug("CopActionHurt:init: play_fire hurt")
-							redir_res = self._ext_movement:play_redirect("fire_hurt")
-							local dir_str
-							local fwd_dot = action_desc.direction_vec:dot(common_data.fwd)
-							if fwd_dot < 0 then
-								local hit_pos = action_desc.hit_pos
-								local hit_vec = hit_pos - common_data.pos:with_z(0):normalized()
-								if 0 < mvector3.dot(hit_vec, common_data.right) then
-									dir_str = "r"
-								else
-									dir_str = "l"
-								end
+			if self._unit:character_damage() ~= nil and self._unit:character_damage().get_last_time_unit_got_fire_damage ~= nil then
+				local last_fire_recieved = self._unit:character_damage():get_last_time_unit_got_fire_damage()
+				if last_fire_recieved == nil or t - last_fire_recieved > 5 then
+					if use_animation_on_fire_damage then
+						redir_res = self._ext_movement:play_redirect("fire_hurt")
+						local dir_str
+						local fwd_dot = action_desc.direction_vec:dot(common_data.fwd)
+						if fwd_dot < 0 then
+							local hit_pos = action_desc.hit_pos
+							local hit_vec = hit_pos - common_data.pos:with_z(0):normalized()
+							if 0 < mvector3.dot(hit_vec, common_data.right) then
+								dir_str = "r"
 							else
-								dir_str = "bwd"
+								dir_str = "l"
 							end
-							self._machine:set_parameter(redir_res, dir_str, 1)
-						end
-						self._unit:character_damage():set_last_time_unit_got_fire_damage(t)
-						elseif action_type == "light_hurt" then
-							if not self._ext_anim.upper_body_active or self._ext_anim.upper_body_empty or self._ext_anim.recoil then
-								redir_res = self._ext_movement:play_redirect(action_type)
-								if not redir_res then
-									debug_pause("[CopActionHurt:init] light_hurt redirect failed in", self._machine:segment_state(Idstring("upper_body")))
-									return
-								end
-								local dir_str
-								local fwd_dot = action_desc.direction_vec:dot(common_data.fwd)
-								if fwd_dot < 0 then
-									local hit_pos = action_desc.hit_pos
-									local hit_vec = hit_pos - common_data.pos:with_z(0):normalized()
-									if 0 < mvector3.dot(hit_vec, common_data.right) then
-										dir_str = "r"
-									else
-										dir_str = "l"
-									end
-								else
-									dir_str = "bwd"
-								end
-								self._machine:set_parameter(redir_res, dir_str, 1)
-								local height_str = action_desc.hit_pos.z > self._ext_movement:m_com().z and "high" or "low"
-								self._machine:set_parameter(redir_res, height_str, 1)
-							end
-							self._expired = true
-							return true
-						elseif action_type == "hurt_sick" then
-							local ecm_hurts_table = self._common_data.char_tweak.ecm_hurts
-							if not ecm_hurts_table then
-								debug_pause_unit(self._unit, "[CopActionHurt:init] Unit missing ecm_hurts in Character Tweak Data", self._unit)
-								return
-							end
-							redir_res = self._ext_movement:play_redirect("hurt_sick")
-							if not redir_res then
-								debug_pause("[CopActionHurt:init] hurt_sick redirect failed in", self._machine:segment_state(Idstring("base")))
-								return
-							end
-							local is_cop = true
-							if is_civilian then
-								is_cop = false
-							end
-							local sick_variants = {}
-							for i, d in pairs(ecm_hurts_table) do
-								table.insert(sick_variants, i)
-							end
-							local variant = sick_variants[math.random(#sick_variants)]
-							local duration = math.random(ecm_hurts_table[variant].min_duration, ecm_hurts_table[variant].max_duration)
-							for _, hurt_sick in ipairs(sick_variants) do
-								self._machine:set_global(hurt_sick, hurt_sick == variant and 1 or 0)
-							end
-							self._sick_time = t + duration
-						elseif action_type == "bleedout" then
-							redir_res = self._ext_movement:play_redirect("bleedout")
-							if not redir_res then
-								debug_pause("[CopActionHurt:init] bleedout redirect failed in", self._machine:segment_state(Idstring("base")))
-								return
-							end
-						elseif action_type == "death" and action_desc.variant == "fire" then
-							redir_res = self._ext_movement:play_redirect("death_fire")
-							if not redir_res then
-								debug_pause("[CopActionHurt:init] death_fire redirect failed in", self._machine:segment_state(Idstring("base")))
-								return
-							end
-							local variant_count = #CopActionHurt.fire_death_anim_variants_length or 5
-							local variant = 1
-							if variant_count > 1 then
-								variant = math.random(variant_count)
-							end
-							for i = 1, variant_count do
-								local state_value = 0
-								if i == variant then
-									state_value = 1
-								end
-								self._machine:set_parameter(redir_res, "var" .. tostring(i), state_value)
-							end
-							managers.fire:_remove_flame_effects_from_doted_unit(self._unit)
-							self:_start_enemy_fire_effect_on_death(variant)
-							managers.fire:check_achievemnts(self._unit, t)
-						elseif action_type == "death" and (self._ext_anim.run and self._ext_anim.move_fwd or self._ext_anim.sprint) and not common_data.char_tweak.no_run_death_anim then
-							redir_res = self._ext_movement:play_redirect("death_run")
-							if not redir_res then
-								debug_pause("[CopActionHurt:init] death_run redirect failed in", self._machine:segment_state(Idstring("base")))
-								return
-							end
-							local variant = self.running_death_anim_variants[is_female and "female" or "male"] or 1
-							if variant > 1 then
-								variant = math.random(variant)
-							end
-							self._machine:set_parameter(redir_res, "var" .. tostring(variant), 1)
-						elseif action_type == "death" and (self._ext_anim.run or self._ext_anim.ragdoll) and self:_start_ragdoll() then
-							self.update = self._upd_ragdolled
-						elseif action_type == "heavy_hurt" and (self._ext_anim.run or self._ext_anim.sprint) and not common_data.is_suppressed and not crouching then
-							redir_res = self._ext_movement:play_redirect("heavy_run")
-							if not redir_res then
-								debug_pause("[CopActionHurt:init] heavy_run redirect failed in", self._machine:segment_state(Idstring("base")))
-								return
-							end
-							local variant = self.running_hurt_anim_variants.fwd or 1
-							if variant > 1 then
-								variant = math.random(variant)
-							end
-							self._machine:set_parameter(redir_res, "var" .. tostring(variant), 1)
 						else
-							local variant, height, old_variant, old_info
-							if (action_type == "hurt" or action_type == "heavy_hurt") and self._ext_anim.hurt then
-								for i = 1, self.hurt_anim_variants_highest_num do
-									if self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "var" .. i) then
-										old_variant = i
-										break
-									end
-								end
-								if old_variant ~= nil then
-									old_info = {
-										fwd = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "fwd"),
-										bwd = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "bwd"),
-										l = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "l"),
-										r = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "r"),
-										high = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "high"),
-										low = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "low"),
-										crh = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "crh"),
-										mod = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "mod"),
-										hvy = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "hvy")
-									}
-								end
-							end
-							redir_res = self._ext_movement:play_redirect(action_type)
-							if not redir_res then
-								debug_pause_unit(self._unit, "[CopActionHurt:init]", action_type, "redirect failed in", self._machine:segment_state(Idstring("base")), self._unit)
-								return
-							end
-							if action_desc.variant == "bleeding" then
-							else
-								local nr_variants = self._ext_anim.base_nr_variants
-								if nr_variants then
-									variant = math.random(nr_variants)
-								else
-									local fwd_dot = action_desc.direction_vec:dot(common_data.fwd)
-									local right_dot = action_desc.direction_vec:dot(common_data.right)
-									local dir_str
-									if math.abs(fwd_dot) > math.abs(right_dot) then
-										if fwd_dot < 0 then
-											dir_str = "fwd"
-										else
-											dir_str = "bwd"
-										end
-									elseif right_dot > 0 then
-										dir_str = "l"
-									else
-										dir_str = "r"
-									end
-									self._machine:set_parameter(redir_res, dir_str, 1)
-									local hit_z = action_desc.hit_pos.z
-									height = hit_z > self._ext_movement:m_com().z and "high" or "low"
-									if action_type == "death" then
-										local death_type = is_civilian and "normal" or action_desc.death_type
-										if is_female then
-											variant = self.death_anim_fe_variants[death_type][crouching and "crouching" or "not_crouching"][dir_str][height]
-										else
-											variant = self.death_anim_variants[death_type][crouching and "crouching" or "not_crouching"][dir_str][height]
-										end
-										if variant > 1 then
-											variant = math.random(variant)
-										end
-									elseif action_type ~= "shield_knock" and action_type ~= "counter_tased" then
-										if old_variant and (old_info[dir_str] == 1 and old_info[height] == 1 and old_info.mod == 1 and action_type == "hurt" or old_info.hvy == 1 and action_type == "heavy_hurt") then
-											variant = old_variant
-										end
-										if not variant then
-											if action_type == "expl_hurt" then
-												variant = self.hurt_anim_variants[action_type][dir_str]
-											else
-												variant = self.hurt_anim_variants[action_type].not_crouching[dir_str][height]
-											end
-											if variant > 1 then
-												variant = math.random(variant)
-											end
-										end
-									end
-								end
-								variant = variant or 1
-								if variant then
-									self._machine:set_parameter(redir_res, "var" .. tostring(variant), 1)
-								end
-								if height then
-									self._machine:set_parameter(redir_res, height, 1)
-								end
-								if crouching then
-									self._machine:set_parameter(redir_res, "crh", 1)
-								end
-								if action_type == "hurt" then
-									self._machine:set_parameter(redir_res, "mod", 1)
-								elseif action_type == "heavy_hurt" then
-									self._machine:set_parameter(redir_res, "hvy", 1)
-								elseif action_type == "death" and action_desc.death_type == "heavy" and not is_civilian then
-									self._machine:set_parameter(redir_res, "heavy", 1)
-								elseif action_type == "expl_hurt" then
-									self._machine:set_parameter(redir_res, "expl", 1)
-								end
-							end
+							dir_str = "bwd"
+						end
+						self._machine:set_parameter(redir_res, dir_str, 1)
+					end
+					self._unit:character_damage():set_last_time_unit_got_fire_damage(t)
+				end
+			end
+		end
+	elseif action_type == "light_hurt" then
+		if not self._ext_anim.upper_body_active or self._ext_anim.upper_body_empty or self._ext_anim.recoil then
+			redir_res = self._ext_movement:play_redirect(action_type)
+			if not redir_res then
+				debug_pause("[CopActionHurt:init] light_hurt redirect failed in", self._machine:segment_state(Idstring("upper_body")))
+				return
+			end
+			local dir_str
+			local fwd_dot = action_desc.direction_vec:dot(common_data.fwd)
+			if fwd_dot < 0 then
+				local hit_pos = action_desc.hit_pos
+				local hit_vec = hit_pos - common_data.pos:with_z(0):normalized()
+				if 0 < mvector3.dot(hit_vec, common_data.right) then
+					dir_str = "r"
+				else
+					dir_str = "l"
+				end
+			else
+				dir_str = "bwd"
+			end
+			self._machine:set_parameter(redir_res, dir_str, 1)
+			local height_str = action_desc.hit_pos.z > self._ext_movement:m_com().z and "high" or "low"
+			self._machine:set_parameter(redir_res, height_str, 1)
+		end
+		self._expired = true
+		return true
+	elseif action_type == "hurt_sick" then
+		local ecm_hurts_table = self._common_data.char_tweak.ecm_hurts
+		if not ecm_hurts_table then
+			debug_pause_unit(self._unit, "[CopActionHurt:init] Unit missing ecm_hurts in Character Tweak Data", self._unit)
+			return
+		end
+		redir_res = self._ext_movement:play_redirect("hurt_sick")
+		if not redir_res then
+			debug_pause("[CopActionHurt:init] hurt_sick redirect failed in", self._machine:segment_state(Idstring("base")))
+			return
+		end
+		local is_cop = true
+		if is_civilian then
+			is_cop = false
+		end
+		local sick_variants = {}
+		for i, d in pairs(ecm_hurts_table) do
+			table.insert(sick_variants, i)
+		end
+		local variant = sick_variants[math.random(#sick_variants)]
+		local duration = math.random(ecm_hurts_table[variant].min_duration, ecm_hurts_table[variant].max_duration)
+		for _, hurt_sick in ipairs(sick_variants) do
+			self._machine:set_global(hurt_sick, hurt_sick == variant and 1 or 0)
+		end
+		self._sick_time = t + duration
+	elseif action_type == "bleedout" then
+		redir_res = self._ext_movement:play_redirect("bleedout")
+		if not redir_res then
+			debug_pause("[CopActionHurt:init] bleedout redirect failed in", self._machine:segment_state(Idstring("base")))
+			return
+		end
+	elseif action_type == "death" and action_desc.variant == "fire" then
+		redir_res = self._ext_movement:play_redirect("death_fire")
+		if not redir_res then
+			debug_pause("[CopActionHurt:init] death_fire redirect failed in", self._machine:segment_state(Idstring("base")))
+			return
+		end
+		local variant_count = #CopActionHurt.fire_death_anim_variants_length or 5
+		local variant = 1
+		if variant_count > 1 then
+			variant = math.random(variant_count)
+		end
+		for i = 1, variant_count do
+			local state_value = 0
+			if i == variant then
+				state_value = 1
+			end
+			self._machine:set_parameter(redir_res, "var" .. tostring(i), state_value)
+		end
+		managers.fire:_remove_flame_effects_from_doted_unit(self._unit)
+		self:_start_enemy_fire_effect_on_death(variant)
+		managers.fire:check_achievemnts(self._unit, t)
+	elseif action_type == "death" and (self._ext_anim.run and self._ext_anim.move_fwd or self._ext_anim.sprint) and not common_data.char_tweak.no_run_death_anim then
+		redir_res = self._ext_movement:play_redirect("death_run")
+		if not redir_res then
+			debug_pause("[CopActionHurt:init] death_run redirect failed in", self._machine:segment_state(Idstring("base")))
+			return
+		end
+		local variant = self.running_death_anim_variants[is_female and "female" or "male"] or 1
+		if variant > 1 then
+			variant = math.random(variant)
+		end
+		self._machine:set_parameter(redir_res, "var" .. tostring(variant), 1)
+	elseif action_type == "death" and (self._ext_anim.run or self._ext_anim.ragdoll) and self:_start_ragdoll() then
+		self.update = self._upd_ragdolled
+	elseif action_type == "heavy_hurt" and (self._ext_anim.run or self._ext_anim.sprint) and not common_data.is_suppressed and not crouching then
+		redir_res = self._ext_movement:play_redirect("heavy_run")
+		if not redir_res then
+			debug_pause("[CopActionHurt:init] heavy_run redirect failed in", self._machine:segment_state(Idstring("base")))
+			return
+		end
+		local variant = self.running_hurt_anim_variants.fwd or 1
+		if variant > 1 then
+			variant = math.random(variant)
+		end
+		self._machine:set_parameter(redir_res, "var" .. tostring(variant), 1)
+	else
+		local variant, height, old_variant, old_info
+		if (action_type == "hurt" or action_type == "heavy_hurt") and self._ext_anim.hurt then
+			for i = 1, self.hurt_anim_variants_highest_num do
+				if self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "var" .. i) then
+					old_variant = i
+					break
+				end
+			end
+			if old_variant ~= nil then
+				old_info = {
+					fwd = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "fwd"),
+					bwd = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "bwd"),
+					l = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "l"),
+					r = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "r"),
+					high = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "high"),
+					low = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "low"),
+					crh = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "crh"),
+					mod = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "mod"),
+					hvy = self._machine:get_parameter(self._machine:segment_state(Idstring("base")), "hvy")
+				}
+			end
+		end
+		redir_res = self._ext_movement:play_redirect(action_type)
+		if not redir_res then
+			debug_pause_unit(self._unit, "[CopActionHurt:init]", action_type, "redirect failed in", self._machine:segment_state(Idstring("base")), self._unit)
+			return
+		end
+		if action_desc.variant == "bleeding" then
+		else
+			local nr_variants = self._ext_anim.base_nr_variants
+			if nr_variants then
+				variant = math.random(nr_variants)
+			else
+				local fwd_dot = action_desc.direction_vec:dot(common_data.fwd)
+				local right_dot = action_desc.direction_vec:dot(common_data.right)
+				local dir_str
+				if math.abs(fwd_dot) > math.abs(right_dot) then
+					if fwd_dot < 0 then
+						dir_str = "fwd"
+					else
+						dir_str = "bwd"
+					end
+				elseif right_dot > 0 then
+					dir_str = "l"
+				else
+					dir_str = "r"
+				end
+				self._machine:set_parameter(redir_res, dir_str, 1)
+				local hit_z = action_desc.hit_pos.z
+				height = hit_z > self._ext_movement:m_com().z and "high" or "low"
+				if action_type == "death" then
+					local death_type = is_civilian and "normal" or action_desc.death_type
+					if is_female then
+						variant = self.death_anim_fe_variants[death_type][crouching and "crouching" or "not_crouching"][dir_str][height]
+					else
+						variant = self.death_anim_variants[death_type][crouching and "crouching" or "not_crouching"][dir_str][height]
+					end
+					if variant > 1 then
+						variant = math.random(variant)
+					end
+				elseif action_type ~= "shield_knock" and action_type ~= "counter_tased" then
+					if old_variant and (old_info[dir_str] == 1 and old_info[height] == 1 and old_info.mod == 1 and action_type == "hurt" or old_info.hvy == 1 and action_type == "heavy_hurt") then
+						variant = old_variant
+					end
+					if not variant then
+						if action_type == "expl_hurt" then
+							variant = self.hurt_anim_variants[action_type][dir_str]
+						else
+							variant = self.hurt_anim_variants[action_type].not_crouching[dir_str][height]
+						end
+						if variant > 1 then
+							variant = math.random(variant)
 						end
 					end
 				end
-			else
 			end
+			variant = variant or 1
+			if variant then
+				self._machine:set_parameter(redir_res, "var" .. tostring(variant), 1)
+			end
+			if height then
+				self._machine:set_parameter(redir_res, height, 1)
+			end
+			if crouching then
+				self._machine:set_parameter(redir_res, "crh", 1)
+			end
+			if action_type == "hurt" then
+				self._machine:set_parameter(redir_res, "mod", 1)
+			elseif action_type == "heavy_hurt" then
+				self._machine:set_parameter(redir_res, "hvy", 1)
+			elseif action_type == "death" and action_desc.death_type == "heavy" and not is_civilian then
+				self._machine:set_parameter(redir_res, "heavy", 1)
+			elseif action_type == "expl_hurt" then
+				self._machine:set_parameter(redir_res, "expl", 1)
+			end
+		end
 	end
 	if self._ext_anim.upper_body_active and not self._ragdolled then
 		self._ext_movement:play_redirect("up_idle")

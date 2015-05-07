@@ -509,6 +509,14 @@ function SentryGunMovement:set_team(team_data)
 		end
 	end
 	self._unit:weapon():update_laser()
+	local turret_units = managers.groupai:state():turrets()
+	if turret_units and table.contains(turret_units, self._unit) then
+		if self._unit:movement():team().foes[tweak_data.levels:get_default_team_ID("player")] then
+			self._unit:contour():remove("mark_unit_friendly", true)
+		else
+			self._unit:contour():add("mark_unit_friendly", true)
+		end
+	end
 end
 function SentryGunMovement:team()
 	return self._team

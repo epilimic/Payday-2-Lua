@@ -231,7 +231,7 @@ function MenuLobbyRenderer:on_request_lobby_slot_reply()
 	})
 	managers.network:session():send_to_peers_loaded("lobby_info", level, rank, character, mask_set)
 	managers.network:session():send_to_peers_loaded("sync_profile", level, rank)
-	managers.network:session():send_to_peers_loaded("sync_outfit", managers.blackmarket:outfit_string(), managers.network:session():local_peer():outfit_version())
+	managers.network:session():check_send_outfit()
 end
 function MenuLobbyRenderer:get_player_slot_by_peer_id(id)
 	for _, slot in ipairs(self._player_slots) do

@@ -19,7 +19,6 @@ function ElementEnableUnit:on_script_activated()
 	self._mission_script:add_save_state_cb(self._id)
 end
 function ElementEnableUnit:_load_unit(unit)
-	Application:stack_dump()
 	table.insert(self._units, unit)
 end
 function ElementEnableUnit:client_on_executed(...)

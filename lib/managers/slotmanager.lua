@@ -58,7 +58,7 @@ function SlotManager:init()
 	self._masks.bullet_impact_targets_sentry_gun = World:make_slot_mask(1, 8, 11, 12, 14, 17, 22, 33, 34, 35, 39)
 	self._masks.bullet_impact_targets_no_AI = World:make_slot_mask(1, 2, 8, 11, 14, 17, 33, 34, 35, 39)
 	self._masks.bullet_impact_targets_shooting_death = World:make_slot_mask(1, 8, 11, 12, 14, 17, 21, 22, 33, 34, 35)
-	self._masks.bullet_blank_impact_targets = World:make_slot_mask(1, 8, 11, 35)
+	self._masks.bullet_blank_impact_targets = World:make_slot_mask(1, 8, 11, 35, 39)
 	self._masks.bullet_physics_push = World:make_slot_mask(11, 17, 18, 39)
 	self._masks.AI_visibility = World:make_slot_mask(1, 11, 38)
 	self._masks.AI_visibility_sentry_gun = World:make_slot_mask(1, 11, 17, 38)
@@ -75,6 +75,7 @@ function SlotManager:init()
 	self._masks.vehicles = World:make_slot_mask(39)
 	self._masks.molotov_raycasts = World:make_slot_mask(1, 11, 39)
 	self._masks.player_ground_check = World:make_slot_mask(1, 11, 15, 39)
+	self._masks.interaction_obstruction = self._masks.world_geometry + self._masks.vehicles
 	self._masks.editor_all = self._masks.editor_all + 36 + 38 + 39
 	self._masks.statics_layer = self._masks.statics_layer + 36 + 38 + 39
 	self._masks.arrow_impact_targets = World:make_slot_mask(1, 2, 8, 11, 12, 16, 17, 18, 21, 22, 25, 26, 33, 34, 35, 39)

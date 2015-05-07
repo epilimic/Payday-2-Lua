@@ -319,6 +319,7 @@ function PlayerDamage:damage_tase(attack_data)
 	end
 	local cur_state = self._unit:movement():current_state_name()
 	if cur_state ~= "tased" and cur_state ~= "fatal" then
+		self:on_tased(false)
 		self._tase_data = attack_data
 		managers.player:set_player_state("tased")
 		local damage_info = {
@@ -331,6 +332,11 @@ function PlayerDamage:damage_tase(attack_data)
 				managers.achievment:award_progress(tweak_data.achievement.its_alive_its_alive.stat)
 			end
 		end
+	end
+end
+function PlayerDamage:on_tased(non_lethal)
+	if self:get_real_health() == 0 and self._check_berserker_done then
+		self:change_health(1)
 	end
 end
 function PlayerDamage:tase_data()
@@ -371,6 +377,10 @@ function PlayerDamage:damage_melee(attack_data)
 		"melee_hit_var2"
 	}
 	self._unit:camera():play_shaker(vars[math.random(#vars)], 1)
+	if managers.player:current_state() == "bipod" then
+		self._unit:movement()._current_state:exit(nil, "standard")
+		managers.player:set_player_state("standard")
+	end
 	self._unit:movement():push(attack_data.push_vel)
 	return result
 end

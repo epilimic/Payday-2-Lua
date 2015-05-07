@@ -4,7 +4,7 @@ function WeaponFlashLight:init(unit)
 	WeaponFlashLight.super.init(self, unit)
 	self._on_event = "gadget_flashlight_on"
 	self._off_event = "gadget_flashlight_off"
-	local obj = self._unit:get_object(Idstring("a_flashlight"))
+	self._a_flashlight_obj = self._unit:get_object(Idstring("a_flashlight"))
 	local is_haunted = managers.job and managers.job:current_job_id() == "haunted"
 	self._g_light = self._unit:get_object(Idstring("g_light"))
 	local texture = is_haunted and "units/lights/spot_light_projection_textures/spotprojection_22_flashlight_df" or "units/lights/spot_light_projection_textures/spotprojection_11_flashlight_df"
@@ -14,13 +14,14 @@ function WeaponFlashLight:init(unit)
 	self._light:set_spot_angle_end(60)
 	self._light:set_far_range(1000)
 	self._light:set_multiplier(self._current_light_multiplier)
-	self._light:link(obj)
-	self._light:set_rotation(Rotation(obj:rotation():z(), -obj:rotation():x(), -obj:rotation():y()))
+	self._light:link(self._a_flashlight_obj)
+	self._light:set_rotation(Rotation(self._a_flashlight_obj:rotation():z(), -self._a_flashlight_obj:rotation():x(), -self._a_flashlight_obj:rotation():y()))
 	self._light:set_enable(false)
 	local effect_path = is_haunted and "effects/particles/weapons/flashlight_spooky/fp_flashlight" or "effects/particles/weapons/flashlight/fp_flashlight"
 	self._light_effect = World:effect_manager():spawn({
 		effect = Idstring(effect_path),
-		parent = obj
+		parent = self._a_flashlight_obj,
+		force_synch = true
 	})
 	World:effect_manager():set_hidden(self._light_effect, true)
 end
@@ -43,10 +44,8 @@ function WeaponFlashLight:_check_state()
 	self._light:set_enable(self._on)
 	self._g_light:set_visibility(self._on)
 	World:effect_manager():set_hidden(self._light_effect, not self._on)
-	local is_haunted = managers.job and managers.job:current_job_id() == "haunted"
-	if is_haunted then
-		self._unit:set_extension_update_enabled(Idstring("base"), self._on)
-	end
+	self._is_haunted = managers.job and managers.job:current_job_id() == "haunted"
+	self._unit:set_extension_update_enabled(Idstring("base"), self._on)
 end
 function WeaponFlashLight:destroy(unit)
 	WeaponFlashLight.super.destroy(self, unit)
@@ -89,6 +88,11 @@ function WeaponFlashLight:sync_net_event(event_id)
 	end
 end
 function WeaponFlashLight:update(unit, t, dt)
+	self._light:link(self._a_flashlight_obj)
+	self._light:set_rotation(Rotation(self._a_flashlight_obj:rotation():z(), -self._a_flashlight_obj:rotation():x(), -self._a_flashlight_obj:rotation():y()))
+	if not self._is_haunted then
+		return
+	end
 	t = Application:time()
 	self._light_speed = self._light_speed or 1
 	self._light_speed = math.step(self._light_speed, 1, dt * (math.random(4) + 2))

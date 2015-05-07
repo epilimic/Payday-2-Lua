@@ -13,6 +13,15 @@ function AttentionTweakData:init()
 	self:_post_init()
 end
 function AttentionTweakData:_init_player()
+	self.settings.pl_clean = {
+		reaction = "REACT_IDLE",
+		filter = "none",
+		max_range = 1,
+		notice_delay_mul = 1,
+		verification_interval = 4,
+		release_delay = 1,
+		notice_requires_FOV = true
+	}
 	self.settings.pl_mask_off_friend_combatant = {
 		reaction = "REACT_IDLE",
 		filter = "combatant",
@@ -586,6 +595,14 @@ function AttentionTweakData:_init_drill()
 		release_delay = 1,
 		notice_requires_FOV = false
 	}
+	self.settings.drill_silent_civ_ene_ntl = {
+		reaction = "REACT_SCARED",
+		filter = "civilians_enemies",
+		verification_interval = 0.4,
+		uncover_range = 200,
+		release_delay = 1,
+		notice_requires_FOV = true
+	}
 end
 function AttentionTweakData:_init_sentry_gun()
 	self.settings.sentry_gun_enemy_cbt = {
@@ -695,6 +712,28 @@ function AttentionTweakData:_init_prop()
 		uncover_range = 100,
 		suspicion_range = 500,
 		max_range = 600,
+		release_delay = 1,
+		notice_requires_FOV = true
+	}
+	self.settings.vehicle_enemy_cbt = {
+		reaction = "REACT_SHOOT",
+		filter = "all",
+		relation = "foe",
+		max_range = 20000,
+		notice_interval = 1,
+		verification_interval = 1.5,
+		uncover_range = 1200,
+		release_delay = 1,
+		notice_requires_FOV = true,
+		weight_mul = 0.4
+	}
+	self.settings.open_elevator_ene_ntl = {
+		reaction = "REACT_AIM",
+		filter = "civilians_enemies",
+		verification_interval = 0.4,
+		uncover_range = 800,
+		suspicion_range = 1200,
+		max_range = 1500,
 		release_delay = 1,
 		notice_requires_FOV = true
 	}

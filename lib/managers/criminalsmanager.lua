@@ -144,6 +144,22 @@ function CriminalsManager:set_unit(name, unit)
 		end
 	end
 end
+function CriminalsManager:set_data(name)
+	for id, data in pairs(self._characters) do
+		if data.name == name then
+			if not data.taken then
+				return
+			end
+			if not data.data.ai then
+				local mask_id = managers.network:session():peer(data.peer_id):mask_id()
+				data.data.mask_obj = managers.blackmarket:mask_unit_name_by_mask_id(mask_id, data.peer_id)
+				data.data.mask_id = managers.blackmarket:get_real_mask_id(mask_id, data.peer_id)
+				data.data.mask_blueprint = managers.network:session():peer(data.peer_id):mask_blueprint()
+			end
+		else
+		end
+	end
+end
 function CriminalsManager:is_taken(name)
 	for _, data in pairs(self._characters) do
 		if name == data.name then

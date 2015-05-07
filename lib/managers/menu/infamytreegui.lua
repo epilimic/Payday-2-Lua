@@ -1,6 +1,6 @@
 require("lib/managers/menu/WalletGuiObject")
 local is_win_32 = SystemInfo:platform() == Idstring("WIN32")
-local WIDTH_MULTIPLIER = is_win_32 and 0.7 or 0.5
+local WIDTH_MULTIPLIER = is_win_32 and 0.65 or 0.5
 InfamyTreeGui = InfamyTreeGui or class()
 function InfamyTreeGui:init(ws, fullscreen_ws, node)
 	managers.menu:active_menu().renderer.ws:hide()
@@ -68,7 +68,7 @@ function InfamyTreeGui:_setup()
 	self._description_panel = self._panel:panel({
 		name = "description_panel"
 	})
-	self._description_panel:set_w(math.round(self._panel:w() * (1 - WIDTH_MULTIPLIER) - 10))
+	self._description_panel:set_w(math.round(self._panel:w() * (1 - WIDTH_MULTIPLIER)))
 	self._description_panel:set_h(math.round(self._panel:h() - title_text:bottom() - 70 - 4))
 	self._description_panel:set_top(title_text:bottom() + 2)
 	self._description_panel:set_right(self._panel:w())
@@ -609,10 +609,10 @@ function InfamyTreeGui:_update_description(name, unlocked)
 	desc_title:set_size(self._description_panel:w() - 20, h)
 	local _, _, _, h = desc_warning:text_rect()
 	desc_warning:set_size(self._description_panel:w() - 20, h)
-	desc_warning:set_top(desc_title:bottom() + (is_win_32 and 20 or 0))
+	desc_warning:set_top(desc_title:bottom() + (is_win_32 and 10 or 0))
 	local _, _, _, h = desc_text:text_rect()
 	desc_text:set_size(self._description_panel:w() - 20, h)
-	desc_text:set_top(desc_warning:bottom() + (is_win_32 and 10 or 0))
+	desc_text:set_top(desc_warning:bottom() + (is_win_32 and 5 or 0))
 	if name then
 		desc_upgrade = self._description_panel:panel({
 			name = "description_upgrade"

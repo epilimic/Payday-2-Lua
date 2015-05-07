@@ -53,7 +53,7 @@ function GroupAIStateBesiege:paused_update(t, dt)
 end
 function GroupAIStateBesiege:_queue_police_upd_task()
 	self._police_upd_task_queued = true
-	managers.enemy:queue_task("GroupAIStateBesiege._upd_police_activity", GroupAIStateBesiege._upd_police_activity, self, self._t + (next(self._spawning_groups) and 0.4 or 2))
+	managers.enemy:queue_task("GroupAIStateBesiege._upd_police_activity", self._upd_police_activity, self, self._t + (next(self._spawning_groups) and 0.4 or 2))
 end
 function GroupAIStateBesiege:assign_enemy_to_group_ai(unit, team_id)
 	local u_tracker = unit:movement():nav_tracker()
@@ -218,7 +218,7 @@ function GroupAIStateBesiege:_begin_new_tasks()
 		return
 	end
 	if assault_candidates and self._hunt_mode then
-		for criminal_key, criminal_data in pairs(self._criminals) do
+		for criminal_key, criminal_data in pairs(self._char_criminals) do
 			if not criminal_data.status then
 				local nav_seg = criminal_data.tracker:nav_segment()
 				local area = self:get_area_from_nav_seg_id(nav_seg)
@@ -270,7 +270,7 @@ function GroupAIStateBesiege:_begin_new_tasks()
 		end
 		if assault_candidates then
 			for criminal_key, _ in pairs(area.criminal.units) do
-				if not self._criminals[criminal_key].status then
+				if not self._criminals[criminal_key].status and not self._criminals[criminal_key].is_deployable then
 					table.insert(assault_candidates, area)
 				else
 				end
@@ -429,7 +429,7 @@ function GroupAIStateBesiege:_upd_assault_task()
 		end
 	end
 	local primary_target_area = task_data.target_areas[1]
-	if self:is_area_safe(primary_target_area) then
+	if self:is_area_safe_assault(primary_target_area) then
 		local target_pos = primary_target_area.pos
 		local nearest_area, nearest_dis
 		for criminal_key, criminal_data in pairs(self._player_criminals) do
@@ -499,7 +499,7 @@ function GroupAIStateBesiege:_verify_anticipation_spawn_point(sp_data)
 		return true
 	else
 		for criminal_key, c_data in pairs(self._criminals) do
-			if not c_data.status and mvector3.distance(sp_data.pos, c_data.m_pos) < 2500 and math.abs(sp_data.pos.z - c_data.m_pos.z) < 300 then
+			if not c_data.status and not c_data.is_deployable and mvector3.distance(sp_data.pos, c_data.m_pos) < 2500 and math.abs(sp_data.pos.z - c_data.m_pos.z) < 300 then
 				return
 			end
 		end
@@ -2375,15 +2375,19 @@ function GroupAIStateBesiege._create_objective_from_group_objective(grp_objectiv
 		end
 		objective.grp_objective = grp_objective
 		return
-	elseif grp_objective.type == "defend_area" or grp_objective.type == "recon_area" or grp_objective.type == "reenforce_area" or grp_objective.type == "retire" then
+	elseif grp_objective.type == "defend_area" or grp_objective.type == "recon_area" or grp_objective.type == "reenforce_area" then
 		objective.type = "defend_area"
 		objective.stance = "hos"
 		objective.pose = "crouch"
 		objective.scan = true
 		objective.interrupt_dis = 200
-		if grp_objective.type ~= "retire" then
-			objective.interrupt_suppression = true
-		end
+		objective.interrupt_suppression = true
+	elseif grp_objective.type == "retire" then
+		objective.type = "defend_area"
+		objective.stance = "hos"
+		objective.pose = "stand"
+		objective.scan = true
+		objective.interrupt_dis = 200
 	elseif grp_objective.type == "assault_area" then
 		objective.type = "defend_area"
 		if grp_objective.follow_unit then

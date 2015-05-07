@@ -264,6 +264,13 @@ function EquipmentsTweakData:init()
 		quantity = 4,
 		sync_possession = true
 	}
+	self.specials.c4_x10 = {
+		text_id = "hud_equipment_pickup_c4",
+		icon = "pd2_c4",
+		action_message = "c4_obtained",
+		quantity = 10,
+		sync_possession = true
+	}
 	self.specials.organs = {
 		text_id = "debug_equipment_organs",
 		icon = "equipment_thermite",
@@ -272,6 +279,11 @@ function EquipmentsTweakData:init()
 	self.specials.crowbar = {
 		text_id = "debug_equipment_crowbar",
 		icon = "equipment_crowbar",
+		sync_possession = true
+	}
+	self.specials.fire_extinguisher = {
+		text_id = "hud_int_equipment_fire_extinguisher",
+		icon = "equipment_thermite",
 		sync_possession = true
 	}
 	self.specials.blood_sample = {

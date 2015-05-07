@@ -858,7 +858,7 @@ function CharacterTweakData:_init_spooc(presets)
 	self.spooc.move_speed = presets.move_speed.lightning
 	self.spooc.no_retreat = true
 	self.spooc.no_arrest = true
-	self.spooc.damage.hurt_severity = presets.hurt_severities.only_light_hurt_and_fire
+	self.spooc.damage.hurt_severity = presets.hurt_severities.only_fire_hurts
 	self.spooc.surrender_break_time = {4, 6}
 	self.spooc.suppression = nil
 	self.spooc.surrender = presets.surrender.special
@@ -1334,6 +1334,7 @@ function CharacterTweakData:_init_old_hoxton_mission(presets)
 	self.old_hoxton_mission.melee_weapon = "fists"
 	self.old_hoxton_mission.melee_weapon_dmg_multiplier = 3
 	self.old_hoxton_mission.steal_loot = false
+	self.old_hoxton_mission.rescue_hostages = false
 end
 function CharacterTweakData:_init_russian(presets)
 	self.russian = {}
@@ -1638,6 +1639,32 @@ function CharacterTweakData:_presets(tweak_data)
 			health_reference = 1,
 			zones = {
 				{none = 1}
+			}
+		}
+	}
+	presets.hurt_severities.only_fire_hurts = {
+		bullet = {
+			health_reference = 1,
+			zones = {
+				{none = 1}
+			}
+		},
+		explosion = {
+			health_reference = 1,
+			zones = {
+				{none = 1}
+			}
+		},
+		melee = {
+			health_reference = 1,
+			zones = {
+				{none = 1}
+			}
+		},
+		fire = {
+			health_reference = 1,
+			zones = {
+				{fire = 1}
 			}
 		}
 	}

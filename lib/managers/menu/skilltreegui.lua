@@ -2608,6 +2608,10 @@ function SkillTreeGui:close()
 		self._spec_placing_tree = nil
 		managers.menu_component:post_event("count_1_finished")
 	end
+	if alive(self._disabled_panel) then
+		self._fullscreen_ws:panel():remove(self._disabled_panel)
+		self._disabled_panel = nil
+	end
 	WalletGuiObject.close_wallet(self._panel)
 	self._ws:panel():remove(self._panel)
 	self._fullscreen_ws:panel():remove(self._fullscreen_panel)
@@ -3707,7 +3711,7 @@ function SkillTreeGui:enter_text(o, s)
 	if self._renaming_skill_switch then
 		local m = tweak_data:get_raw_value("gui", "rename_skill_set_max_letters") or 15
 		local n = utf8.len(self._renaming_skill_switch)
-		s = s:sub(1, m - n)
+		s = utf8.sub(s, 1, m - n)
 		self._renaming_skill_switch = self._renaming_skill_switch .. tostring(s)
 		self:_update_rename_skill_switch()
 	end

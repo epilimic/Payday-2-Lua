@@ -17,12 +17,7 @@ function PlayerClean:_enter(enter_data)
 		self._unit:camera():play_redirect(self._ids_unequip)
 	end
 	self._unit:base():set_slot(self._unit, 4)
-	self._ext_movement:set_attention_settings({
-		"pl_mask_off_friend_combatant",
-		"pl_mask_off_friend_non_combatant",
-		"pl_mask_off_foe_combatant",
-		"pl_mask_off_foe_non_combatant"
-	})
+	self._ext_movement:set_attention_settings({"pl_clean"})
 	if not managers.groupai:state():enemy_weapons_hot() then
 		self._enemy_weapons_hot_listen_id = "PlayerClean" .. tostring(self._unit:key())
 		managers.groupai:state():add_listener(self._enemy_weapons_hot_listen_id, {

@@ -3329,4 +3329,16 @@ function DLCTweakData:init(tweak_data)
 			amount = 1
 		}
 	}
+	self.ach_melt_3 = {}
+	self.ach_melt_3.dlc = "has_achievement"
+	self.ach_melt_3.achievement_id = "melt_3"
+	self.ach_melt_3.content = {}
+	self.ach_melt_3.content.loot_global_value = "infamous"
+	self.ach_melt_3.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "grendel",
+			amount = 1
+		}
+	}
 end

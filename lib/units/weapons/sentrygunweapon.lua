@@ -98,6 +98,10 @@ function SentryGunWeapon:set_ammo(amount)
 	self._ammo_max = math.max(self._ammo_max, amount)
 end
 function SentryGunWeapon:_setup_contour()
+	local turret_units = managers.groupai:state():turrets()
+	if turret_units and table.contains(turret_units, self._unit) then
+		return
+	end
 	if self._unit:contour() and self:out_of_ammo() then
 		self._unit:contour():remove("deployable_active")
 		if managers.player:has_category_upgrade("sentry_gun", "can_reload") then
@@ -120,6 +124,7 @@ function SentryGunWeapon:change_ammo(amount)
 end
 function SentryGunWeapon:sync_ammo(ammo_ratio)
 	self._ammo_ratio = ammo_ratio * self._ammo_sync_resolution
+	self._unit:base():set_waiting_for_refill(false)
 	if self._unit:interaction() then
 		self._unit:interaction():set_dirty(true)
 	end
@@ -336,6 +341,7 @@ function SentryGunWeapon:_set_laser_state(state)
 			self._laser_unit:set_visible(false)
 		end
 	elseif alive(self._laser_unit) then
+		self._laser_unit:base():set_off()
 		self._laser_unit:set_slot(0)
 		self._laser_unit = nil
 	end

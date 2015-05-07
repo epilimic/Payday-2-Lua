@@ -937,7 +937,7 @@ function MenuManager:show_confirm_blackmarket_abort(params)
 	local dialog_data = {}
 	dialog_data.title = managers.localization:text("dialog_bm_mask_custom_abort")
 	dialog_data.text = managers.localization:text("dialog_blackmarket_abort_mask_warning")
-	dialog_data.focus_button = 1
+	dialog_data.focus_button = 2
 	local yes_button = {}
 	yes_button.text = managers.localization:text("dialog_yes")
 	yes_button.callback_func = params.yes_func

@@ -318,12 +318,20 @@ function Drill:_set_attention_state(state)
 			if self._attention_obj_name then
 				self._attention_handler:set_detection_object_name(self._attention_obj_name)
 			end
-			local attention_setting = PlayerMovement._create_attention_setting_from_descriptor(self, tweak_data.attention.settings.drill_civ_ene_ntl, "drill_civ_ene_ntl")
+			local descriptor = self._alert_radius and "drill_civ_ene_ntl" or "drill_silent_civ_ene_ntl"
+			local attention_setting = PlayerMovement._create_attention_setting_from_descriptor(self, tweak_data.attention.settings[descriptor], descriptor)
 			self._attention_handler:set_attention(attention_setting)
 		end
 	elseif self._attention_handler then
 		self._attention_handler:set_attention(nil)
 		self._attention_handler = nil
+	end
+end
+function Drill:update_attention_settings(descriptor)
+	local tweak_data = tweak_data.attention.settings[descriptor]
+	if tweak_data and self._attention_handler then
+		local attention_setting = PlayerMovement._create_attention_setting_from_descriptor(self, tweak_data, descriptor)
+		self._attention_handler:set_attention(attention_setting)
 	end
 end
 function Drill:clbk_enemy_weapons_hot()
@@ -440,7 +448,9 @@ function Drill:set_alert_radius(radius)
 			self:_register_investigate_SO()
 		end
 	else
+		self._alert_radius = nil
 		self:_unregister_investigate_SO()
+		self:update_attention_settings("drill_silent_civ_ene_ntl")
 	end
 end
 function Drill:_register_investigate_SO()
@@ -524,7 +534,7 @@ function Drill:clbk_investigate_SO_verification(candidate_unit)
 	local ray = self._unit:raycast("ray", candidate_listen_pos, sound_source_pos, "slot_mask", managers.slot:get_mask("AI_visibility"), "ray_type", "ai_vision", "report")
 	if ray then
 		local my_dis = mvector3.distance(candidate_listen_pos, sound_source_pos)
-		if my_dis > self._alert_radius * 0.5 then
+		if my_dis > (self._alert_radius or 900) * 0.5 then
 			return
 		end
 	end

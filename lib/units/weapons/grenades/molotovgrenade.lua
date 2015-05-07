@@ -14,6 +14,8 @@ function MolotovGrenade:_setup_from_tweak_data(grenade_entry)
 	self._curve_pow = self._tweak_data.curve_pow or 3
 	self._damage = self._tweak_data.damage
 	self._player_damage = self._tweak_data.player_damage
+	self._alert_radius = self._tweak_data.alert_radius
+	self._fire_alert_radius = self._tweak_data.fire_alert_radius
 	local sound_event = self._tweak_data.sound_event or "molotov_impact"
 	local sound_event_burning = self._tweak_data.sound_event_burning or "burn_loop_gen"
 	local sound_event_impact_duration = self._tweak_data.sound_event_impact_duration or 1
@@ -31,7 +33,6 @@ function MolotovGrenade:_setup_from_tweak_data(grenade_entry)
 	self._burn_tick_period = self._tweak_data.burn_tick_period
 	self._detonated = false
 	self._detonated_position = nil
-	self._user_timer = false
 	self._molotov_damage_effect_table = {}
 	self._initial_damage_done = false
 	self._damaged_bodies = {}
@@ -39,9 +40,6 @@ function MolotovGrenade:_setup_from_tweak_data(grenade_entry)
 end
 function MolotovGrenade:update(unit, t, dt)
 	MolotovGrenade.super.update(self, unit, t, dt)
-	if self._last_position ~= nil and self._detonated == false then
-		local raycast_collision = World:raycast(unit:position(), self._last_position, "ignore_unit", unit)
-	end
 	if self._detonated == true and self._burn_duration > 0 then
 		self._burn_duration = self._burn_duration - dt
 		self._burn_tick_temp_counter = self._burn_tick_temp_counter + dt
@@ -115,6 +113,7 @@ function MolotovGrenade:_do_damage()
 						ignore_unit = self._unit,
 						user = self._unit,
 						push_units = false,
+						alert_radius = self._fire_alert_radius,
 						fire_dot_data = fire_dot_data
 					})
 				end
@@ -138,6 +137,7 @@ function MolotovGrenade:detonate(normal)
 		curve_pow = 0.1,
 		damage = 3,
 		player_damage = 0,
+		alert_radius = self._alert_radius,
 		ignore_unit = managers.player:player_unit(),
 		user = self._unit
 	})
@@ -238,7 +238,6 @@ end
 function MolotovGrenade:_detonate(normal)
 	if self._detonated == false then
 		self:detonate(normal)
-		Application:debug(" ........................... MolotovGrenade:_detonate()   ", normal)
 		managers.network:session():send_to_peers_synched("sync_detonate_molotov_grenade", self._unit, "base", GrenadeBase.EVENT_IDS.detonate, normal)
 	end
 end

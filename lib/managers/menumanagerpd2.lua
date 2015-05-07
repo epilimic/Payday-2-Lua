@@ -60,7 +60,7 @@ function MenuManager:setup_local_lobby_character()
 	end
 	local_peer:set_outfit_string(managers.blackmarket:outfit_string())
 	managers.network:session():send_to_peers_loaded("sync_profile", level, rank)
-	managers.network:session():send_to_peers_loaded("sync_outfit", managers.blackmarket:outfit_string(), managers.network:session():local_peer():outfit_version())
+	managers.network:session():check_send_outfit()
 end
 function MenuManager:http_test()
 	Steam:http_request("http://www.overkillsoftware.com/?feed=rss", callback(self, self, "http_test_result"))
@@ -315,7 +315,7 @@ function MenuCallbackHandler:_update_outfit_information()
 			kit_menu.renderer:set_slot_outfit(id, criminal_name, outfit_string)
 		end
 		local_peer:set_outfit_string(outfit_string)
-		managers.network:session():send_to_peers_loaded("sync_outfit", outfit_string, local_peer:outfit_version())
+		managers.network:session():check_send_outfit()
 	end
 end
 function MenuCallbackHandler:buy_mask(item)

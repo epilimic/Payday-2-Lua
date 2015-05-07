@@ -114,7 +114,9 @@ function IngameWaitingForPlayersState:_start_delay()
 	self._delay_start_t = Application:time() + 1
 end
 function IngameWaitingForPlayersState:_audio_done(event_type, label, cookie)
-	self:_start_delay()
+	if Network:is_server() then
+		self:_start_delay()
+	end
 end
 function IngameWaitingForPlayersState:_briefing_callback(event_type, label, cookie)
 	print("[IngameWaitingForPlayersState]", "event_type", event_type, "label", label, "cookie", cookie)

@@ -261,6 +261,21 @@ function NarrativeTweakData:init()
 		1.2,
 		1.2
 	}
+	self.jobs.firestarter.contract_visuals = {}
+	self.jobs.firestarter.contract_visuals.min_mission_xp = {
+		30000,
+		30000,
+		30000,
+		30000,
+		30000
+	}
+	self.jobs.firestarter.contract_visuals.max_mission_xp = {
+		44000,
+		44000,
+		44000,
+		44000,
+		44000
+	}
 	self.jobs.firestarter_prof = deep_clone(self.jobs.firestarter)
 	self.jobs.firestarter_prof.jc = 60
 	self.jobs.firestarter_prof.professional = true
@@ -342,6 +357,21 @@ function NarrativeTweakData:init()
 		240000,
 		300000
 	}
+	self.jobs.alex.contract_visuals = {}
+	self.jobs.alex.contract_visuals.min_mission_xp = {
+		24000,
+		24000,
+		24000,
+		24000,
+		24000
+	}
+	self.jobs.alex.contract_visuals.max_mission_xp = {
+		96000,
+		96000,
+		96000,
+		96000,
+		96000
+	}
 	self.jobs.alex_prof = deep_clone(self.jobs.alex)
 	self.jobs.alex_prof.jc = 50
 	self.jobs.alex_prof.professional = true
@@ -404,6 +434,21 @@ function NarrativeTweakData:init()
 		50000,
 		90000,
 		150000
+	}
+	self.jobs.welcome_to_the_jungle_wrapper.contract_visuals = {}
+	self.jobs.welcome_to_the_jungle_wrapper.contract_visuals.min_mission_xp = {
+		34000,
+		34000,
+		34000,
+		34000,
+		34000
+	}
+	self.jobs.welcome_to_the_jungle_wrapper.contract_visuals.max_mission_xp = {
+		34000,
+		34000,
+		34000,
+		34000,
+		34000
 	}
 	self.jobs.welcome_to_the_jungle_wrapper_prof = deep_clone(self.jobs.welcome_to_the_jungle_wrapper)
 	self.jobs.welcome_to_the_jungle_wrapper_prof.job_wrapper = {
@@ -515,6 +560,21 @@ function NarrativeTweakData:init()
 		310000,
 		400000
 	}
+	self.jobs.framing_frame.contract_visuals = {}
+	self.jobs.framing_frame.contract_visuals.min_mission_xp = {
+		20000,
+		20000,
+		20000,
+		20000,
+		20000
+	}
+	self.jobs.framing_frame.contract_visuals.max_mission_xp = {
+		42000,
+		42000,
+		42000,
+		42000,
+		42000
+	}
 	self.jobs.framing_frame_prof = deep_clone(self.jobs.framing_frame)
 	self.jobs.framing_frame_prof.jc = 70
 	self.jobs.framing_frame_prof.professional = true
@@ -571,6 +631,21 @@ function NarrativeTweakData:init()
 		155000,
 		310000,
 		400000
+	}
+	self.jobs.watchdogs_wrapper.contract_visuals = {}
+	self.jobs.watchdogs_wrapper.contract_visuals.min_mission_xp = {
+		24000,
+		24000,
+		24000,
+		24000,
+		24000
+	}
+	self.jobs.watchdogs_wrapper.contract_visuals.max_mission_xp = {
+		40000,
+		40000,
+		40000,
+		40000,
+		40000
 	}
 	self.jobs.watchdogs_wrapper_prof = deep_clone(self.jobs.watchdogs_wrapper)
 	self.jobs.watchdogs_wrapper_prof.job_wrapper = {
@@ -666,6 +741,21 @@ function NarrativeTweakData:init()
 		160000,
 		200000
 	}
+	self.jobs.nightclub.contract_visuals = {}
+	self.jobs.nightclub.contract_visuals.min_mission_xp = {
+		8000,
+		8000,
+		8000,
+		8000,
+		8000
+	}
+	self.jobs.nightclub.contract_visuals.max_mission_xp = {
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
+	}
 	self.jobs.nightclub_prof = deep_clone(self.jobs.nightclub)
 	self.jobs.nightclub_prof.jc = 40
 	self.jobs.nightclub_prof.professional = true
@@ -710,6 +800,21 @@ function NarrativeTweakData:init()
 		23000,
 		25000,
 		30000
+	}
+	self.jobs.ukrainian_job.contract_visuals = {}
+	self.jobs.ukrainian_job.contract_visuals.min_mission_xp = {
+		4000,
+		4000,
+		4000,
+		4000,
+		4000
+	}
+	self.jobs.ukrainian_job.contract_visuals.max_mission_xp = {
+		10000,
+		10000,
+		10000,
+		10000,
+		10000
 	}
 	self.jobs.ukrainian_job_prof = deep_clone(self.jobs.ukrainian_job)
 	self.jobs.ukrainian_job_prof.jc = 20
@@ -776,6 +881,21 @@ function NarrativeTweakData:init()
 		40000,
 		100000
 	}
+	self.jobs.jewelry_store.contract_visuals = {}
+	self.jobs.jewelry_store.contract_visuals.min_mission_xp = {
+		2000,
+		2000,
+		2000,
+		2000,
+		2000
+	}
+	self.jobs.jewelry_store.contract_visuals.max_mission_xp = {
+		8000,
+		8000,
+		8000,
+		8000,
+		8000
+	}
 	self.jobs.jewelry_store_prof = deep_clone(self.jobs.jewelry_store)
 	self.jobs.jewelry_store_prof.jc = 20
 	self.jobs.jewelry_store_prof.professional = true
@@ -827,6 +947,21 @@ function NarrativeTweakData:init()
 		80000,
 		100000
 	}
+	self.jobs.four_stores.contract_visuals = {}
+	self.jobs.four_stores.contract_visuals.min_mission_xp = {
+		6000,
+		6000,
+		6000,
+		6000,
+		6000
+	}
+	self.jobs.four_stores.contract_visuals.max_mission_xp = {
+		6000,
+		6000,
+		6000,
+		6000,
+		6000
+	}
 	self.jobs.four_stores_prof = deep_clone(self.jobs.four_stores)
 	self.jobs.four_stores_prof.jc = 20
 	self.jobs.four_stores_prof.professional = true
@@ -877,6 +1012,21 @@ function NarrativeTweakData:init()
 		40000,
 		80000,
 		100000
+	}
+	self.jobs.mallcrasher.contract_visuals = {}
+	self.jobs.mallcrasher.contract_visuals.min_mission_xp = {
+		6000,
+		6000,
+		6000,
+		6000,
+		6000
+	}
+	self.jobs.mallcrasher.contract_visuals.max_mission_xp = {
+		6000,
+		6000,
+		6000,
+		6000,
+		6000
 	}
 	self.jobs.mallcrasher_prof = deep_clone(self.jobs.mallcrasher)
 	self.jobs.mallcrasher_prof.jc = 30
@@ -934,6 +1084,21 @@ function NarrativeTweakData:init()
 		80000,
 		160000,
 		200000
+	}
+	self.jobs.branchbank.contract_visuals = {}
+	self.jobs.branchbank.contract_visuals.min_mission_xp = {
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
+	}
+	self.jobs.branchbank.contract_visuals.max_mission_xp = {
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
 	}
 	self.jobs.branchbank_prof = deep_clone(self.jobs.branchbank)
 	self.jobs.branchbank_prof.jc = 30
@@ -999,6 +1164,21 @@ function NarrativeTweakData:init()
 		80000,
 		160000,
 		200000
+	}
+	self.jobs.branchbank_deposit.contract_visuals = {}
+	self.jobs.branchbank_deposit.contract_visuals.min_mission_xp = {
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
+	}
+	self.jobs.branchbank_deposit.contract_visuals.max_mission_xp = {
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
 	}
 	self.jobs.branchbank_deposit_prof = deep_clone(self.jobs.branchbank_deposit)
 	self.jobs.branchbank_deposit_prof.jc = 30
@@ -1066,6 +1246,21 @@ function NarrativeTweakData:init()
 		160000,
 		200000
 	}
+	self.jobs.branchbank_cash.contract_visuals = {}
+	self.jobs.branchbank_cash.contract_visuals.min_mission_xp = {
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
+	}
+	self.jobs.branchbank_cash.contract_visuals.max_mission_xp = {
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
+	}
 	self.jobs.branchbank_cash_prof = deep_clone(self.jobs.branchbank_cash)
 	self.jobs.branchbank_cash_prof.jc = 30
 	self.jobs.branchbank_cash_prof.professional = true
@@ -1131,6 +1326,21 @@ function NarrativeTweakData:init()
 		80000,
 		160000,
 		200000
+	}
+	self.jobs.branchbank_gold.contract_visuals = {}
+	self.jobs.branchbank_gold.contract_visuals.min_mission_xp = {
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
+	}
+	self.jobs.branchbank_gold.contract_visuals.max_mission_xp = {
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
 	}
 	self.jobs.branchbank_gold_prof = deep_clone(self.jobs.branchbank_gold)
 	self.jobs.branchbank_gold_prof.jc = 30
@@ -1215,6 +1425,21 @@ function NarrativeTweakData:init()
 		120000,
 		240000,
 		300000
+	}
+	self.jobs.election_day.contract_visuals = {}
+	self.jobs.election_day.contract_visuals.min_mission_xp = {
+		10000,
+		10000,
+		10000,
+		10000,
+		10000
+	}
+	self.jobs.election_day.contract_visuals.max_mission_xp = {
+		44000,
+		44000,
+		44000,
+		44000,
+		44000
 	}
 	self.jobs.election_day_prof = deep_clone(self.jobs.election_day)
 	self.jobs.election_day_prof.jc = 50
@@ -1343,6 +1568,21 @@ function NarrativeTweakData:init()
 	}
 	self.jobs.arm_cro.dlc = "armored_transport"
 	self.jobs.arm_cro.spawn_chance_multiplier = 0.5
+	self.jobs.arm_cro.contract_visuals = {}
+	self.jobs.arm_cro.contract_visuals.min_mission_xp = {
+		8000,
+		8000,
+		8000,
+		8000,
+		8000
+	}
+	self.jobs.arm_cro.contract_visuals.max_mission_xp = {
+		8000,
+		8000,
+		8000,
+		8000,
+		8000
+	}
 	self.jobs.arm_cro_prof = deep_clone(self.jobs.arm_cro)
 	self.jobs.arm_cro_prof.jc = 30
 	self.jobs.arm_cro_prof.professional = true
@@ -1395,6 +1635,21 @@ function NarrativeTweakData:init()
 	}
 	self.jobs.arm_und.dlc = "armored_transport"
 	self.jobs.arm_und.spawn_chance_multiplier = 0.5
+	self.jobs.arm_und.contract_visuals = {}
+	self.jobs.arm_und.contract_visuals.min_mission_xp = {
+		8000,
+		8000,
+		8000,
+		8000,
+		8000
+	}
+	self.jobs.arm_und.contract_visuals.max_mission_xp = {
+		8000,
+		8000,
+		8000,
+		8000,
+		8000
+	}
 	self.jobs.arm_und_prof = deep_clone(self.jobs.arm_und)
 	self.jobs.arm_und_prof.jc = 30
 	self.jobs.arm_und_prof.professional = true
@@ -1447,6 +1702,21 @@ function NarrativeTweakData:init()
 	}
 	self.jobs.arm_hcm.dlc = "armored_transport"
 	self.jobs.arm_hcm.spawn_chance_multiplier = 0.5
+	self.jobs.arm_hcm.contract_visuals = {}
+	self.jobs.arm_hcm.contract_visuals.min_mission_xp = {
+		8000,
+		8000,
+		8000,
+		8000,
+		8000
+	}
+	self.jobs.arm_hcm.contract_visuals.max_mission_xp = {
+		8000,
+		8000,
+		8000,
+		8000,
+		8000
+	}
 	self.jobs.arm_hcm_prof = deep_clone(self.jobs.arm_hcm)
 	self.jobs.arm_hcm_prof.jc = 30
 	self.jobs.arm_hcm_prof.professional = true
@@ -1499,6 +1769,21 @@ function NarrativeTweakData:init()
 	}
 	self.jobs.arm_par.dlc = "armored_transport"
 	self.jobs.arm_par.spawn_chance_multiplier = 0.5
+	self.jobs.arm_par.contract_visuals = {}
+	self.jobs.arm_par.contract_visuals.min_mission_xp = {
+		8000,
+		8000,
+		8000,
+		8000,
+		8000
+	}
+	self.jobs.arm_par.contract_visuals.max_mission_xp = {
+		8000,
+		8000,
+		8000,
+		8000,
+		8000
+	}
 	self.jobs.arm_par_prof = deep_clone(self.jobs.arm_par)
 	self.jobs.arm_par_prof.jc = 40
 	self.jobs.arm_par_prof.professional = true
@@ -1551,6 +1836,21 @@ function NarrativeTweakData:init()
 	}
 	self.jobs.arm_fac.dlc = "armored_transport"
 	self.jobs.arm_fac.spawn_chance_multiplier = 0.5
+	self.jobs.arm_fac.contract_visuals = {}
+	self.jobs.arm_fac.contract_visuals.min_mission_xp = {
+		8000,
+		8000,
+		8000,
+		8000,
+		8000
+	}
+	self.jobs.arm_fac.contract_visuals.max_mission_xp = {
+		8000,
+		8000,
+		8000,
+		8000,
+		8000
+	}
 	self.jobs.arm_fac_prof = deep_clone(self.jobs.arm_fac)
 	self.jobs.arm_fac_prof.jc = 30
 	self.jobs.arm_fac_prof.professional = true
@@ -1573,9 +1873,9 @@ function NarrativeTweakData:init()
 	self.jobs.arm_for.briefing_event = "pln_tr1b_cbf_01"
 	self.jobs.arm_for.debrief_event = nil
 	self.jobs.arm_for.crimenet_callouts = {
-		"pln_tr1b_cnc_01",
-		"pln_tr1b_cnc_01",
-		"pln_tr1b_cnc_01"
+		"pln_tr1b_cnc_01_01",
+		"pln_tr1b_cnc_01_02",
+		"pln_tr1b_cnc_01_03"
 	}
 	self.jobs.arm_for.crimenet_videos = {
 		"cn_jewel1",
@@ -1604,6 +1904,21 @@ function NarrativeTweakData:init()
 		400000
 	}
 	self.jobs.arm_for.dlc = "armored_transport"
+	self.jobs.arm_for.contract_visuals = {}
+	self.jobs.arm_for.contract_visuals.min_mission_xp = {
+		8000,
+		8000,
+		8000,
+		8000,
+		8000
+	}
+	self.jobs.arm_for.contract_visuals.max_mission_xp = {
+		8000,
+		8000,
+		8000,
+		8000,
+		8000
+	}
 	self.jobs.arm_for_prof = deep_clone(self.jobs.arm_for)
 	self.jobs.arm_for_prof.jc = 70
 	self.jobs.arm_for_prof.professional = true
@@ -1649,6 +1964,21 @@ function NarrativeTweakData:init()
 		235000,
 		470000,
 		600000
+	}
+	self.jobs.rat.contract_visuals = {}
+	self.jobs.rat.contract_visuals.min_mission_xp = {
+		16000,
+		16000,
+		16000,
+		16000,
+		16000
+	}
+	self.jobs.rat.contract_visuals.max_mission_xp = {
+		9600000,
+		9600000,
+		9600000,
+		9600000,
+		9600000
 	}
 	self.jobs.family = {}
 	self.jobs.family.name_id = "heist_family"
@@ -1696,6 +2026,21 @@ function NarrativeTweakData:init()
 		1.5,
 		1.5,
 		1.5
+	}
+	self.jobs.family.contract_visuals = {}
+	self.jobs.family.contract_visuals.min_mission_xp = {
+		4000,
+		4000,
+		4000,
+		4000,
+		4000
+	}
+	self.jobs.family.contract_visuals.max_mission_xp = {
+		14000,
+		14000,
+		14000,
+		14000,
+		14000
 	}
 	self.jobs.family_prof = deep_clone(self.jobs.family)
 	self.jobs.family_prof.jc = 50
@@ -1751,6 +2096,21 @@ function NarrativeTweakData:init()
 		600000
 	}
 	self.jobs.big.dlc = "big_bank"
+	self.jobs.big.contract_visuals = {}
+	self.jobs.big.contract_visuals.min_mission_xp = {
+		24000,
+		24000,
+		24000,
+		24000,
+		24000
+	}
+	self.jobs.big.contract_visuals.max_mission_xp = {
+		38000,
+		38000,
+		38000,
+		38000,
+		38000
+	}
 	self.jobs.big_prof = deep_clone(self.jobs.big)
 	self.jobs.big_prof.jc = 60
 	self.jobs.big_prof.professional = true
@@ -1808,6 +2168,21 @@ function NarrativeTweakData:init()
 		120000,
 		240000,
 		300000
+	}
+	self.jobs.roberts.contract_visuals = {}
+	self.jobs.roberts.contract_visuals.min_mission_xp = {
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
+	}
+	self.jobs.roberts.contract_visuals.max_mission_xp = {
+		18000,
+		18000,
+		18000,
+		18000,
+		18000
 	}
 	self.jobs.roberts_prof = deep_clone(self.jobs.roberts)
 	self.jobs.roberts_prof.jc = 40
@@ -1911,6 +2286,21 @@ function NarrativeTweakData:init()
 		1.5,
 		1.8
 	}
+	self.jobs.kosugi.contract_visuals = {}
+	self.jobs.kosugi.contract_visuals.min_mission_xp = {
+		4000,
+		4000,
+		4000,
+		4000,
+		4000
+	}
+	self.jobs.kosugi.contract_visuals.max_mission_xp = {
+		70000,
+		70000,
+		70000,
+		70000,
+		70000
+	}
 	self.jobs.kosugi_prof = deep_clone(self.jobs.kosugi)
 	self.jobs.kosugi_prof.jc = 40
 	self.jobs.kosugi_prof.professional = true
@@ -1941,7 +2331,7 @@ function NarrativeTweakData:init()
 		}
 	}
 	self.jobs.mia.briefing_event = "dentist_hm1_cnc_01"
-	self.jobs.mia.debrief_event = "dentist_hm1_debrief"
+	self.jobs.mia.debrief_event = "Play_pln_hm1_end_01"
 	self.jobs.mia.crimenet_callouts = {
 		"dentist_hm1_cnc_01",
 		"dentist_hm1_cnc_01",
@@ -1976,6 +2366,21 @@ function NarrativeTweakData:init()
 		1.4,
 		1.4,
 		1.4
+	}
+	self.jobs.mia.contract_visuals = {}
+	self.jobs.mia.contract_visuals.min_mission_xp = {
+		46000,
+		46000,
+		46000,
+		46000,
+		46000
+	}
+	self.jobs.mia.contract_visuals.max_mission_xp = {
+		68000,
+		68000,
+		68000,
+		68000,
+		68000
 	}
 	self.jobs.mia_prof = deep_clone(self.jobs.mia)
 	self.jobs.mia_prof.jc = 70
@@ -2043,6 +2448,21 @@ function NarrativeTweakData:init()
 		200000
 	}
 	self.jobs.gallery.dlc = "pd2_clan"
+	self.jobs.gallery.contract_visuals = {}
+	self.jobs.gallery.contract_visuals.min_mission_xp = {
+		2000,
+		2000,
+		2000,
+		2000,
+		2000
+	}
+	self.jobs.gallery.contract_visuals.max_mission_xp = {
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
+	}
 	self.jobs.gallery_prof = deep_clone(self.jobs.gallery)
 	self.jobs.gallery_prof.jc = 40
 	self.jobs.gallery_prof.professional = true
@@ -2107,6 +2527,21 @@ function NarrativeTweakData:init()
 		310000,
 		620000,
 		800000
+	}
+	self.jobs.hox.contract_visuals = {}
+	self.jobs.hox.contract_visuals.min_mission_xp = {
+		46000,
+		46000,
+		46000,
+		46000,
+		46000
+	}
+	self.jobs.hox.contract_visuals.max_mission_xp = {
+		46000,
+		46000,
+		46000,
+		46000,
+		46000
 	}
 	self.jobs.hox_prof = deep_clone(self.jobs.hox)
 	self.jobs.hox_prof.jc = 70
@@ -2179,6 +2614,21 @@ function NarrativeTweakData:init()
 		240000,
 		300000
 	}
+	self.jobs.pines.contract_visuals = {}
+	self.jobs.pines.contract_visuals.min_mission_xp = {
+		8000,
+		8000,
+		8000,
+		8000,
+		8000
+	}
+	self.jobs.pines.contract_visuals.max_mission_xp = {
+		4808000,
+		4808000,
+		4808000,
+		4808000,
+		4808000
+	}
 	self.jobs.pines_prof = deep_clone(self.jobs.pines)
 	self.jobs.pines_prof.jc = 70
 	self.jobs.pines_prof.professional = true
@@ -2248,6 +2698,21 @@ function NarrativeTweakData:init()
 		620000,
 		800000
 	}
+	self.jobs.mus.contract_visuals = {}
+	self.jobs.mus.contract_visuals.min_mission_xp = {
+		16000,
+		16000,
+		16000,
+		16000,
+		16000
+	}
+	self.jobs.mus.contract_visuals.max_mission_xp = {
+		32000,
+		32000,
+		32000,
+		32000,
+		32000
+	}
 	self.jobs.mus_prof = deep_clone(self.jobs.mus)
 	self.jobs.mus_prof.jc = 70
 	self.jobs.mus_prof.professional = true
@@ -2312,6 +2777,21 @@ function NarrativeTweakData:init()
 		80000,
 		160000,
 		200000
+	}
+	self.jobs.cage.contract_visuals = {}
+	self.jobs.cage.contract_visuals.min_mission_xp = {
+		10000,
+		10000,
+		10000,
+		10000,
+		10000
+	}
+	self.jobs.cage.contract_visuals.max_mission_xp = {
+		10000,
+		10000,
+		10000,
+		10000,
+		10000
 	}
 	self.jobs.cage_prof = deep_clone(self.jobs.cage)
 	self.jobs.cage_prof.jc = 70
@@ -2378,6 +2858,21 @@ function NarrativeTweakData:init()
 		620000,
 		800000
 	}
+	self.jobs.hox_3.contract_visuals = {}
+	self.jobs.hox_3.contract_visuals.min_mission_xp = {
+		16000,
+		16000,
+		16000,
+		16000,
+		16000
+	}
+	self.jobs.hox_3.contract_visuals.max_mission_xp = {
+		20000,
+		20000,
+		20000,
+		20000,
+		20000
+	}
 	self.jobs.crojob1 = {}
 	self.jobs.crojob1.name_id = "heist_crojob1"
 	self.jobs.crojob1.briefing_id = "heist_crojob1_crimenet"
@@ -2429,6 +2924,21 @@ function NarrativeTweakData:init()
 		1.1
 	}
 	self.jobs.crojob1.dlc = "the_bomb"
+	self.jobs.crojob1.contract_visuals = {}
+	self.jobs.crojob1.contract_visuals.min_mission_xp = {
+		10000,
+		10000,
+		10000,
+		10000,
+		10000
+	}
+	self.jobs.crojob1.contract_visuals.max_mission_xp = {
+		15000,
+		15000,
+		15000,
+		15000,
+		15000
+	}
 	self.jobs.crojob1_prof = deep_clone(self.jobs.crojob1)
 	self.jobs.crojob1_prof.jc = 70
 	self.jobs.crojob1_prof.professional = true
@@ -2501,7 +3011,76 @@ function NarrativeTweakData:init()
 		620000,
 		800000
 	}
+	self.jobs.crojob_wrapper.contract_visuals = {}
+	self.jobs.crojob_wrapper.contract_visuals.min_mission_xp = {
+		20000,
+		20000,
+		20000,
+		20000,
+		20000
+	}
+	self.jobs.crojob_wrapper.contract_visuals.max_mission_xp = {
+		20000,
+		20000,
+		20000,
+		20000,
+		20000
+	}
 	self.jobs.crojob_wrapper.dlc = "the_bomb"
+	self.jobs.shoutout_raid = {}
+	self.jobs.shoutout_raid.name_id = "heist_shoutout_raid"
+	self.jobs.shoutout_raid.briefing_id = "heist_shoutout_raid_crimenet"
+	self.jobs.shoutout_raid.contact = "vlad"
+	self.jobs.shoutout_raid.region = "street"
+	self.jobs.shoutout_raid.jc = 30
+	self.jobs.shoutout_raid.chain = {
+		{
+			level_id = "shoutout_raid",
+			type_id = "heist_type_assault",
+			type = "d"
+		}
+	}
+	self.jobs.shoutout_raid.briefing_event = "vld_ko1b_cbf_01_01"
+	self.jobs.shoutout_raid.debrief_event = nil
+	self.jobs.shoutout_raid.crimenet_callouts = {
+		"vld_ko1b_cnc_01_01",
+		"vld_ko1b_cnc_01_02",
+		"vld_ko1b_cnc_01_03"
+	}
+	self.jobs.shoutout_raid.crimenet_videos = {
+		"cn_jewel1",
+		"cn_jewel2",
+		"cn_jewel3"
+	}
+	self.jobs.shoutout_raid.payout = {
+		26000,
+		37000,
+		81000,
+		101000,
+		202000
+	}
+	self.jobs.shoutout_raid.contract_cost = {
+		62000,
+		124000,
+		310000,
+		620000,
+		800000
+	}
+	self.jobs.shoutout_raid.contract_visuals = {}
+	self.jobs.shoutout_raid.contract_visuals.min_mission_xp = {
+		20000,
+		20000,
+		20000,
+		20000,
+		20000
+	}
+	self.jobs.shoutout_raid.contract_visuals.max_mission_xp = {
+		36000,
+		36000,
+		36000,
+		36000,
+		36000
+	}
 	self.jobs.crojob2 = {}
 	self.jobs.crojob2.package = "packages/job_crojob"
 	self.jobs.crojob2.chain = {
@@ -2571,7 +3150,8 @@ function NarrativeTweakData:init()
 		"crojob_wrapper",
 		"crojob2",
 		"crojob2_night",
-		"rat"
+		"rat",
+		"shoutout_raid"
 	}
 	self:set_job_wrappers()
 end

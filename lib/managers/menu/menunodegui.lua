@@ -240,8 +240,8 @@ function MenuNodeGui:_create_legends(node)
 	end
 	local text = self._legends_panel:text({
 		text = t_text,
-		font = self.font,
-		font_size = self.font_size,
+		font = self.legends_font or self.font,
+		font_size = self.legends_font_size or self.font_size,
 		color = self.color,
 		layer = self.layers.items
 	})

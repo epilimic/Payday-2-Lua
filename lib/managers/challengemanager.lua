@@ -91,6 +91,13 @@ function ChallengeManager:_fetch_done_clbk(success, s)
 		self._global.validated = true
 	end
 end
+function ChallengeManager:debug_activate_all()
+	if Application:production_build() then
+		for key, challenge in pairs(self._global.challenges) do
+			self:activate_challenge(challenge.id, key, "debug")
+		end
+	end
+end
 function ChallengeManager:_load_challenges_from_xml()
 	local list = PackageManager:script_data(self.FILE_EXTENSION:id(), self.PATH:id())
 	local objectives, rewards
@@ -318,6 +325,17 @@ function ChallengeManager:save(data)
 	local save_data = {}
 	save_data.active_challenges = deep_clone(self._global.active_challenges)
 	save_data.visited_crimenet = self._global.visited_crimenet
+	if Application:production_build() then
+		local debug_list = {}
+		for key, challenge in pairs(save_data.active_challenges) do
+			if challenge.category == "debug" then
+				table.insert(debug_list, key)
+			end
+		end
+		for _, key in ipairs(debug_list) do
+			save_data.active_challenges[key] = nil
+		end
+	end
 	data.ChallengeManager = save_data
 end
 function ChallengeManager:load(data, version)

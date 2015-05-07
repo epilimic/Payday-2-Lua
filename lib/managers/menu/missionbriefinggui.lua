@@ -2478,7 +2478,8 @@ function MissionBriefingGui:init(saferect_ws, fullrect_ws, node)
 		font = tweak_data.menu.pd2_large_font,
 		color = tweak_data.screen_colors.button_stage_3,
 		layer = 2,
-		blend_mode = "add"
+		blend_mode = "add",
+		rotation = 360
 	})
 	local _, _, w, h = self._ready_button:text_rect()
 	self._ready_button:set_size(w, h)
@@ -2503,7 +2504,8 @@ function MissionBriefingGui:init(saferect_ws, fullrect_ws, node)
 		font = tweak_data.menu.pd2_massive_font,
 		color = tweak_data.screen_colors.button_stage_3,
 		alpha = 0.4,
-		layer = 1
+		layer = 1,
+		rotation = 360
 	})
 	local _, _, w, h = big_text:text_rect()
 	big_text:set_size(w, h)
@@ -2651,7 +2653,7 @@ function MissionBriefingGui:flash_ready()
 		end)
 		o:set_color(color)
 		o:set_font_size(font_size)
-		o:set_rotation(0)
+		o:set_rotation(360)
 	end
 	self._ready_button:animate(animate_flash_ready)
 end

@@ -10,8 +10,10 @@ ZipLine.NET_EVENTS.remove_user = 5
 ZipLine.NET_EVENTS.request_attach_bag = 6
 ZipLine.NET_EVENTS.attach_bag_denied = 7
 ZipLine.NET_EVENTS.attach_bag_granted = 8
+local ids_rope_obj = Idstring("rope")
 function ZipLine:init(unit)
 	self._unit = unit
+	self._rope_obj = unit:get_object(ids_rope_obj)
 	self:set_usage_type(self._usage_type or "person")
 	self._wire_brush = Draw:brush(Color.black:with_alpha(1))
 	self._current_time = 0
@@ -77,9 +79,6 @@ function ZipLine:_update_sled(t, dt)
 	end
 	self._dirty = self._current_time ~= current_time or self._dirty
 	self:_check_dirty()
-	self._wire_brush:cylinder(self._sled_data.tip1, self._sled_data.tip2, 1, 8)
-	self._wire_brush:cylinder(self._line_data.start_pos, self._sled_data.tip1, 1, 8)
-	self._wire_brush:cylinder(self._sled_data.tip2, self._line_data.end_pos, 1, 8)
 	if self._synced_user and alive(self._user_unit) and self._sled_data.object then
 		local pos = self._sled_data.object:position() + self._sled_data.object:rotation():z() * -22
 		self._wire_brush:cylinder(pos, pos + math.UP * -100, 1)
@@ -122,6 +121,12 @@ function ZipLine:_check_dirty()
 	mvector3.multiply(self._sled_data.tip2, len)
 	mvector3.add(self._sled_data.tip2, self._sled_data.pos)
 	self:_update_sled_object()
+	self._rope_obj:set_control_points({
+		self._line_data.start_pos,
+		self._sled_data.tip1,
+		self._sled_data.tip2,
+		self._line_data.end_pos
+	})
 end
 function ZipLine:_update_sled_object()
 	if self._sled_data.object then

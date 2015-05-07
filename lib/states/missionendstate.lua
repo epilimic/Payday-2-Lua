@@ -352,6 +352,7 @@ function MissionEndState:at_enter(old_state, params)
 		self._bonuses = bonuses
 		self:completion_bonus_done(total_xp_bonus)
 		managers.job:clear_saved_ghost_bonus()
+		managers.experience:mission_xp_process(self._success, managers.job:on_last_stage())
 		ghost_bonus = managers.job:accumulate_ghost_bonus(ghost_bonus)
 	end
 	if self._success then

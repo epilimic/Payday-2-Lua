@@ -1,6 +1,7 @@
 require("lib/managers/group_ai_states/GroupAIStateBase")
 require("lib/managers/group_ai_states/GroupAIStateEmpty")
 require("lib/managers/group_ai_states/GroupAIStateBesiege")
+require("lib/managers/group_ai_states/GroupAIStateStreet")
 GroupAIManager = GroupAIManager or class()
 function GroupAIManager:init()
 	self:set_state("empty")
@@ -14,14 +15,10 @@ end
 function GroupAIManager:set_state(name)
 	if name == "empty" then
 		self._state = GroupAIStateEmpty:new()
-	elseif name == "besiege" then
-		self._state = GroupAIStateBesiege:new()
 	elseif name == "street" then
 		self._state = GroupAIStateStreet:new()
-	elseif name == "airport" then
-		self._state = GroupAIStateAirport:new()
-	elseif name == "zombie_apocalypse" then
-		self._state = GroupAIStateZombieApocalypse:new()
+	elseif name == "besiege" or name == "airport" or name == "zombie_apocalypse" then
+		self._state = GroupAIStateBesiege:new()
 	else
 		Application:error("[GroupAIManager:set_state] inexistent state name", name)
 		return

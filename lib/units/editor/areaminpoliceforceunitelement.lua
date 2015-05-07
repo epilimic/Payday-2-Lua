@@ -14,8 +14,8 @@ function AreaMinPoliceForceUnitElement:_build_panel(panel, panel_sizer)
 		sizer = panel_sizer,
 		value = self._hed.amount,
 		floats = 0,
-		tooltip = "Set amount of enemy forces in area",
-		min = 1,
+		tooltip = "Set amount of enemy forces in area. Use 0 to define dynamic spawn area for \"street\" GroupAI.",
+		min = 0,
 		name_proportions = 1,
 		ctrlr_proportions = 2
 	}

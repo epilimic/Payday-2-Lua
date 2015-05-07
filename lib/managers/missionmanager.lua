@@ -52,7 +52,6 @@ require("lib/managers/mission/ElementSmokeGrenade")
 require("lib/managers/mission/ElementDisableShout")
 require("lib/managers/mission/ElementSetOutline")
 require("lib/managers/mission/ElementExplosionDamage")
-require("lib/managers/mission/ElementSequenceCharacter")
 require("lib/managers/mission/ElementPlayerStyle")
 require("lib/managers/mission/ElementDropinState")
 require("lib/managers/mission/ElementBainState")
@@ -87,12 +86,17 @@ require("lib/managers/mission/ElementCharacterTeam")
 require("lib/managers/mission/ElementTeamRelation")
 require("lib/managers/mission/ElementSlowMotion")
 require("lib/managers/mission/ElementInteraction")
+require("lib/managers/mission/ElementCharacterSequence")
+require("lib/managers/mission/ElementExperience")
 require("lib/managers/mission/ElementPlayerSpawner")
 require("lib/managers/mission/ElementAreaTrigger")
 require("lib/managers/mission/ElementSpawnEnemyDummy")
 require("lib/managers/mission/ElementEnemyDummyTrigger")
+require("lib/managers/mission/ElementMotionpathMarker")
 require("lib/managers/mission/ElementVehicleTrigger")
 require("lib/managers/mission/ElementVehicleOperator")
+require("lib/managers/mission/ElementVehicleSpawner")
+require("lib/managers/mission/ElementEnvironmentOperator")
 MissionManager = MissionManager or class(CoreMissionManager.MissionManager)
 function MissionManager:init(...)
 	MissionManager.super.init(self, ...)
@@ -107,7 +111,7 @@ function MissionManager:init(...)
 	self:add_area_instigator_categories("loot")
 	self:add_area_instigator_categories("unique_loot")
 	self:add_area_instigator_categories("vehicle")
-	self:add_area_instigator_categories("vehicle_or_player")
+	self:add_area_instigator_categories("vehicle_with_players")
 	self:set_default_area_instigator("player")
 	self:set_global_event_list({
 		"bankmanager_key",
@@ -140,7 +144,8 @@ function MissionManager:init(...)
 		"hotel_room_key",
 		"pku_evidence_bag",
 		"ecm_jammer_on",
-		"ecm_jammer_off"
+		"ecm_jammer_off",
+		"pku_warhead"
 	})
 	self._mission_filter = {}
 	if not Global.mission_manager then

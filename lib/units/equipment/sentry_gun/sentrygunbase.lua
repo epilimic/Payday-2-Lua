@@ -33,6 +33,10 @@ function SentryGunBase:is_owner()
 	return self._owner_id and self._owner_id == managers.network:session():local_peer():id()
 end
 function SentryGunBase:_setup_contour()
+	local turret_units = managers.groupai:state():turrets()
+	if turret_units and table.contains(turret_units, self._unit) then
+		return
+	end
 	if managers.player:has_category_upgrade("sentry_gun", "can_reload") then
 		self._unit:contour():add("deployable_interactable")
 	elseif self:is_owner() then
@@ -111,6 +115,8 @@ function SentryGunBase:activate_as_module(team_type, tweak_table_id)
 	self._unit:brain():setup(1)
 	self._unit:brain():on_activated(tweak_table_id)
 	self._unit:brain():set_active(true)
+	self._is_module = true
+	managers.groupai:state():register_turret(self._unit)
 end
 function SentryGunBase:get_name_id()
 	return self._tweak_table_id
@@ -342,11 +348,19 @@ function SentryGunBase:refill(ammo_ratio)
 		local ammo_total = self._unit:weapon():ammo_total()
 		local ammo_max = self._unit:weapon():ammo_max()
 		self._unit:weapon():change_ammo(math.ceil(ammo_max * ammo_ratio))
+	else
+		self:set_waiting_for_refill(true)
 	end
 	self._unit:brain():switch_on()
 	self._unit:interaction():set_dirty(true)
 	self:_setup_contour()
 	self._unit:contour():remove("deployable_disabled")
+end
+function SentryGunBase:set_waiting_for_refill(state)
+	self._waiting_for_refill = state and true or nil
+end
+function SentryGunBase:waiting_for_refill()
+	return self._waiting_for_refill
 end
 function SentryGunBase:on_death()
 	if self._unit:contour() then
@@ -380,11 +394,19 @@ function SentryGunBase:save(save_data)
 	local my_save_data = {}
 	save_data.base = my_save_data
 	my_save_data.tweak_table_id = self._tweak_table_id
+	my_save_data.is_module = self._is_module
 end
 function SentryGunBase:load(save_data)
 	self._was_dropin = true
 	local my_save_data = save_data.base
 	self._tweak_table_id = my_save_data.tweak_table_id
+	self._is_module = my_save_data.is_module
+	if self._is_module then
+		local turret_units = managers.groupai:state():turrets()
+		if not turret_units or not table.contains(turret_units, self._unit) then
+			managers.groupai:state():register_turret(self._unit)
+		end
+	end
 end
 function SentryGunBase:pre_destroy()
 	SentryGunBase.super.pre_destroy(self, self._unit)

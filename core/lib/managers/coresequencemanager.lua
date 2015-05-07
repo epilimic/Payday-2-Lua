@@ -60,6 +60,7 @@ function SequenceManager:init(area_damage_mask, target_world_mask, beings_mask)
 		self:register_event_element_class(SoundElement)
 	end
 	self:register_event_element_class(SpawnUnitElement)
+	self:register_event_element_class(StopEffectElement)
 	self:register_event_element_class(StopPhysicEffectElement)
 	self:register_event_element_class(TriggerElement)
 	self._filter_element_class_map = {}
@@ -3385,6 +3386,7 @@ function EffectElement:init(node, unit_element)
 	self._align = self:get("align")
 	self._velocity = self:get("velocity")
 	self._parent = self:get("parent")
+	self._store_id_list_var = self:get("store_id_list_var")
 	self._param_list = {}
 	for i = 1, 5 do
 		local param = self:get("param" .. i)
@@ -3435,7 +3437,19 @@ function EffectElement:activate_callback(env)
 		if Application:editor() then
 			CoreEngineAccess._editor_load(Idstring("effect"), param_map.effect)
 		end
-		World:effect_manager():spawn(param_map)
+		local id = World:effect_manager():spawn(param_map)
+		local store_id_list_var = self:run_parsed_func(env, self._store_id_list_var)
+		if store_id_list_var then
+			local store_id_list = env.vars[store_id_list_var]
+			if not store_id_list then
+				store_id_list = {}
+				env.vars[store_id_list_var] = store_id_list
+			end
+			table.insert(store_id_list, id)
+			if #store_id_list == 100 then
+				self:print_error("\"store_id_list_var\" contains 100 elements. You aren't using the variable or it spawns too many effects.", true, env, nil)
+			end
+		end
 	elseif not position then
 		self:print_attribute_error("position", position, nil, true, env)
 	else
@@ -4980,6 +4994,38 @@ function StopPhysicEffectElement:activate_callback(env)
 		self:print_attribute_error("id", id, nil, true, env)
 	else
 		World:stop_physic_effect(id)
+	end
+end
+StopEffectElement = StopEffectElement or class(BaseElement)
+StopEffectElement.NAME = "stop_effect"
+function StopEffectElement:init(node, unit_element)
+	BaseElement.init(self, node, unit_element)
+	self._id_list_var = self:get("id_list_var")
+	self._instant = self:get("instant")
+end
+function StopEffectElement:activate_callback(env)
+	local id_list_var = self:run_parsed_func(env, self._id_list_var)
+	if not id_list_var then
+		self:print_attribute_error("id_list_var", id_list_var, nil, true, env)
+	else
+		local id_list = env.vars[id_list_var]
+		if id_list then
+			if type(id_list) == "table" then
+				local instant = self:run_parsed_func(env, self._instant)
+				local effect_manager = World:effect_manager()
+				local func = instant and effect_manager.kill or effect_manager.fade_kill
+				for _, id in ipairs(id_list) do
+					if instant then
+						func(effect_manager, id)
+					else
+						func(effect_manager, id)
+					end
+				end
+				env.vars[id_list_var] = nil
+			else
+				self:print_error("\"id_list_var\" referred to a variable that wasn't a table but a \"" .. tostring(type(id_list)) .. "\".", false, env, nil)
+			end
+		end
 	end
 end
 TriggerElement = TriggerElement or class(BaseElement)

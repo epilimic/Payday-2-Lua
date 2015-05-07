@@ -67,6 +67,7 @@ function PlayerStandard:enter(state_data, enter_data)
 	PlayerMovementState.enter(self, state_data, enter_data)
 	tweak_data:add_reload_callback(self, self.tweak_data_clbk_reload)
 	self._state_data = state_data
+	self._state_data.using_bipod = managers.player:current_state() == "bipod"
 	self._equipped_unit = self._ext_inventory:equipped_unit()
 	local weapon = self._ext_inventory:equipped_unit()
 	if not weapon or not weapon:base().weapon_hold or not weapon:base():weapon_hold() then
@@ -186,6 +187,7 @@ function PlayerStandard:exit(state_data, new_state_name)
 		ducking = self._state_data.ducking,
 		skip_equip = true
 	}
+	self._state_data.using_bipod = managers.player:current_state() == "bipod"
 	return exit_data
 end
 function PlayerStandard:_activate_mover(mover, velocity)
@@ -448,12 +450,16 @@ function PlayerStandard:_update_check_actions(t, dt)
 	new_action = new_action or self:_check_action_equip(t, input)
 	new_action = new_action or self:_check_use_item(t, input)
 	new_action = new_action or self:_check_action_throw_grenade(t, input)
-	new_action = new_action or self:_check_action_interact(t, input)
+	if managers.player:current_state() ~= "driving" and not new_action then
+		new_action = self:_check_action_interact(t, input)
+	end
 	self:_check_action_jump(t, input)
 	self:_check_action_run(t, input)
 	self:_check_action_ladder(t, input)
 	self:_check_action_zipline(t, input)
-	self:_check_action_duck(t, input)
+	if managers.player:current_state() ~= "driving" then
+		self:_check_action_duck(t, input)
+	end
 	self:_check_action_steelsight(t, input)
 	self:_find_pickups(t)
 end
@@ -657,7 +663,11 @@ function PlayerStandard:_stance_entered(unequipped)
 		stances = tweak_data.player.stances[stance_id] or tweak_data.player.stances.default
 	end
 	local misc_attribs
-	misc_attribs = self._state_data.in_steelsight and stances.steelsight or self._state_data.ducking and stances.crouched or stances.standard
+	if self:_is_using_bipod() then
+		misc_attribs = stances.bipod
+	else
+		misc_attribs = self._state_data.in_steelsight and stances.steelsight or self._state_data.ducking and stances.crouched or stances.standard
+	end
 	local duration = tweak_data.player.TRANSITION_DURATION + (self._equipped_unit:base():transition_duration() or 0)
 	local duration_multiplier = self._state_data.in_steelsight and 1 / self._equipped_unit:base():enter_steelsight_speed_multiplier() or 1
 	local new_fov = self:get_zoom_fov(misc_attribs) + 0
@@ -917,7 +927,7 @@ function PlayerStandard:_check_action_throw_grenade(t, input)
 	if not managers.player:can_throw_grenade() then
 		return
 	end
-	local action_forbidden = not PlayerBase.USE_GRENADES or self:chk_action_forbidden("interact") or self._unit:base():stats_screen_visible() or self:_is_throwing_grenade() or self:_interacting() or self:is_deploying() or self:_changing_weapon() or self:_is_meleeing()
+	local action_forbidden = not PlayerBase.USE_GRENADES or self:chk_action_forbidden("interact") or self._unit:base():stats_screen_visible() or self:_is_throwing_grenade() or self:_interacting() or self:is_deploying() or self:_changing_weapon() or self:_is_meleeing() or self:_is_using_bipod()
 	if action_forbidden then
 		return
 	end
@@ -966,7 +976,7 @@ function PlayerStandard:_check_action_interact(t, input)
 	local new_action, timer, interact_object
 	local interaction_wanted = input.btn_interact_press
 	if interaction_wanted then
-		local action_forbidden = self:chk_action_forbidden("interact") or self._unit:base():stats_screen_visible() or self:_interacting() or self._ext_movement:has_carry_restriction() or self:is_deploying() or self:_changing_weapon() or self:_is_throwing_grenade() or self:_is_meleeing() or self:_on_zipline()
+		local action_forbidden = self:chk_action_forbidden("interact") or self._unit:base():stats_screen_visible() or self:_interacting() or self._ext_movement:has_carry_restriction() or self:is_deploying() or self:_changing_weapon() or self:_is_throwing_grenade() or self:_is_meleeing() or self:_on_zipline() or self:_is_using_bipod()
 		if not action_forbidden then
 			new_action, timer, interact_object = managers.interaction:interact(self._unit)
 			if new_action then
@@ -1027,7 +1037,7 @@ function PlayerStandard:_interacting()
 end
 function PlayerStandard:_update_interaction_timers(t)
 	if self._interact_expire_t then
-		if not alive(self._interact_params.object) or self._interact_params.object ~= managers.interaction:active_object() or self._interact_params.tweak_data ~= self._interact_params.object:interaction().tweak_data or self._interact_params.object:interaction():check_interupt() then
+		if not alive(self._interact_params.object) or self._interact_params.object ~= managers.interaction:active_unit() or self._interact_params.tweak_data ~= self._interact_params.object:interaction().tweak_data or self._interact_params.object:interaction():check_interupt() then
 			self:_interupt_action_interact(t)
 		else
 			managers.hud:set_interaction_bar_width(self._interact_params.timer - (self._interact_expire_t - t), self._interact_params.timer)
@@ -1076,7 +1086,7 @@ function PlayerStandard:_check_action_melee(t, input)
 		end
 		return
 	end
-	local action_forbidden = not self:_melee_repeat_allowed() or self._use_item_expire_t or self:_changing_weapon() or self:_interacting() or self:_is_throwing_grenade()
+	local action_forbidden = not self:_melee_repeat_allowed() or self._use_item_expire_t or self:_changing_weapon() or self:_interacting() or self:_is_throwing_grenade() or self:_is_using_bipod()
 	if action_forbidden then
 		return
 	end
@@ -1624,6 +1634,7 @@ function PlayerStandard:_get_intimidation_action(prime_target, char_table, amoun
 	local unit_type_civilian = 1
 	local unit_type_teammate = 2
 	local unit_type_camera = 3
+	local unit_type_turret = 4
 	local is_whisper_mode = managers.groupai:state():whisper_mode()
 	if prime_target then
 		if prime_target.unit_type == unit_type_teammate then
@@ -1690,6 +1701,9 @@ function PlayerStandard:_get_intimidation_action(prime_target, char_table, amoun
 			elseif prime_target.unit_type == unit_type_camera then
 				plural = false
 				voice_type = "mark_camera"
+			elseif prime_target.unit_type == unit_type_turret then
+				plural = false
+				voice_type = "mark_turret"
 			elseif prime_target.unit:base():char_tweak().is_escort then
 				plural = false
 				local e_guy = prime_target.unit
@@ -1759,6 +1773,7 @@ function PlayerStandard:_get_unit_intimidation_action(intimidate_enemies, intimi
 	local unit_type_civilian = 1
 	local unit_type_teammate = 2
 	local unit_type_camera = 3
+	local unit_type_turret = 4
 	local cam_fwd = self._ext_camera:forward()
 	local my_head_pos = self._ext_movement:m_head_pos()
 	local range_mul = managers.player:upgrade_value("player", "intimidate_range_mul", 1) * managers.player:upgrade_value("player", "passive_intimidate_range_mul", 1)
@@ -1820,12 +1835,22 @@ function PlayerStandard:_get_unit_intimidation_action(intimidate_enemies, intimi
 			end
 		end
 	end
-	if intimidate_enemies and managers.groupai:state():whisper_mode() then
-		for _, unit in ipairs(SecurityCamera.cameras) do
-			if alive(unit) and unit:enabled() and not unit:base():destroyed() then
-				local dist = 2000
-				local prio = 0.001
-				self:_add_unit_to_char_table(char_table, unit, unit_type_camera, dist, false, false, prio, my_head_pos, cam_fwd, {unit})
+	if intimidate_enemies then
+		if managers.groupai:state():whisper_mode() then
+			for _, unit in ipairs(SecurityCamera.cameras) do
+				if alive(unit) and unit:enabled() and not unit:base():destroyed() then
+					local dist = 2000
+					local prio = 0.001
+					self:_add_unit_to_char_table(char_table, unit, unit_type_camera, dist, false, false, prio, my_head_pos, cam_fwd, {unit})
+				end
+			end
+		end
+		local turret_units = managers.groupai:state():turrets()
+		if turret_units then
+			for _, unit in pairs(turret_units) do
+				if alive(unit) and unit:movement():team().foes[self._ext_movement:team().id] then
+					self:_add_unit_to_char_table(char_table, unit, unit_type_turret, 2000, false, false, 0.01, my_head_pos, cam_fwd, {unit})
+				end
 			end
 		end
 	end
@@ -1903,11 +1928,8 @@ function PlayerStandard:_start_action_intimidate(t)
 			self._ext_movement:rally_skill_data().morale_boost_delay_t = managers.player:player_timer():time() + (self._ext_movement:rally_skill_data().morale_boost_cooldown_t or 3.5)
 		elseif voice_type == "escort" then
 			interact_type = "cmd_point"
-			sound_name = "e01x_" .. sound_suffix
-		elseif voice_type == "escort_keep" then
-			interact_type = "cmd_point"
-			sound_name = "e05x_" .. sound_suffix
-		elseif voice_type == "escort_go" then
+			sound_name = "f41_" .. sound_suffix
+		elseif voice_type == "escort_keep" or voice_type == "escort_go" then
 			interact_type = "cmd_point"
 			sound_name = "f40_any"
 		elseif voice_type == "bridge_codeword" then
@@ -1920,10 +1942,13 @@ function PlayerStandard:_start_action_intimidate(t)
 			sound_name = "und_18"
 			interact_type = "cmd_point"
 		elseif voice_type == "mark_camera" then
-			sound_name = "quiet"
-			interact_type = "cmd_point"
 			sound_name = "f39_any"
+			interact_type = "cmd_point"
 			prime_target.unit:contour():add("mark_unit", true)
+		elseif voice_type == "mark_turret" then
+			sound_name = "f42_any"
+			interact_type = "cmd_point"
+			prime_target.unit:contour():add("mark_unit_dangerous", true)
 		end
 		self:_do_action_intimidate(t, interact_type, sound_name, skip_alert)
 	end
@@ -2013,7 +2038,7 @@ function PlayerStandard:_check_action_jump(t, input)
 	local action_wanted = input.btn_jump_press
 	if action_wanted then
 		local action_forbidden = self._jump_t and t < self._jump_t + 0.55
-		action_forbidden = action_forbidden or self._unit:base():stats_screen_visible() or self._state_data.in_air or self:_interacting() or self:_on_zipline() or self:_does_deploying_limit_movement()
+		action_forbidden = action_forbidden or self._unit:base():stats_screen_visible() or self._state_data.in_air or self:_interacting() or self:_on_zipline() or self:_does_deploying_limit_movement() or self:_is_using_bipod()
 		if not action_forbidden then
 			if self._state_data.ducking then
 				self:_interupt_action_ducking(t)
@@ -2245,6 +2270,9 @@ function PlayerStandard:on_ladder()
 	return self._state_data.on_ladder
 end
 function PlayerStandard:_check_action_duck(t, input)
+	if self:_is_using_bipod() then
+		return
+	end
 	if self._setting_hold_to_duck and input.btn_duck_release then
 		if self._state_data.ducking then
 			self:_end_action_ducking(t)
@@ -2319,7 +2347,7 @@ function PlayerStandard:_check_action_primary_attack(t, input)
 	local new_action
 	local action_wanted = input.btn_primary_attack_state or input.btn_primary_attack_release
 	if action_wanted then
-		local action_forbidden = self:_is_reloading() or self:_changing_weapon() or self:_is_meleeing() or self._use_item_expire_t or self:_interacting() or self:_is_throwing_grenade()
+		local action_forbidden = self:_is_reloading() or self:_changing_weapon() or self:_is_meleeing() or self._use_item_expire_t or self:_interacting() or self:_is_throwing_grenade() or self:_is_deploying_bipod()
 		if not action_forbidden then
 			self._queue_reload_interupt = nil
 			self._ext_inventory:equip_selected_primary(false)
@@ -2577,6 +2605,19 @@ end
 function PlayerStandard:_is_reloading()
 	return self._state_data.reload_expire_t or self._state_data.reload_enter_expire_t or self._state_data.reload_exit_expire_t
 end
+function PlayerStandard:start_deploying_bipod(bipod_deploy_duration)
+	self._deploy_bipod_expire_t = managers.player:player_timer():time() + bipod_deploy_duration
+end
+function PlayerStandard:_is_deploying_bipod()
+	local deploying = false
+	if self._deploy_bipod_expire_t and self._deploy_bipod_expire_t > managers.player:player_timer():time() then
+		deploying = true
+	end
+	return deploying
+end
+function PlayerStandard:_is_using_bipod()
+	return self._state_data.using_bipod
+end
 function PlayerStandard:_get_swap_speed_multiplier()
 	local multiplier = 1
 	multiplier = multiplier * managers.player:upgrade_value("weapon", "swap_speed_multiplier", 1)
@@ -2625,7 +2666,9 @@ function PlayerStandard:_find_pickups(t)
 end
 function PlayerStandard:_upd_attention()
 	local preset
-	if managers.groupai:state():whisper_mode() then
+	do break end
+	if self._seat and self._seat.driving then
+	elseif managers.groupai:state():whisper_mode() then
 		if self._state_data.ducking then
 			preset = {
 				"pl_mask_on_friend_combatant_whisper_mode",

@@ -260,6 +260,7 @@ function MusicManager:jukebox_default_tracks()
 		heist_hox_3 = "track_27",
 		heist_jewelry_store = "track_01",
 		heist_mallcrasher = "track_03",
+		heist_shoutout_raid = "track_28",
 		heist_nightclub = "track_05",
 		heist_alex1 = "track_08",
 		heist_alex2 = "track_07",
@@ -333,7 +334,8 @@ function MusicManager:jukebox_music_tracks()
 		"track_24",
 		"track_25",
 		"track_26",
-		"track_27"
+		"track_27",
+		"track_28"
 	}
 	local pdth_tracks = {
 		"track_pth_01",
@@ -385,6 +387,26 @@ function MusicManager:jukebox_menu_tracks()
 		"drifting",
 		"im_a_wild_one"
 	}
+	local new_tracks = {
+		"the_flames_of_love"
+	}
+	local bsides_tracks = {
+		"bsides_04_double_lmgs",
+		"bsides_11_meat_and_machine_guns",
+		"bsides_05_rule_britannia",
+		"bsides_07_an_unexpected_call",
+		"bsides_13_infamy_2_0",
+		"bsides_12_the_enforcer",
+		"bsides_03_showdown",
+		"bsides_15_duel",
+		"bsides_02_swat_attack",
+		"bsides_08_this_is_goodbye",
+		"bsides_10_zagrebacka",
+		"bsides_16_pilgrim",
+		"bsides_14_collide",
+		"bsides_01_enter_the_hallway",
+		"bsides_06_hur_jag_trivs"
+	}
 	local pdth_tracks = {
 		"pth_i_will_give_you_my_all",
 		"pth_breaking_news",
@@ -411,12 +433,19 @@ function MusicManager:jukebox_menu_tracks()
 		"xmas13_deck_the_safe_house_instrumental"
 	}
 	tracks = table.list_add(tracks, pd2_tracks)
+	tracks = table.list_add(tracks, new_tracks)
+	tracks = table.list_add(tracks, bsides_tracks)
 	tracks = table.list_add(tracks, pdth_tracks)
 	tracks = table.list_add(tracks, xmas_tracks)
 	local tracks_locked = {}
 	if not managers.dlc:has_soundtrack_or_cce() then
 		for _, sound in ipairs(pd2_tracks) do
 			tracks_locked[sound] = "soundtrack"
+		end
+	end
+	if not managers.dlc:has_bsides_soundtrack() then
+		for _, sound in ipairs(bsides_tracks) do
+			tracks_locked[sound] = "bsides"
 		end
 	end
 	if not managers.dlc:has_pdth_soundtrack() then
@@ -430,4 +459,11 @@ function MusicManager:jukebox_menu_tracks()
 		end
 	end
 	return tracks, tracks_locked
+end
+function MusicManager:music_tracks()
+	local tracks = {
+		"soundbanks/music",
+		"soundbanks/alesso_heist"
+	}
+	return tracks
 end

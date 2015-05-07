@@ -115,7 +115,7 @@ function ContractBoxGui:create_contract_box()
 	local job_id = managers.job:current_job_id()
 	self._contract_panel = self._panel:panel({
 		name = "contract_box_panel",
-		w = 350,
+		w = self._panel:w() * 0.35,
 		h = 100,
 		layer = 0
 	})
@@ -258,11 +258,23 @@ function ContractBoxGui:create_contract_box()
 		end
 		local plvl = managers.experience:current_level()
 		local player_stars = math.max(math.ceil(plvl / 10), 1)
-		local total_xp, _ = managers.experience:get_contract_xp_by_stars(job_id, job_stars, difficulty_stars, job_data.professional, #job_chain)
+		local contract_visuals = job_data.contract_visuals or {}
+		local total_xp_min, _ = managers.experience:get_contract_xp_by_stars(job_id, job_stars, difficulty_stars, job_data.professional, #job_chain, {
+			mission_xp = contract_visuals.min_mission_xp and contract_visuals.min_mission_xp[difficulty_stars + 1]
+		})
+		local total_xp_max, _ = managers.experience:get_contract_xp_by_stars(job_id, job_stars, difficulty_stars, job_data.professional, #job_chain, {
+			mission_xp = contract_visuals.max_mission_xp and contract_visuals.max_mission_xp[difficulty_stars + 1]
+		})
+		local xp_text_min = managers.money:add_decimal_marks_to_string(tostring(math.round(total_xp_min)))
+		local xp_text_max = managers.money:add_decimal_marks_to_string(tostring(math.round(total_xp_max)))
+		if total_xp_min < total_xp_max then
+		else
+			local job_xp_text = managers.localization:text("menu_number_range", {min = xp_text_min, max = xp_text_max}) or xp_text_min
+		end
 		local job_xp = self._contract_panel:text({
 			font = font,
 			font_size = font_size,
-			text = managers.money:add_decimal_marks_to_string(tostring(math.round(total_xp))),
+			text = job_xp_text,
 			color = tweak_data.screen_colors.text
 		})
 		do
@@ -333,15 +345,23 @@ function ContractBoxGui:create_contract_box()
 			end
 			heat_xp_text:set_position(math.round((job_xp:right())), job_xp:top())
 		end
-		local total_payout, stage_payout_table, job_payout_table = managers.money:get_contract_money_by_stars(job_stars, difficulty_stars, #job_chain, managers.job:current_job_id(), managers.job:current_level_id())
-		local total_stage_value = stage_payout_table[2]
-		local total_stage_risk_value = stage_payout_table[4]
-		local total_job_value = job_payout_table[2]
-		local total_job_risk_value = job_payout_table[4]
+		local total_payout_min, base_payout_min, risk_payout_min = managers.money:get_contract_money_by_stars(job_stars, difficulty_stars, #job_chain, managers.job:current_job_id(), managers.job:current_level_id())
+		local total_payout_max, base_payout_max, risk_payout_max = managers.money:get_contract_money_by_stars(job_stars, difficulty_stars, #job_chain, managers.job:current_job_id(), managers.job:current_level_id(), {
+			mandatory_bags_value = contract_visuals.mandatory_bags_value and contract_visuals.mandatory_bags_value[difficulty_stars + 1],
+			bonus_bags_value = contract_visuals.bonus_bags_value and contract_visuals.bonus_bags_value[difficulty_stars + 1],
+			small_value = contract_visuals.small_value and contract_visuals.small_value[difficulty_stars + 1],
+			vehicle_value = contract_visuals.vehicle_value and contract_visuals.vehicle_value[difficulty_stars + 1]
+		})
+		local payout_text_min = managers.experience:cash_string(math.round(total_payout_min))
+		local payout_text_max = managers.experience:cash_string(math.round(total_payout_max))
+		if total_payout_min < total_payout_max then
+		else
+			local total_payout_text = managers.localization:text("menu_number_range", {min = payout_text_min, max = payout_text_max}) or payout_text_min
+		end
 		local job_money = self._contract_panel:text({
 			font = font,
 			font_size = font_size,
-			text = managers.experience:cash_string(math.round(total_payout)),
+			text = total_payout_text,
 			color = tweak_data.screen_colors.text
 		})
 		do
@@ -352,7 +372,7 @@ function ContractBoxGui:create_contract_box()
 		local risk_money = self._contract_panel:text({
 			font = font,
 			font_size = font_size,
-			text = " +" .. managers.experience:cash_string(math.round(total_stage_risk_value + total_job_risk_value)),
+			text = " +" .. managers.experience:cash_string(math.round(risk_payout_min)),
 			color = risk_color
 		})
 		do
@@ -375,7 +395,7 @@ function ContractBoxGui:create_contract_box()
 		})
 		debug_start:grow(-debug_start:x() - 10, debug_start:y() - 10)
 	end
-	self._contract_panel:set_rightbottom(self._panel:w() - 10, self._panel:h() - 50)
+	self._contract_panel:set_rightbottom(self._panel:w() - 0, self._panel:h() - 60)
 	if self._contract_text_header then
 		self._contract_text_header:set_bottom(self._contract_panel:top())
 		self._contract_text_header:set_left(self._contract_panel:left())
@@ -464,7 +484,8 @@ function ContractBoxGui:create_character_text(peer_id, x, y, text, icon)
 		font = tweak_data.menu.pd2_medium_font,
 		layer = 0,
 		color = tweak_data.screen_colors.text,
-		blend_mode = "add"
+		blend_mode = "add",
+		rotation = 360
 	})
 	self._peers_state[peer_id]:set_top(self._peers[peer_id]:bottom())
 	self._peers_state[peer_id]:set_center_x(self._peers[peer_id]:center_x())

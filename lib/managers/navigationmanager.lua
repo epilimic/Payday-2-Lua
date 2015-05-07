@@ -2033,7 +2033,7 @@ function NavigationManager:clbk_navfield(event_name, args, args2, args3)
 				if type(door) == "userdata" and door:script_data().element:id() == nav_link_id then
 					local is_first_door = not nav_seg_from.neighbours[nav_seg_to_id]
 					nav_seg_from.neighbours[nav_seg_to_id] = nav_seg_from.neighbours[nav_seg_to_id] or {}
-					table.insert(nav_seg_from.disabled_neighbours[nav_seg_to_id], table.remove(nav_seg_from.neighbours[nav_seg_to_id], i_door))
+					table.insert(nav_seg_from.neighbours[nav_seg_to_id], table.remove(nav_seg_from.disabled_neighbours[nav_seg_to_id], i_door))
 					if not next(nav_seg_from.disabled_neighbours[nav_seg_to_id]) then
 						nav_seg_from.disabled_neighbours[nav_seg_to_id] = nil
 					end

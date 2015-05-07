@@ -257,7 +257,7 @@ function SecurityCameraUnitElement:layer_finished()
 	SecurityCameraUnitElement.super.layer_finished(self)
 	if self._hed.camera_u_id then
 		local unit = managers.worlddefinition:get_unit_on_load(self._hed.camera_u_id, callback(self, self, "load_camera_unit"))
-		if unit:base() and unit:base().security_camera then
+		if alive(unit) and unit:base() and unit:base().security_camera then
 			self:_set_camera_unit(unit)
 		else
 			self:_set_camera_unit(nil)

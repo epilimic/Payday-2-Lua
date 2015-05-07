@@ -91,6 +91,7 @@ do
 		"civ_male_pilot_1",
 		"civ_male_scientist_1",
 		"civ_male_miami_store_clerk_1",
+		"civ_male_taxman",
 		"civ_male_trucker_1",
 		"civ_male_worker_1",
 		"civ_male_worker_2",

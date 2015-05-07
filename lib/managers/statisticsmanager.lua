@@ -184,6 +184,7 @@ function StatisticsManager:_setup(reset)
 	}
 	self._defaults.killed_by_melee = {}
 	self._defaults.killed_by_weapon = {}
+	self._defaults.killed_by_grenade = {}
 	self._defaults.shots_by_weapon = {}
 	self._defaults.sessions = {count = 0, time = 0}
 	self._defaults.sessions.levels = {}
@@ -303,7 +304,7 @@ function StatisticsManager:start_session(data)
 	if self._session_started then
 		return
 	end
-	if Global.level_data.level_id then
+	if Global.level_data.level_id and self._global.sessions.levels[Global.level_data.level_id] then
 		self._global.sessions.levels[Global.level_data.level_id].started = self._global.sessions.levels[Global.level_data.level_id].started + 1
 		self._global.sessions.levels[Global.level_data.level_id].from_beginning = self._global.sessions.levels[Global.level_data.level_id].from_beginning + (Global.statistics_manager.playing_from_start and 1 or 0)
 		self._global.sessions.levels[Global.level_data.level_id].drop_in = self._global.sessions.levels[Global.level_data.level_id].drop_in + (Global.statistics_manager.playing_from_start and 0 or 1)
@@ -329,6 +330,10 @@ function StatisticsManager:stop_session(data)
 		if data and data.quit then
 			Global.statistics_manager.playing_from_start = nil
 		end
+		return
+	end
+	Application:debug("StatisticsManager:stop_session( data ) level_id: ", Global.level_data.level_id)
+	if not self._global.sessions.levels[Global.level_data.level_id] then
 		return
 	end
 	self:_flush_log()
@@ -443,7 +448,7 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 	if session_time_seconds == 0 or session_time_minutes == 0 or session_time == 0 then
 		return
 	end
-	local level_list, job_list, mask_list, weapon_list, melee_list, enemy_list, armor_list, character_list = tweak_data.statistics:statistics_table()
+	local level_list, job_list, mask_list, weapon_list, melee_list, grenade_list, enemy_list, armor_list, character_list = tweak_data.statistics:statistics_table()
 	local stats = {}
 	self._global.play_time.minutes = math.ceil(self._global.play_time.minutes + session_time_minutes)
 	local current_time = math.floor(self._global.play_time.minutes / 60)
@@ -594,6 +599,12 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 		elseif melee_name then
 			print("Statistics Missing: melee_used_" .. melee_name)
 		end
+		local grenade_name = managers.blackmarket:equipped_grenade()
+		if table.contains(grenade_list, grenade_name) then
+			stats["grenade_used_" .. grenade_name] = {type = "int", value = 1}
+		elseif grenade_name then
+			print("Statistics Missing: grenade_used_" .. grenade_name)
+		end
 		local mask_id = managers.blackmarket:equipped_mask().mask_id
 		if table.contains(mask_list, mask_id) then
 			stats["mask_used_" .. mask_id] = {type = "int", value = 1}
@@ -636,6 +647,15 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 				stats["melee_kills_" .. melee_name] = {type = "int", value = melee_kill}
 			else
 				print("Statistics Missing: melee_kills_" .. melee_name)
+			end
+		end
+	end
+	for grenade_name, grenade_kill in pairs(session.killed_by_grenade) do
+		if grenade_kill > 0 then
+			if table.contains(grenade_list, grenade_name) then
+				stats["grenade_kills_" .. grenade_name] = {type = "int", value = grenade_kill}
+			else
+				print("Statistics Missing: grenade_kills_" .. grenade_name)
 			end
 		end
 	end
@@ -684,11 +704,6 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 		type = "int",
 		method = "set",
 		value = 1
-	}
-	stats.info_playing_beta = {
-		type = "int",
-		method = "set",
-		value = 0
 	}
 	if completion == "win_begin" or completion == "win_dropin" or completion == "fail" then
 		local level_id = managers.job:current_level_id()
@@ -963,9 +978,6 @@ function StatisticsManager:killed(data)
 				managers.achievment:award(tweak_data.achievement.first_blood.award)
 			end
 		end
-		if tweak_data.achievement.sitting_bullseye and data.name == tweak_data.achievement.sitting_bullseye.enemy and name_id == tweak_data.achievement.sitting_bullseye.weapon and self._global.session.killed_by_weapon[name_id][data.name].count == tweak_data.achievement.sitting_bullseye.count then
-			managers.achievment:award(tweak_data.achievement.sitting_bullseye.award)
-		end
 		if data.name == "tank" then
 			managers.achievment:set_script_data("dodge_this_active", true)
 		end
@@ -974,13 +986,19 @@ function StatisticsManager:killed(data)
 		self._global.session.killed_by_melee[name_id] = (self._global.session.killed_by_melee[name_id] or 0) + 1
 		self._global.killed_by_melee[name_id] = (self._global.killed_by_melee[name_id] or 0) + 1
 	elseif by_explosion then
-		local name_id
+		local name_id, throwable_id
 		if data.weapon_unit then
 			if data.weapon_unit:base().projectile_entry then
-				name_id = tweak_data.blackmarket.projectiles[data.weapon_unit:base():projectile_entry()].weapon_id
+				local projectile_data = tweak_data.blackmarket.projectiles[data.weapon_unit:base():projectile_entry()]
+				name_id = projectile_data.weapon_id
+				throwable_id = projectile_data.throwable and data.weapon_unit:base():projectile_entry()
 			else
 				name_id = data.weapon_unit:base().get_name_id and data.weapon_unit and data.weapon_unit:base():get_name_id()
 			end
+		end
+		if throwable_id then
+			self._global.session.killed_by_grenade[throwable_id] = (self._global.session.killed_by_grenade[throwable_id] or 0) + 1
+			self._global.killed_by_grenade[throwable_id] = (self._global.killed_by_grenade[throwable_id] or 0) + 1
 		end
 		local boom_guns = {
 			"gre_m79",
@@ -1430,6 +1448,7 @@ function StatisticsManager:save(data)
 		experience = self._global.experience,
 		killed_by_melee = self._global.killed_by_melee,
 		killed_by_weapon = self._global.killed_by_weapon,
+		killed_by_grenade = self._global.killed_by_grenade,
 		shots_by_weapon = self._global.shots_by_weapon,
 		health = self._global.health,
 		misc = self._global.misc,

@@ -213,7 +213,8 @@ function ControllerWrapper:setup(setup)
 	if setup then
 		self._setup = setup
 		local connection_map = setup:get_connection_map()
-		for connection_name, connection in pairs(connection_map) do
+		for _, connection_name in ipairs(setup:get_connection_list()) do
+			local connection = connection_map[connection_name]
 			local controller_id = connection:get_controller_id() or self._default_controller_id
 			local controller = self._controller_map[controller_id]
 			self:setup_connection(connection_name, connection, controller_id, controller)
@@ -297,10 +298,52 @@ function ControllerWrapper:virtual_connect2(controller_id, controller, input_nam
 	local min_src, max_src, min_dest, max_dest = connection:get_range()
 	local connect_src_type = connection:get_connect_src_type()
 	local connect_dest_type = connection:get_connect_dest_type()
-	if type(input_name) ~= "number" then
-		input_name = Idstring(input_name)
+	if connection._btn_connections and input_name == "buttons" then
+		local btn_data = {}
+		btn_data.up = {
+			1,
+			0,
+			1
+		}
+		btn_data.down = {
+			1,
+			0,
+			-1
+		}
+		btn_data.left = {
+			0,
+			0,
+			-1
+		}
+		btn_data.right = {
+			0,
+			0,
+			1
+		}
+		if not self._virtual_controller:has_axis(Idstring(connection_name)) then
+			self._virtual_controller:add_axis(Idstring(connection_name))
+		end
+		for btn, input in pairs(connection._btn_connections) do
+			if controller:has_button(Idstring(input.name)) and input.type == "button" or controller:has_axis(Idstring(input.name)) and input.type == "axis" then
+				if input.type == "axis" then
+					self._virtual_controller:connect(controller, Idstring("axis"), Idstring(input.name), tonumber(input.dir), Idstring("range"), tonumber(input.range1), tonumber(input.range2), Idstring("axis"), Idstring(connection_name), btn_data[btn][1], Idstring("range"), btn_data[btn][2], btn_data[btn][3])
+				else
+					self._virtual_controller:connect(controller, Idstring("button"), Idstring(input.name), Idstring("axis"), Idstring(connection_name), btn_data[btn][1], Idstring("range"), btn_data[btn][2], btn_data[btn][3])
+				end
+			end
+		end
+	else
+		if type(input_name) ~= "number" then
+			input_name = Idstring(input_name)
+		end
+		if controller:has_button(input_name) or controller:has_axis(input_name) then
+			self._virtual_controller:connect(controller, Idstring(connect_src_type), input_name, Idstring("range"), min_src, max_src, Idstring(connect_dest_type), Idstring(connection_name), Idstring("range"), min_dest, max_dest)
+		elseif self._virtual_controller:has_button(input_name) or self._virtual_controller:has_axis(input_name) then
+			self._virtual_controller:connect(self._virtual_controller, Idstring(connect_src_type), input_name, Idstring("range"), min_src, max_src, Idstring(connect_dest_type), Idstring(connection_name), Idstring("range"), min_dest, max_dest)
+		else
+			Application:error("Invalid input name \"" .. tostring(input_name) .. "\". Controller type: \"" .. tostring(controller_id) .. "\", Connection name: \"" .. tostring(connection_name) .. "\".")
+		end
 	end
-	self._virtual_controller:connect(controller, Idstring(connect_src_type), input_name, Idstring("range"), min_src, max_src, Idstring(connect_dest_type), Idstring(connection_name), Idstring("range"), min_dest, max_dest)
 end
 function ControllerWrapper:connected(controller_id)
 	if controller_id then

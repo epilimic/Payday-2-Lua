@@ -2,6 +2,7 @@ AkimboWeaponBase = AkimboWeaponBase or class(NewRaycastWeaponBase)
 AkimboWeaponBase.AKIMBO = true
 function AkimboWeaponBase:init(...)
 	AkimboWeaponBase.super.init(self, ...)
+	self._manual_fire_second_gun = self:weapon_tweak_data().manual_fire_second_gun
 end
 function AkimboWeaponBase:_create_second_gun()
 	local factory_weapon = tweak_data.weapon.factory[self._factory_id]
@@ -28,13 +29,32 @@ function AkimboWeaponBase:create_second_gun()
 	self._setup.user_unit:camera()._camera_unit:link(Idstring("a_weapon_left"), self._second_gun, self._second_gun:orientation_object():name())
 end
 function AkimboWeaponBase:fire(...)
-	local result = AkimboWeaponBase.super.fire(self, ...)
-	if alive(self._second_gun) then
-		managers.enemy:add_delayed_clbk("AkimboWeaponBase", callback(self, self, "_fire_second", {
-			...
-		}), TimerManager:game():time() + 0.025 + math.rand(0.075))
+	if not self._manual_fire_second_gun then
+		local result = AkimboWeaponBase.super.fire(self, ...)
+		if alive(self._second_gun) then
+			managers.enemy:add_delayed_clbk("AkimboWeaponBase", callback(self, self, "_fire_second", {
+				...
+			}), TimerManager:game():time() + 0.025 + math.rand(0.075))
+		end
+		return result
+	else
+		local result
+		if self._fire_second_gun_next then
+			if alive(self._second_gun) then
+				result = self._second_gun:base().super.fire(self._second_gun:base(), ...)
+				if result then
+					self._second_gun:base():_fire_sound()
+					managers.hud:set_ammo_amount(self:selection_index(), self:ammo_info())
+					self._second_gun:base():tweak_data_anim_play("fire")
+				end
+			end
+			self._fire_second_gun_next = false
+		else
+			result = AkimboWeaponBase.super.fire(self, ...)
+			self._fire_second_gun_next = true
+		end
+		return result
 	end
-	return result
 end
 function AkimboWeaponBase:_fire_second(params)
 	if alive(self._second_gun) then
@@ -44,6 +64,7 @@ function AkimboWeaponBase:_fire_second(params)
 			managers.hud:set_ammo_amount(self:selection_index(), self:ammo_info())
 			self._second_gun:base():tweak_data_anim_play("fire")
 		end
+		return fired
 	end
 end
 function AkimboWeaponBase:on_enabled(...)
@@ -92,19 +113,33 @@ function AkimboWeaponBase:destroy(...)
 end
 NPCAkimboWeaponBase = NPCAkimboWeaponBase or class(NewNPCRaycastWeaponBase)
 NPCAkimboWeaponBase.AKIMBO = true
+function NPCAkimboWeaponBase:init(...)
+	NPCAkimboWeaponBase.super.init(self, ...)
+	self._manual_fire_second_gun = self:weapon_tweak_data().manual_fire_second_gun
+end
 function NPCAkimboWeaponBase:create_second_gun()
 	AkimboWeaponBase._create_second_gun(self)
 	self._setup.user_unit:link(Idstring("a_weapon_left_front"), self._second_gun, self._second_gun:orientation_object():name())
 end
 function NPCAkimboWeaponBase:fire_blank(...)
-	NPCAkimboWeaponBase.super.fire_blank(self, ...)
-	if alive(self._second_gun) then
-		if self._setup.user_unit:movement():current_state_name() == "bleed_out" or self._setup.user_unit:movement():zipline_unit() then
-			return
+	if not self._manual_fire_second_gun then
+		NPCAkimboWeaponBase.super.fire_blank(self, ...)
+		if alive(self._second_gun) then
+			if self._setup.user_unit:movement():current_state_name() == "bleed_out" or self._setup.user_unit:movement():zipline_unit() then
+				return
+			end
+			managers.enemy:add_delayed_clbk("NPCAkimboWeaponBase", callback(self, self, "_fire_blank_second", {
+				...
+			}), TimerManager:game():time() + 0.025 + math.rand(0.075))
 		end
-		managers.enemy:add_delayed_clbk("NPCAkimboWeaponBase", callback(self, self, "_fire_blank_second", {
-			...
-		}), TimerManager:game():time() + 0.025 + math.rand(0.075))
+	elseif self._fire_second_gun_next then
+		if alive(self._second_gun) and alive(self._setup.user_unit) then
+			self._second_gun:base():fire_blank(...)
+		end
+		self._fire_second_gun_next = false
+	else
+		NPCAkimboWeaponBase.super.fire_blank(self, ...)
+		self._fire_second_gun_next = true
 	end
 end
 function NPCAkimboWeaponBase:_fire_blank_second(params)

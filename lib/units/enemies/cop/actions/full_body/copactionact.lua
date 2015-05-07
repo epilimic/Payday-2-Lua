@@ -79,6 +79,8 @@ CopActionAct._act_redirects.enemy_spawn = {
 	"e_sp_over_3m",
 	"e_sp_run_2m_turn_r_10m",
 	"e_sp_run_2m_turn_l_10m",
+	"e_sp_run_2m_turn_r_14m",
+	"e_sp_run_2m_turn_l_14m",
 	"e_sp_armored_truck_1st",
 	"e_sp_armored_truck_2nd",
 	"e_sp_armored_truck_3rd",
@@ -548,6 +550,12 @@ CopActionAct._act_redirects.SO = {
 	"cm_arms_up_1",
 	"cm_arms_up_2",
 	"cm_arms_up_3",
+	"cf_hand_clap_1",
+	"cf_hand_clap_2",
+	"cf_hand_clap_3",
+	"cm_hand_clap_1",
+	"cm_hand_clap_2",
+	"cm_hand_clap_3",
 	"cmf_so_lean_1m",
 	"sstash_stand_enter",
 	"sstash_stand_loop",
@@ -578,8 +586,9 @@ CopActionAct._act_redirects.SO = {
 	"so_escort_before_door_idle",
 	"so_escort_before_door_enter",
 	"drive_falcogini_passanger",
-	"drive_escape_van_passanger",
-	"drive_escape_van_kneel"
+	"drive_muscle_passanger",
+	"drive_muscle_back_right",
+	"drive_muscle_back_left"
 }
 function CopActionAct:init(action_desc, common_data)
 	self._common_data = common_data

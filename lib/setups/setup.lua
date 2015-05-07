@@ -124,6 +124,9 @@ function Setup:load_packages()
 	if not PackageManager:loaded("packages/dyn_resources") then
 		PackageManager:load("packages/dyn_resources")
 	end
+	if Application:ews_enabled() and not PackageManager:loaded("packages/wip/editor") then
+		PackageManager:load("packages/wip/editor")
+	end
 end
 function Setup:init_managers(managers)
 	Global.game_settings = Global.game_settings or {
@@ -340,6 +343,7 @@ function Setup:update(t, dt)
 	managers.player:update(t, dt)
 	managers.blackmarket:update(t, dt)
 	managers.vote:update(t, dt)
+	managers.vehicle:update(t, dt)
 	game_state_machine:update(t, dt)
 	if self._main_thread_loading_screen_gui_visible then
 		self._main_thread_loading_screen_gui_script:update(-1, dt)
@@ -424,6 +428,7 @@ end
 function Setup:exec(context)
 	self:set_fps_cap(30)
 	managers.music:stop()
+	managers.vote:stop()
 	SoundDevice:stop()
 	if not managers.system_menu:is_active() then
 		self:set_main_thread_loading_screen_visible(true)

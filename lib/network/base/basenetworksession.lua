@@ -708,3 +708,10 @@ end
 function BaseNetworkSession:load_counter()
 	return self._load_counter
 end
+function BaseNetworkSession:check_send_outfit(peer)
+	if peer then
+		peer:send_queued_sync("sync_outfit", managers.blackmarket:outfit_string(), self:local_peer():outfit_version(), "")
+	else
+		self:send_to_peers_loaded("sync_outfit", managers.blackmarket:outfit_string(), self:local_peer():outfit_version(), "")
+	end
+end

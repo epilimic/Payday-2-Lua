@@ -20,12 +20,15 @@ function CivilianLogicIdle.enter(data, new_logic_name, enter_params)
 	local key_str = tostring(data.key)
 	local objective = data.objective
 	if objective then
-		if objective.action and data.unit:brain():action_request(objective.action) and objective.action.type == "act" then
-			my_data.acting = true
-			if objective.action_start_clbk then
-				objective.action_start_clbk(data.unit)
-				if my_data ~= data.internal_data then
-					return
+		if objective.action then
+			local action = data.unit:brain():action_request(objective.action)
+			if action and objective.action.type == "act" then
+				my_data.acting = action
+				if objective.action_start_clbk then
+					objective.action_start_clbk(data.unit)
+					if my_data ~= data.internal_data then
+						return
+					end
 				end
 			end
 		end
@@ -265,7 +268,7 @@ function CivilianLogicIdle.action_complete_clbk(data, action)
 	local my_data = data.internal_data
 	if action:type() == "turn" then
 		my_data.turning = nil
-	elseif action:type() == "act" and my_data.acting and data.objective then
+	elseif action:type() == "act" and my_data.acting == action then
 		my_data.acting = nil
 		if action:expired() then
 			if not my_data.action_timeout_clbk_id then

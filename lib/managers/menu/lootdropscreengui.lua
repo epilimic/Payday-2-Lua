@@ -131,6 +131,10 @@ function LootDropScreenGui:show()
 	self._fullscreen_panel:set_alpha(1)
 end
 function LootDropScreenGui:check_all_ready()
+	if not alive(self._panel) or not alive(self._fullscreen_panel) then
+		Application:error("[LootDropScreenGui:check_all_ready] GUI panel is dead!", self._panel, self._fullscreen_panel)
+		return
+	end
 	if self._lootscreen_hud:check_all_ready() then
 		local text_id = "victory_client_waiting_for_server"
 		if Global.game_settings.single_player or self._is_alone or not managers.network:session() then

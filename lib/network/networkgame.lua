@@ -286,21 +286,6 @@ function NetworkGame:on_statistics_recieved(peer_id, peer_kills, peer_specials_k
 				most_downs.score = stats.downs
 				most_downs.peer_id = member:peer():id()
 			end
-			if stats.downs == 0 and tweak_data.achievement.protect_the_chief and table.contains(tweak_data.achievement.protect_the_chief.difficulty, Global.game_settings.difficulty) and managers.statistics:started_session_from_beginning() and managers.job:on_last_stage() and table.contains(tweak_data.achievement.protect_the_chief.jobs, managers.job:current_real_job_id()) then
-				do
-					local outfit = member:peer():blackmarket_outfit()
-					if tweak_data.achievement.protect_the_chief.mask == outfit.mask.mask_id and tweak_data.achievement.protect_the_chief.primary == outfit.primary.factory_id and tweak_data.achievement.protect_the_chief.melee_weapon == outfit.melee_weapon then
-						managers.achievment:award(tweak_data.achievement.protect_the_chief.award)
-						managers.network:session():send_to_peers_synched("sync_award_achievement", tweak_data.achievement.protect_the_chief.award)
-						do break end
-						do break end
-						break
-					else
-					end
-				end
-			else
-			end
-		else
 		end
 	end
 	group_accuracy = math.floor(group_accuracy / table.size(self._members))
@@ -366,6 +351,18 @@ function NetworkGame:on_peer_removed(peer, peer_id, reason)
 		local member_downed = alive(member_unit) and member_unit:movement():downed()
 		local member_health = 1
 		local member_dead = managers.trade and managers.trade:is_peer_in_custody(peer_id)
+		local hostages_killed = 0
+		local respawn_penalty = 0
+		if member_dead and player_character and managers.trade then
+			hostages_killed = managers.trade:hostages_killed_by_name(player_character)
+			respawn_penalty = managers.trade:respawn_delay_by_name(player_character)
+		elseif alive(member_unit) then
+			local criminal_record = managers.groupai:state():criminal_record(member_unit:key())
+			if criminal_record then
+				hostages_killed = criminal_record.hostages_killed
+				respawn_penalty = criminal_record.respawn_penalty
+			end
+		end
 		if player_left then
 			local mugshot_id = managers.criminals:character_data_by_peer_id(peer_id).mugshot_id
 			local mugshot_data = managers.hud:_get_mugshot_data(mugshot_id)
@@ -403,7 +400,9 @@ function NetworkGame:on_peer_removed(peer, peer_id, reason)
 						used_deployable = member_used_deployable,
 						used_cable_ties = member_used_cable_ties,
 						used_body_bags = member_used_body_bags,
-						member_dead = member_dead
+						member_dead = member_dead,
+						hostages_killed = hostages_killed,
+						respawn_penalty = respawn_penalty
 					}
 					local trade_entry = managers.trade:replace_player_with_ai(player_character, player_character)
 					if unit then

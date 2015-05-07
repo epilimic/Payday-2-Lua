@@ -40,7 +40,7 @@ function NetworkMember:_get_old_entry()
 	local used_deployable = false
 	local used_cable_ties = 0
 	local used_body_bags = 0
-	local member_dead
+	local member_dead, hostages_killed, respawn_penalty
 	if old_plr_entry and old_plr_entry.t + 180 > Application:time() then
 		member_downed = old_plr_entry.member_downed
 		health = old_plr_entry.health
@@ -48,8 +48,10 @@ function NetworkMember:_get_old_entry()
 		used_cable_ties = old_plr_entry.used_cable_ties
 		used_body_bags = old_plr_entry.used_body_bags
 		member_dead = old_plr_entry.member_dead
+		hostages_killed = old_plr_entry.hostages_killed
+		respawn_penalty = old_plr_entry.respawn_penalty
 	end
-	return member_downed, member_dead, health, used_deployable, used_cable_ties, used_body_bags, old_plr_entry
+	return member_downed, member_dead, health, used_deployable, used_cable_ties, used_body_bags, hostages_killed, respawn_penalty, old_plr_entry
 end
 function NetworkMember:_get_drop_in_spawn_on_unit()
 	if Global.local_member and alive(Global.local_member:unit()) then
@@ -96,10 +98,12 @@ function NetworkMember:spawn_unit(spawn_point_id, is_drop_in, spawn_as)
 	else
 		pos_rot = managers.network:spawn_point(spawn_point_id).pos_rot
 	end
-	local member_downed, member_dead, health, used_deployable, used_cable_ties, used_body_bags, old_plr_entry = self:_get_old_entry()
+	local member_downed, member_dead, health, used_deployable, used_cable_ties, used_body_bags, hostages_killed, respawn_penalty, old_plr_entry = self:_get_old_entry()
 	if old_plr_entry then
 		old_plr_entry.member_downed = nil
 		old_plr_entry.member_dead = nil
+		old_plr_entry.hostages_killed = nil
+		old_plr_entry.respawn_penalty = nil
 	end
 	local character_name = self:character_name()
 	local trade_entry, spawn_in_custody
@@ -132,6 +136,7 @@ function NetworkMember:spawn_unit(spawn_point_id, is_drop_in, spawn_as)
 		unit:character_damage():send_set_status()
 	end
 	if is_drop_in then
+		managers.groupai:state():set_dropin_hostages_killed(unit, hostages_killed, respawn_penalty)
 		self._peer:set_used_deployable(used_deployable)
 		self._peer:set_used_body_bags(used_body_bags)
 		if self == Global.local_member then
@@ -211,7 +216,7 @@ function NetworkMember:sync_lobby_data(peer)
 	cat_print("multiplayer_base", "NetworkMember:sync_lobby_data to", peer:id(), " : ", peer_id, level)
 	peer:send_after_load("lobby_info", level, rank, character, mask_set)
 	peer:send_after_load("sync_profile", level, rank)
-	peer:send_after_load("sync_outfit", managers.blackmarket:outfit_string(), managers.network:session():local_peer():outfit_version())
+	managers.network:session():check_send_outfit()
 	if menu_state_index then
 		peer:send_after_load("set_menu_sync_state_index", menu_state_index)
 	end
@@ -227,7 +232,7 @@ function NetworkMember:sync_data(peer)
 	local level = managers.experience:current_level()
 	local rank = managers.experience:current_rank()
 	peer:send_queued_sync("sync_profile", level, rank)
-	peer:send_queued_sync("sync_outfit", managers.blackmarket:outfit_string(), managers.network:session():local_peer():outfit_version())
+	managers.network:session():check_send_outfit(peer)
 	managers.player:update_deployable_equipment_to_peer(peer)
 	managers.player:update_cable_ties_to_peer(peer)
 	managers.player:update_grenades_to_peer(peer)

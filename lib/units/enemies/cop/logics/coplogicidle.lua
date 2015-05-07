@@ -423,9 +423,13 @@ end
 function CopLogicIdle.on_criminal_neutralized(data, criminal_key)
 end
 function CopLogicIdle.on_intimidated(data, amount, aggressor_unit)
+	print(data.unit, "[CopLogicIdle.on_intimidated]", data.unit, amount, aggressor_unit)
 	local surrender = false
 	local my_data = data.internal_data
 	data.t = TimerManager:game():time()
+	if not aggressor_unit:movement():team().foes[data.unit:movement():team().id] then
+		return
+	end
 	if managers.groupai:state():has_room_for_police_hostage() then
 		local i_am_special = managers.groupai:state():is_enemy_special(data.unit)
 		local required_skill = i_am_special and "intimidate_specials" or "intimidate_enemies"
@@ -438,13 +442,16 @@ function CopLogicIdle.on_intimidated(data, amount, aggressor_unit)
 			aggressor_can_intimidate = aggressor_unit:base():upgrade_value("player", required_skill)
 			aggressor_intimidation_mul = aggressor_intimidation_mul * (aggressor_unit:base():upgrade_value("player", "empowered_intimidation_mul") or 1) * (aggressor_unit:base():upgrade_value("player", "intimidation_multiplier") or 1)
 		end
+		print("aggressor_can_intimidate", aggressor_can_intimidate, "required_skill", required_skill, "is_local_player", aggressor_unit:base().is_local_player)
 		if aggressor_can_intimidate then
 			local hold_chance = CopLogicBase._evaluate_reason_to_surrender(data, my_data, aggressor_unit)
+			print("hold_chance", hold_chance)
 			if hold_chance then
 				hold_chance = hold_chance ^ aggressor_intimidation_mul
 				if hold_chance >= 1 then
 				else
 					local rand_nr = math.random()
+					print("and the winner is: hold_chance", hold_chance, "rand_nr", rand_nr, "rand_nr > hold_chance", hold_chance < rand_nr)
 					if hold_chance < rand_nr then
 						surrender = true
 					end

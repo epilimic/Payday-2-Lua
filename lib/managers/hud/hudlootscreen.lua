@@ -1,6 +1,6 @@
 require("lib/managers/menu/MenuBackdropGUI")
 HUDLootScreen = HUDLootScreen or class()
-function HUDLootScreen:init(hud, workspace, saved_lootdrop, saved_selected, saved_chosen)
+function HUDLootScreen:init(hud, workspace, saved_lootdrop, saved_selected, saved_chosen, saved_setup)
 	self._backdrop = MenuBackdropGUI:new(workspace)
 	self._backdrop:create_black_borders()
 	self._active = false
@@ -61,10 +61,15 @@ function HUDLootScreen:init(hud, workspace, saved_lootdrop, saved_selected, save
 	end
 	self._num_visible = 1
 	self:set_num_visible(self:get_local_peer_id())
+	if saved_setup then
+		for _, setup in ipairs(saved_setup) do
+			self:make_cards(setup.peer, setup.max_pc, setup.left_card, setup.right_card)
+		end
+	end
 	self._lootdrops = self._lootdrops or {}
 	if saved_lootdrop then
 		for _, lootdrop in ipairs(saved_lootdrop) do
-			self:feed_lootdrop(lootdrop)
+			self:make_lootdrop(lootdrop)
 		end
 	end
 	if saved_selected then
@@ -112,6 +117,8 @@ function HUDLootScreen:create_peer(peers_panel, peer_id)
 	self._peer_data[peer_id].wait_t = false
 	self._peer_data[peer_id].ready = false
 	self._peer_data[peer_id].active = false
+	self._peer_data[peer_id].wait_for_lootdrop = true
+	self._peer_data[peer_id].wait_for_choice = true
 	local panel = peers_panel:panel({
 		name = "peer" .. tostring(peer_id),
 		x = 0,
@@ -449,12 +456,10 @@ end
 function HUDLootScreen:update_layout()
 	self._backdrop:_set_black_borders()
 end
-function HUDLootScreen:feed_lootdrop(lootdrop_data)
-	Application:debug(inspect(lootdrop_data))
+function HUDLootScreen:make_cards(peer, max_pc, left_card, right_card)
 	if not self:is_active() then
 		self:show()
 	end
-	local peer = lootdrop_data[1]
 	local peer_id = peer and peer:id() or 1
 	local is_local_peer = self:get_local_peer_id() == peer_id
 	if is_local_peer then
@@ -463,14 +468,9 @@ function HUDLootScreen:feed_lootdrop(lootdrop_data)
 	end
 	local player_level = is_local_peer and managers.experience:current_level() or peer and peer:level()
 	local player_rank = is_local_peer and managers.experience:current_rank() or peer and peer:rank() or 0
-	local global_value = lootdrop_data[2]
-	local item_category = lootdrop_data[3]
-	local item_id = lootdrop_data[4]
-	local max_pc = lootdrop_data[5]
-	local item_pc = lootdrop_data[6]
-	local left_pc = lootdrop_data[7]
-	local right_pc = lootdrop_data[8]
-	self._peer_data[peer_id].lootdrops = lootdrop_data
+	self._peer_data[peer_id].lootdrops = {}
+	self._peer_data[peer_id].lootdrops[7] = left_card
+	self._peer_data[peer_id].lootdrops[8] = right_card
 	self._peer_data[peer_id].active = true
 	local panel = self._peers_panel:child("peer" .. tostring(peer_id))
 	local peer_info_panel = panel:child("peer_info")
@@ -511,7 +511,22 @@ function HUDLootScreen:feed_lootdrop(lootdrop_data)
 		layer = 2
 	})
 	item_panel:hide()
-	local category = item_category
+	self:set_num_visible(math.max(self:get_local_peer_id(), peer_id))
+	if self._peer_data[peer_id].delayed_card_id then
+		self:begin_choose_card(peer_id, self._peer_data[peer_id].delayed_card_id)
+		self._peer_data[peer_id].delayed_card_id = nil
+	end
+end
+function HUDLootScreen:make_lootdrop(lootdrop_data)
+	local peer = lootdrop_data[1]
+	local peer_id = peer and peer:id() or 1
+	self._peer_data[peer_id].lootdrops = lootdrop_data
+	self._peer_data[peer_id].active = true
+	self._peer_data[peer_id].wait_for_lootdrop = nil
+	local panel = self._peers_panel:child("peer" .. tostring(peer_id))
+	local item_panel = panel:child("item")
+	local item_id = lootdrop_data[4]
+	local category = lootdrop_data[3]
 	if category == "weapon_mods" then
 		category = "mods"
 	end
@@ -556,11 +571,15 @@ function HUDLootScreen:feed_lootdrop(lootdrop_data)
 		else
 			local guis_catalog = "guis/"
 			local tweak_data_category = category == "mods" and "weapon_mods" or category
-			local bundle_folder = tweak_data.blackmarket[tweak_data_category] and tweak_data.blackmarket[tweak_data_category][item_id] and tweak_data.blackmarket[tweak_data_category][item_id].texture_bundle_folder
+			local guis_id = item_id
+			if tweak_data.blackmarket[tweak_data_category] and tweak_data.blackmarket[tweak_data_category][item_id] and tweak_data.blackmarket[tweak_data_category][item_id].guis_id then
+				guis_id = tweak_data.blackmarket[tweak_data_category][item_id].guis_id
+			end
+			local bundle_folder = tweak_data.blackmarket[tweak_data_category] and tweak_data.blackmarket[tweak_data_category][guis_id] and tweak_data.blackmarket[tweak_data_category][guis_id].texture_bundle_folder
 			if bundle_folder then
 				guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
 			end
-			texture_path = guis_catalog .. "textures/pd2/blackmarket/icons/" .. tostring(category) .. "/" .. tostring(item_id)
+			texture_path = guis_catalog .. "textures/pd2/blackmarket/icons/" .. tostring(category) .. "/" .. tostring(guis_id)
 		end
 		Application:debug("Requesting Texture", texture_path, "PEER", peer_id)
 		if DB:has(Idstring("texture"), texture_path) then
@@ -572,10 +591,8 @@ function HUDLootScreen:feed_lootdrop(lootdrop_data)
 			})
 		end
 	end
-	self:set_num_visible(math.max(self:get_local_peer_id(), peer_id))
-	if self._peer_data[peer_id].delayed_card_id then
-		self:begin_choose_card(peer_id, self._peer_data[peer_id].delayed_card_id)
-		self._peer_data[peer_id].delayed_card_id = nil
+	if not self._peer_data[peer_id].wait_for_choice then
+		self:begin_flip_card(peer_id)
 	end
 end
 function HUDLootScreen:texture_loaded_clbk(params, texture_idstring)
@@ -627,10 +644,11 @@ function HUDLootScreen:begin_choose_card(peer_id, card_id)
 	local panel = self._peers_panel:child("peer" .. tostring(peer_id))
 	panel:stop()
 	panel:set_alpha(1)
-	self._peer_data[peer_id].wait_t = 5
+	local wait_for_lootdrop = self._peer_data[peer_id].wait_for_lootdrop
+	self._peer_data[peer_id].wait_t = not wait_for_lootdrop and 5
 	local card_info_panel = panel:child("card_info")
 	local main_text = card_info_panel:child("main_text")
-	main_text:set_text(managers.localization:to_upper_text("menu_l_choose_card_chosen", {time = 5}))
+	main_text:set_text(managers.localization:to_upper_text(wait_for_lootdrop and "menu_l_choose_card_waiting" or "menu_l_choose_card_chosen", {time = 5}))
 	local _, _, _, hh = main_text:text_rect()
 	main_text:set_h(hh + 2)
 	local lootdrop_data = self._peer_data[peer_id].lootdrops
@@ -640,14 +658,12 @@ function HUDLootScreen:begin_choose_card(peer_id, card_id)
 	local right_pc = lootdrop_data[8]
 	local cards = {}
 	local card_one = card_id
-	cards[card_one] = item_pc
+	cards[card_one] = wait_for_lootdrop and 3 or item_pc
 	local card_two = #cards + 1
 	cards[card_two] = left_pc
 	local card_three = #cards + 1
 	cards[card_three] = right_pc
-	if item_pc == 0 then
-		self._peer_data[peer_id].joker = 0 < tweak_data.lootdrop.joker_chance
-	end
+	self._peer_data[peer_id].chosen_card_id = wait_for_lootdrop and card_id
 	local type_to_card = {
 		weapon_mods = 2,
 		cash = 3,
@@ -701,6 +717,52 @@ function HUDLootScreen:begin_choose_card(peer_id, card_id)
 	end
 	panel:child("card" .. card_two):animate(callback(self, self, "flipcard"), 5)
 	panel:child("card" .. card_three):animate(callback(self, self, "flipcard"), 5)
+	self._peer_data[peer_id].wait_for_choice = nil
+end
+function HUDLootScreen:begin_flip_card(peer_id)
+	self._peer_data[peer_id].wait_t = 5
+	local type_to_card = {
+		weapon_mods = 2,
+		cash = 3,
+		masks = 1,
+		materials = 5,
+		colors = 6,
+		textures = 7,
+		xp = 4
+	}
+	local card_nums = {
+		"upcard_mask",
+		"upcard_weapon",
+		"upcard_cash",
+		"upcard_xp",
+		"upcard_material",
+		"upcard_color",
+		"upcard_pattern"
+	}
+	local lootdrop_data = self._peer_data[peer_id].lootdrops
+	local item_category = lootdrop_data[3]
+	local item_pc = lootdrop_data[6]
+	local card_i = type_to_card[item_category] or math.max(item_pc, 1)
+	local texture, rect, coords = tweak_data.hud_icons:get_icon_data(card_nums[card_i] or "downcard_overkill_deck")
+	local panel = self._peers_panel:child("peer" .. tostring(peer_id))
+	local card_info_panel = panel:child("card_info")
+	local main_text = card_info_panel:child("main_text")
+	main_text:set_text(managers.localization:to_upper_text("menu_l_choose_card_chosen", {time = 5}))
+	local _, _, _, hh = main_text:text_rect()
+	main_text:set_h(hh + 2)
+	local card_panel = panel:child("card" .. self._peer_data[peer_id].chosen_card_id)
+	local upcard = card_panel:child("upcard")
+	upcard:set_image(texture)
+	if coords then
+		local tl = Vector3(coords[1][1], coords[1][2], 0)
+		local tr = Vector3(coords[2][1], coords[2][2], 0)
+		local bl = Vector3(coords[3][1], coords[3][2], 0)
+		local br = Vector3(coords[4][1], coords[4][2], 0)
+		upcard:set_texture_coordinates(tl, tr, bl, br)
+	else
+		upcard:set_texture_rect(unpack(rect))
+	end
+	self._peer_data[peer_id].chosen_card_id = nil
 end
 function HUDLootScreen:debug_flip()
 	local card = self._peers_panel:child("peer1"):child("card1")

@@ -34,7 +34,7 @@ function CrimeNetManager:_get_jobs_by_jc()
 		local is_cooldown_ok = managers.job:check_ok_with_cooldown(job_id)
 		local is_not_wrapped = not tweak_data.narrative.jobs[job_id].wrapped_to_job
 		local dlc = tweak_data.narrative:job_data(job_id).dlc
-		local is_not_dlc_or_got = not dlc or managers.dlc:has_dlc(dlc)
+		local is_not_dlc_or_got = not dlc or managers.dlc:is_dlc_unlocked(dlc)
 		local pass_all_tests = is_cooldown_ok and is_not_wrapped and is_not_dlc_or_got
 		if pass_all_tests then
 			local job_data = tweak_data.narrative:job_data(job_id)
@@ -1670,7 +1670,7 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 			num_stars = num_stars + 1
 		end
 		job_num = #tweak_data.narrative:job_chain(data.job_id)
-		local total_payout, stage_payout_table, job_payout_table = managers.money:get_contract_money_by_stars(job_stars, difficulty_stars, job_num, data.job_id)
+		local total_payout, base_payout, risk_payout = managers.money:get_contract_money_by_stars(job_stars, difficulty_stars, job_num, data.job_id)
 		job_cash = managers.experience:cash_string(math.round(total_payout))
 		local difficulty_string = managers.localization:to_upper_text(tweak_data.difficulty_name_ids[tweak_data.difficulties[data.difficulty_id]])
 		difficulty_name:set_text(difficulty_string)
@@ -2457,6 +2457,7 @@ function CrimeNetGui:check_job_pressed(x, y)
 	for id, job in pairs(self._jobs) do
 		if job.mouse_over == 1 then
 			job.expanded = not job.expanded
+			local job_data = tweak_data.narrative:job_data(job.job_id)
 			local data = {
 				difficulty = job.difficulty,
 				difficulty_id = job.difficulty_id,
@@ -2469,7 +2470,8 @@ function CrimeNetGui:check_job_pressed(x, y)
 				state = job.state,
 				host_name = job.host_name,
 				special_node = job.special_node,
-				dlc = job.dlc
+				dlc = job.dlc,
+				contract_visuals = job_data and job_data.contract_visuals
 			}
 			managers.menu_component:post_event("menu_enter")
 			if not data.dlc or managers.dlc:is_dlc_unlocked(data.dlc) then
@@ -3000,6 +3002,9 @@ function CrimeNetGui:ps3_invites_callback()
 		managers.menu:active_menu().renderer:disable_input(0.2)
 		MenuCallbackHandler:view_invites()
 	end
+end
+function CrimeNetGui:enabled()
+	return self._crimenet_enabled
 end
 function CrimeNetGui:enable_crimenet()
 	self._crimenet_enabled = true

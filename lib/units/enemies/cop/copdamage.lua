@@ -949,8 +949,8 @@ function CopDamage:dead()
 end
 function CopDamage:die(variant)
 	self._unit:base():set_slot(self._unit, 17)
-	if alive(managers.interaction:active_object()) then
-		managers.interaction:active_object():interaction():selected()
+	if alive(managers.interaction:active_unit()) then
+		managers.interaction:active_unit():interaction():selected()
 	end
 	self:drop_pickup()
 	self._unit:inventory():drop_shield()

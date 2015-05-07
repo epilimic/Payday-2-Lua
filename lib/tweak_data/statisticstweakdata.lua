@@ -310,7 +310,11 @@ function StatisticsTweakData:statistics_table()
 		"firedemon",
 		"gasmask",
 		"firemask",
-		"chef_hat"
+		"chef_hat",
+		"bandit",
+		"bullskull",
+		"kangee",
+		"lone"
 	}
 	local weapon_list = {
 		"ak5",
@@ -386,7 +390,10 @@ function StatisticsTweakData:statistics_table()
 		"b682",
 		"flamethrower_mk2",
 		"m32",
-		"aa12"
+		"aa12",
+		"peacemaker",
+		"winchester1874",
+		"plainsrider"
 	}
 	local melee_list = {
 		"weapon",
@@ -427,7 +434,16 @@ function StatisticsTweakData:statistics_table()
 		"fork",
 		"poker",
 		"spatula",
-		"tenderizer"
+		"tenderizer",
+		"scalper",
+		"mining_pick",
+		"branding_iron",
+		"bowie"
+	}
+	local grenade_list = {
+		"frag",
+		"molotov",
+		"dynamite"
 	}
 	local enemy_list = {
 		"civilian",
@@ -475,5 +491,5 @@ function StatisticsTweakData:statistics_table()
 		"jacket",
 		"bonnie"
 	}
-	return level_list, job_list, mask_list, weapon_list, melee_list, enemy_list, armor_list, character_list
+	return level_list, job_list, mask_list, weapon_list, melee_list, grenade_list, enemy_list, armor_list, character_list
 end

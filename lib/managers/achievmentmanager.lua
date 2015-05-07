@@ -116,6 +116,7 @@ function AchievmentManager:total_unlocked()
 	return i
 end
 function AchievmentManager:award(id)
+	print("[AchievmentManager:award] ", id)
 	if not self:exists(id) then
 		Application:debug("[AchievmentManager:award] Awarding non-existing achievement", "id", id)
 		return

@@ -5,10 +5,11 @@ function FragGrenade:_setup_from_tweak_data()
 	self._init_timer = tweak_entry.init_timer or 2.5
 	self._mass_look_up_modifier = tweak_entry.mass_look_up_modifier
 	self._range = tweak_entry.range
-	self._effect_name = "effects/payday2/particles/explosions/grenade_explosion"
+	self._effect_name = tweak_entry.effect_name or "effects/payday2/particles/explosions/grenade_explosion"
 	self._curve_pow = tweak_entry.curve_pow or 3
 	self._damage = tweak_entry.damage
 	self._player_damage = tweak_entry.player_damage
+	self._alert_radius = tweak_entry.alert_radius
 	local sound_event = tweak_entry.sound_event or "grenade_explode"
 	self._custom_params = {
 		effect = self._effect_name,
@@ -45,6 +46,7 @@ function FragGrenade:_detonate(tag, unit, body, other_unit, other_body, position
 		damage = self._damage,
 		player_damage = 0,
 		ignore_unit = self._unit,
+		alert_radius = self._alert_radius,
 		user = self._unit
 	})
 	managers.network:session():send_to_peers_synched("sync_unit_event_id_16", self._unit, "base", GrenadeBase.EVENT_IDS.detonate)

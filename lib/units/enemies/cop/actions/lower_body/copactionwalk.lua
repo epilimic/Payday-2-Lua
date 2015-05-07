@@ -942,6 +942,13 @@ function CopActionWalk:update(t)
 					variant = "walk"
 				end
 			elseif self._ext_anim.run then
+				if not self._walk_anim_velocities[pose] then
+					print("No walk anim velocities for pose:", pose)
+					print(inspect(self._walk_anim_velocities))
+				elseif not self._walk_anim_velocities[pose][self._stance.name] then
+					print("No stance info for stance name:", self._stance.name)
+					print(inspect(self._walk_anim_velocities[pose]))
+				end
 				if real_velocity > 530 and self._walk_anim_velocities[pose][self._stance.name].sprint and self._ext_anim.pose == "stand" then
 					variant = "sprint"
 				elseif real_velocity > 250 then
@@ -949,12 +956,21 @@ function CopActionWalk:update(t)
 				else
 					variant = "walk"
 				end
-			elseif real_velocity > 530 and self._walk_anim_velocities[pose][self._stance.name].sprint and self._ext_anim.pose == "stand" then
-				variant = "sprint"
-			elseif real_velocity > 300 then
-				variant = "run"
 			else
-				variant = "walk"
+				if not self._walk_anim_velocities[pose] then
+					print("No walk anim velocities for pose:", pose)
+					print(inspect(self._walk_anim_velocities))
+				elseif not self._walk_anim_velocities[pose][self._stance.name] then
+					print("No stance info for stance name:", self._stance.name)
+					print(inspect(self._walk_anim_velocities[pose]))
+				end
+				if real_velocity > 530 and self._walk_anim_velocities[pose][self._stance.name].sprint and self._ext_anim.pose == "stand" then
+					variant = "sprint"
+				elseif real_velocity > 300 then
+					variant = "run"
+				else
+					variant = "walk"
+				end
 			end
 		end
 		self:_adjust_move_anim(wanted_walk_dir, variant)

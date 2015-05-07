@@ -478,6 +478,9 @@ function CopLogicTravel.is_available_for_assignment(data, new_objective)
 	if new_objective and new_objective.forced then
 		return true
 	elseif data.objective and data.objective.type == "act" then
+		if (not new_objective or new_objective and new_objective.type == "free") and data.objective.interrupt_dis == -1 then
+			return true
+		end
 		return
 	else
 		return CopLogicAttack.is_available_for_assignment(data, new_objective)
@@ -827,6 +830,12 @@ function CopLogicTravel.complete_coarse_path(data, my_data, coarse_path)
 			end
 		end
 		i_nav_point = i_nav_point + 1
+	end
+	if #coarse_path == 1 then
+		table.insert(coarse_path, 1, {
+			current_seg_id,
+			mvector3.copy(data.m_pos)
+		})
 	end
 	local start_index
 	for i, nav_point in ipairs(coarse_path) do

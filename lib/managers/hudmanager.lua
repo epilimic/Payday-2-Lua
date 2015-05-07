@@ -535,9 +535,19 @@ function HUDManager:_update_name_labels(t, dt)
 	for _, data in ipairs(self._hud.name_labels) do
 		local label_panel = data.panel
 		panel = panel or label_panel:parent()
-		local movement = data.movement
-		mvector3.set(nl_w_pos, movement:m_pos())
-		mvector3.set_z(nl_w_pos, mvector3.z(movement:m_head_pos()) + 30)
+		local pos
+		if data.movement then
+			pos = data.movement:m_pos()
+			mvector3.set(nl_w_pos, pos)
+			mvector3.set_z(nl_w_pos, mvector3.z(data.movement:m_head_pos()) + 30)
+		elseif data.vehicle then
+			if not alive(data.vehicle) then
+				return
+			end
+			pos = data.vehicle:position()
+			mvector3.set(nl_w_pos, pos)
+			mvector3.set_z(nl_w_pos, pos.z + data.vehicle:vehicle_driving().hud_label_offset)
+		end
 		mvector3.set(nl_pos, self._workspace:world_to_screen(cam, nl_w_pos))
 		mvector3.set(nl_dir, nl_w_pos)
 		mvector3.subtract(nl_dir, cam_pos)
@@ -557,6 +567,13 @@ function HUDManager:_update_name_labels(t, dt)
 				if dot > 0.925 then
 				else
 				end
+			end
+		end
+		if data.movement then
+			if data.movement.current_state_name and data.movement:current_state_name() == "driving" then
+				label_panel:set_visible(false)
+			elseif data.movement.vehicle_seat and data.movement.vehicle_seat.occupant ~= nil then
+				label_panel:set_visible(false)
 			end
 		end
 		local offset = data.panel:child("cheater"):h() / 2
@@ -997,6 +1014,19 @@ function HUDManager:update_name_label_by_peer(peer)
 			if peer:level() then
 				local experience = (peer:rank() > 0 and managers.experience:rank_string(peer:rank()) .. "-" or "") .. peer:level()
 				name = name .. " (" .. experience .. ")"
+			end
+			data.text:set_text(utf8.to_upper(name))
+			self:align_teammate_name_label(data.panel, data.interact)
+		else
+		end
+	end
+end
+function HUDManager:update_vehicle_label_by_id(label_id, num_players)
+	for _, data in pairs(self._hud.name_labels) do
+		if data.id == label_id then
+			local name = data.character_name
+			if num_players > 0 then
+				name = "(" .. num_players .. ") " .. name
 			end
 			data.text:set_text(utf8.to_upper(name))
 			self:align_teammate_name_label(data.panel, data.interact)

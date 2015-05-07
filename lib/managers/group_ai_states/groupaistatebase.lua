@@ -2218,15 +2218,14 @@ function GroupAIStateBase:on_civilian_objective_complete(unit, objective)
 	end
 end
 function GroupAIStateBase:on_civilian_objective_failed(unit, objective)
-	local fail_clbk = objective.fail_clbk
-	objective.fail_clbk = nil
-	if fail_clbk then
-		fail_clbk(unit)
-	end
 	if alive(unit) and objective == unit:brain():objective() then
 		if unit:brain():is_tied() then
-			print("going back to tied")
 			unit:brain():on_hostage_move_interaction(nil, "stay")
+			local fail_clbk = objective.fail_clbk
+			objective.fail_clbk = nil
+			if fail_clbk then
+				fail_clbk(unit)
+			end
 		else
 			unit:brain():set_objective({type = "free", is_default = true})
 		end
@@ -2449,6 +2448,12 @@ function GroupAIStateBase:hostage_killed(killer_unit)
 	if not alive(killer_unit) then
 		return
 	end
+	if killer_unit:base() and killer_unit:base().thrower_unit then
+		killer_unit = killer_unit:base():thrower_unit()
+		if not alive(killer_unit) then
+			return
+		end
+	end
 	local key = killer_unit:key()
 	local criminal = self._criminals[key]
 	if not criminal then
@@ -2481,6 +2486,20 @@ function GroupAIStateBase:hostage_killed(killer_unit)
 		local respawn_penalty = criminal.respawn_penalty or tweak.base_respawn_time_penalty
 		criminal.respawn_penalty = respawn_penalty + tweak.respawn_time_penalty
 		criminal.hostages_killed = (criminal.hostages_killed or 0) + 1
+	end
+end
+function GroupAIStateBase:set_dropin_hostages_killed(criminal_unit, hostages_killed, respawn_penalty)
+	if not alive(criminal_unit) then
+		return
+	end
+	local key = criminal_unit:key()
+	local criminal = self._criminals[key]
+	if not criminal then
+		return
+	end
+	if not criminal.is_deployable then
+		criminal.hostages_killed = hostages_killed or criminal.hostages_killed
+		criminal.respawn_penalty = respawn_penalty or criminal.respawn_penalty
 	end
 end
 function GroupAIStateBase:on_AI_criminal_death(criminal_name, unit)
@@ -3225,6 +3244,14 @@ end
 function GroupAIStateBase:is_area_safe(area)
 	for u_key, u_data in pairs(self._criminals) do
 		if area.nav_segs[u_data.tracker:nav_segment()] then
+			return
+		end
+	end
+	return true
+end
+function GroupAIStateBase:is_area_safe_assault(area)
+	for u_key, u_data in pairs(self._criminals) do
+		if not u_data.is_deployable and area.nav_segs[u_data.tracker:nav_segment()] then
 			return
 		end
 	end
@@ -4066,8 +4093,11 @@ function GroupAIStateBase:on_criminal_suspicion_progress(u_suspect, u_observer, 
 	if not self._ai_enabled or not self._whisper_mode then
 		return
 	end
-	local susp_data = self._suspicion_hud_data
 	local obs_key = u_observer:key()
+	if managers.groupai:state():all_AI_criminals()[obs_key] then
+		return
+	end
+	local susp_data = self._suspicion_hud_data
 	local susp_key = u_suspect and u_suspect:key()
 	local function _sync_status(sync_status_code)
 		if Network:is_server() and managers.network:session() then
@@ -4377,4 +4407,22 @@ function GroupAIStateBase:get_following_hostages(owner)
 		return
 	end
 	return owner_data.following_hostages
+end
+function GroupAIStateBase:register_turret(unit)
+	self._turret_units = self._turret_units or {}
+	table.insert(self._turret_units, unit)
+end
+function GroupAIStateBase:unregister_turret(unit)
+	if not self._turret_units then
+		return
+	end
+	for id, turret_unit in pairs(self._turret_units) do
+		if turret_unit:key() == unit:key() then
+			self._turret_units[id] = nil
+			return
+		end
+	end
+end
+function GroupAIStateBase:turrets()
+	return self._turret_units
 end

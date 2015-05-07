@@ -46,7 +46,6 @@ function IngameDriving:at_enter(old_state, ...)
 		player:base():set_enabled(true)
 	end
 	SoundDevice:set_rtpc("stamina", 100)
-	self._sound_source = self._sound_source or SoundDevice:create_source("IngameDriving")
 	self._old_state = old_state:name()
 	local vehicle_ext = managers.player:get_vehicle().vehicle_unit:vehicle_driving()
 	local seat = vehicle_ext:find_seat_for_player(player)
