@@ -1484,7 +1484,7 @@ function TweakData:init()
 				"olympic"
 			}
 		},
-		seven_eleven = {
+		scorpion_4 = {
 			award = "scorpion_4",
 			weapon = "peacemaker",
 			in_steelsight = false,

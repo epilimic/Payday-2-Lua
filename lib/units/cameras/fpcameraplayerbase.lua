@@ -81,6 +81,8 @@ function FPCameraPlayerBase:update(unit, t, dt)
 	if managers.player:current_state() ~= "driving" then
 		self._parent_unit:camera():set_position(self._output_data.position)
 		self._parent_unit:camera():set_rotation(self._output_data.rotation)
+	else
+		self:_set_camera_position_in_vehicle()
 	end
 	if self._fov.dirty then
 		self._parent_unit:camera():set_FOV(self._fov.fov)
@@ -332,55 +334,7 @@ function FPCameraPlayerBase:_update_rot(axis)
 	mrotation.multiply(new_shoulder_rot, self._vel_overshot.rotation)
 	local player_state = managers.player:current_state()
 	if player_state == "driving" then
-		local vehicle = managers.player:get_vehicle().vehicle_unit:vehicle()
-		local vehicle_ext = managers.player:get_vehicle().vehicle_unit:vehicle_driving()
-		local seat = vehicle_ext:find_seat_for_player(managers.player:player_unit())
-		local obj_pos, obj_rot = vehicle_ext:get_object_placement(managers.player:local_player())
-		if obj_pos == nil or obj_rot == nil then
-			return
-		end
-		local stance = managers.player:local_player():movement():current_state():stance()
-		if stance == PlayerDriving.STANCE_SHOOTING then
-			mvector3.add(obj_pos, seat.shooting_pos:rotate_with(vehicle:rotation()))
-		end
-		local camera_rot = mrot3
-		mrotation.set_zero(camera_rot)
-		mrotation.multiply(camera_rot, obj_rot)
-		mrotation.multiply(camera_rot, self._output_data.rotation)
-		local hands_rot = mrot4
-		mrotation.set_zero(hands_rot)
-		mrotation.multiply(hands_rot, obj_rot)
-		mrotation.multiply(hands_rot, Rotation(-90, 0, 0))
-		local target = Vector3(0, 0, 145)
-		local target_camera = Vector3(0, 0, 145)
-		if vehicle_ext._tweak_data.driver_camera_offset then
-			target_camera = target_camera + vehicle_ext._tweak_data.driver_camera_offset
-		end
-		mvector3.rotate_with(target, vehicle:rotation())
-		mvector3.rotate_with(target_camera, vehicle:rotation())
-		local pos = obj_pos + target
-		local camera_pos = obj_pos + target_camera
-		if seat.driving then
-			self:set_position(pos)
-			self:set_rotation(hands_rot)
-			self._parent_unit:camera():set_position(camera_pos)
-			self._parent_unit:camera():set_rotation(camera_rot)
-		else
-			local shoulder_pos = mvec3
-			local shoulder_rot = mrot4
-			mrotation.set_zero(shoulder_rot)
-			mrotation.multiply(shoulder_rot, camera_rot)
-			mrotation.multiply(shoulder_rot, self._shoulder_stance.rotation)
-			mrotation.multiply(shoulder_rot, self._vel_overshot.rotation)
-			mvector3.set(shoulder_pos, self._shoulder_stance.translation)
-			mvector3.add(shoulder_pos, self._vel_overshot.translation)
-			mvector3.rotate_with(shoulder_pos, shoulder_rot)
-			mvector3.add(shoulder_pos, pos)
-			self:set_position(shoulder_pos)
-			self:set_rotation(shoulder_rot)
-			self._parent_unit:camera():set_position(pos)
-			self._parent_unit:camera():set_rotation(camera_rot)
-		end
+		self:_set_camera_position_in_vehicle()
 	else
 		self:set_position(new_shoulder_pos)
 		self:set_rotation(new_shoulder_rot)
@@ -393,6 +347,57 @@ function FPCameraPlayerBase:_update_rot(axis)
 		self:set_fov_instant(40)
 	elseif not self._parent_unit:movement()._current_state:in_steelsight() then
 		PlayerBipod:set_shoulder_pos(bipod_pos)
+	end
+end
+function FPCameraPlayerBase:_set_camera_position_in_vehicle()
+	local vehicle = managers.player:get_vehicle().vehicle_unit:vehicle()
+	local vehicle_ext = managers.player:get_vehicle().vehicle_unit:vehicle_driving()
+	local seat = vehicle_ext:find_seat_for_player(managers.player:player_unit())
+	local obj_pos, obj_rot = vehicle_ext:get_object_placement(managers.player:local_player())
+	if obj_pos == nil or obj_rot == nil then
+		return
+	end
+	local stance = managers.player:local_player():movement():current_state():stance()
+	if stance == PlayerDriving.STANCE_SHOOTING then
+		mvector3.add(obj_pos, seat.shooting_pos:rotate_with(vehicle:rotation()))
+	end
+	local camera_rot = mrot3
+	mrotation.set_zero(camera_rot)
+	mrotation.multiply(camera_rot, obj_rot)
+	mrotation.multiply(camera_rot, self._output_data.rotation)
+	local hands_rot = mrot4
+	mrotation.set_zero(hands_rot)
+	mrotation.multiply(hands_rot, obj_rot)
+	mrotation.multiply(hands_rot, Rotation(-90, 0, 0))
+	local target = Vector3(0, 0, 145)
+	local target_camera = Vector3(0, 0, 145)
+	if vehicle_ext._tweak_data.driver_camera_offset then
+		target_camera = target_camera + vehicle_ext._tweak_data.driver_camera_offset
+	end
+	mvector3.rotate_with(target, vehicle:rotation())
+	mvector3.rotate_with(target_camera, vehicle:rotation())
+	local pos = obj_pos + target
+	local camera_pos = obj_pos + target_camera
+	if seat.driving then
+		self:set_position(pos)
+		self:set_rotation(hands_rot)
+		self._parent_unit:camera():set_position(camera_pos)
+		self._parent_unit:camera():set_rotation(camera_rot)
+	else
+		local shoulder_pos = mvec3
+		local shoulder_rot = mrot4
+		mrotation.set_zero(shoulder_rot)
+		mrotation.multiply(shoulder_rot, camera_rot)
+		mrotation.multiply(shoulder_rot, self._shoulder_stance.rotation)
+		mrotation.multiply(shoulder_rot, self._vel_overshot.rotation)
+		mvector3.set(shoulder_pos, self._shoulder_stance.translation)
+		mvector3.add(shoulder_pos, self._vel_overshot.translation)
+		mvector3.rotate_with(shoulder_pos, shoulder_rot)
+		mvector3.add(shoulder_pos, pos)
+		self:set_position(shoulder_pos)
+		self:set_rotation(shoulder_rot)
+		self._parent_unit:camera():set_position(pos)
+		self._parent_unit:camera():set_rotation(camera_rot)
 	end
 end
 function FPCameraPlayerBase:_get_aim_assist(t, dt)

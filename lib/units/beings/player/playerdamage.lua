@@ -749,6 +749,9 @@ function PlayerDamage:_check_bleed_out(can_activate_berserker)
 				managers.hud:set_teammate_condition(HUDManager.PLAYER_PANEL, "mugshot_swansong", managers.localization:text("debug_mugshot_downed"))
 				managers.player:activate_temporary_upgrade("temporary", "berserker_damage_multiplier")
 				self._check_berserker_done = true
+				if alive(managers.interaction:active_unit()) and not managers.interaction:active_unit():interaction():can_interact(self._unit) then
+					self._unit:movement():interupt_interact()
+				end
 			end
 		end
 		self._hurt_value = 0.2

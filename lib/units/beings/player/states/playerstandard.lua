@@ -1035,6 +1035,13 @@ end
 function PlayerStandard:_interacting()
 	return self._interact_expire_t
 end
+function PlayerStandard:interupt_interact()
+	if self:_interacting() then
+		self:_interupt_action_interact()
+		managers.interaction:interupt_action_interact()
+		self._interact_expire_t = nil
+	end
+end
 function PlayerStandard:_update_interaction_timers(t)
 	if self._interact_expire_t then
 		if not alive(self._interact_params.object) or self._interact_params.object ~= managers.interaction:active_unit() or self._interact_params.tweak_data ~= self._interact_params.object:interaction().tweak_data or self._interact_params.object:interaction():check_interupt() then

@@ -587,6 +587,9 @@ end
 function PlayerMovement:object_interaction_blocked()
 	return self._current_state:interaction_blocked()
 end
+function PlayerMovement:interupt_interact()
+	self._current_state:interupt_interact()
+end
 function PlayerMovement:on_morale_boost(benefactor_unit)
 	if self._morale_boost then
 		managers.enemy:reschedule_delayed_clbk(self._morale_boost.expire_clbk_id, TimerManager:game():time() + tweak_data.upgrades.morale_boost_time)

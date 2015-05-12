@@ -330,7 +330,7 @@ function CopDamage:_check_damage_achievements(attack_data, head)
 			if achievement_data.level_id then
 				level_pass = (managers.job:current_level_id() or "") == achievement_data.level_id
 			end
-			steelsight_pass = achievement_data.in_steelsight == nil or attack_data.attacker_unit and attack_data.attacker_unit:movement():current_state():in_steelsight() == achievement_data.in_steelsight
+			steelsight_pass = achievement_data.in_steelsight == nil or attack_data.attacker_unit and attack_data.attacker_unit:movement() and not not attack_data.attacker_unit:movement():current_state():in_steelsight() == not not achievement_data.in_steelsight
 			cop_pass = not achievement_data.is_cop or is_cop
 			part_pass = not achievement_data.part_id or attack_weapon:base():has_part(achievement_data.part_id)
 			parts_pass = not achievement_data.parts
@@ -346,7 +346,7 @@ function CopDamage:_check_damage_achievements(attack_data, head)
 			timer_pass = not achievement_data.timer
 			if all_pass and achievement_data.timer then
 				memory = managers.job:get_memory(achievement)
-				local t = Application:time()
+				local t = TimerManager:game():time()
 				if memory then
 					table.insert(memory, t)
 					for i = #memory, 1, -1 do

@@ -2072,6 +2072,10 @@ function PlayerManager:clear_carry()
 		managers.player:set_player_state("standard")
 	end
 end
+function PlayerManager:is_berserker()
+	local player_unit = self:player_unit()
+	return alive(player_unit) and player_unit:character_damage() and player_unit:character_damage():is_berserker() or false
+end
 function PlayerManager:is_carrying()
 	return self:get_my_carry_data() and true or false
 end

@@ -1725,8 +1725,8 @@ function MenuNodeCrimenetGageAssignmentGui:close()
 	MenuNodeCrimenetGageAssignmentGui.super.close(self)
 end
 MenuNodeCrimenetChallengeGui = MenuNodeCrimenetChallengeGui or class(MenuNodeCrimenetGageAssignmentGui)
-MenuNodeCrimenetChallengeGui.WIDTH = 840
-MenuNodeCrimenetChallengeGui.HEIGHT = 460
+MenuNodeCrimenetChallengeGui.WIDTH = 900
+MenuNodeCrimenetChallengeGui.HEIGHT = 500
 MenuNodeCrimenetChallengeGui.MENU_WIDTH = 315
 MenuNodeCrimenetChallengeGui.PADDING = 10
 MenuNodeCrimenetChallengeGui.CODEX_TEXT_ID = "menu_cn_challenge_title"
@@ -1858,10 +1858,12 @@ function MenuNodeCrimenetChallengeGui:set_contact_info(id, name, files, override
 		end
 		if challenge.rewards and 0 < #challenge.rewards then
 			local x = self.PADDING
-			local height = math.min(self._info_panel:h() - y - self.PADDING * 2 - tweak_data.menu.pd2_small_font_size, 128)
+			local min_height = 64
+			local height = math.clamp(self._info_panel:h() - y - self.PADDING * 2 - tweak_data.menu.pd2_small_font_size, min_height, 128)
 			local width = math.min((self._info_panel:w() - self.PADDING * (#challenge.rewards - 1)) / #challenge.rewards, height)
 			local rewards_panel = self._info_panel:panel({
-				name = "rewards_panel"
+				name = "rewards_panel",
+				layer = 10
 			})
 			rewards_panel:set_h(height)
 			rewards_panel:set_bottom(self._info_panel:h())
@@ -1886,6 +1888,7 @@ function MenuNodeCrimenetChallengeGui:set_contact_info(id, name, files, override
 			local color = false
 			local rewards_text = self._info_panel:text({
 				name = "rewards_text",
+				layer = 10,
 				text = managers.localization:to_upper_text(challenge.rewarded and "menu_cn_rewarded" or challenge.completed and "menu_cn_completed" or "menu_cn_not_completed"),
 				font = tweak_data.menu.pd2_small_font,
 				font_size = tweak_data.menu.pd2_small_font_size,
@@ -1898,6 +1901,17 @@ function MenuNodeCrimenetChallengeGui:set_contact_info(id, name, files, override
 			rewards_text:set_bottom(rewards_panel:top())
 			if color then
 				rewards_text:set_color(color)
+			end
+			if height == min_height then
+				self._info_panel:rect({
+					w = rewards_panel:w(),
+					h = rewards_panel:bottom() - rewards_text:top(),
+					x = rewards_panel:x(),
+					y = rewards_text:top(),
+					color = Color.black,
+					layer = 9,
+					alpha = 0.5
+				})
 			end
 			BoxGuiObject:new(rewards_panel, {
 				sides = {

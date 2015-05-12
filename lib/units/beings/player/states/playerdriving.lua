@@ -54,13 +54,12 @@ function PlayerDriving:_enter(enter_data)
 	end
 	self._unit:camera():set_shaker_parameter("breathing", "amplitude", 0)
 	self._unit:camera()._camera_unit:base():animate_fov(self._vehicle_ext._tweak_data.fov, 0.33)
-	self:_setup_controller()
+	self._controller = self._unit:base():controller()
 	self:_upd_attention()
 end
 function PlayerDriving:exit(state_data, new_state_name)
 	print("[DRIVING] PlayerDriving: Exiting vehicle")
 	PlayerDriving.super.exit(self, state_data, new_state_name)
-	self:_clear_controller()
 	self:_interupt_action_exit_vehicle()
 	local exit_position = self._vehicle_ext:find_exit_position(self._unit)
 	local exit_rot = exit_position:rotation()
@@ -289,18 +288,6 @@ function PlayerDriving:_get_vehicle()
 	end
 	self._vehicle_ext = self._vehicle_unit:vehicle_driving()
 	self._vehicle = self._vehicle_unit:vehicle()
-end
-function PlayerDriving:_setup_controller()
-	self._controller = self._unit:base():controller()
-end
-function PlayerDriving:_clear_controller()
-	if self._controller then
-	end
-end
-function PlayerDriving:set_controller_enabled(enabled)
-	if self._controller then
-		self._controller:set_enabled(enabled)
-	end
 end
 function PlayerDriving:cb_leave()
 	local exit_position = self._vehicle_ext:find_exit_position(self._unit)
