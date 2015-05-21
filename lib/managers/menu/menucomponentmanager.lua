@@ -13,6 +13,7 @@ require("lib/managers/menu/PlayerProfileGuiObject")
 require("lib/managers/menu/IngameContractGui")
 require("lib/managers/menu/IngameManualGui")
 require("lib/managers/menu/PrePlanningMapGui")
+require("lib/managers/menu/GameInstallingGui")
 require("lib/managers/hud/HUDLootScreen")
 MenuComponentManager = MenuComponentManager or class()
 function MenuComponentManager:init()
@@ -28,6 +29,10 @@ function MenuComponentManager:init()
 	self._resolution_changed_callback_id = managers.viewport:add_resolution_changed_func(callback(self, self, "resolution_changed"))
 	self._request_done_clbk_func = callback(self, self, "_request_done_callback")
 	self._preplanning_saved_draws = {}
+	local is_installing, install_progress = managers.dlc:is_installing()
+	self._is_game_installing = is_installing
+	self._crimenet_enabled = not is_installing
+	self._crimenet_offline_enabled = not is_installing
 	self._active_components = {}
 	self._active_components.news = {
 		create = callback(self, self, "_create_newsfeed_gui"),
@@ -140,6 +145,10 @@ function MenuComponentManager:init()
 	self._active_components.preplanning_map = {
 		create = callback(self, self, "create_preplanning_map_gui"),
 		close = callback(self, self, "close_preplanning_map_gui")
+	}
+	self._active_components.game_installing = {
+		create = callback(self, self, "create_game_installing_gui"),
+		close = callback(self, self, "close_game_installing_gui")
 	}
 end
 function MenuComponentManager:save(data)
@@ -292,6 +301,7 @@ function MenuComponentManager:update(t, dt)
 		self:update_mission_briefing_tab_positions()
 	end
 	self:_update_newsfeed_gui(t, dt)
+	self:_update_game_installing_gui(t, dt)
 	if t > self._refresh_friends_t then
 		self:_update_friends_gui()
 		self._refresh_friends_t = t + self._REFRESH_FRIENDS_TIME
@@ -700,6 +710,9 @@ function MenuComponentManager:special_btn_pressed(...)
 		return true
 	end
 	if self._crimenet_casino_gui and self._crimenet_casino_gui:special_btn_pressed(...) then
+		return true
+	end
+	if self._stage_endscreen_gui and self._stage_endscreen_gui:special_btn_pressed(...) then
 		return true
 	end
 end
@@ -1335,6 +1348,9 @@ function MenuComponentManager:remove_crimenet_gui_job(id)
 		self._crimenet_gui:remove_job(id)
 	end
 end
+function MenuComponentManager:has_crimenet_gui()
+	return not not self._crimenet_gui
+end
 function MenuComponentManager:close_crimenet_gui()
 	if self._crimenet_gui then
 		self._crimenet_gui:close()
@@ -1733,6 +1749,11 @@ function MenuComponentManager:set_blackmarket_tab_positions()
 		self._blackmarket_gui:set_tab_positions()
 	end
 end
+function MenuComponentManager:reload_blackmarket_gui()
+	if self._blackmarket_gui and not self._blackmarket_gui:in_setup() then
+		self._blackmarket_gui:reload()
+	end
+end
 function MenuComponentManager:close_blackmarket_gui()
 	if self._blackmarket_gui then
 		self._blackmarket_gui:close()
@@ -1956,7 +1977,7 @@ function MenuComponentManager:create_lootdrop_casino_gui(node)
 		}
 		local selected_card = {}
 		selected_card[peer and peer:id() or 1] = 2
-		local parent_layer = managers.menu:active_menu().renderer:selected_node():layer()
+		local parent_layer = managers.menu:active_menu() and managers.menu:active_menu().renderer:selected_node() and managers.menu:active_menu().renderer:selected_node():layer() or 100
 		self._lootscreen_casino_hud = HUDLootScreen:new(nil, self._fullscreen_ws, nil, selected_card)
 		self._lootscreen_casino_hud:set_layer(parent_layer + 1)
 		self._lootscreen_casino_hud:show()
@@ -2217,19 +2238,28 @@ function MenuComponentManager:close_view_character_profile_gui()
 		self._view_character_profile_gui_minimized_id = nil
 	end
 end
-function MenuComponentManager:get_texture_from_mod_type(type, sub_type, gadget, silencer, is_auto)
+function MenuComponentManager:get_texture_from_mod_type(type, sub_type, gadget, silencer, is_auto, equipped, mods, types)
 	local texture
 	if silencer then
 		texture = "guis/textures/pd2/blackmarket/inv_mod_silencer"
 	elseif type == "gadget" then
 		texture = "guis/textures/pd2/blackmarket/inv_mod_" .. (gadget or "flashlight")
-	elseif type == "upper_reciever" then
+	elseif type == "upper_reciever" or type == "lower_reciever" then
 		texture = "guis/textures/pd2/blackmarket/inv_mod_custom"
 	elseif type == "custom" then
 		texture = "guis/textures/pd2/blackmarket/inv_mod_" .. (sub_type or is_auto and "autofire" or "singlefire")
 	elseif type == "sight" then
 		texture = "guis/textures/pd2/blackmarket/inv_mod_scope"
 	elseif type == "ammo" then
+		if equipped then
+			texture = "guis/textures/pd2/blackmarket/inv_mod_" .. tostring(sub_type or type)
+		elseif mods and #mods > 0 then
+			local weapon_factory_tweak_data = tweak_data.weapon.factory.parts
+			local part_id = mods[1][1]
+			type = weapon_factory_tweak_data[part_id].type
+			sub_type = weapon_factory_tweak_data[part_id].sub_type
+			texture = "guis/textures/pd2/blackmarket/inv_mod_" .. tostring(sub_type or type)
+		end
 		texture = "guis/textures/pd2/blackmarket/inv_mod_" .. tostring(sub_type or type)
 	else
 		texture = "guis/textures/pd2/blackmarket/inv_mod_" .. type
@@ -2246,9 +2276,32 @@ function MenuComponentManager:create_weapon_mod_icon_list(weapon, category, fact
 		for _, default_part in ipairs(default_blueprint) do
 			table.delete(mods_equip, default_part)
 		end
+		local mods = {}
 		local mods_sorted = {}
-		for id, _ in pairs(mods_all) do
+		local types = {}
+		local type
+		for id, data in pairs(mods_all) do
+			mods[id] = mods[id] or {}
+			for _, mod in ipairs(data) do
+				table.insert(mods[id], clone(mod))
+			end
 			table.insert(mods_sorted, id)
+			types[id] = true
+		end
+		for _, data in pairs(mods) do
+			do
+				local sort_td = tweak_data.blackmarket.weapon_mods
+				local x_td, y_td, x_pc, y_pc
+				table.sort(data, function(x, y)
+					x_td = sort_td[x[1]]
+					y_td = sort_td[y[1]]
+					x_pc = x_td.value or x_td.pc or x_td.pcs and x_td.pcs[1] or 10
+					y_pc = y_td.value or y_td.pc or y_td.pcs and y_td.pcs[1] or 10
+					x_pc = x_pc + (x[2] and tweak_data.lootdrop.global_values[x[2]].sort_number or 0)
+					y_pc = y_pc + (y[2] and tweak_data.lootdrop.global_values[y[2]].sort_number or 0)
+					return x_pc < y_pc or x_pc == y_pc and x[1] < y[1]
+				end)
+			end
 		end
 		table.sort(mods_sorted, function(x, y)
 			return y < x
@@ -2267,17 +2320,70 @@ function MenuComponentManager:create_weapon_mod_icon_list(weapon, category, fact
 				else
 				end
 			end
-			local texture = self:get_texture_from_mod_type(name, sub_type, gadget, silencer, is_auto)
-			if DB:has(Idstring("texture"), texture) then
-				table.insert(icon_list, {
-					texture = texture,
-					equipped = equipped,
-					type = name
-				})
+			local texture = self:get_texture_from_mod_type(name, sub_type, gadget, silencer, is_auto, equipped, mods[name], types)
+			if texture then
+				if DB:has(Idstring("texture"), texture) then
+					table.insert(icon_list, {
+						texture = texture,
+						equipped = equipped,
+						type = name
+					})
+				else
+					Application:error("[MenuComponentManager:create_weapon_mod_icon_list]", "Missing texture for weapon mod icon", texture)
+				end
 			end
 		end
 	end
 	return icon_list
+end
+function MenuComponentManager:create_game_installing_gui()
+	if self._game_installing then
+		return
+	end
+	self:_create_game_installing_gui()
+end
+function MenuComponentManager:_create_game_installing_gui()
+	self:close_game_installing_gui()
+	if not MenuCallbackHandler:is_installed() then
+		self._game_installing = GameInstallingGui:new(self._ws)
+	end
+end
+function MenuComponentManager:_update_game_installing_gui(t, dt)
+	if not self._crimenet_enabled or not self._crimenet_offline_enabled then
+		local is_installing, install_progress = managers.dlc:is_installing()
+		if self._game_installing then
+			self._game_installing:update(install_progress)
+		end
+		self._is_game_installing = is_installing
+		if not self._is_game_installing and managers.menu:active_menu() then
+			local logic = managers.menu:active_menu().logic
+			if logic then
+				local node = logic:get_node("main")
+				if node then
+					local crimenet = node:item("crimenet")
+					if crimenet then
+						crimenet:set_enabled(true)
+						self._crimenet_enabled = true
+					end
+					local crimenet_offline = node:item("crimenet_offline")
+					if crimenet_offline then
+						crimenet_offline:set_enabled(true)
+						self._crimenet_offline_enabled = true
+					end
+				else
+					self._crimenet_enabled = true
+					self._crimenet_offline_enabled = true
+				end
+			end
+			self:close_game_installing_gui()
+		end
+	end
+end
+function MenuComponentManager:close_game_installing_gui()
+	if self._game_installing then
+		self._game_installing:close()
+		self._game_installing = nil
+	end
 end
 function MenuComponentManager:_create_newsfeed_gui()
 	if self._newsfeed_gui then

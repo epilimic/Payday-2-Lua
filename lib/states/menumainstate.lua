@@ -4,6 +4,7 @@ function MenuMainState:init(game_state_machine)
 	GameState.init(self, "menu_main", game_state_machine)
 end
 function MenuMainState:at_enter(old_state)
+	managers.platform:set_playing(false)
 	managers.platform:set_rich_presence("Idle")
 	if old_state:name() ~= "freeflight" or not managers.menu:is_active() then
 		managers.menu_scene:setup_camera()
@@ -38,21 +39,8 @@ function MenuMainState:at_enter(old_state)
 		end
 	end
 	local has_invite = false
-	if SystemInfo:platform() == Idstring("PS3") then
-		Global.boot_invite = Global.boot_invite or {}
-		if Application:is_booted_from_invitation() and not Global.boot_invite.used then
-			has_invite = true
-			Global.boot_invite.used = false
-			Global.boot_invite.pending = true
-			if 0 < #PSN:get_world_list() and PSN:is_online() then
-				print("had world list, can join now")
-				managers.network.matchmake:join_boot_invite()
-			else
-				managers.menu:open_ps3_sign_in_menu(function(success)
-					print("success", success)
-				end)
-			end
-		end
+	if SystemInfo:platform() == Idstring("PS3") or SystemInfo:platform() == Idstring("PS4") then
+		is_boot = not Global.psn_boot_invite_checked and Application:is_booted_from_invitation()
 	elseif SystemInfo:platform() == Idstring("WIN32") then
 		if Global.boot_invite then
 			has_invite = true
@@ -60,7 +48,7 @@ function MenuMainState:at_enter(old_state)
 			Global.boot_invite = nil
 			managers.network.matchmake:join_server_with_check(lobby)
 		end
-	elseif SystemInfo:platform() == Idstring("X360") and Global.boot_invite and next(Global.boot_invite) then
+	elseif (SystemInfo:platform() == Idstring("X360") or SystemInfo:platform() == Idstring("XB1")) and Global.boot_invite and next(Global.boot_invite) then
 		has_invite = true
 		managers.network.matchmake:join_boot_invite()
 	end
@@ -88,7 +76,7 @@ function MenuMainState:at_exit(new_state)
 	end
 end
 function MenuMainState:on_server_left()
-	if managers.network:session() and managers.network:session():has_recieved_ok_to_load_level() then
+	if managers.network:session() and (managers.network:session():has_recieved_ok_to_load_level() or managers.network:session():closing()) then
 		return
 	end
 	self:_create_server_left_dialog()
@@ -114,4 +102,6 @@ function MenuMainState:_create_disconnected_dialog()
 	managers.menu:show_mp_disconnected_internet_dialog({
 		ok_func = callback(self, self, "on_server_left_ok_pressed")
 	})
+end
+function MenuMainState:on_disconnected()
 end

@@ -27,10 +27,12 @@ end
 local win32 = Idstring("WIN32")
 local ps3 = Idstring("PS3")
 local x360 = Idstring("X360")
+local ps4 = Idstring("PS4")
+local xb1 = Idstring("XB1")
 function ElementFilter:_check_platform()
 	local platform = Global.running_simulation and Idstring(managers.editor:mission_platform())
 	platform = platform or SystemInfo:platform()
-	if self._values.platform_win32 and platform == win32 then
+	if self._values.platform_win32 and (platform == win32 or platform == ps4 or platform == xb1) then
 		return true
 	end
 	if self._values.platform_ps3 and (platform == ps3 or platform == x360) then

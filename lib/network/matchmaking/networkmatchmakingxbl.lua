@@ -8,7 +8,10 @@ function NetworkMatchMakingXBL:init()
 	self._difficulty_filter = 0
 	self._try_re_enter_lobby = nil
 	self._players = {}
+	self._next_cancel_callback_id = 0
+	self._cancel_callback_map = {}
 	self:set_server_joinable(true)
+	print("[XBLA] matchmaking initialized")
 	managers.platform:add_event_callback("invite_accepted", callback(self, self, "invite_accepted_callback"))
 end
 function NetworkMatchMakingXBL:invite_accepted_callback(player_index)
@@ -24,9 +27,14 @@ function NetworkMatchMakingXBL:invite_accepted_callback(player_index)
 		Global.boot_invite[player_index] = invitation
 		return
 	end
-	if managers.user:get_platform_id() ~= player_index then
+	if managers.dlc:is_installing() then
+		Global.boot_invite = nil
+		managers.menu:show_game_is_installing()
+		return
+	end
+	if not invitation.is_same_user then
 		print("INACTIVE USER RECIEVED INVITE")
-		Global.boot_invite[player_index] = invitation
+		Global.boot_invite[player_index] = nil
 		managers.menu:show_inactive_user_accepted_invite({ok_func = nil})
 		managers.user:invite_accepted_by_inactive_user()
 		return
@@ -37,12 +45,22 @@ function NetworkMatchMakingXBL:invite_accepted_callback(player_index)
 		MenuCallbackHandler:_dialog_end_game_yes()
 		return
 	end
+	if setup:has_queued_exec() then
+		Global.queued_invite = invitation
+		Global.queued_player = player_index
+		return
+	end
 	self:_check_invite_requirements(invitation)
 end
 function NetworkMatchMakingXBL:join_boot_invite()
 	local invitation = Global.boot_invite[managers.user:get_platform_id()]
 	print("NetworkMatchMakingXBL:join_boot_invite()", invitation)
 	if not invitation then
+		return
+	end
+	if managers.dlc:is_installing() then
+		Global.boot_invite = nil
+		managers.menu:show_game_is_installing()
 		return
 	end
 	self:_check_invite_requirements(invitation)
@@ -52,17 +70,24 @@ function NetworkMatchMakingXBL:_check_invite_requirements(invitation)
 	Global.game_settings.single_player = false
 	self._test_invitation = invitation
 	print("invitation\n", inspect(invitation))
-	if not managers.menu:_enter_online_menus_x360() then
-		return
-	end
-	if self._session and self._session:id() == invitation.host_info:id() then
-		print("Allready in that session")
-		return
-	end
-	self._has_pending_invite = true
-	self:_join_invite_accepted(invitation.host_info)
+	managers.menu:open_sign_in_menu(function(success)
+		if not success then
+			return
+		end
+		if self._session and self._session:id() == invitation.host_info:id() then
+			print("Allready in that session")
+			return
+		end
+		if invitation.host_info:id() == "(empty)" then
+			managers.menu:show_invite_wrong_room_message()
+			managers.menu:leave_online_menu()
+			return
+		end
+		self._has_pending_invite = true
+		self:_join_invite_accepted(invitation.host_info, invitation.properties.GAMERHOSTNAME)
+	end)
 end
-function NetworkMatchMakingXBL:_join_invite_accepted(host_info)
+function NetworkMatchMakingXBL:_join_invite_accepted(host_info, host_name)
 	managers.system_menu:close("server_left_dialog")
 	print("_join_invite_accepted", host_info)
 	self._has_pending_invite = nil
@@ -71,7 +96,8 @@ function NetworkMatchMakingXBL:_join_invite_accepted(host_info)
 		print("MUST LEAVE session")
 		MenuCallbackHandler:_dialog_leave_lobby_yes()
 	end
-	self:join_server_with_check(host_info:id(), true, {})
+	managers.system_menu:force_close_all()
+	self:join_server_with_check(host_info:id(), true, {info = host_info, host_name = host_name})
 end
 function NetworkMatchMakingXBL:register_callback(event, callback)
 	self._callback_map[event] = callback
@@ -100,9 +126,25 @@ end
 function NetworkMatchMakingXBL:destroy_game()
 	self:leave_game()
 end
+function NetworkMatchMakingXBL:add_cancelable_callback()
+	self._next_cancel_callback_id = self._next_cancel_callback_id + 1
+	self._cancel_callback_map[self._next_cancel_callback_id] = false
+	return self._next_cancel_callback_id
+end
+function NetworkMatchMakingXBL:check_callback_canceled(id)
+	local is_canceled = self._cancel_callback_map[id]
+	self._cancel_callback_map[id] = nil
+	if not next(self._cancel_callback_map) then
+		self._next_cancel_callback_id = 0
+	end
+	return is_canceled
+end
 function NetworkMatchMakingXBL:leave_game()
 	print("NetworkMatchMakingXBL:leave_game()", self._session and self._session:state())
 	Application:stack_dump()
+	for id in pairs(self._cancel_callback_map) do
+		self._cancel_callback_map[id] = true
+	end
 	if self._session then
 		local player_index = managers.user:get_platform_id()
 		print("managers.user:get_platform_id()", managers.user:get_platform_id())
@@ -136,6 +178,11 @@ function NetworkMatchMakingXBL:_load_globals()
 		self._is_client_var = Global.xbl.match.is_client
 		self._players = Global.xbl.match.players
 		Global.xbl.match = nil
+	end
+	if Global.queued_invite then
+		Global.boot_invite[Global.queued_player] = Global.queued_invite
+		MenuCallbackHandler:_dialog_end_game_yes()
+		Global.queued_invite = nil
 	end
 end
 function NetworkMatchMakingXBL:_save_globals()
@@ -195,11 +242,11 @@ function NetworkMatchMakingXBL:search_lobby(friends_only)
 	con.GAME_TYPE = "STANDARD"
 	con.game_mode = "ONLINE"
 	self._searching_lobbys = true
-	XboxLive:search_session("Find Matches", player_index, 50, prop, con, callback(self, self, "_find_server_callback"))
+	XboxLive:search_session("Find Matches", player_index, 50, prop, con, callback(self, self, "_find_server_callback", self:add_cancelable_callback()))
 end
-function NetworkMatchMakingXBL:_find_server_callback(servers, mode)
+function NetworkMatchMakingXBL:_find_server_callback(cancel_id, servers, mode)
 	self._searching_lobbys = nil
-	if self._cancel_find then
+	if self:check_callback_canceled(cancel_id) then
 		return
 	end
 	self._last_mode = mode
@@ -262,7 +309,11 @@ function NetworkMatchMakingXBL:join_server_with_check(session_id, skip_permissio
 	managers.menu:show_joining_lobby_dialog()
 	local empty = function()
 	end
+	local cancel_id = self:add_cancelable_callback()
 	local function f(servers)
+		if self:check_callback_canceled(cancel_id) then
+			return
+		end
 		print("servers", servers)
 		if not servers or not servers[1] then
 			managers.system_menu:close("join_server")
@@ -294,7 +345,18 @@ function NetworkMatchMakingXBL:join_server_with_check(session_id, skip_permissio
 			self:search_lobby(self:search_friends_only())
 		end
 	end
-	XboxLive:search_session_by_id(session_id, player_index, f)
+	if data and data.info then
+		f({
+			{
+				info = data.info,
+				host_name = data.host_name,
+				open_private_slots = 0
+			}
+		})
+	else
+		debug_pause("[NetworkMatchMakingXBL:join_server_with_check] Missing data.", inspect(data))
+		f({})
+	end
 end
 function NetworkMatchMakingXBL._on_data_update(...)
 end
@@ -333,7 +395,9 @@ function NetworkMatchMakingXBL:join_server(session_id, server, skip_showing_dial
 		print("FAILED CREATE CLIENT SESSION")
 		result = "failed"
 	end
-	XboxLive:join_local(self._session, player_index, self._private)
+	if not XboxLive:join_local(self._session, player_index, self._private) then
+		result = "failed"
+	end
 	print("self._session", self._session)
 	print("[NetworkMatchMakingXBL:join_server:f]")
 	managers.system_menu:close("join_server")
@@ -425,6 +489,9 @@ function NetworkMatchMakingXBL:send_join_invite(friend)
 end
 function NetworkMatchMakingXBL:set_server_attributes(settings)
 	self:set_attributes(settings)
+	if self._session then
+		XboxLive:modify_session(self._session)
+	end
 end
 function NetworkMatchMakingXBL:create_lobby(settings)
 	local attributes_numbers = settings.numbers
@@ -459,7 +526,10 @@ function NetworkMatchMakingXBL:create_lobby(settings)
 	dialog_data.id = "create_lobby"
 	dialog_data.no_buttons = true
 	managers.system_menu:show(dialog_data)
-	local success = XboxLive:create_session("live_multiplayer_standard", player_index, pub_slots, priv_slots, callback(self, self, "_create_lobby_callback", settings))
+	local success = XboxLive:create_session("live_multiplayer_standard", player_index, pub_slots, priv_slots, callback(self, self, "_create_lobby_callback", {
+		cancel_id = self:add_cancelable_callback(),
+		settings = settings
+	}))
 	print("create return value", success)
 end
 function NetworkMatchMakingXBL:_create_lobby_failed()
@@ -480,19 +550,22 @@ function NetworkMatchMakingXBL:_create_lobby_done()
 	self._creating_lobby = nil
 	managers.system_menu:close("create_lobby")
 end
-function NetworkMatchMakingXBL:_create_lobby_callback(settings, session)
-	if self._cancel_find then
+function NetworkMatchMakingXBL:_create_lobby_callback(params, session)
+	if self:check_callback_canceled(params.cancel_id) then
 		cat_print("lobby", "create_server canceled")
 		return
 	end
-	print("NetworkMatchMakingXBL:_create_server_callback", inspect(settings))
+	print("NetworkMatchMakingXBL:_create_server_callback", inspect(params.settings))
 	local player_index = managers.user:get_platform_id()
 	if not session then
 		print("CREATE SESSION FAILED")
 		self:_create_lobby_failed()
 		return
 	end
-	XboxLive:join_local(session, player_index, self._private)
+	if not XboxLive:join_local(session, player_index, self._private) then
+		self:_create_lobby_failed()
+		return
+	end
 	if alive(self._session) then
 		cat_print("lobby", "Trying to remove self._session", self._session:id(), "in state", self._session:state())
 		cat_stack_dump("lobby")
@@ -522,11 +595,13 @@ end
 function NetworkMatchMakingXBL:set_server_joinable(state)
 	print("[NetworkMatchMakingXBL:set_server_joinable]", state)
 	local player_index = managers.user:get_platform_id()
-	XboxLive:set_property(player_index, "SERVERJOINABLE", state and 1 or 0)
+	if self._session then
+		XboxLive:set_joinable(self._session, state and 1 or 0)
+	end
 end
 function NetworkMatchMakingXBL:is_server_joinable()
 	local player_index = managers.user:get_platform_id()
-	return XboxLive:get_property(player_index, "SERVERJOINABLE") == 1
+	return XboxLive:is_joinable(self._session)
 end
 function NetworkMatchMakingXBL:server_state_name()
 end
@@ -620,10 +695,10 @@ function NetworkMatchMakingXBL:_test_search(settings)
 	local con = {}
 	con.GAME_TYPE = settings.game_type
 	con.game_mode = settings.game_mode
-	XboxLive:search_session("Find Matches", player_index, 25, prop, con, callback(self, self, "_find_test_server_callback"))
+	XboxLive:search_session("Find Matches", player_index, 25, prop, con, callback(self, self, "_find_test_server_callback", self:add_cancelable_callback()))
 end
-function NetworkMatchMakingXBL:_find_test_server_callback(servers, mode)
-	if self._cancel_find then
+function NetworkMatchMakingXBL:_find_test_server_callback(cancel_id, servers, mode)
+	if self:check_callback_canceled(cancel_id) then
 		return
 	end
 	self._last_mode = mode
@@ -653,7 +728,9 @@ function NetworkMatchMakingXBL:_test_join(xs_info, skip_showing_dialog)
 		print("FAILED CREATE CLIENT SESSION")
 		return
 	end
-	XboxLive:join_local(self._session, player_index, true)
+	if not XboxLive:join_local(self._session, player_index, true) then
+		return
+	end
 	print("self._session", self._session)
 	local result = "failed"
 	print("[NetworkMatchMakingXBL:join_server:f]")
@@ -750,11 +827,11 @@ function NetworkMatchMakingXBL:_test_create(settings)
 	local pub_slots = self.OPEN_SLOTS
 	local priv_slots = 0
 	print("creating session\n", inspect(create_prop))
-	local session = XboxLive:create_session("live_multiplayer_standard", player_index, pub_slots, priv_slots, callback(self, self, "_create_server_callback"))
+	local session = XboxLive:create_session("live_multiplayer_standard", player_index, pub_slots, priv_slots, callback(self, self, "_create_server_callback", self:add_cancelable_callback()))
 	print("create return value", session)
 end
-function NetworkMatchMakingXBL:_create_server_callback(session)
-	if self._cancel_find then
+function NetworkMatchMakingXBL:_create_server_callback(cancel_id, session)
+	if self:check_callback_canceled(cancel_id) then
 		cat_print("lobby", "create_server canceled")
 		return
 	end
@@ -764,7 +841,9 @@ function NetworkMatchMakingXBL:_create_server_callback(session)
 		print("CREATE SESSION FAILED")
 		return
 	end
-	XboxLive:join_local(session, player_index, self._private)
+	if not XboxLive:join_local(session, player_index, self._private) then
+		return
+	end
 	if alive(self._session) then
 		cat_print("lobby", "Trying to remove self._session", self._session:id(), "in state", self._session:state())
 		cat_stack_dump("lobby")

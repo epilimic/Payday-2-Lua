@@ -52,11 +52,8 @@ local mvec_direction = Vector3()
 local mvec_spread_direction = Vector3()
 function NewShotgunBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul, shoot_player, spread_mul, autohit_mul, suppr_mul, shoot_through_data)
 	local result
-	local add_shoot_through_bullet = self._can_shoot_through_shield or self._can_shoot_through_enemy or self._can_shoot_through_wall
-	if add_shoot_through_bullet then
-		result = NewShotgunBase.super._fire_raycast(self, user_unit, from_pos, direction, dmg_mul, shoot_player, spread_mul, autohit_mul, suppr_mul, shoot_through_data)
-	end
 	local hit_enemies = {}
+	local hit_objects = {}
 	local hit_something, col_rays
 	if self._alert_events then
 		col_rays = {}
@@ -72,14 +69,20 @@ function NewShotgunBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul, s
 				hit_enemies[enemy_key] = col_ray
 			end
 		else
-			self._bullet_class:on_collision(col_ray, self._unit, user_unit, damage)
+			local add_shoot_through_bullet = self._can_shoot_through_shield or self._can_shoot_through_wall
+			if add_shoot_through_bullet and not hit_objects[col_ray.unit:key()] then
+				NewShotgunBase.super._fire_raycast(self, user_unit, from_pos, col_ray.ray, dmg_mul, shoot_player, 0, autohit_mul, suppr_mul, shoot_through_data)
+				hit_objects[col_ray.unit:key()] = true
+			else
+				self._bullet_class:on_collision(col_ray, self._unit, user_unit, damage)
+			end
 		end
 	end
 	local spread = self:_get_spread(user_unit)
 	mvector3.set(mvec_direction, direction)
 	if spread then
 	end
-	for i = add_shoot_through_bullet and 2 or 1, self._rays do
+	for i = 1, self._rays do
 		mvector3.set(mvec_spread_direction, mvec_direction)
 		if spread then
 			mvector3.spread(mvec_spread_direction, spread * (spread_mul or 1))
@@ -127,7 +130,13 @@ function NewShotgunBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul, s
 	for _, col_ray in pairs(hit_enemies) do
 		local damage = self:get_damage_falloff(damage, col_ray, user_unit)
 		if damage > 0 then
-			local my_result = self._bullet_class:on_collision(col_ray, self._unit, user_unit, damage)
+			local my_result
+			local add_shoot_through_bullet = self._can_shoot_through_shield or self._can_shoot_through_enemy or self._can_shoot_through_wall
+			if add_shoot_through_bullet then
+				my_result = NewShotgunBase.super._fire_raycast(self, user_unit, from_pos, col_ray.ray, dmg_mul, shoot_player, 0, autohit_mul, suppr_mul, shoot_through_data)
+			else
+				my_result = self._bullet_class:on_collision(col_ray, self._unit, user_unit, damage)
+			end
 			if my_result and my_result.type == "death" then
 				managers.game_play_central:do_shotgun_push(col_ray.unit, col_ray.position, col_ray.ray, col_ray.distance)
 			end

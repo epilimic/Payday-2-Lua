@@ -128,7 +128,9 @@ function CrimeNetManager:_setup()
 	end
 end
 function CrimeNetManager:reset_seed()
-	self._presets = nil
+	if not managers.menu_component or not managers.menu_component:has_crimenet_gui() then
+		self._presets = nil
+	end
 end
 function CrimeNetManager:update(t, dt)
 	if not self._active then
@@ -234,13 +236,19 @@ end
 local is_win32 = SystemInfo:platform() == Idstring("WIN32")
 local is_ps3 = SystemInfo:platform() == Idstring("PS3")
 local is_x360 = SystemInfo:platform() == Idstring("X360")
+local is_xb1 = SystemInfo:platform() == Idstring("XB1")
+local is_ps4 = SystemInfo:platform() == Idstring("PS4")
 function CrimeNetManager:_find_online_games(friends_only)
 	if is_win32 then
 		self:_find_online_games_win32(friends_only)
 	elseif is_ps3 then
 		self:_find_online_games_ps3(friends_only)
+	elseif is_ps4 then
+		self:_find_online_games_ps4(friends_only)
 	elseif is_x360 then
 		self:_find_online_games_xbox360(friends_only)
+	elseif is_xb1 then
+		self:_find_online_games_xb1(friends_only)
 	else
 		Application:error("[CrimeNetManager] Unknown gaming platform trying to access Crime.net!")
 	end
@@ -259,7 +267,6 @@ function CrimeNetManager:_find_online_games_xbox360(friends_only)
 			local name_str = tostring(room.owner_name)
 			local attributes_numbers = attribute_list[i].numbers
 			if managers.network.matchmake:is_server_ok(friends_only, room.owner_id, attributes_numbers) then
-				dead_list[room.room_id] = nil
 				local host_name = name_str
 				local level_id = tweak_data.levels:get_level_name_from_index(attributes_numbers[1] % 1000)
 				local name_id = level_id and tweak_data.levels[level_id] and tweak_data.levels[level_id].name_id
@@ -320,7 +327,190 @@ function CrimeNetManager:_find_online_games_xbox360(friends_only)
 	managers.network.matchmake:register_callback("search_lobby", f)
 	managers.network.matchmake:search_lobby(friends_only)
 end
+function CrimeNetManager:_find_online_games_xb1(friends_only)
+	local function f(info)
+		local friends = managers.network.friends:get_friends_by_name()
+		managers.network.matchmake:search_lobby_done()
+		local room_list = info.room_list
+		local attribute_list = info.attribute_list
+		local dead_list = {}
+		for id, _ in pairs(self._active_server_jobs) do
+			dead_list[id] = true
+		end
+		for i, room in ipairs(room_list) do
+			local name_str = tostring(room.owner_name)
+			local attributes_numbers = attribute_list[i].numbers
+			local host_name = name_str
+			local level_id = tweak_data.levels:get_level_name_from_index(attributes_numbers[1] % 1000)
+			local name_id = level_id and tweak_data.levels[level_id] and tweak_data.levels[level_id].name_id
+			local level_name = name_id and managers.localization:text(name_id) or "LEVEL NAME ERROR"
+			local difficulty_id = attributes_numbers[2]
+			local difficulty = tweak_data:index_to_difficulty(difficulty_id)
+			local job_id = tweak_data.narrative:get_job_name_from_index(math.floor(attributes_numbers[1] / 1000))
+			local state_string_id = tweak_data:index_to_server_state(attributes_numbers[4])
+			local state_name = state_string_id and managers.localization:text("menu_lobby_server_state_" .. state_string_id) or "UNKNOWN"
+			local state = attributes_numbers[4]
+			local num_plrs = attributes_numbers[5]
+			local is_friend = friends[host_name] and true or false
+			if friends_only then
+			else
+				local is_ok = is_friend and managers.network.matchmake:is_server_ok(friends_only, room.owner_id, attributes_numbers)
+			end
+			if is_ok then
+				dead_list[room.room_id] = nil
+			end
+			if name_id and is_ok then
+				if not self._active_server_jobs[room.room_id] then
+					if table.size(self._active_jobs) + table.size(self._active_server_jobs) < tweak_data.gui.crime_net.job_vars.total_active_jobs then
+						self._active_server_jobs[room.room_id] = {added = false, alive_time = 0}
+						managers.menu_component:add_crimenet_server_job({
+							room_id = room.room_id,
+							info = room.info,
+							id = room.room_id,
+							level_id = level_id,
+							difficulty = difficulty,
+							difficulty_id = difficulty_id,
+							num_plrs = num_plrs,
+							host_name = host_name,
+							state_name = state_name,
+							state = state,
+							level_name = level_name,
+							job_id = job_id,
+							is_friend = is_friend
+						})
+					end
+				else
+					managers.menu_component:update_crimenet_server_job({
+						room_id = room.room_id,
+						info = room.info,
+						id = room.room_id,
+						level_id = level_id,
+						difficulty = difficulty,
+						difficulty_id = difficulty_id,
+						num_plrs = num_plrs,
+						host_name = host_name,
+						state_name = state_name,
+						state = state,
+						level_name = level_name,
+						job_id = job_id,
+						is_friend = is_friend
+					})
+				end
+			end
+		end
+		for id, _ in pairs(dead_list) do
+			self._active_server_jobs[id] = nil
+			managers.menu_component:remove_crimenet_gui_job(id)
+		end
+	end
+	managers.network.matchmake:register_callback("search_lobby", f)
+	managers.network.matchmake:search_lobby(friends_only)
+end
 function CrimeNetManager:_find_online_games_ps3(friends_only)
+	local function f(info_list)
+		managers.network.matchmake:search_lobby_done()
+		local friend_names = managers.network.friends:get_names_friends_list()
+		for _, info in ipairs(info_list) do
+			local room_list = info.room_list
+			local attribute_list = info.attribute_list
+			for i, room in ipairs(room_list) do
+				local name_str = tostring(room.owner_id)
+				local friend_str = room.friend_id and tostring(room.friend_id)
+				local attributes_numbers = attribute_list[i].numbers
+				if managers.network.matchmake:is_server_ok(friends_only, room.owner_id, attributes_numbers) then
+					local host_name = name_str
+					local level_id, name_id, level_name, difficulty_id, difficulty, job_id, state_string_id, state_name, state, num_plrs = self:_server_properties(attributes_numbers)
+					local is_friend = friend_names[host_name] and true or false
+					if name_id and not self._active_server_jobs[name_str] and table.size(self._active_jobs) + table.size(self._active_server_jobs) < tweak_data.gui.crime_net.job_vars.total_active_jobs then
+						self._active_server_jobs[name_str] = {
+							added = false,
+							alive_time = 0,
+							room_id = room.room_id
+						}
+						managers.menu_component:add_crimenet_server_job({
+							room_id = room.room_id,
+							id = name_str,
+							level_id = level_id,
+							difficulty = difficulty,
+							difficulty_id = difficulty_id,
+							num_plrs = num_plrs,
+							host_name = host_name,
+							state_name = state_name,
+							state = state,
+							level_name = level_name,
+							job_id = job_id,
+							is_friend = is_friend
+						})
+					end
+				else
+				end
+			end
+		end
+	end
+	if #PSN:get_world_list() == 0 then
+		return
+	end
+	local function done_verify_func()
+		managers.network.matchmake:register_callback("search_lobby", f)
+		managers.network.matchmake:start_search_lobbys(friends_only)
+	end
+	local dead_list = {}
+	local rooms_original = {}
+	for id, data in pairs(self._active_server_jobs) do
+		dead_list[id] = true
+		table.insert(rooms_original, data.room_id)
+	end
+	local rooms = {}
+	while #rooms_original > 0 do
+		table.insert(rooms, table.remove(rooms_original, math.random(#rooms_original)))
+	end
+	local function updated_session_attributes(active_info_list)
+		self._test_result = active_info_list
+		if active_info_list then
+			local friend_names = managers.network.friends:get_names_friends_list()
+			for _, info in ipairs(active_info_list) do
+				local room_list = info.room_list
+				local attribute_list = info.attribute_list
+				for i, room in ipairs(room_list) do
+					local name_str = tostring(room.owner_id)
+					local friend_str = room.friend_id and tostring(room.friend_id)
+					local attributes_numbers = attribute_list[i].numbers
+					if friends_only then
+					end
+					local is_friend = friend_names[name_str] and true or false
+					if (not friends_only or is_friend) and managers.network.matchmake:is_server_ok(friends_only, room.owner_id, attributes_numbers) then
+						dead_list[name_str] = nil
+						local host_name = name_str
+						local level_id, name_id, level_name, difficulty_id, difficulty, job_id, state_string_id, state_name, state, num_plrs = self:_server_properties(attributes_numbers)
+						if name_id and self._active_server_jobs[name_str] then
+							managers.menu_component:update_crimenet_server_job({
+								room_id = room.room_id,
+								id = name_str,
+								level_id = level_id,
+								difficulty = difficulty,
+								difficulty_id = difficulty_id,
+								num_plrs = num_plrs,
+								host_name = host_name,
+								state_name = state_name,
+								state = state,
+								level_name = level_name,
+								job_id = job_id,
+								is_friend = is_friend
+							})
+						end
+					end
+				end
+			end
+			for id, _ in pairs(dead_list) do
+				self._active_server_jobs[id] = nil
+				managers.menu_component:remove_crimenet_gui_job(id)
+			end
+		end
+		done_verify_func()
+	end
+	managers.network.matchmake:update_session_attributes(rooms, updated_session_attributes)
+end
+function CrimeNetManager:_find_online_games_ps4(friends_only)
 	local function f(info_list)
 		managers.network.matchmake:search_lobby_done()
 		local friend_names = managers.network.friends:get_names_friends_list()
@@ -1066,7 +1256,7 @@ function CrimeNetGui:init(ws, fullscreeen_ws, node)
 		if managers.menu:is_pc_controller() then
 			filter_button:set_color(tweak_data.screen_colors.button_stage_3)
 		end
-		if is_ps3 then
+		if is_ps3 or is_ps4 then
 			local invites_button = self._panel:text({
 				name = "invites_button",
 				text = managers.localization:get_default_macro("BTN_BACK") .. " " .. managers.localization:to_upper_text("menu_view_invites"),
@@ -1772,44 +1962,44 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 	})
 	do
 		local _, _, w, h = host_name:text_rect()
-		host_name:set_size(w, h - 4)
+		host_name:set_size(w, h)
 		host_name:set_position(0, 0)
 		if not is_server then
 		end
 	end
 	do
 		local _, _, w, h = job_name:text_rect()
-		job_name:set_size(w, h - 4)
-		job_name:set_position(0, host_name:bottom())
+		job_name:set_size(w, h)
+		job_name:set_position(0, host_name:bottom() - 2)
 	end
 	do
 		local _, _, w, h = contact_name:text_rect()
-		contact_name:set_size(w, h - 4)
+		contact_name:set_size(w, h)
 		contact_name:set_top(job_name:top())
 		contact_name:set_right(0)
 	end
 	do
 		local _, _, w, h = info_name:text_rect()
 		info_name:set_size(w, h - 4)
-		info_name:set_top(contact_name:bottom())
+		info_name:set_top(contact_name:bottom() - 4)
 		info_name:set_right(0)
 	end
 	do
 		local _, _, w, h = difficulty_name:text_rect()
-		difficulty_name:set_size(w, h - 4)
-		difficulty_name:set_top(info_name:bottom())
+		difficulty_name:set_size(w, h)
+		difficulty_name:set_top(info_name:bottom() - 4)
 		difficulty_name:set_right(0)
 	end
 	do
 		local _, _, w, h = heat_name:text_rect()
 		heat_name:set_size(w, h - 4)
-		heat_name:set_top(difficulty_name:bottom())
+		heat_name:set_top(difficulty_name:bottom() - 4)
 		heat_name:set_right(0)
 	end
 	if not got_heat_text then
 		heat_name:set_text(" ")
-		heat_name:set_w(1, 0)
-		heat_name:set_position(0, host_name:bottom())
+		heat_name:set_w(1)
+		heat_name:set_position(0, host_name:bottom() - 4)
 	end
 	if is_special then
 		contact_name:set_text(" ")
@@ -2098,6 +2288,7 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 	managers.menu:post_event("job_appear")
 	local job = {
 		room_id = data.room_id,
+		info = data.info,
 		job_id = data.job_id,
 		level_id = level_id,
 		level_data = level_data,
@@ -2105,6 +2296,7 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 		peers_panel = peers_panel,
 		kick_option = data.kick_option,
 		container_panel = container_panel,
+		is_friend = data.is_friend,
 		timer_rect = timer_rect,
 		side_panel = side_panel,
 		icon_panel = icon_panel,
@@ -2236,7 +2428,8 @@ function CrimeNetGui:update_server_job(data, i)
 	local updated_difficulty = self:_update_job_variable(job_index, "difficulty", data.difficulty)
 	local updated_difficulty_id = self:_update_job_variable(job_index, "difficulty_id", data.difficulty_id)
 	local updated_state = self:_update_job_variable(job_index, "state", data.state)
-	local recreate_job = updated_room or updated_job or updated_level_id or updated_level_data or updated_difficulty or updated_difficulty_id or updated_state
+	local updated_friend = self:_update_job_variable(job_index, "is_friend", data.is_friend)
+	local recreate_job = updated_room or updated_job or updated_level_id or updated_level_data or updated_difficulty or updated_difficulty_id or updated_state or updated_friend
 	self:_update_job_variable(job_index, "state_name", data.state_name)
 	if self:_update_job_variable(job_index, "num_plrs", data.num_plrs) and job.peers_panel then
 		for i, peer_icon in ipairs(job.peers_panel:children()) do
@@ -2471,7 +2664,8 @@ function CrimeNetGui:check_job_pressed(x, y)
 				host_name = job.host_name,
 				special_node = job.special_node,
 				dlc = job.dlc,
-				contract_visuals = job_data and job_data.contract_visuals
+				contract_visuals = job_data and job_data.contract_visuals,
+				info = job.info
 			}
 			managers.menu_component:post_event("menu_enter")
 			if not data.dlc or managers.dlc:is_dlc_unlocked(data.dlc) then

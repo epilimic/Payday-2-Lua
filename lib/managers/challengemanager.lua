@@ -113,7 +113,10 @@ function ChallengeManager:_load_challenges_from_xml()
 						name_s = data.name_s,
 						desc_id = data.desc_id,
 						desc_s = data.desc_s,
-						completed = false
+						completed = false,
+						progress_id = data.progress_id,
+						max_progress = data.progress_id and data.max_progress or 1,
+						progress = data.progress_id and 0
 					})
 				elseif data._meta == "reward" then
 					table.insert(rewards, {
@@ -227,6 +230,12 @@ function ChallengeManager:_check_challenge_completed(id, key)
 	end
 	return false
 end
+function ChallengeManager:award(id)
+	self:on_achievement_awarded(id)
+end
+function ChallengeManager:award_progress(progress_id, amount)
+	self:on_achievement_progressed(progress_id, amount)
+end
 function ChallengeManager:on_achievement_awarded(id)
 	if not self._global.validated then
 		return
@@ -235,7 +244,22 @@ function ChallengeManager:on_achievement_awarded(id)
 		for _, objective in ipairs(active_challenge.objectives) do
 			if not objective.completed and objective.achievement_id == id then
 				objective.completed = true
-				self:_check_challenge_completed(objective.id, key)
+				self:_check_challenge_completed(active_challenge.id, key)
+			else
+			end
+		end
+	end
+end
+function ChallengeManager:on_achievement_progressed(progress_id, amount)
+	if not self._global.validated then
+		return
+	end
+	for key, active_challenge in pairs(self._global.active_challenges) do
+		for _, objective in ipairs(active_challenge.objectives) do
+			if not objective.completed and objective.progress_id == progress_id then
+				objective.progress = math.floor(math.min(objective.progress + (amount or 1), objective.max_progress))
+				objective.completed = objective.progress == objective.max_progress
+				self:_check_challenge_completed(active_challenge.id, key)
 			else
 			end
 		end

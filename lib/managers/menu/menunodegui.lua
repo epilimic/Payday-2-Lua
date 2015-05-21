@@ -1491,13 +1491,15 @@ function MenuNodeMainGui:_setup_item_rows(node)
 		self._version_string:parent():remove(self._version_string)
 		self._version_string = nil
 	end
-	self._version_string = self.ws:panel():text({
-		name = "version_string",
-		text = Application:version(),
-		font = tweak_data.menu.pd2_small_font,
-		font_size = tweak_data.menu.pd2_small_font_size,
-		align = SystemInfo:platform() == Idstring("WIN32") and "right" or "left",
-		vertical = "bottom",
-		alpha = 0.5
-	})
+	if Application:debug_enabled() or SystemInfo:platform() == Idstring("WIN32") then
+		self._version_string = self.ws:panel():text({
+			name = "version_string",
+			text = Application:version(),
+			font = tweak_data.menu.pd2_small_font,
+			font_size = tweak_data.menu.pd2_small_font_size,
+			align = SystemInfo:platform() == Idstring("WIN32") and "right" or "left",
+			vertical = "bottom",
+			alpha = 0.5
+		})
+	end
 end

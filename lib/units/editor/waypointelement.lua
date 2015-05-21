@@ -29,8 +29,10 @@ function WaypointUnitElement:init(unit)
 	}
 	self._hed.icon = "pd2_goto"
 	self._hed.text_id = "debug_none"
+	self._hed.only_in_clean = false
 	table.insert(self._save_values, "icon")
 	table.insert(self._save_values, "text_id")
+	table.insert(self._save_values, "only_in_clean")
 end
 function WaypointUnitElement:_add_wp_options()
 	self._text_options = {"debug_none"}
@@ -54,6 +56,7 @@ function WaypointUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	self:_build_value_checkbox(panel, panel_sizer, "only_in_clean", "This waypoint will only be visible for players that are in casing mode")
 	self:_build_value_combobox(panel, panel_sizer, "icon", self._icon_options, "Select an icon")
 	self:_build_value_combobox(panel, panel_sizer, "text_id", self._text_options, "Select a text id")
 	local text_sizer = EWS:BoxSizer("HORIZONTAL")

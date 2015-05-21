@@ -269,6 +269,7 @@ function EquipmentsTweakData:init()
 		icon = "pd2_c4",
 		action_message = "c4_obtained",
 		quantity = 10,
+		max_quantity = 10,
 		sync_possession = true
 	}
 	self.specials.organs = {
@@ -283,7 +284,7 @@ function EquipmentsTweakData:init()
 	}
 	self.specials.fire_extinguisher = {
 		text_id = "hud_int_equipment_fire_extinguisher",
-		icon = "equipment_thermite",
+		icon = "equipment_fire_extinguisher",
 		sync_possession = true
 	}
 	self.specials.blood_sample = {
@@ -315,6 +316,13 @@ function EquipmentsTweakData:init()
 		text_id = "debug_equipment_gold",
 		icon = "equipment_gold",
 		player_rule = "no_run"
+	}
+	self.specials.circle_cutter = {
+		text_id = "hud_equipment_circle_cutter",
+		icon = "equipment_glasscutter",
+		quantity = 1,
+		max_quantity = 3,
+		sync_possession = true
 	}
 	local barcodes = {
 		"barcode_downtown",

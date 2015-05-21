@@ -9,6 +9,7 @@ end
 function BoxGuiObject:create_sides(panel, config)
 	if not alive(panel) then
 		Application:error("[BoxGuiObject:create_sides] Failed creating BoxGui. Parent panel not alive!")
+		Application:stack_dump()
 		return
 	end
 	if alive(self._panel) then
@@ -152,11 +153,27 @@ end
 function BoxGuiObject:set_visible(visible)
 	self._panel:set_visible(visible)
 end
+function BoxGuiObject:visible()
+	return self._panel:visible()
+end
 function BoxGuiObject:set_layer(layer)
 	self._panel:set_layer(layer)
 end
 function BoxGuiObject:size()
 	return self._panel:size()
+end
+function BoxGuiObject:alive()
+	return alive(self._panel)
+end
+function BoxGuiObject:inside(x, y, side)
+	if not self:alive() then
+		return false
+	end
+	if side then
+		return self._panel:child(side) and self._panel:child(side):inside(x, y)
+	else
+		return self._panel:inside(x, y)
+	end
 end
 function BoxGuiObject:set_aligns(halign, valign)
 	for i, d in pairs(self._panel:children()) do

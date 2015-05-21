@@ -25,4 +25,8 @@ function ControllerWrapper:get_input_released(connection_name)
 	end
 	return cache
 end
+function ControllerWrapper:clear_input_pressed_state(connection_name)
+	self._input_pressed_cache[connection_name] = false
+	self._input_released_cache[connection_name] = false
+end
 CoreClass.override_class(CoreControllerWrapper.ControllerWrapper, ControllerWrapper)

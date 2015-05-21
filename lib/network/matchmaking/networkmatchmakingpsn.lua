@@ -5,7 +5,8 @@ function NetworkMatchMakingPSN:init()
 	cat_print("lobby", "matchmake = NetworkMatchMakingPSN")
 	self._players = {}
 	self._TRY_TIME_INC = 10
-	self._JOIN_SERVER_TRY_TIME_INC = 20
+	self._PSN_TIMEOUT_INC = 20
+	self._JOIN_SERVER_TRY_TIME_INC = self._PSN_TIMEOUT_INC + 5
 	self._room_id = nil
 	self._join_cb_room = nil
 	self._server_rpc = nil
@@ -44,38 +45,62 @@ function NetworkMatchMakingPSN:_xmb_join_invite_cb(message)
 	end
 	managers.menu:show_invite_join_message({ok_func = ok_func})
 end
-function NetworkMatchMakingPSN:start_server_time_out_check()
-	PSN:set_matchmaking_callback("fetch_session_attributes", callback(self, self, "_server_time_out_check_cb"))
+function NetworkMatchMakingPSN:_start_time_out_check()
+	PSN:set_matchmaking_callback("fetch_session_attributes", callback(self, self, "_time_out_check_cb"))
 	self:_trigger_time_out_check()
 end
 function NetworkMatchMakingPSN:_trigger_time_out_check()
-	self._next_time_out_check_t = Application:time() + 4
-	self._testing_connection = true
-	PSN:get_session_attributes({
-		self._room_id
-	}, {
-		numbers = {
-			1,
-			2,
-			3,
-			4,
-			5,
-			6,
-			7,
-			8
-		}
-	})
+	if self._room_id then
+		self._next_time_out_check_t = Application:time() + 4
+		self._testing_connection = true
+		PSN:get_session_attributes({
+			self._room_id
+		}, {
+			numbers = {
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8
+			}
+		})
+	else
+		self._next_time_out_check_t = nil
+	end
 end
-function NetworkMatchMakingPSN:_server_time_out_check_cb()
-	self._server_last_alive_t = Application:time()
+function NetworkMatchMakingPSN:_time_out_check_cb()
+	self._last_alive_t = Application:time()
 	self._testing_connection = nil
+end
+function NetworkMatchMakingPSN:_end_time_out_check()
+	self._next_time_out_check_t = nil
+	self._last_alive_t = nil
+	PSN:set_matchmaking_callback("fetch_session_attributes", function()
+	end)
+end
+function NetworkMatchMakingPSN:_on_disconnect_detected()
+	if managers.network:session() and managers.network:session():_local_peer_in_lobby() and not managers.network:session():closing() then
+		managers.menu:psn_disconnected()
+	elseif managers.network:game() then
+		managers.network:game():psn_disconnected()
+	elseif setup.IS_START_MENU then
+		managers.menu:ps3_disconnect(false)
+	end
 end
 function NetworkMatchMakingPSN:_worlds_fetched_cb(...)
 	print("_worlds_fetched_cb")
 	self._getting_world_list = nil
 	managers.system_menu:close("get_world_list")
 	if Global.boot_invite and Global.boot_invite.pending then
-		self:join_boot_invite()
+		managers.menu:open_sign_in_menu(function(success)
+			if not success then
+				return
+			end
+			self:join_boot_invite()
+		end)
 	end
 end
 function NetworkMatchMakingPSN:_getting_world_list_failed()
@@ -137,6 +162,7 @@ function NetworkMatchMakingPSN:cancel_find()
 	self._try_list = nil
 	self._try_index = nil
 	self._trytime = nil
+	self:_end_time_out_check()
 	self:destroy_game()
 	self._room_id = nil
 	if managers.network.group:room_id() then
@@ -162,10 +188,8 @@ end
 function NetworkMatchMakingPSN:leave_game()
 	local sent = false
 	self:remove_ping_watch()
-	self._server_last_alive_t = nil
-	self._next_time_out_check_t = nil
-	PSN:set_matchmaking_callback("fetch_session_attributes", function()
-	end)
+	self:_end_time_out_check()
+	self._no_longer_in_session = nil
 	if self:_is_client() then
 		if self._server_rpc then
 			sent = true
@@ -180,7 +204,7 @@ function NetworkMatchMakingPSN:leave_game()
 			end
 		end
 	end
-	if sent == true then
+	if sent and managers.network:session() and not managers.network:session():closing() then
 		if self._room_id then
 			local dialog_data = {}
 			dialog_data.title = managers.localization:text("dialog_leaving_lobby_title")
@@ -205,13 +229,11 @@ function NetworkMatchMakingPSN:end_game()
 end
 function NetworkMatchMakingPSN:destroy_game()
 	if self._room_id then
+		self._no_longer_in_session = nil
+		self:_end_time_out_check()
 		if self:_is_client() then
 			PSN:leave_session(self._room_id)
 		else
-			self._server_last_alive_t = nil
-			self._next_time_out_check_t = nil
-			PSN:set_matchmaking_callback("fetch_session_attributes", function()
-			end)
 			PSN:destroy_session(self._room_id)
 		end
 	else
@@ -257,7 +279,28 @@ function NetworkMatchMakingPSN:user_in_lobby(id)
 	end
 	return false
 end
+function NetworkMatchMakingPSN:psn_disconnected()
+	self._no_longer_in_session = nil
+	Global.boot_invite = nil
+	if self._joining_lobby then
+		self:_joining_lobby_done()
+	end
+	if self._searching_lobbys then
+		self:search_lobby_done()
+	end
+	if self._creating_lobby then
+		self:_create_lobby_done()
+	end
+end
 function NetworkMatchMakingPSN:update(time)
+	if self._queue_end_game then
+		self._queue_end_game = self._queue_end_game - 1
+		if self._queue_end_game < 0 then
+			print("EXITING FOR INVITE")
+			self._queue_end_game = nil
+			MenuCallbackHandler:_dialog_end_game_yes()
+		end
+	end
 	if self._no_longer_in_session then
 		if self._no_longer_in_session == 0 then
 			if Network:is_client() and managers.network:session() and managers.network:session():server_peer() then
@@ -273,14 +316,10 @@ function NetworkMatchMakingPSN:update(time)
 			self._no_longer_in_session = self._no_longer_in_session - 1
 		end
 	end
-	if self._is_server_var then
-		if self._server_last_alive_t and self._server_last_alive_t + 20 < Application:time() then
-			self._server_last_alive_t = nil
-			if managers.network:session() and managers.network:session():_local_peer_in_lobby() then
-				managers.menu:psn_disconnected()
-			elseif managers.network:game() then
-				managers.network:game():psn_disconnected()
-			end
+	if self._next_time_out_check_t then
+		if self._last_alive_t and self._last_alive_t + self._PSN_TIMEOUT_INC < Application:time() then
+			self._last_alive_t = nil
+			self:_on_disconnect_detected()
 		elseif self._next_time_out_check_t and self._next_time_out_check_t < Application:time() then
 			self:_trigger_time_out_check()
 		end
@@ -312,7 +351,6 @@ function NetworkMatchMakingPSN:update(time)
 	if self._leave_time and TimerManager:wall():time() > self._leave_time then
 		local closed = false
 		if self._room_id then
-			closed = true
 			if PSN:is_online() and managers.network.group:room_id() then
 				managers.network.voice_chat:open_session(managers.network.group:room_id())
 			end
@@ -321,9 +359,9 @@ function NetworkMatchMakingPSN:update(time)
 			end
 			if self:_is_client() then
 				print("leave session HERE")
-				PSN:leave_session(self._room_id)
+				closed = PSN:leave_session(self._room_id)
 			else
-				PSN:destroy_session(self._room_id)
+				closed = PSN:destroy_session(self._room_id)
 			end
 		end
 		self._players = {}
@@ -346,6 +384,7 @@ function NetworkMatchMakingPSN:update(time)
 	end
 	if self._leaving_timer and TimerManager:wall():time() > self._leaving_timer then
 		print("self._leaving_timer left_game")
+		managers.system_menu:close("leaving_game")
 		self._room_id = nil
 		self._leaving_timer = nil
 		self:_call_callback("left_game")
@@ -369,9 +408,7 @@ function NetworkMatchMakingPSN:_load_globals()
 		self._hidden = Global.psn.match._hidden
 		self._num_players = Global.psn.match._num_players
 		Global.psn.match = nil
-		if self._is_server_var then
-			self:start_server_time_out_check()
-		end
+		self:_start_time_out_check()
 		if self._room_id then
 			local info_session = PSN:get_info_session(self._room_id)
 			if not info_session or #info_session.memberlist == 0 then
@@ -440,7 +477,7 @@ function NetworkMatchMakingPSN:psn_member_left(info)
 				else
 				end
 				if self._invite_room_id then
-					self:join_server_with_check(room_id, true)
+					self:join_server_with_check(self._invite_room_id, true)
 				end
 				return
 			end
@@ -449,7 +486,7 @@ function NetworkMatchMakingPSN:psn_member_left(info)
 				self._leaving_timer = nil
 				self:_call_callback("left_game")
 				if self._invite_room_id then
-					self:join_server_with_check(room_id, true)
+					self:join_server_with_check(self._invite_room_id, true)
 				end
 				return
 			end
@@ -501,7 +538,7 @@ function NetworkMatchMakingPSN:_is_client(set)
 	end
 end
 function NetworkMatchMakingPSN:_game_version()
-	return managers.dlc:is_trial() and 7 or 8
+	return PSN:game_version()
 end
 function NetworkMatchMakingPSN:create_lobby(settings)
 	print("NetworkMatchMakingPSN:create_group_lobby()", inspect(settings))
@@ -564,7 +601,7 @@ function NetworkMatchMakingPSN:_created_lobby(room_id)
 	playerinfo.rpc = Network:self("TCP_IP")
 	self:_call_callback("found_game", self._room_id, true)
 	self:_call_callback("player_joined", playerinfo)
-	self:start_server_time_out_check()
+	self:_start_time_out_check()
 end
 function NetworkMatchMakingPSN:searching_friends_only()
 	return self._friends_only
@@ -651,6 +688,7 @@ function NetworkMatchMakingPSN:start_search_lobbys(friends_only)
 				self:_call_callback("search_lobby", self._lobbys_info_list)
 			end
 			if #room_ids > 0 then
+				self:_end_time_out_check()
 				PSN:set_matchmaking_callback("fetch_session_attributes", f2)
 				local wanted_attributes = {
 					numbers = {
@@ -833,21 +871,51 @@ function NetworkMatchMakingPSN:_invitation_received_result_cb(message)
 	print(inspect(message.custom_table))
 	print("message.sender", message.sender)
 	print("message", inspect(message))
-	if PSN:user_age() < MenuManager.ONLINE_AGE and PSN:parental_control_settings_active() then
-		managers.menu:show_err_under_age()
+	if not Global.user_manager.user_index or not Global.user_manager.active_user_state_change_quit then
+		print("BOOT UP INVITE")
+		Global.boot_invite = message
+		Global.boot_invite.used = false
+		Global.boot_invite.pending = true
 		return
 	end
-	if not managers.menu:_enter_online_menus() then
+	if managers.dlc:is_installing() then
+		managers.menu:show_game_is_installing()
 		return
 	end
-	if self._room_id == message.room_id then
+	if game_state_machine:current_state_name() ~= "menu_main" then
+		print("INGAME INVITE")
+		if self._room_id == message.room_id then
+			return
+		end
+		Global.boot_invite = message
+		Global.boot_invite.used = false
+		Global.boot_invite.pending = true
+		self._queue_end_game = 15
 		return
 	end
-	if message.version ~= self:_game_version() then
-		managers.menu:show_invite_wrong_version_message()
+	if setup:has_queued_exec() then
+		Global.boot_invite.used = false
+		Global.boot_invite.pending = true
 		return
 	end
-	self:_join_invite_accepted(message.room_id)
+	managers.menu:open_sign_in_menu(function(success)
+		if not success then
+			return
+		end
+		if not message.room_id or message.room_id:is_empty() then
+			managers.menu:show_invite_wrong_room_message()
+			return
+		end
+		print("SELF ", self._room_id, " INVITE ", message.room_id)
+		if self._room_id == message.room_id then
+			return
+		end
+		if message.version ~= self:_game_version() then
+			managers.menu:show_invite_wrong_version_message()
+			return
+		end
+		self:_join_invite_accepted(message.room_id)
+	end)
 end
 function NetworkMatchMakingPSN:join_boot_invite()
 	print("[NetworkMatchMakingPSN:join_boot_invite]", inspect(Global.boot_invite))
@@ -856,14 +924,11 @@ function NetworkMatchMakingPSN:join_boot_invite()
 	end
 	Global.boot_invite.used = true
 	Global.boot_invite.pending = false
-	if PSN:user_age() < MenuManager.ONLINE_AGE and PSN:parental_control_settings_active() then
-		managers.menu:show_err_under_age()
+	if managers.dlc:is_installing() then
+		managers.menu:show_game_is_installing()
 		return
 	end
-	if not managers.menu:_enter_online_menus() then
-		return
-	end
-	local message = PSN:get_boot_invitation()
+	local message = Global.boot_invite
 	if not message then
 		print("[NetworkMatchMakingPSN:join_boot_invite] PSN:get_boot_invitation failed")
 		return
@@ -872,8 +937,13 @@ function NetworkMatchMakingPSN:join_boot_invite()
 	for i, k in pairs(message) do
 		print(i, k)
 	end
+	print("JSELF ", self._room_id, " INVITE ", message.room_id)
 	if self._room_id == message.room_id then
 		print("[NetworkMatchMakingPSN:join_boot_invite] we are already joined")
+		return
+	end
+	if not message.room_id or message.room_id:is_empty() then
+		managers.menu:show_invite_wrong_room_message()
 		return
 	end
 	if message.version ~= self:_game_version() then
@@ -881,6 +951,7 @@ function NetworkMatchMakingPSN:join_boot_invite()
 		managers.menu:show_invite_wrong_version_message()
 		return
 	end
+	Global.game_settings.single_player = false
 	managers.network:ps3_determine_voice(false)
 	self:_join_invite_accepted(message.room_id)
 end
@@ -949,6 +1020,7 @@ function NetworkMatchMakingPSN:join_server_with_check(room_id, skip_permission_c
 			managers.network.matchmake:start_search_lobbys(self._friends_only)
 		end
 	end
+	self:_end_time_out_check()
 	PSN:set_matchmaking_callback("fetch_session_attributes", f)
 	local wanted_attributes = {
 		numbers = {
@@ -974,6 +1046,7 @@ function NetworkMatchMakingPSN:update_session_attributes(rooms, cb_func)
 		return
 	end
 	self._update_session_attributes_cb = cb_func
+	self:_end_time_out_check()
 	PSN:set_matchmaking_callback("fetch_session_attributes", callback(self, self, "_update_session_attributes_result"))
 	local wanted_attributes = {
 		numbers = {
@@ -1009,6 +1082,9 @@ function NetworkMatchMakingPSN:_update_session_attributes_result(results)
 			end
 		end
 	end
+	if self._room_id then
+		self:_start_time_out_check()
+	end
 	if self._update_session_attributes_cb then
 		self._update_session_attributes_cb(info_list)
 	end
@@ -1032,6 +1108,7 @@ function NetworkMatchMakingPSN:_join_server(room)
 	self._join_cb_room = self._room_id
 	PSN:join_session(room.room_id)
 	self._trytime = TimerManager:wall():time() + self._JOIN_SERVER_TRY_TIME_INC
+	self:_start_time_out_check()
 end
 function NetworkMatchMakingPSN:_joining_lobby_done_failed()
 	self:_joining_lobby_done()
@@ -1039,6 +1116,12 @@ end
 function NetworkMatchMakingPSN:_joining_lobby_done()
 	managers.system_menu:close("join_server")
 	self._joining_lobby = nil
+end
+function NetworkMatchMakingPSN:on_peer_added(peer)
+	print("NetworkMatchMakingPSN:on_peer_added")
+end
+function NetworkMatchMakingPSN:on_peer_removed(peer)
+	managers.network.voice_chat:close_channel_to(peer)
 end
 function NetworkMatchMakingPSN:cb_connection_established(info)
 	if self._is_server_var then
@@ -1074,6 +1157,7 @@ function NetworkMatchMakingPSN:cb_connection_established(info)
 		end
 		self._trytime = nil
 		managers.network:start_client()
+		managers.network.voice_chat:open_session(self._room_id)
 		managers.menu:show_waiting_for_server_response({
 			cancel_func = function()
 				if managers.network:session() then
@@ -1084,7 +1168,6 @@ function NetworkMatchMakingPSN:cb_connection_established(info)
 		local function f(res, level_index, difficulty_index, state_index)
 			managers.system_menu:close("waiting_for_server_response")
 			if res == "JOINED_LOBBY" then
-				managers.network.voice_chat:open_session(self._room_id)
 				MenuCallbackHandler:crimenet_focus_changed(nil, false)
 				managers.menu:on_enter_lobby()
 			elseif res == "JOINED_GAME" then
@@ -1190,6 +1273,9 @@ function NetworkMatchMakingPSN:_error_cb(info)
 		if self._joining_lobby then
 			self:_joining_lobby_done_failed()
 		end
+		if info.error == "ffffffff80550c36" and setup.IS_START_MENU and not self._room_id then
+			self:_on_disconnect_detected()
+		end
 		if self._getting_world_list then
 			self:_getting_world_list_failed()
 		end
@@ -1276,6 +1362,7 @@ function NetworkMatchMakingPSN:_recived_join_invite(message)
 end
 function NetworkMatchMakingPSN:_join_invite_accepted(room_id)
 	print("_join_invite_accepted", room_id)
+	Global.game_settings.single_player = false
 	self._has_pending_invite = nil
 	self._invite_room_id = room_id
 	if self._room_id then
@@ -1283,6 +1370,7 @@ function NetworkMatchMakingPSN:_join_invite_accepted(room_id)
 		MenuCallbackHandler:_dialog_leave_lobby_yes()
 		return
 	end
+	managers.system_menu:force_close_all()
 	self:join_server_with_check(room_id, true)
 end
 function NetworkMatchMakingPSN:_set_room_hidden(set)

@@ -95,6 +95,7 @@ require("lib/units/player_team/HuskTeamAIBase")
 require("lib/units/vehicles/AnimatedVehicleBase")
 require("lib/units/vehicles/VehicleDrivingExt")
 require("lib/units/vehicles/VehicleDamage")
+require("lib/units/vehicles/npc/NpcVehicleDamage")
 require("lib/units/vehicles/npc/NpcVehicleDrivingExt")
 require("lib/units/interactions/InteractionExt")
 require("lib/units/DramaExt")
@@ -114,6 +115,7 @@ require("lib/units/equipment/grenade_crate/GrenadeCrateBase")
 require("lib/units/equipment/bodybags_bag/BodyBagsBagBase")
 require("lib/units/ContourExt")
 require("lib/units/DLCExt")
+require("lib/units/BlinkExt")
 require("lib/units/weapons/RaycastWeaponBase")
 require("lib/units/weapons/NewRaycastWeaponBase")
 require("lib/units/weapons/NPCRaycastWeaponBase")
@@ -361,7 +363,7 @@ function GameSetup:init_finalize()
 	if not Application:editor() then
 		game_state_machine:change_state_by_name("ingame_waiting_for_players")
 	end
-	if SystemInfo:platform() == Idstring("PS3") then
+	if SystemInfo:platform() == Idstring("PS3") or SystemInfo:platform() == Idstring("PS4") then
 		managers.achievment:chk_install_trophies()
 	end
 	if managers.music then

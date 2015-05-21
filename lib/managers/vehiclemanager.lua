@@ -189,6 +189,13 @@ function VehicleManager:sync_vehicle_data(vehicle_unit, state, occupant_driver, 
 		v_ext._trunk_open = true
 		v_ext._interaction_loot = true
 	end
+	local number_of_seats = 0
+	for _, seat in pairs(v_ext._seats) do
+		number_of_seats = number_of_seats + 1
+	end
+	if number_of_seats == v_ext:_number_in_the_vehicle() then
+		v_ext._interaction_enter_vehicle = false
+	end
 end
 function VehicleManager:sync_vehicle_loot(vehicle_unit, carry_id1, multiplier1, carry_id2, multiplier2, carry_id3, multiplier3)
 	if not alive(vehicle_unit) then

@@ -76,6 +76,8 @@ function print_parts_without_texture()
 	end
 	Application:debug("---------------------------")
 end
+local is_win_32 = SystemInfo:platform() == Idstring("WIN32")
+local is_not_win_32 = not is_win_32
 WeaponFactoryTweakData = WeaponFactoryTweakData or class()
 function WeaponFactoryTweakData:init()
 	self.parts = {}
@@ -171,6 +173,7 @@ function WeaponFactoryTweakData:init()
 	self:_init_peacemaker()
 	self:_init_winchester1874()
 	self:_init_plainsrider()
+	self:_init_mateba()
 	self:create_ammunition()
 	self:_init_content_unfinished()
 end
@@ -14233,9 +14236,11 @@ function WeaponFactoryTweakData:create_ammunition()
 		internal_part = true,
 		sub_type = "ammo_custom"
 	}
-	self.parts.wpn_fps_upg_a_custom_free = deep_clone(self.parts.wpn_fps_upg_a_custom)
-	self.parts.wpn_fps_upg_a_custom_free.dlc = nil
-	self.parts.wpn_fps_upg_a_custom_free.is_a_unlockable = nil
+	if is_win_32 then
+		self.parts.wpn_fps_upg_a_custom_free = deep_clone(self.parts.wpn_fps_upg_a_custom)
+		self.parts.wpn_fps_upg_a_custom_free.dlc = nil
+		self.parts.wpn_fps_upg_a_custom_free.is_a_unlockable = nil
+	end
 	self.parts.wpn_fps_upg_a_explosive = {
 		pcs = {},
 		type = "ammo",
@@ -14313,19 +14318,17 @@ function WeaponFactoryTweakData:create_ammunition()
 			damage_near_mul = 2,
 			damage_far_mul = 1.15,
 			armor_piercing_add = 1,
-			can_shoot_through_enemy = true,
 			can_shoot_through_shield = true,
-			can_shoot_through_wall = true,
 			ammo_pickup_min_mul = 1,
 			ammo_pickup_max_mul = 1,
 			bullet_class = "FlameBulletBase",
 			muzzleflash = "effects/payday2/particles/weapons/shotgun/sho_muzzleflash_dragons_breath",
 			fire_dot_data = {
-				dot_damage = "2",
+				dot_damage = "1",
 				dot_trigger_max_distance = "3000",
 				dot_trigger_chance = "50",
-				dot_length = "3",
-				dot_tick_damage = "0.5"
+				dot_length = "3.1",
+				dot_tick_period = "0.5"
 			}
 		},
 		muzzleflash = "effects/payday2/particles/weapons/shotgun/sho_muzzleflash_dragons_breath",
@@ -14358,8 +14361,12 @@ function WeaponFactoryTweakData:create_ammunition()
 			table.insert(self[factory_id .. "_npc"].uses_parts, "wpn_fps_upg_a_slug")
 			table.insert(self[factory_id].uses_parts, "wpn_fps_upg_a_custom")
 			table.insert(self[factory_id .. "_npc"].uses_parts, "wpn_fps_upg_a_custom")
-			table.insert(self[factory_id].uses_parts, "wpn_fps_upg_a_custom_free")
-			table.insert(self[factory_id .. "_npc"].uses_parts, "wpn_fps_upg_a_custom_free")
+			if is_win_32 then
+				table.insert(self[factory_id].uses_parts, "wpn_fps_upg_a_custom_free")
+			end
+			if is_win_32 then
+				table.insert(self[factory_id .. "_npc"].uses_parts, "wpn_fps_upg_a_custom_free")
+			end
 			table.insert(self[factory_id].uses_parts, "wpn_fps_upg_a_explosive")
 			table.insert(self[factory_id .. "_npc"].uses_parts, "wpn_fps_upg_a_explosive")
 			table.insert(self[factory_id].uses_parts, "wpn_fps_upg_a_piercing")
@@ -21043,4 +21050,180 @@ function WeaponFactoryTweakData:_init_plainsrider()
 	}
 	self.wpn_fps_bow_plainsrider_npc = deep_clone(self.wpn_fps_bow_plainsrider)
 	self.wpn_fps_bow_plainsrider_npc.unit = "units/pd2_dlc_west/weapons/wpn_fps_bow_plainsrider/wpn_fps_bow_plainsrider_npc"
+end
+function WeaponFactoryTweakData:_init_mateba()
+	self.parts.wpn_fps_pis_2006m_b_long = {
+		pcs = {
+			10,
+			20,
+			30,
+			40
+		},
+		type = "barrel",
+		name_id = "bm_wp_2006m_b_long",
+		a_obj = "a_b",
+		unit = "units/pd2_dlc_arena/weapons/wpn_fps_pis_2006m_pts/wpn_fps_pis_2006m_b_long",
+		stats = {
+			value = 1,
+			spread = 1,
+			concealment = -2
+		},
+		texture_bundle_folder = "dlc_arena",
+		dlc = "arena"
+	}
+	self.parts.wpn_fps_pis_2006m_b_medium = {
+		pcs = {
+			10,
+			20,
+			30,
+			40
+		},
+		type = "barrel",
+		name_id = "bm_wp_2006m_b_medium",
+		a_obj = "a_b",
+		unit = "units/pd2_dlc_arena/weapons/wpn_fps_pis_2006m_pts/wpn_fps_pis_2006m_b_medium",
+		stats = {
+			value = 1,
+			spread = -1,
+			concealment = 2
+		},
+		texture_bundle_folder = "dlc_arena",
+		dlc = "arena"
+	}
+	self.parts.wpn_fps_pis_2006m_b_short = {
+		pcs = {
+			10,
+			20,
+			30,
+			40
+		},
+		type = "barrel",
+		name_id = "bm_wp_2006m_b_short",
+		a_obj = "a_b",
+		unit = "units/pd2_dlc_arena/weapons/wpn_fps_pis_2006m_pts/wpn_fps_pis_2006m_b_short",
+		stats = {
+			value = 1,
+			spread = -2,
+			concealment = 4
+		},
+		texture_bundle_folder = "dlc_arena",
+		dlc = "arena"
+	}
+	self.parts.wpn_fps_pis_2006m_b_standard = {
+		type = "barrel",
+		name_id = "bm_wp_2006m_b_long",
+		a_obj = "a_b",
+		unit = "units/pd2_dlc_arena/weapons/wpn_fps_pis_2006m_pts/wpn_fps_pis_2006m_b_standard",
+		stats = {value = 1}
+	}
+	self.parts.wpn_fps_pis_2006m_body_standard = {
+		type = "lower_reciever",
+		name_id = "bm_wp_2006m_b_long",
+		a_obj = "a_body",
+		unit = "units/pd2_dlc_arena/weapons/wpn_fps_pis_2006m_pts/wpn_fps_pis_2006m_body_standard",
+		stats = {value = 1},
+		animations = {
+			reload = "reload",
+			reload_not_empty = "reload_not_empty",
+			fire = "recoil",
+			fire_steelsight = "recoil"
+		}
+	}
+	self.parts.wpn_fps_pis_2006m_fl_adapter = {
+		type = "extra",
+		name_id = "bm_wp_2006m_b_long",
+		a_obj = "a_fl",
+		unit = "units/pd2_dlc_arena/weapons/wpn_fps_pis_2006m_pts/wpn_fps_pis_2006m_fl_adapter",
+		stats = {value = 1}
+	}
+	self.parts.wpn_fps_pis_2006m_g_bling = {
+		pcs = {
+			10,
+			20,
+			30,
+			40
+		},
+		type = "grip",
+		name_id = "bm_wp_2006m_g_bling",
+		a_obj = "a_g",
+		unit = "units/pd2_dlc_arena/weapons/wpn_fps_pis_2006m_pts/wpn_fps_pis_2006m_g_bling",
+		stats = {value = 1, concealment = 2},
+		texture_bundle_folder = "dlc_arena",
+		dlc = "arena"
+	}
+	self.parts.wpn_fps_pis_2006m_g_standard = {
+		type = "grip",
+		name_id = "bm_wp_2006m_b_long",
+		a_obj = "a_g",
+		unit = "units/pd2_dlc_arena/weapons/wpn_fps_pis_2006m_pts/wpn_fps_pis_2006m_g_standard",
+		stats = {value = 1}
+	}
+	self.parts.wpn_fps_pis_2006m_m_standard = {
+		type = "magazine",
+		name_id = "bm_wp_2006m_b_long",
+		a_obj = "a_m",
+		unit = "units/pd2_dlc_arena/weapons/wpn_fps_pis_2006m_pts/wpn_fps_pis_2006m_m_standard",
+		stats = {value = 1},
+		animations = {
+			reload = "reload",
+			reload_not_empty = "reload_not_empty"
+		}
+	}
+	self.parts.wpn_fps_pis_2006m_b_long.third_unit = "units/pd2_dlc_arena/weapons/wpn_third_pis_2006m_pts/wpn_third_pis_2006m_b_long"
+	self.parts.wpn_fps_pis_2006m_b_standard.third_unit = "units/pd2_dlc_arena/weapons/wpn_third_pis_2006m_pts/wpn_third_pis_2006m_b_standard"
+	self.parts.wpn_fps_pis_2006m_b_short.third_unit = "units/pd2_dlc_arena/weapons/wpn_third_pis_2006m_pts/wpn_third_pis_2006m_b_short"
+	self.parts.wpn_fps_pis_2006m_b_medium.third_unit = "units/pd2_dlc_arena/weapons/wpn_third_pis_2006m_pts/wpn_third_pis_2006m_b_medium"
+	self.parts.wpn_fps_pis_2006m_body_standard.third_unit = "units/pd2_dlc_arena/weapons/wpn_third_pis_2006m_pts/wpn_third_pis_2006m_body_standard"
+	self.parts.wpn_fps_pis_2006m_fl_adapter.third_unit = "units/pd2_dlc_arena/weapons/wpn_third_pis_2006m_pts/wpn_third_pis_2006m_fl_adapter"
+	self.parts.wpn_fps_pis_2006m_g_bling.third_unit = "units/pd2_dlc_arena/weapons/wpn_third_pis_2006m_pts/wpn_third_pis_2006m_g_bling"
+	self.parts.wpn_fps_pis_2006m_g_standard.third_unit = "units/pd2_dlc_arena/weapons/wpn_third_pis_2006m_pts/wpn_third_pis_2006m_g_standard"
+	self.parts.wpn_fps_pis_2006m_m_standard.third_unit = "units/pd2_dlc_arena/weapons/wpn_third_pis_2006m_pts/wpn_third_pis_2006m_m_standard"
+	self.wpn_fps_pis_2006m = {}
+	self.wpn_fps_pis_2006m.unit = "units/pd2_dlc_arena/weapons/wpn_fps_pis_2006m/wpn_fps_pis_2006m"
+	self.wpn_fps_pis_2006m.optional_types = {
+		"gadget",
+		"sight",
+		"barrel_ext"
+	}
+	self.wpn_fps_pis_2006m.adds = {
+		wpn_fps_upg_fl_pis_laser = {
+			"wpn_fps_pis_2006m_fl_adapter"
+		},
+		wpn_fps_upg_fl_pis_tlr1 = {
+			"wpn_fps_pis_2006m_fl_adapter"
+		},
+		wpn_fps_upg_fl_pis_crimson = {
+			"wpn_fps_pis_2006m_fl_adapter"
+		},
+		wpn_fps_upg_fl_pis_x400v = {
+			"wpn_fps_pis_2006m_fl_adapter"
+		},
+		wpn_fps_upg_fl_pis_m3x = {
+			"wpn_fps_pis_2006m_fl_adapter"
+		}
+	}
+	self.wpn_fps_pis_2006m.default_blueprint = {
+		"wpn_fps_pis_2006m_b_standard",
+		"wpn_fps_pis_2006m_body_standard",
+		"wpn_fps_pis_2006m_g_standard",
+		"wpn_fps_pis_2006m_m_standard"
+	}
+	self.wpn_fps_pis_2006m.uses_parts = {
+		"wpn_fps_pis_2006m_b_long",
+		"wpn_fps_pis_2006m_b_medium",
+		"wpn_fps_pis_2006m_b_short",
+		"wpn_fps_pis_2006m_b_standard",
+		"wpn_fps_pis_2006m_body_standard",
+		"wpn_fps_pis_2006m_fl_adapter",
+		"wpn_fps_pis_2006m_g_bling",
+		"wpn_fps_pis_2006m_g_standard",
+		"wpn_fps_pis_2006m_m_standard",
+		"wpn_fps_upg_fl_pis_laser",
+		"wpn_fps_upg_fl_pis_tlr1",
+		"wpn_fps_upg_fl_pis_crimson",
+		"wpn_fps_upg_fl_pis_x400v",
+		"wpn_fps_upg_fl_pis_m3x"
+	}
+	self.wpn_fps_pis_2006m_npc = deep_clone(self.wpn_fps_pis_2006m)
+	self.wpn_fps_pis_2006m_npc.unit = "units/pd2_dlc_arena/weapons/wpn_fps_pis_2006m/wpn_fps_pis_2006m_npc"
 end

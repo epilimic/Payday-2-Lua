@@ -77,6 +77,8 @@ CopActionAct._act_redirects.enemy_spawn = {
 	"e_sp_down_8m_var3",
 	"e_sp_over_3_35m",
 	"e_sp_over_3m",
+	"e_sp_over_3m_fwd_4m",
+	"e_sp_over_3m_fwd_2m_roll",
 	"e_sp_run_2m_turn_r_10m",
 	"e_sp_run_2m_turn_l_10m",
 	"e_sp_run_2m_turn_r_14m",
@@ -191,6 +193,7 @@ CopActionAct._act_redirects.civilian_spawn = {
 	"cm_spawn_prisonvan_var8",
 	"cm_spawn_prisonvan_var9",
 	"cm_spawn_prisonvan_var10",
+	"cm_sp_fastfood_worker",
 	"cf_sp_casino_guest_sit_var2",
 	"cf_sp_dealer_cards",
 	"cf_sp_dealer_roulette",
@@ -254,6 +257,16 @@ CopActionAct._act_redirects.SO = {
 	"e_nl_down_4m",
 	"e_nl_climb_over_3m",
 	"e_nl_up_4m",
+	"e_nl_up_1m_dwn_9m",
+	"e_nl_over_3m_fwd_4m",
+	"e_nl_over_and_fwd_1m_var2",
+	"e_nl_over_and_fwd_1m",
+	"e_nl_up_8m_right_2m_over_1m",
+	"e_nl_up_8m_left_2m_over_1m",
+	"e_nl_under_0_7m",
+	"e_nl_climb_up_4_75m",
+	"e_nl_climb_up_2_2m",
+	"e_nl_over_3m_fwd_2m_roll",
 	"e_nl_up_4m_down_1m",
 	"e_nl_up_0_8_down_1_25m",
 	"e_nl_kick_enter",
@@ -556,6 +569,15 @@ CopActionAct._act_redirects.SO = {
 	"cm_hand_clap_1",
 	"cm_hand_clap_2",
 	"cm_hand_clap_3",
+	"cf_idle_1",
+	"cf_idle_2",
+	"cf_idle_3",
+	"dj_celebrate",
+	"dj_arm_up",
+	"dj_mixing",
+	"cm_idle_1",
+	"cm_idle_2",
+	"cm_idle_3",
 	"cmf_so_lean_1m",
 	"sstash_stand_enter",
 	"sstash_stand_loop",
@@ -769,13 +791,15 @@ function CopActionAct:_upd_wait_for_full_blend()
 end
 function CopActionAct:_clamping_update(t)
 	if self._ext_anim.act then
-		local dt = TimerManager:game():delta_time()
-		self._last_pos = CopActionHurt._get_pos_clamped_to_graph(self)
-		CopActionWalk._set_new_pos(self, dt)
-		local new_rot = self._unit:get_animation_delta_rotation()
-		new_rot = self._common_data.rot * new_rot
-		mrotation.set_yaw_pitch_roll(new_rot, new_rot:yaw(), 0, 0)
-		self._ext_movement:set_rotation(new_rot)
+		if not self._unit:parent() then
+			local dt = TimerManager:game():delta_time()
+			self._last_pos = CopActionHurt._get_pos_clamped_to_graph(self)
+			CopActionWalk._set_new_pos(self, dt)
+			local new_rot = self._unit:get_animation_delta_rotation()
+			new_rot = self._common_data.rot * new_rot
+			mrotation.set_yaw_pitch_roll(new_rot, new_rot:yaw(), 0, 0)
+			self._ext_movement:set_rotation(new_rot)
+		end
 	else
 		self._expired = true
 	end
@@ -823,7 +847,7 @@ function CopActionAct:update(t)
 			self._unit:set_driving("animation")
 			self._changed_driving = true
 		end
-	else
+	elseif not self._unit:parent() then
 		self._ext_movement:set_m_rot(self._unit:rotation())
 		self._ext_movement:set_m_pos(self._unit:position())
 	end
@@ -917,20 +941,20 @@ function CopActionAct:_play_anim()
 		self._expired = true
 		return
 	end
-	if Network:is_client() and self._action_desc.start_rot then
+	if Network:is_client() and self._action_desc.start_rot and not self._unit:parent() then
 		self._ext_movement:set_rotation(self._action_desc.start_rot)
 		self._ext_movement:set_position(self._action_desc.start_pos)
 	end
 	if self._action_desc.clamp_to_graph then
 		self:_set_updator("_clamping_update")
 	else
-		if not self._ext_anim.freefall then
+		if not self._ext_anim.freefall and not self._unit:parent() then
 			self._unit:set_driving("animation")
 			self._changed_driving = true
 		end
 		self:_set_updator()
 	end
-	if self._ext_anim.freefall then
+	if self._ext_anim.freefall and not self._unit:parent() then
 		self._freefall = true
 		self._last_vel_z = 0
 	end
@@ -951,9 +975,9 @@ function CopActionAct:_sync_anim_play()
 					yaw = 360 + yaw
 				end
 				local sync_yaw = 1 + math.ceil(yaw * 254 / 360)
-				self._common_data.ext_network:send("action_act_start_align", action_index, self._blocks.heavy_hurt and true or false, self._action_desc.clamp_to_graph or false, sync_yaw, mvector3.copy(self._common_data.pos))
+				self._common_data.ext_network:send("action_act_start_align", action_index, self._blocks.heavy_hurt and true or false, self._action_desc.clamp_to_graph or false, self._action_desc.needs_full_blend and true or false, sync_yaw, mvector3.copy(self._common_data.pos))
 			else
-				self._common_data.ext_network:send("action_act_start", action_index, self._blocks.heavy_hurt and true or false, self._action_desc.clamp_to_graph or false)
+				self._common_data.ext_network:send("action_act_start", action_index, self._blocks.heavy_hurt and true or false, self._action_desc.clamp_to_graph or false, self._action_desc.needs_full_blend and true or false)
 			end
 		else
 			print("[CopActionAct:_sync_anim_play] redirect", self._action_desc.variant, "not found")

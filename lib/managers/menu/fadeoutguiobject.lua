@@ -3,8 +3,11 @@ function FadeoutGuiObject:init(params)
 	Global.FadeoutObjects = Global.FadeoutObjects or {}
 	table.insert(Global.FadeoutObjects, self)
 	params = params or {}
-	local sustain = params.sustain or 0
-	local fade_out_t = params.fade_out or 0
+	local sustain = params.sustain
+	self._fade_out_duration = params.fade_out or 0
+	if not sustain then
+		self._fade_out_duration = nil
+	end
 	local fade_color = params.color or Color.black
 	local show_loding_icon = params.show_loading_icon or true
 	local loading_texture = params.loading_texture or "guis/textures/icon_loading"
@@ -29,8 +32,10 @@ function FadeoutGuiObject:init(params)
 	end
 	local function fade_out_animation(panel)
 		local loading_icon = panel:child("loading_icon")
-		wait(sustain)
-		over(fade_out_t, function(p)
+		while not self._fade_out_duration do
+			wait(1)
+		end
+		over(self._fade_out_duration, function(p)
 			panel:set_alpha(1 - p)
 			if alive(loading_icon) then
 				loading_icon:set_alpha(1 - p)
@@ -42,4 +47,7 @@ function FadeoutGuiObject:init(params)
 	end
 	Application:debug("FadeoutGuiObject: Fadeout")
 	self._panel:animate(fade_out_animation)
+end
+function FadeoutGuiObject:fade_out(duration)
+	self._fade_out_duration = duration
 end

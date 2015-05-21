@@ -10,6 +10,9 @@ function MotionPathManager:init()
 	self._consumed_triggers = {}
 	self._path_types = {"airborne", "ground"}
 	self._debug_output_offset = 0
+	self._player_proximity_distance = 30
+	self._units_in_player_proximity = {}
+	self._player_proximity_distance_step = 15
 end
 function MotionPathManager:get_path_types()
 	return self._path_types
@@ -88,6 +91,26 @@ function MotionPathManager:_assign_units_to_paths(units_info)
 		})
 	end
 end
+function MotionPathManager:remove_unit_from_paths(unit_id)
+	local was_removed = false
+	for _, path in ipairs(self._paths) do
+		for i = #path.units, 1, -1 do
+			local unit = path.units[i]
+			if unit.unit == unit_id then
+				table.remove(path.units, i)
+				was_removed = true
+			end
+		end
+	end
+	if was_removed then
+		local mission_elements = managers.worlddefinition._mission_element_units
+		for _, me in pairs(mission_elements) do
+			if alive(me) and me:name() == Idstring("units/dev_tools/mission_elements/motion_path_marker/motion_path_marker") then
+				me:mission_element():remove_unit(unit_id)
+			end
+		end
+	end
+end
 function MotionPathManager:operation_goto_marker(checkpoint_marker_id, goto_marker_id)
 	table.insert(self._operations, {
 		operation = "goto_marker",
@@ -146,6 +169,18 @@ function MotionPathManager:_assign_unit_to_path(path, unit_and_pos, checkpoint)
 		target_checkpoint = checkpoint,
 		initial_checkpoint = checkpoint,
 		direction = unit_and_pos.direction
+	})
+end
+function MotionPathManager:put_unit_on_path(path_info)
+	local checkpoint = self:_get_marker_point_id(path_info.path, path_info.marker)
+	if path_info.direction == "bck" then
+		checkpoint = #path_info.path.points - checkpoint + 1
+	end
+	table.insert(path_info.path.units, {
+		unit = path_info.unit_id,
+		target_checkpoint = checkpoint,
+		initial_checkpoint = checkpoint,
+		direction = path_info.direction
 	})
 end
 function MotionPathManager:_get_checkpoint_from_marker(path, marker)
@@ -224,106 +259,123 @@ function MotionPathManager:set_default_speed_limit(speed_limit)
 	end
 	path.default_speed_limit = speed_limit
 end
-local AUTO_DRIVE_TEST = true
-function MotionPathManager:update(t, dt)
-	if Application:editor() and not Global.running_simulation then
-		for _, path in ipairs(self._paths) do
-			if path.points then
-				for j = 1, #path.points do
-					if path.points[j + 1] and path.points[j + 1].point then
-						if path.id ~= self._selected_path or not {
-							1,
-							1,
-							0
-						} then
-							local spline_color = {
-								1,
-								1,
-								1
-							}
-						end
-						Application:draw_line(path.points[j].point, path.points[j + 1].point, unpack(spline_color))
-					end
-				end
-			end
-		end
-		if not AUTO_DRIVE_TEST then
-			return
-		end
+function MotionPathManager:_draw_editor_info()
+	if not Application:editor() then
+		return
 	end
 	for _, path in ipairs(self._paths) do
-		for _, unit_and_pos in ipairs(path.units) do
-			local default_distance_threshold
-			if path.path_type == "airborne" then
-				default_distance_threshold = 10
-			elseif path.path_type == "ground" then
-				default_distance_threshold = 400
-			else
-				default_distance_threshold = 10
-			end
-			local unit = self:_get_unit(unit_and_pos.unit)
-			if alive(unit) then
-				local target_checkpoint_vector, distance_to_checkpoint, move_direction, move_vector, movement_distance
-				local find_next_checkpoint = true
-				self._check_for_operations(path, unit_and_pos)
-				local points_in_direction
-				if not unit_and_pos.direction or unit_and_pos.direction == "fwd" then
-					points_in_direction = path.points
-				else
-					points_in_direction = path.points_bck
-				end
-				repeat
-					if points_in_direction[unit_and_pos.target_checkpoint] then
-						local current_marker = managers.mission:get_element_by_id(path.marker_checkpoints[unit_and_pos.target_checkpoint])
-						if current_marker and current_marker._values.motion_state == "wait" then
-							find_next_checkpoint = false
-						end
-						target_checkpoint_vector = points_in_direction[unit_and_pos.target_checkpoint].point - unit:position()
-						distance_to_checkpoint = target_checkpoint_vector:length()
-						move_direction = target_checkpoint_vector:normalized()
-						move_vector = move_direction * points_in_direction[unit_and_pos.target_checkpoint].speed * dt
-						movement_distance = move_vector:length()
-						if distance_to_checkpoint >= movement_distance then
-							find_next_checkpoint = false
-						else
-							find_next_checkpoint = self:_proceed_to_next_checkpoint(path, unit_and_pos)
-						end
-						if default_distance_threshold > distance_to_checkpoint then
-							local vehicle_ai = unit:npc_vehicle_driving()
-							if path.path_type == "ground" and #points_in_direction == unit_and_pos.target_checkpoint and vehicle_ai and vehicle_ai:is_chasing() then
-								local npc_vehicle = unit:npc_vehicle_driving()
-								if npc_vehicle then
-									npc_vehicle._last_checkpoint_reached = true
-								else
-									Application:error("Non vehicle unit using 'ground' motion path. Unit: " .. unit_and_pos.unit .. " on motion path '" .. path.id .. "'")
-								end
-							end
-							move_vector = target_checkpoint_vector
-							find_next_checkpoint = false
-							self:_proceed_to_next_checkpoint(path, unit_and_pos)
-						end
-						if path.path_type == "ground" then
-							if alive(unit) and unit.npc_vehicle_driving then
-								local vehicle_ai = unit:npc_vehicle_driving()
-								if vehicle_ai and vehicle_ai:is_chasing() then
-									vehicle_ai:drive_to_point(path, unit_and_pos)
-								end
-							end
-						else
-							local target_rotation = self:_get_target_rotation_for_unit(unit, move_direction)
-							local current_rotation = unit:rotation()
-							local smooth_rot = current_rotation:slerp(target_rotation, dt * 2)
-							unit:move(move_vector)
-							unit:set_rotation(smooth_rot)
-						end
-					else
-						self:_check_for_triggers(path, unit_and_pos)
-						find_next_checkpoint = false
+		if path.points then
+			for j = 1, #path.points do
+				if path.points[j + 1] and path.points[j + 1].point then
+					if path.id ~= self._selected_path or not {
+						0,
+						1,
+						0
+					} then
+						local spline_color = {
+							1,
+							1,
+							1
+						}
 					end
-				until not find_next_checkpoint
+					Application:draw_line(path.points[j].point, path.points[j + 1].point, unpack(spline_color))
+				end
 			end
 		end
 	end
+end
+local AUTO_DRIVE_TEST = true
+function MotionPathManager:update(t, dt)
+	self:_draw_editor_info()
+	if not AUTO_DRIVE_TEST then
+		return
+	end
+	for _, path in ipairs(self._paths) do
+		local default_distance_threshold
+		if path.path_type == "airborne" then
+			default_distance_threshold = 10
+		elseif path.path_type == "ground" then
+			default_distance_threshold = 400
+		else
+			default_distance_threshold = 10
+		end
+		for _, unit_and_pos in ipairs(path.units) do
+			local unit = self:_get_unit(unit_and_pos.unit)
+			if alive(unit) then
+				self:_move_unit(t, dt, path, unit, unit_and_pos, default_distance_threshold)
+			end
+		end
+	end
+end
+function MotionPathManager:_move_unit(t, dt, path, unit, unit_and_pos, default_distance_threshold)
+	local find_next_checkpoint = true
+	self._check_for_operations(path, unit_and_pos)
+	local points_in_direction
+	if not unit_and_pos.direction or unit_and_pos.direction == "fwd" then
+		points_in_direction = path.points
+	else
+		points_in_direction = path.points_bck
+	end
+	local infinite_loop_protection = 0
+	repeat
+		if find_next_checkpoint then
+			infinite_loop_protection = infinite_loop_protection + 1
+		else
+			infinite_loop_protection = 0
+		end
+		if infinite_loop_protection > 100 then
+			find_next_checkpoint = false
+			debug_pause("Possible infinite loop in Motion Path Manager.")
+		elseif points_in_direction[unit_and_pos.target_checkpoint] then
+			find_next_checkpoint = self:_move_unit_to_checkpoint(t, dt, path, unit, unit_and_pos, default_distance_threshold, points_in_direction)
+		else
+			self:_check_for_triggers(path, unit_and_pos)
+			find_next_checkpoint = false
+		end
+	until not find_next_checkpoint
+end
+function MotionPathManager:_move_unit_to_checkpoint(t, dt, path, unit, unit_and_pos, default_distance_threshold, points_in_direction)
+	local target_checkpoint_vector, distance_to_checkpoint, move_direction, move_vector, movement_distance
+	local npc_vehicle = unit:npc_vehicle_driving()
+	local find_next_checkpoint = true
+	if path.path_type == "ground" and npc_vehicle then
+		if npc_vehicle:is_chasing() and Network:is_server() then
+			if #points_in_direction == unit_and_pos.target_checkpoint then
+				npc_vehicle._last_checkpoint_reached = true
+			else
+				npc_vehicle._last_checkpoint_reached = false
+			end
+			find_next_checkpoint = npc_vehicle:drive_to_point(path, unit_and_pos, dt)
+		else
+			find_next_checkpoint = false
+		end
+	else
+		local current_marker = managers.mission:get_element_by_id(path.marker_checkpoints[unit_and_pos.target_checkpoint])
+		if current_marker and current_marker._values.motion_state == "wait" then
+			find_next_checkpoint = false
+		end
+		target_checkpoint_vector = points_in_direction[unit_and_pos.target_checkpoint].point - unit:position()
+		distance_to_checkpoint = target_checkpoint_vector:length()
+		move_direction = target_checkpoint_vector:normalized()
+		move_vector = move_direction * points_in_direction[unit_and_pos.target_checkpoint].speed * dt
+		movement_distance = move_vector:length()
+		if distance_to_checkpoint >= movement_distance then
+			find_next_checkpoint = false
+		else
+			find_next_checkpoint = self:_proceed_to_next_checkpoint(path, unit_and_pos)
+		end
+		if default_distance_threshold > distance_to_checkpoint then
+			move_vector = target_checkpoint_vector
+			find_next_checkpoint = false
+			self:_proceed_to_next_checkpoint(path, unit_and_pos)
+		end
+		local target_rotation = self:_get_target_rotation_for_unit(unit, move_direction)
+		local current_rotation = unit:rotation()
+		local smooth_rot = current_rotation:slerp(target_rotation, dt * 2)
+		unit:move(move_vector)
+		unit:set_rotation(smooth_rot)
+	end
+	return find_next_checkpoint
 end
 function MotionPathManager:_get_target_rotation_for_unit(unit, move_direction)
 	local unit_id = unit:unit_data().unit_id
@@ -434,6 +486,9 @@ function MotionPathManager:on_simulation_ended()
 	self._operations = {}
 	self._rotations = {}
 	self._debug_output_offset = 0
+	self._player_proximity_distance = 30
+	self._units_in_player_proximity = {}
+	self._player_proximity_distance_step = 15
 	for _, path in ipairs(self._paths) do
 		for _, unit_and_pos in ipairs(path.units) do
 			unit_and_pos.target_checkpoint = unit_and_pos.initial_checkpoint
@@ -571,6 +626,122 @@ function MotionPathManager:motion_operation_deactivate_bridge(marker_ids)
 	end
 	self._path_finder:recreate_graph()
 end
+function MotionPathManager:remove_ground_unit_from_path(unit_id)
+	for _, path in ipairs(self._paths) do
+		if path.path_type == "ground" then
+			for idx, unit_info in dpairs(path.units) do
+				if unit_id == unit_info.unit then
+					table.remove(path.units, idx)
+				end
+			end
+		end
+	end
+end
+function MotionPathManager:find_nearest_ground_path(ground_unit_id)
+	local ground_unit = self:_get_unit(ground_unit_id)
+	if not alive(ground_unit) then
+		return
+	end
+	local ground_unit_position = ground_unit:position()
+	local min_distance_marker = {
+		marker_to = nil,
+		distance = 2000000,
+		direction = nil,
+		path = nil
+	}
+	for _, path in ipairs(self._paths) do
+		if path.path_type == "ground" then
+			for _, marker in ipairs(path.markers) do
+				local marker_position = self:_get_marker_position(path, marker)
+				local distance_to_ground_unit = marker_position - ground_unit_position:length()
+				local ray_hit = ground_unit:raycast(ground_unit_position, marker_position)
+				if not ray_hit and distance_to_ground_unit <= min_distance_marker.distance and distance_to_ground_unit > 500 then
+					min_distance_marker.path = path
+					min_distance_marker.marker = marker
+					min_distance_marker.distance = distance_to_ground_unit
+				end
+			end
+		end
+	end
+	if not min_distance_marker.path then
+		return nil
+	end
+	min_distance_marker.direction = self:_choose_target_path_direction(ground_unit_position, min_distance_marker)
+	return min_distance_marker
+end
+function MotionPathManager:_choose_target_path_direction(ground_unit_position, target_path_info)
+	local point_id = self:_get_marker_point_id(target_path_info.path, target_path_info.marker)
+	local target_point_bck_id = #target_path_info.path.points - point_id + 1
+	local point_forward = target_path_info.path.points[point_id + 1]
+	local point_backward = target_path_info.path.points_bck[target_point_bck_id + 1]
+	if not point_forward then
+		return "bck"
+	elseif not point_backward then
+		return "fwd"
+	elseif not point_forward and not point_backward then
+		Application:error("Unable to choose path direction.")
+		return
+	end
+	local distance_forward = ground_unit_position - point_forward.point:length()
+	local distance_backward = ground_unit_position - point_backward.point:length()
+	local retval
+	if distance_forward >= distance_backward then
+		retval = "fwd"
+	else
+		retval = "bck"
+	end
+	return retval
+end
+function MotionPathManager:_is_marker_in_front(marker_position, unit)
+	local target_direction = marker_position - unit:position()
+	local unit_fwd_vector = unit:rotation():y():normalized()
+	local angle_to_target = unit_fwd_vector:angle(target_direction)
+	local target_direction_360 = math.mod(360 + target_direction:to_polar().spin, 360)
+	local unit_fwd_vector_360 = math.mod(360 + unit_fwd_vector:to_polar().spin, 360)
+	local relative_angle = math.mod(360 + (target_direction_360 - unit_fwd_vector_360), 360)
+	local FWD_ANGLE = 90
+	local retval = relative_angle < FWD_ANGLE and relative_angle > 0 or relative_angle < 360 and relative_angle > 360 - FWD_ANGLE
+	return retval
+end
+function MotionPathManager:_get_marker_position(path, marker)
+	local marker_unit = self:_get_mop_marker_data(marker)
+	return marker_unit.position
+end
+function MotionPathManager:_get_marker_point_id(path, marker)
+	local point_id = 1
+	for id, candidate_marker in pairs(path.marker_checkpoints) do
+		if candidate_marker == marker then
+			point_id = id
+		end
+	end
+	return point_id
+end
+function MotionPathManager:set_player_proximity_distance(meters)
+	self._player_proximity_distance = meters
+end
+function MotionPathManager:set_player_proximity_distance_step(meters)
+	self._player_proximity_distance_step = meters
+end
+function MotionPathManager:get_player_proximity_distance()
+	return self._player_proximity_distance
+end
+function MotionPathManager:increase_player_proximity_distance()
+	self._player_proximity_distance = self._player_proximity_distance + self._player_proximity_distance_step
+end
+function MotionPathManager:reset_player_proximity_distance()
+	self._player_proximity_distance = 30
+	for unit_id, meters in pairs(self._units_in_player_proximity) do
+		self._units_in_player_proximity[unit_id] = self._player_proximity_distance
+	end
+end
+function MotionPathManager:get_player_proximity_distance_for_unit(unit_id)
+	local retval = self._units_in_player_proximity[unit_id]
+	retval = retval or 0
+	return retval
+end
+function MotionPathManager:set_player_proximity_distance_for_unit(unit_id, meters)
+	self._units_in_player_proximity[unit_id] = meters
+end
 function MotionPathManager:show_npc_vehicle_stats(enabled)
 	self._npc_vehicle_debug_show = enabled
 end
@@ -586,5 +757,19 @@ function MotionPathManager:show_bridges()
 				Application:draw_arrow(marker_from:position(), marker_to:position(), 1, 0, 0, 1)
 			end
 		end
+	end
+end
+function MotionPathManager:dump_units_on_path(path_type)
+	for _, path in ipairs(self._paths) do
+		if path.path_type == path_type then
+			for _, unit in ipairs(path.units) do
+				print(path.id, inspect(unit))
+			end
+		end
+	end
+end
+function MotionPathManager:dump_player_proximity_distance()
+	for unit_id, meters in pairs(self._units_in_player_proximity) do
+		Application:debug("MotionPathManager:dump_player_proximity_distance() unit, meters: ", unit_id, meters)
 	end
 end

@@ -3,7 +3,8 @@ UpgradesManager.AQUIRE_STRINGS = {
 	"Default",
 	"SkillTree",
 	"SpecializationTree",
-	"LevelTree"
+	"LevelTree",
+	"DLC"
 }
 function UpgradesManager:init()
 	self:_setup()
@@ -76,8 +77,25 @@ function UpgradesManager:aquire_from_level_tree(level, loading)
 	if not tree_data then
 		return
 	end
+	local identifier = UpgradesManager.AQUIRE_STRINGS[4] .. tostring(level)
 	for _, upgrade in ipairs(tree_data.upgrades) do
-		self:aquire(upgrade, loading, UpgradesManager.AQUIRE_STRINGS[4] .. tostring(level))
+		if not self:aquired(upgrade, identifier) then
+			self:aquire(upgrade, loading, identifier)
+		end
+	end
+end
+function UpgradesManager:verify_level_tree(level, loading)
+	local tree_data = tweak_data.upgrades.level_tree[level]
+	if not tree_data then
+		return
+	end
+	local identifier = UpgradesManager.AQUIRE_STRINGS[4] .. tostring(level)
+	local upgrade
+	for _, id in ipairs(tree_data.upgrades) do
+		upgrade = tweak_data.upgrades.definitions[id]
+		if upgrade and upgrade.dlc and not managers.dlc:is_dlc_unlocked(upgrade.dlc) and self:aquired(id, identifier) then
+			self:unaquire(id, identifier)
+		end
 	end
 end
 function UpgradesManager:_next_tree()
@@ -129,11 +147,11 @@ function UpgradesManager:aquired(id, identifier)
 end
 function UpgradesManager:aquire_default(id, identifier)
 	if not tweak_data.upgrades.definitions[id] then
-		Application:error("Tried to aquire an upgrade that doesn't exist: " .. id .. "")
+		Application:error("Tried to aquire an upgrade that doesn't exist: " .. (id or "nil") .. "")
 		return
 	end
 	local upgrade = tweak_data.upgrades.definitions[id]
-	if upgrade.dlc and (tweak_data.dlc[upgrade.dlc] and tweak_data.dlc[upgrade.dlc].free or not managers.dlc:has_dlc(upgrade.dlc)) then
+	if upgrade.dlc and not managers.dlc:is_dlc_unlocked(upgrade.dlc) then
 		Application:error("Tried to aquire an upgrade locked to a dlc you do not have: " .. id .. " DLC: ", upgrade.dlc)
 		return
 	end

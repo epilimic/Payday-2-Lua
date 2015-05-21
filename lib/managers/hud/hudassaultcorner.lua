@@ -348,11 +348,13 @@ function HUDAssaultCorner:_start_assault(text_list)
 	self._bg_box:stop()
 	assault_panel:set_visible(true)
 	self._bg_box:animate(callback(self, self, "_animate_assault"))
+	self:_set_feedback_color(self._assault_color)
 end
 function HUDAssaultCorner:_end_assault()
 	if not self._assault then
 		return
 	end
+	self:_set_feedback_color(nil)
 	self._assault = false
 	self._bg_box:child("text_panel"):stop()
 	self._bg_box:child("text_panel"):clear()
@@ -416,6 +418,7 @@ function HUDAssaultCorner:show_point_of_no_return_timer()
 	self._hud_panel:child("hostages_panel"):set_visible(false)
 	point_of_no_return_panel:stop()
 	point_of_no_return_panel:animate(callback(self, self, "_animate_show_noreturn"), delay_time)
+	self:_set_feedback_color(self._noreturn_color)
 	self._point_of_no_return = true
 end
 function HUDAssaultCorner:hide_point_of_no_return_timer()
@@ -423,6 +426,7 @@ function HUDAssaultCorner:hide_point_of_no_return_timer()
 	self._hud_panel:child("point_of_no_return_panel"):set_visible(false)
 	self._hud_panel:child("hostages_panel"):set_visible(true)
 	self._point_of_no_return = false
+	self:_set_feedback_color(nil)
 end
 function HUDAssaultCorner:flash_point_of_no_return_timer(beep)
 	local function flash_timer(o)
@@ -440,19 +444,30 @@ function HUDAssaultCorner:flash_point_of_no_return_timer(beep)
 	local point_of_no_return_timer = self._noreturn_bg_box:child("point_of_no_return_timer")
 	point_of_no_return_timer:animate(flash_timer)
 end
-function HUDAssaultCorner:show_casing()
+function HUDAssaultCorner:show_casing(mode)
 	local delay_time = self._assault and 1.2 or 0
 	self:_end_assault()
 	local casing_panel = self._hud_panel:child("casing_panel")
 	local text_panel = casing_panel:child("text_panel")
 	text_panel:script().text_list = {}
 	self._casing_bg_box:script().text_list = {}
-	for _, text_id in ipairs({
-		"hud_casing_mode_ticker",
-		"hud_assault_end_line",
-		"hud_casing_mode_ticker",
-		"hud_assault_end_line"
-	}) do
+	local msg
+	if mode == "clean" then
+		msg = {
+			"hud_casing_mode_ticker_clean",
+			"hud_assault_end_line",
+			"hud_casing_mode_ticker_clean",
+			"hud_assault_end_line"
+		}
+	else
+		msg = {
+			"hud_casing_mode_ticker",
+			"hud_assault_end_line",
+			"hud_casing_mode_ticker",
+			"hud_assault_end_line"
+		}
+	end
+	for _, text_id in ipairs(msg) do
 		table.insert(text_panel:script().text_list, text_id)
 		table.insert(self._casing_bg_box:script().text_list, text_id)
 	end
@@ -576,4 +591,30 @@ function HUDAssaultCorner:_animate_test_point_of_no_return(panel)
 		managers.hud:feed_point_of_no_return_timer(math.max(t, 0), false)
 	end
 	managers.hud:hide_point_of_no_return_timer()
+end
+function HUDAssaultCorner:_set_feedback_color(color)
+	if self._feedback_color ~= color then
+		self._feedback_color = color
+		if color then
+			self._feedback_color_t = 2.8
+			managers.hud:add_updator("feedback_color", callback(self, self, "_update_feedback_alpha"))
+		else
+			managers.hud:remove_updator("feedback_color")
+			managers.platform:set_feedback_color(nil)
+		end
+	end
+end
+function HUDAssaultCorner:_update_feedback_alpha(t, dt)
+	self._feedback_color_t = self._feedback_color_t - dt
+	local alpha_curve = math.sin(self._feedback_color_t * 180)
+	local alpha = math.abs(alpha_curve)
+	local color = self._feedback_color
+	if color == self._assault_color then
+		if alpha_curve < 0 then
+			color = Color.blue
+		else
+			color = Color.red
+		end
+	end
+	managers.platform:set_feedback_color(color:with_alpha(alpha))
 end

@@ -26,6 +26,8 @@ function PlayerDamage:init(unit)
 	local body_ext = PlayerBodyDamage:new(self._unit, self, self._inflict_damage_body)
 	self._inflict_damage_body:extension().damage = body_ext
 	managers.sequence:add_inflict_updator_body("fire", self._unit:key(), self._inflict_damage_body:key(), self._inflict_damage_body:extension().damage)
+	self._doh_data = tweak_data.upgrades.damage_to_hot_data or {}
+	self._damage_to_hot_stack = {}
 end
 function PlayerDamage:post_init()
 	self:send_set_status()
@@ -371,6 +373,7 @@ function PlayerDamage:damage_melee(attack_data)
 		dmg_mul = dmg_mul * managers.player:upgrade_value("player", "interacting_damage_multiplier", 1)
 	end
 	attack_data.damage = attack_data.damage * dmg_mul
+	self._unit:sound():play("melee_hit_body", nil, nil)
 	local result = self:damage_bullet(attack_data)
 	local vars = {
 		"melee_hit",
@@ -755,6 +758,7 @@ function PlayerDamage:_check_bleed_out(can_activate_berserker)
 			end
 		end
 		self._hurt_value = 0.2
+		self._damage_to_hot_stack = {}
 		managers.environment_controller:set_downed_value(0)
 		SoundDevice:set_rtpc("downed_state_progression", 0)
 		if not self._check_berserker_done or not can_activate_berserker then
@@ -828,6 +832,7 @@ function PlayerDamage:on_downed()
 	self._downed_timer = self:down_time()
 	self._downed_start_time = self._downed_timer
 	self._downed_paused_counter = 0
+	self._damage_to_hot_stack = {}
 	self:disable_berserker()
 	managers.hud:pd_start_timer({
 		time = self._downed_timer
@@ -965,7 +970,7 @@ function PlayerDamage:revive(helped_self)
 		return
 	end
 	local arrested = self:arrested()
-	managers.player:set_player_state("standard")
+	managers.player:set_player_state(managers.player:current_sync_state())
 	if not helped_self then
 		PlayerStandard.say_line(self, "s05x_sin")
 	end
@@ -1022,6 +1027,24 @@ function PlayerDamage:focus_delay_mul()
 end
 function PlayerDamage:shoot_pos_mid(m_pos)
 	mvector3.set(m_pos, self._unit:movement():m_head_pos())
+end
+function PlayerDamage:got_max_doh_stacks()
+	return self._doh_data.max_stacks and #self._damage_to_hot_stack >= (tonumber(self._doh_data.max_stacks) or 1)
+end
+function PlayerDamage:add_damage_to_hot()
+	if self:got_max_doh_stacks() then
+		return
+	end
+	if self:need_revive() or self:dead() or self._check_berserker_done then
+		return
+	end
+	table.insert(self._damage_to_hot_stack, {
+		next_tick = TimerManager:game():time() + (self._doh_data.tick_time or 1),
+		ticks_left = (self._doh_data.total_ticks or 1) + managers.player:upgrade_value("player", "damage_to_hot_extra_ticks", 0)
+	})
+	table.sort(self._damage_to_hot_stack, function(x, y)
+		return x.next_tick < y.next_tick
+	end)
 end
 function PlayerDamage:set_regenerate_timer_to_max()
 	local mul = managers.player:body_armor_regen_multiplier(alive(self._unit) and self._unit:movement():current_state()._moving)
@@ -1180,6 +1203,25 @@ function PlayerDamage:_upd_health_regen(t, dt)
 			self:change_health(max_health * regen_rate)
 			self._health_regen_update_timer = 5
 		end
+	end
+	if 0 < #self._damage_to_hot_stack then
+		repeat
+			local next_doh = self._damage_to_hot_stack[1]
+			local done = not next_doh or next_doh.next_tick > TimerManager:game():time()
+			if not done then
+				local regen_rate = managers.player:upgrade_value("player", "damage_to_hot", 0)
+				self:change_health(regen_rate)
+				next_doh.ticks_left = next_doh.ticks_left - 1
+				if next_doh.ticks_left == 0 then
+					table.remove(self._damage_to_hot_stack, 1)
+				else
+					next_doh.next_tick = next_doh.next_tick + (self._doh_data.tick_time or 1)
+				end
+				table.sort(self._damage_to_hot_stack, function(x, y)
+					return x.next_tick < y.next_tick
+				end)
+			end
+		until done
 	end
 end
 function PlayerDamage:suppression_ratio()

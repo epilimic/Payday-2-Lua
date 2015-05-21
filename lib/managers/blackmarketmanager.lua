@@ -2154,6 +2154,7 @@ function BlackMarketManager:on_sell_weapon(category, slot, skip_verification)
 			self:_update_menu_scene_secondary()
 		end
 	end
+	MenuCallbackHandler:_update_outfit_information()
 end
 function BlackMarketManager:_update_menu_scene_primary()
 	if not managers.menu_scene then
@@ -2290,6 +2291,7 @@ function BlackMarketManager:_on_modified_weapon(category, slot)
 			managers.menu_scene:set_character_equipped_weapon(nil, data.factory_id, data.blueprint, category == "primaries" and "primary" or "secondary")
 		end
 	end
+	MenuCallbackHandler:_update_outfit_information()
 end
 function BlackMarketManager:view_weapon_platform(weapon_id, open_node_cb)
 	local factory_id = managers.weapon_factory:get_factory_id_by_weapon_id(weapon_id)
@@ -2584,6 +2586,8 @@ function BlackMarketManager:select_customize_mask(category, id, global_value)
 	}
 	if self:can_view_customized_mask() then
 		managers.menu_scene:update_mask(self:get_customized_mask_blueprint())
+	else
+		managers.menu_scene:update_mask(self._customize_mask.default_blueprint)
 	end
 	return true
 end
@@ -3476,6 +3480,9 @@ function BlackMarketManager:_load_done()
 		end
 	end
 	MenuCallbackHandler:_update_outfit_information()
+	if managers.menu_component then
+		managers.menu_component:reload_blackmarket_gui()
+	end
 end
 function BlackMarketManager:verify_dlc_items()
 	self:_cleanup_blackmarket()

@@ -1507,10 +1507,15 @@ function BlackMarketGui:make_fine_text(text)
 	text:set_size(w, h)
 	text:set_position(math.round(text:x()), math.round(text:y()))
 end
+function BlackMarketGui:in_setup()
+	return not not self._in_setup
+end
 function BlackMarketGui:_setup(is_start_page, component_data)
+	self._in_setup = true
 	if alive(self._panel) then
 		self._ws:panel():remove(self._panel)
 	end
+	MenuCallbackHandler:chk_dlc_content_updated()
 	self._item_bought = nil
 	self._panel = self._ws:panel():panel({})
 	self._fullscreen_panel = self._fullscreen_ws:panel():panel({layer = 40})
@@ -2496,6 +2501,7 @@ function BlackMarketGui:_setup(is_start_page, component_data)
 			end
 			self._armor_stats_shown = {
 				{name = "armor"},
+				{name = "health"},
 				{
 					name = "concealment",
 					index = true
@@ -2873,6 +2879,7 @@ function BlackMarketGui:_setup(is_start_page, component_data)
 	end
 	self:set_tab_positions()
 	self:_round_everything()
+	self._in_setup = nil
 end
 function BlackMarketGui:_update_borders()
 	local wh = self._weapon_info_panel:h()
@@ -3337,6 +3344,15 @@ function BlackMarketGui:_get_armor_stats(name)
 			}
 			skill_stats[stat.name] = {
 				value = math.round((base_stats[stat.name].value + managers.player:body_armor_skill_addend(name) * tweak_data.gui.stats_present_multiplier) * managers.player:body_armor_skill_multiplier() - base_stats[stat.name].value)
+			}
+		elseif stat.name == "health" then
+			local base = tweak_data.player.damage.HEALTH_INIT
+			local mod = managers.player:thick_skin_value()
+			base_stats[stat.name] = {
+				value = math.round((base + mod) * tweak_data.gui.stats_present_multiplier)
+			}
+			skill_stats[stat.name] = {
+				value = math.round(base_stats[stat.name].value * managers.player:health_skill_multiplier() - base_stats[stat.name].value)
 			}
 		elseif stat.name == "concealment" then
 			base_stats[stat.name] = {
@@ -4369,6 +4385,11 @@ function BlackMarketGui:update_info_text()
 				SKILL = slot_data.name
 			}))
 			updated_texts[3].below_stats = true
+		elseif managers.player:has_category_upgrade("player", "damage_to_hot") then
+			if not table.contains(tweak_data:get_raw_value("upgrades", "damage_to_hot_data", "armors_allowed") or {}, self._slot_data.name) then
+				updated_texts[3].text = managers.localization:to_upper_text("bm_menu_disables_damage_to_hot")
+				updated_texts[3].below_stats = true
+			end
 		end
 	elseif identifier == self.identifiers.mask then
 		local price = slot_data.price
@@ -4526,11 +4547,13 @@ function BlackMarketGui:update_info_text()
 		end
 		local mask_mod_info = managers.blackmarket:info_customize_mask()
 		updated_texts[2].text = managers.localization:to_upper_text("bm_menu_mask_customization") .. "\n"
+		local resource_color = {}
 		local material_text = managers.localization:to_upper_text("bm_menu_materials")
 		local pattern_text = managers.localization:to_upper_text("bm_menu_textures")
 		local colors_text = managers.localization:to_upper_text("bm_menu_colors")
 		if mask_mod_info[1].overwritten then
 			updated_texts[2].text = updated_texts[2].text .. material_text .. ": " .. "##" .. managers.localization:to_upper_text("menu_bm_overwritten") .. "##" .. "\n"
+			table.insert(resource_color, tweak_data.screen_colors.risk)
 		elseif mask_mod_info[1].is_good then
 			updated_texts[2].text = updated_texts[2].text .. material_text .. ": " .. managers.localization:text(mask_mod_info[1].text)
 			if mask_mod_info[1].price and 0 < mask_mod_info[1].price then
@@ -4539,9 +4562,11 @@ function BlackMarketGui:update_info_text()
 			updated_texts[2].text = updated_texts[2].text .. "\n"
 		else
 			updated_texts[2].text = updated_texts[2].text .. material_text .. ": " .. "##" .. managers.localization:to_upper_text("menu_bm_not_selected") .. "##" .. "\n"
+			table.insert(resource_color, tweak_data.screen_colors.important_1)
 		end
 		if mask_mod_info[2].overwritten then
 			updated_texts[2].text = updated_texts[2].text .. pattern_text .. ": " .. "##" .. managers.localization:to_upper_text("menu_bm_overwritten") .. "##" .. "\n"
+			table.insert(resource_color, tweak_data.screen_colors.risk)
 		elseif mask_mod_info[2].is_good then
 			updated_texts[2].text = updated_texts[2].text .. pattern_text .. ": " .. managers.localization:text(mask_mod_info[2].text)
 			if mask_mod_info[2].price and 0 < mask_mod_info[2].price then
@@ -4550,9 +4575,11 @@ function BlackMarketGui:update_info_text()
 			updated_texts[2].text = updated_texts[2].text .. "\n"
 		else
 			updated_texts[2].text = updated_texts[2].text .. pattern_text .. ": " .. "##" .. managers.localization:to_upper_text("menu_bm_not_selected") .. "##" .. "\n"
+			table.insert(resource_color, tweak_data.screen_colors.important_1)
 		end
 		if mask_mod_info[3].overwritten then
 			updated_texts[2].text = updated_texts[2].text .. colors_text .. ": " .. "##" .. managers.localization:to_upper_text("menu_bm_overwritten") .. "##" .. "\n"
+			table.insert(resource_color, tweak_data.screen_colors.risk)
 		elseif mask_mod_info[3].is_good then
 			updated_texts[2].text = updated_texts[2].text .. colors_text .. ": " .. managers.localization:text(mask_mod_info[3].text)
 			if mask_mod_info[3].price and 0 < mask_mod_info[3].price then
@@ -4561,6 +4588,7 @@ function BlackMarketGui:update_info_text()
 			updated_texts[2].text = updated_texts[2].text .. "\n"
 		else
 			updated_texts[2].text = updated_texts[2].text .. colors_text .. ": " .. "##" .. managers.localization:to_upper_text("menu_bm_not_selected") .. "##" .. "\n"
+			table.insert(resource_color, tweak_data.screen_colors.important_1)
 		end
 		updated_texts[2].text = updated_texts[2].text .. "\n"
 		local price, can_afford = managers.blackmarket:get_customize_mask_value()
@@ -4622,15 +4650,22 @@ function BlackMarketGui:update_info_text()
 ##]] .. managers.localization:to_upper_text("menu_bm_overwrite", {
 					category = managers.localization:text("bm_menu_" .. part_info.override)
 				}) .. "##"
-				table.insert(updated_texts[4].resource_color, tweak_data.screen_colors.important_1)
+				table.insert(updated_texts[4].resource_color, tweak_data.screen_colors.risk)
 			end
 		end
 		if price and price > 0 then
 			updated_texts[2].text = updated_texts[2].text .. managers.localization:to_upper_text("menu_bm_total_cost", {
 				cost = (not can_afford and "##" or "") .. managers.experience:cash_string(price) .. (not can_afford and "##" or "")
 			})
+			if not can_afford then
+				table.insert(resource_color, tweak_data.screen_colors.important_1)
+			end
 		end
-		updated_texts[2].resource_color = tweak_data.screen_colors.important_1
+		if #resource_color == 1 then
+			updated_texts[2].resource_color = resource_color[1]
+		else
+			updated_texts[2].resource_color = resource_color
+		end
 		if not managers.blackmarket:can_finish_customize_mask() then
 			local list_of_mods = ""
 			local missed_mods = {}
@@ -4645,7 +4680,7 @@ function BlackMarketGui:update_info_text()
 					if i < #missed_mods - 1 then
 						list_of_mods = list_of_mods .. ", "
 					elseif i == #missed_mods - 1 then
-						list_of_mods = list_of_mods .. managers.localization:text("bm_menu_last_of_kind")
+						list_of_mods = list_of_mods .. ", "
 					end
 				end
 			elseif #missed_mods == 1 then
@@ -6159,6 +6194,7 @@ function BlackMarketGui:populate_masks(data)
 		local is_locked = tweak_data.lootdrop.global_values[new_data.global_value] and tweak_data.lootdrop.global_values[new_data.global_value].dlc and not managers.dlc:is_dlc_unlocked(new_data.global_value)
 		local locked_parts = {}
 		local mask_is_locked = is_locked
+		local locked_global_value
 		if not is_locked then
 			local name_converter = {
 				material = "materials",
@@ -6170,8 +6206,11 @@ function BlackMarketGui:populate_masks(data)
 				if default_blueprint[type] ~= part.id and default_blueprint[name_converter[type]] ~= part.id and tweak_data.lootdrop.global_values[part.global_value] and tweak_data.lootdrop.global_values[part.global_value].dlc and not tweak_data.dlc[part.global_value].free and not managers.dlc:has_dlc(part.global_value) then
 					locked_parts[type] = part.global_value
 					is_locked = true
+					locked_global_value = part.global_value or locked_global_value
 				end
 			end
+		else
+			locked_global_value = new_data.global_value
 		end
 		if is_locked then
 			new_data.unlocked = false
@@ -6265,7 +6304,7 @@ function BlackMarketGui:populate_masks(data)
 					guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
 				end
 				local right = -3
-				local bottom = 38 - (NOT_WIN_32 and 20 or 10)
+				local bottom = 38 - (NOT_WIN_32 and 10 or 10)
 				local w = 42
 				local h = 42
 				table.insert(new_data.mini_icons, {

@@ -95,7 +95,8 @@ function CopBrain:post_init()
 		"heavy_hurt",
 		"hurt_sick",
 		"shield_knock",
-		"counter_tased"
+		"counter_tased",
+		"taser_tased"
 	}, callback(self, self, "clbk_damage"))
 	self._unit:character_damage():add_listener("CopBrain_death" .. my_key, {"death"}, callback(self, self, "clbk_death"))
 	self:_setup_attention_handler()

@@ -16,9 +16,19 @@ function PlayerBipod:_enter(enter_data)
 		local tweak_data = self._equipped_unit:base():weapon_tweak_data()
 		local speed_multiplier = self._equipped_unit:base():reload_speed_multiplier()
 		local reload_name_id = tweak_data.animations.reload_name_id or self._equipped_unit:base().name_id
+		self._unit_deploy_position = player:position()
 		self._unit:camera():camera_unit():base():set_limits(tweak_data.bipod_camera_spin_limit, tweak_data.bipod_camera_pitch_limit)
 		PlayerBipod.super:start_deploying_bipod(tweak_data.timers.deploy_bipod)
 		self._ext_camera:play_redirect(Idstring("recoil_" .. reload_name_id), speed_multiplier)
+		self._headbob = 0
+		self._target_headbob = 0
+		self._ext_camera:set_shaker_parameter("headbob", "amplitude", 0)
+		self._ext_camera:stop_shaker("player_start_running")
+		self._ext_camera:play_shaker("player_stop_running")
+		self:_end_action_running(managers.player:player_timer():time())
+		self:set_running(false)
+		self._last_velocity_xy = Vector3()
+		self._ext_camera:play_redirect(self.IDS_IDLE)
 	end
 end
 function PlayerBipod:exit(state_data, new_state_name)
@@ -34,7 +44,9 @@ function PlayerBipod:exit(state_data, new_state_name)
 end
 function PlayerBipod:update(t, dt)
 	PlayerBipod.super.update(self, t, dt)
-	if not managers.player:player_unit():mover():standing() then
+	local deploy_valid = self._equipped_unit:base():is_gadget_usable()
+	local movement_distance = self._unit_deploy_position - managers.player:player_unit():position():length()
+	if not managers.player:player_unit():mover():standing() or movement_distance > 10 or not deploy_valid then
 		self:exit(nil, "standard")
 		managers.player:set_player_state("standard")
 	end
@@ -78,6 +90,10 @@ function PlayerBipod:_update_check_actions(t, dt)
 	self:_check_action_steelsight(t, input)
 	self:_check_use_item(t, input)
 	self:_find_pickups(t)
+end
+function PlayerBipod:_check_step(t)
+end
+function PlayerBipod:_check_action_reload(t, input)
 end
 function PlayerBipod:_check_action_run(...)
 end

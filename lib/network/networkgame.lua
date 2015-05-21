@@ -81,7 +81,7 @@ function NetworkGame:on_peer_entered_lobby(peer_id)
 	local peer = managers.network:session():peer(peer_id)
 	peer:set_in_lobby(true)
 	if peer:ip_verified() then
-		Global.local_member:sync_lobby_data(peer)
+		managers.network:session():local_peer():sync_lobby_data(peer)
 	end
 end
 function NetworkGame:on_load_complete()
@@ -99,8 +99,12 @@ function NetworkGame:on_load_complete()
 			local peer_id = peer:id()
 		end
 	end
-	if SystemInfo:platform() == Idstring("PS3") then
-		PSN:set_online_callback(callback(self, self, "ps3_disconnect"))
+	if not setup.IS_START_MENU then
+		if SystemInfo:platform() == Idstring("PS3") then
+			PSN:set_online_callback(callback(self, self, "ps3_disconnect"))
+		elseif SystemInfo:platform() == Idstring("PS4") then
+			PSN:set_online_callback(callback(self, self, "ps4_disconnect"))
+		end
 	end
 end
 function NetworkGame:psn_disconnected()
@@ -130,6 +134,14 @@ function NetworkGame:xbox_disconnected()
 	end
 	managers.network.voice_chat:destroy_voice(true)
 end
+function NetworkGame:ps4_disconnect(connected)
+	if managers.network:session() then
+		managers.network.matchmake:psn_disconnected()
+	end
+	if not connected then
+		managers.platform:event("disconnect")
+	end
+end
 function NetworkGame:ps3_disconnect(connected)
 	print("NetworkGame ps3_disconnect", connected)
 	if Global.game_settings.single_player then
@@ -151,7 +163,7 @@ function NetworkGame:on_peer_added(peer, peer_id)
 	if Network:is_server() then
 		managers.network.matchmake:set_num_players(table.size(self._members))
 	end
-	if SystemInfo:platform() == Idstring("X360") then
+	if SystemInfo:platform() == Idstring("X360") or SystemInfo:platform() == Idstring("XB1") then
 		managers.network.matchmake:on_peer_added(peer)
 	end
 	if managers.chat then
@@ -183,8 +195,8 @@ function NetworkGame:on_peer_sync_complete(peer, peer_id)
 	local local_peer = managers.network:session():local_peer()
 	local local_peer_id = local_peer:id()
 	if peer:ip_verified() then
-		Global.local_member:sync_lobby_data(peer)
-		Global.local_member:sync_data(peer)
+		local_peer:sync_lobby_data(peer)
+		local_peer:sync_data(peer)
 	end
 	self:_update_peer_ready_gui(peer)
 	if Network:is_server() then
@@ -378,7 +390,7 @@ function NetworkGame:on_peer_removed(peer, peer_id, reason)
 			self:_check_start_game_intro()
 		end
 		if Network:multiplayer() then
-			if SystemInfo:platform() == Idstring("X360") then
+			if SystemInfo:platform() == Idstring("X360") or SystemInfo:platform() == Idstring("XB1") or SystemInfo:platform() == Idstring("PS4") then
 				managers.network.matchmake:on_peer_removed(peer)
 			end
 			if Network:is_client() then
@@ -645,10 +657,9 @@ function NetworkGame:on_dropin_progress_received(dropin_peer_id, progress_percen
 	if peer:synched() then
 		return
 	end
-	local dropin_member = self._members[dropin_peer_id]
-	local old_drop_in_prog = dropin_member:drop_in_progress()
+	local old_drop_in_prog = peer:drop_in_progress()
 	if not old_drop_in_prog or progress_percentage > old_drop_in_prog then
-		dropin_member:set_drop_in_progress(progress_percentage)
+		peer:set_drop_in_progress(progress_percentage)
 		if game_state_machine:last_queued_state_name() == "ingame_waiting_for_players" then
 			managers.menu:get_menu("kit_menu").renderer:set_dropin_progress(dropin_peer_id, progress_percentage, "join")
 		else

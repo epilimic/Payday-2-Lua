@@ -37,7 +37,7 @@ function IngameWaitingForPlayersState:_skip()
 	managers.network:session():send_to_peers_synched("sync_waiting_for_player_skip")
 end
 function IngameWaitingForPlayersState:sync_skip()
-	print("SKIP")
+	self:_create_blackscreen_loading_icon()
 	self._skipped = true
 	managers.briefing:stop_event(true)
 	self:_start_delay()
@@ -102,10 +102,22 @@ function IngameWaitingForPlayersState:_start_audio()
 	end
 	if not event_started then
 		print("failed to start audio, or played safehouse before")
+		self:_create_blackscreen_loading_icon()
 		if Network:is_server() then
 			self:_start_delay()
 		end
 	end
+end
+function IngameWaitingForPlayersState:_create_blackscreen_loading_icon()
+	if self._fadeout_loading_icon then
+		return
+	end
+	local settings = {
+		fade_out = tweak_data.overlay_effects.level_fade_in.fade_out,
+		color = tweak_data.overlay_effects.level_fade_in.color,
+		show_loading_icon = true
+	}
+	self._fadeout_loading_icon = FadeoutGuiObject:new(settings)
 end
 function IngameWaitingForPlayersState:_start_delay()
 	if self._delay_start_t then
@@ -114,6 +126,7 @@ function IngameWaitingForPlayersState:_start_delay()
 	self._delay_start_t = Application:time() + 1
 end
 function IngameWaitingForPlayersState:_audio_done(event_type, label, cookie)
+	self:_create_blackscreen_loading_icon()
 	if Network:is_server() then
 		self:_start_delay()
 	end
@@ -164,7 +177,6 @@ function IngameWaitingForPlayersState:update(t, dt)
 			if Network:is_server() then
 				self._delay_spawn_t = Application:time() + 1
 			end
-			FadeoutGuiObject:new(tweak_data.overlay_effects.level_fade_in)
 		end
 	end
 	if self._delay_spawn_t and t > self._delay_spawn_t then
@@ -232,8 +244,9 @@ function IngameWaitingForPlayersState:at_enter()
 	self:_next_camera()
 	self._briefing_start_t = Application:time() + 2
 	if managers.network:session():is_client() and managers.network:session():server_peer() then
-		Global.local_member:sync_lobby_data(managers.network:session():server_peer())
-		Global.local_member:sync_data(managers.network:session():server_peer())
+		local local_peer = managers.network:session():local_peer()
+		local_peer:sync_lobby_data(managers.network:session():server_peer())
+		local_peer:sync_data(managers.network:session():server_peer())
 	end
 	if managers.job:interupt_stage() and not tweak_data.levels[managers.job:interupt_stage()].bonus_escape then
 		managers.menu_component:post_event("escape_menu")
@@ -251,6 +264,11 @@ function IngameWaitingForPlayersState:at_enter()
 		managers.dyn_resource:add_listener(self, {
 			DynamicResourceManager.listener_events.file_streamer_workload
 		}, callback(self, self, "clbk_file_streamer_status"))
+	end
+	if Global.game_settings.single_player then
+		local is_safe_house = managers.job:current_job_data() and managers.job:current_job_id() == "safehouse"
+		local rich_presence = is_safe_house and "SafeHousePlaying" or "SPPlaying"
+		managers.platform:set_rich_presence(rich_presence)
 	end
 end
 function IngameWaitingForPlayersState:clbk_file_streamer_status(workload)
@@ -341,12 +359,26 @@ function IngameWaitingForPlayersState:at_exit()
 			managers.music:post_event(music_ext)
 		end
 	end
+	local is_safe_house = managers.job:current_job_data() and managers.job:current_job_id() == "safehouse"
+	local rich_presence
+	if is_safe_house then
+		rich_presence = "SafeHousePlaying"
+	elseif Global.game_settings.single_player then
+		rich_presence = "SPPlaying"
+	else
+		rich_presence = "MPPlaying"
+	end
 	managers.platform:set_presence("Playing")
-	managers.platform:set_rich_presence(Global.game_settings.single_player and "SPPlaying" or "MPPlaying")
+	managers.platform:set_rich_presence(rich_presence)
+	managers.platform:set_playing(true)
 	managers.game_play_central:start_heist_timer()
 	if not Network:is_server() and managers.network:session() and managers.network:session():server_peer() then
 		managers.network:session():server_peer():verify_job(managers.job:current_job_id())
 		managers.network:session():server_peer():verify_character()
+	end
+	if self._fadeout_loading_icon then
+		self._fadeout_loading_icon:fade_out(tweak_data.overlay_effects.level_fade_in.fade_out)
+		self._fadeout_loading_icon = nil
 	end
 end
 function IngameWaitingForPlayersState:_get_cameras()

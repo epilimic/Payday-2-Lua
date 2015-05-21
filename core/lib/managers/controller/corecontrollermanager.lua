@@ -4,6 +4,8 @@ core:import("CoreControllerWrapperGamepad")
 core:import("CoreControllerWrapperPC")
 core:import("CoreControllerWrapperXbox360")
 core:import("CoreControllerWrapperPS3")
+core:import("CoreControllerWrapperPS4")
+core:import("CoreControllerWrapperXB1")
 core:import("CoreControllerWrapperDebug")
 core:import("CoreManagerBase")
 core:import("CoreEvent")
@@ -36,6 +38,10 @@ function ControllerManager:init(path, default_settings_path)
 		self._supported_wrapper_types[CoreControllerWrapperXbox360.ControllerWrapperXbox360.TYPE] = CoreControllerWrapperXbox360.ControllerWrapperXbox360
 	elseif SystemInfo:platform() == Idstring("PS3") then
 		self._supported_wrapper_types[CoreControllerWrapperPS3.ControllerWrapperPS3.TYPE] = CoreControllerWrapperPS3.ControllerWrapperPS3
+	elseif SystemInfo:platform() == Idstring("PS4") then
+		self._supported_wrapper_types[CoreControllerWrapperPS4.ControllerWrapperPS4.TYPE] = CoreControllerWrapperPS4.ControllerWrapperPS4
+	elseif SystemInfo:platform() == Idstring("XB1") then
+		self._supported_wrapper_types[CoreControllerWrapperXB1.ControllerWrapperXB1.TYPE] = CoreControllerWrapperXB1.ControllerWrapperXB1
 	elseif SystemInfo:platform() == Idstring("X360") then
 		self._supported_wrapper_types[CoreControllerWrapperXbox360.ControllerWrapperXbox360.TYPE] = CoreControllerWrapperXbox360.ControllerWrapperXbox360
 	end

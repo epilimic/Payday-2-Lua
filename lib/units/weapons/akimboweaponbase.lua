@@ -57,7 +57,7 @@ function AkimboWeaponBase:fire(...)
 	end
 end
 function AkimboWeaponBase:_fire_second(params)
-	if alive(self._second_gun) then
+	if alive(self._second_gun) and self._setup and alive(self._setup.user_unit) then
 		local fired = self._second_gun:base().super.fire(self._second_gun:base(), unpack(params))
 		if fired then
 			self._second_gun:base():_fire_sound()

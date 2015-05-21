@@ -832,7 +832,7 @@ function HUDManager:add_mugshot_by_unit(unit)
 	end
 	local use_lifebar = is_husk_player and true or false
 	local mugshot_id = managers.hud:add_mugshot({
-		name = utf8.to_upper(character_name),
+		name = character_name,
 		use_lifebar = use_lifebar,
 		peer_id = peer_id,
 		character_name_id = character_name_id
@@ -850,7 +850,7 @@ function HUDManager:add_mugshot_without_unit(char_name, ai, peer_id, name)
 	end
 	local use_lifebar = not ai
 	local mugshot_id = managers.hud:add_mugshot({
-		name = utf8.to_upper(character_name),
+		name = character_name,
 		use_lifebar = use_lifebar,
 		peer_id = peer_id,
 		character_name_id = character_name_id
@@ -1015,7 +1015,7 @@ function HUDManager:update_name_label_by_peer(peer)
 				local experience = (peer:rank() > 0 and managers.experience:rank_string(peer:rank()) .. "-" or "") .. peer:level()
 				name = name .. " (" .. experience .. ")"
 			end
-			data.text:set_text(utf8.to_upper(name))
+			data.text:set_text(name)
 			self:align_teammate_name_label(data.panel, data.interact)
 		else
 		end

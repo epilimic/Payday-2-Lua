@@ -2,10 +2,14 @@ BaseNetworkSession = BaseNetworkSession or class()
 BaseNetworkSession.TIMEOUT_CHK_INTERVAL = 5
 if SystemInfo:platform() == Idstring("X360") then
 	BaseNetworkSession.CONNECTION_TIMEOUT = 15
+elseif SystemInfo:platform() == Idstring("PS4") then
+	BaseNetworkSession.CONNECTION_TIMEOUT = 10
+elseif SystemInfo:platform() == Idstring("XB1") then
+	BaseNetworkSession.CONNECTION_TIMEOUT = 10
 else
 	BaseNetworkSession.CONNECTION_TIMEOUT = 10
 end
-BaseNetworkSession.LOADING_CONNECTION_TIMEOUT = 20
+BaseNetworkSession.LOADING_CONNECTION_TIMEOUT = SystemInfo:platform() == Idstring("WIN32") and 20 or 20
 BaseNetworkSession._LOAD_WAIT_TIME = 3
 BaseNetworkSession._STEAM_P2P_SEND_INTERVAL = 1
 function BaseNetworkSession:init()
@@ -218,7 +222,7 @@ function BaseNetworkSession:on_peer_lost(peer, peer_id)
 				managers.network.matchmake:destroy_game()
 			end
 			managers.network.voice_chat:destroy_voice()
-			if managers.network:stopping() then
+			if managers.network:stopping() or self._closing then
 				return
 			end
 			managers.system_menu:close("leave_lobby")
@@ -436,8 +440,8 @@ function BaseNetworkSession:set_peer_loading_state(peer, state, load_counter)
 	end
 	if not state and self._local_peer:loaded() then
 		if peer:ip_verified() then
-			Global.local_member:sync_lobby_data(peer)
-			Global.local_member:sync_data(peer)
+			self._local_peer:sync_lobby_data(peer)
+			self._local_peer:sync_data(peer)
 		end
 		peer:flush_overwriteable_msgs()
 	end
@@ -572,7 +576,7 @@ function BaseNetworkSession:on_steam_p2p_ping(sender_rpc)
 	self:chk_send_connection_established(nil, user_id)
 end
 function BaseNetworkSession:chk_send_connection_established(name, user_id, peer)
-	if SystemInfo:platform() == Idstring("PS3") then
+	if SystemInfo:platform() == Idstring("PS3") or SystemInfo:platform() == Idstring("PS4") then
 		peer = self:peer_by_name(name)
 		if not peer then
 			print("[BaseNetworkSession:chk_send_connection_established] no peer yet", name)

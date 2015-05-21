@@ -412,6 +412,10 @@ function RaycastWeaponBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul
 					managers.achievment:award_progress(achievement_data.stat)
 				elseif achievement_data.award then
 					managers.achievment:award(achievement_data.award)
+				elseif achievement_data.challenge_stat then
+					managers.challenge:award_progress(achievement_data.challenge_stat)
+				elseif achievement_data.challenge_award then
+					managers.challenge:award(achievement_data.challenge_award)
 				end
 			end
 		end
@@ -1217,6 +1221,15 @@ function FlameBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, b
 	return result
 end
 function FlameBulletBase:give_fire_damage(col_ray, weapon_unit, user_unit, damage, armor_piercing)
+	local fire_dot_data
+	if weapon_unit.base and weapon_unit:base()._ammo_data and weapon_unit:base()._ammo_data.bullet_class == "FlameBulletBase" then
+		fire_dot_data = weapon_unit:base()._ammo_data.fire_dot_data
+	elseif weapon_unit.base and weapon_unit:base()._name_id then
+		local weapon_name_id = weapon_unit:base()._name_id
+		if tweak_data.weapon[weapon_name_id] and tweak_data.weapon[weapon_name_id].fire_dot_data then
+			fire_dot_data = tweak_data.weapon[weapon_name_id].fire_dot_data
+		end
+	end
 	local action_data = {}
 	action_data.variant = "fire"
 	action_data.damage = damage
@@ -1224,23 +1237,20 @@ function FlameBulletBase:give_fire_damage(col_ray, weapon_unit, user_unit, damag
 	action_data.attacker_unit = user_unit
 	action_data.col_ray = col_ray
 	action_data.armor_piercing = armor_piercing
-	action_data.start_dot_damage_roll = -1
-	if weapon_unit:base()._ammo_data.hit_effect == "dragonsbreath" then
-		action_data.ignite_character = "dragonsbreath"
-	end
+	action_data.fire_dot_data = fire_dot_data
 	local defense_data = col_ray.unit:character_damage():damage_fire(action_data)
 	return defense_data
 end
-function FlameBulletBase:give_fire_damage_dot(col_ray, weapon_unit, user_unit, damage, is_fire_dot_damage)
+function FlameBulletBase:give_fire_damage_dot(col_ray, weapon_unit, attacker_unit, damage, is_fire_dot_damage)
 	local action_data = {}
 	action_data.variant = "fire"
 	action_data.damage = damage
 	action_data.weapon_unit = weapon_unit
-	action_data.attacker_unit = user_unit
+	action_data.attacker_unit = attacker_unit
 	action_data.col_ray = col_ray
 	action_data.is_fire_dot_damage = is_fire_dot_damage
 	local defense_data = {}
-	if col_ray and alive(col_ray.unit) and col_ray.unit and col_ray.unit.character_damage then
+	if col_ray and col_ray.unit and alive(col_ray.unit) and col_ray.unit.character_damage then
 		defense_data = col_ray.unit:character_damage():damage_fire(action_data)
 	end
 	return defense_data

@@ -68,6 +68,8 @@ core:register_module("core/lib/managers/controller/CoreControllerWrapperGamepad"
 core:register_module("core/lib/managers/controller/CoreControllerWrapperPC")
 core:register_module("core/lib/managers/controller/CoreControllerWrapperXbox360")
 core:register_module("core/lib/managers/controller/CoreControllerWrapperPS3")
+core:register_module("core/lib/managers/controller/CoreControllerWrapperPS4")
+core:register_module("core/lib/managers/controller/CoreControllerWrapperXB1")
 core:register_module("core/lib/managers/controller/CoreControllerWrapperDebug")
 core:register_module("core/lib/managers/CoreListenerManager")
 core:register_module("core/lib/managers/CoreSlotManager")

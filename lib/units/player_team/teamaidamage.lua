@@ -328,9 +328,11 @@ function TeamAIDamage:_check_bleed_out()
 		self._regenerate_t = nil
 		self._bleed_out_paused_count = 0
 		if Network:is_server() then
-			self._to_dead_clbk_id = "TeamAIDamage_to_dead" .. tostring(self._unit:key())
-			self._to_dead_t = TimerManager:game():time() + self:down_time()
-			managers.enemy:add_delayed_clbk(self._to_dead_clbk_id, callback(self, self, "clbk_exit_to_dead"), self._to_dead_t)
+			if not self._to_dead_clbk_id then
+				self._to_dead_clbk_id = "TeamAIDamage_to_dead" .. tostring(self._unit:key())
+				self._to_dead_t = TimerManager:game():time() + self:down_time()
+				managers.enemy:add_delayed_clbk(self._to_dead_clbk_id, callback(self, self, "clbk_exit_to_dead"), self._to_dead_t)
+			end
 			self._unit:sound():say("f11e_plu", true)
 			self._revive_reminder_line_t = self._to_dead_t - 10
 		end
@@ -375,7 +377,7 @@ function TeamAIDamage:unpause_bleed_out()
 	self._bleed_out_paused_count = self._bleed_out_paused_count - 1
 	if (self._bleed_out or self._fatal) and self._bleed_out_paused_count == 0 then
 		self._to_dead_t = TimerManager:game():time() + self._to_dead_remaining_t
-		if Network:is_server() and not self._dead then
+		if Network:is_server() and not self._dead and not self._to_dead_clbk_id then
 			self._to_dead_clbk_id = "TeamAIDamage_to_dead" .. tostring(self._unit:key())
 			managers.enemy:add_delayed_clbk(self._to_dead_clbk_id, callback(self, self, "clbk_exit_to_dead"), self._to_dead_t)
 		end

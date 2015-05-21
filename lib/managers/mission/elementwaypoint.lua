@@ -17,15 +17,19 @@ function ElementWaypoint:on_executed(instigator)
 	if not self._values.enabled then
 		return
 	end
-	local text = managers.localization:text(self._values.text_id)
-	managers.hud:add_waypoint(self._id, {
-		text = text,
-		icon = self._values.icon,
-		position = self._values.position,
-		distance = true,
-		present_timer = 0,
-		state = "sneak_present"
-	})
+	if not self._values.only_in_clean or managers.player:current_state() == "clean" then
+		local text = managers.localization:text(self._values.text_id)
+		managers.hud:add_waypoint(self._id, {
+			text = text,
+			icon = self._values.icon,
+			position = self._values.position,
+			distance = true,
+			present_timer = 0,
+			state = "sneak_present"
+		})
+	elseif managers.hud:get_waypoint_data(self._id) then
+		managers.hud:remove_waypoint(self._id)
+	end
 	ElementWaypoint.super.on_executed(self, instigator)
 end
 function ElementWaypoint:operation_remove()

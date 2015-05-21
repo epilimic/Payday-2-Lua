@@ -74,6 +74,7 @@ require("lib/managers/VoteManager")
 require("lib/units/UnitDamage")
 require("lib/units/props/DigitalGui")
 require("lib/units/props/TextGui")
+require("lib/units/props/MaterialControl")
 require("lib/units/MaskExt")
 script_data = script_data or {}
 game_state_machine = game_state_machine or nil
@@ -138,8 +139,10 @@ function Setup:init_managers(managers)
 		drop_in_allowed = true,
 		kick_option = 1,
 		search_appropriate_jobs = true,
-		auto_kick = true
+		auto_kick = true,
+		is_playing = false
 	}
+	managers.dlc:setup()
 	managers.dyn_resource = DynamicResourceManager:new()
 	managers.gui_data = CoreGuiDataManager.GuiDataManager:new()
 	managers.platform = PlatformManager.PlatformManager:new()
@@ -319,6 +322,7 @@ end
 function Setup:init_finalize()
 	game_state_machine:init_finilize()
 	managers.dlc:init_finalize()
+	managers.achievment:init_finalize()
 	managers.system_menu:init_finalize()
 	managers.controller:init_finalize()
 	if Application:editor() then
@@ -336,6 +340,7 @@ function Setup:update(t, dt)
 	self:_upd_unload_packages()
 	managers.weapon_factory:update(t, dt)
 	managers.platform:update(t, dt)
+	managers.user:update(t, dt)
 	managers.dyn_resource:update()
 	managers.system_menu:update(main_t, main_dt)
 	managers.savefile:update(t, dt)
@@ -352,6 +357,7 @@ end
 function Setup:paused_update(t, dt)
 	self:_upd_unload_packages()
 	managers.platform:paused_update(t, dt)
+	managers.user:paused_update(t, dt)
 	managers.dyn_resource:update()
 	managers.system_menu:paused_update(t, dt)
 	managers.savefile:paused_update(t, dt)
@@ -396,6 +402,7 @@ function Setup:destroy()
 end
 function Setup:load_level(level, mission, world_setting, level_class_name, level_id)
 	managers.menu:close_all_menus()
+	managers.platform:destroy_context()
 	Global.load_level = true
 	Global.load_start_menu = false
 	Global.load_start_menu_lobby = false
@@ -411,10 +418,12 @@ function Setup:load_start_menu_lobby()
 	Global.load_start_menu_lobby = true
 end
 function Setup:load_start_menu()
+	managers.platform:set_playing(false)
 	managers.job:deactivate_current_job()
 	managers.gage_assignment:deactivate_assignments()
 	managers.menu:close_all_menus()
 	managers.mission:pre_destroy()
+	managers.platform:destroy_context()
 	Global.load_level = false
 	Global.load_start_menu = true
 	Global.load_start_menu_lobby = false
@@ -426,7 +435,20 @@ function Setup:load_start_menu()
 	self:exec(nil)
 end
 function Setup:exec(context)
-	self:set_fps_cap(30)
+	if managers.network then
+		if SystemInfo:platform() == Idstring("PS4") then
+			PSN:set_matchmaking_callback("session_destroyed", function()
+			end)
+		end
+		print("SETTING BLACK LOADING SCREEN")
+		self._black_loading_screen = true
+		if Network.set_loading_state then
+			Network:set_loading_state(true)
+		end
+	end
+	if SystemInfo:platform() == Idstring("WIN32") then
+		self:set_fps_cap(30)
+	end
 	managers.music:stop()
 	managers.vote:stop()
 	SoundDevice:stop()
@@ -473,7 +495,10 @@ function Setup:block_exec()
 		managers.dyn_resource:set_file_streaming_chunk_size_mul(1, 1)
 		result = true
 	end
-	if managers.system_menu:block_exec() or managers.savefile:is_active() then
+	if managers.system_menu:block_exec() then
+		result = true
+	end
+	if managers.savefile:is_active() then
 		result = true
 	end
 	return result

@@ -54,7 +54,7 @@ function MissionBriefingTabItem:reduce_to_small_font()
 	self._tab_select_rect:set_shape(self._tab_text:shape())
 	self._panel:set_top(self._tab_text:bottom() - 3)
 	self._panel:set_h(self._main_panel:h())
-	self._panel:grow(0, -(self._panel:top() + 70 + tweak_data.menu.pd2_small_font_size * 4 + 35))
+	self._panel:grow(0, -(self._panel:top() + 70 + tweak_data.menu.pd2_small_font_size * 4 + 25))
 end
 function MissionBriefingTabItem:update_tab_position()
 	local prev_item_title_text = self._main_panel:child("tab_text_" .. tostring(self._index - 1))
@@ -282,6 +282,29 @@ function DescriptionItem:init(panel, text, i, saved_descriptions)
 		desc_text:set_text(text)
 	end
 	self:_chk_add_scrolling()
+end
+function DescriptionItem:reduce_to_small_font()
+	DescriptionItem.super.reduce_to_small_font(self)
+	if not alive(self._scroll_panel) then
+		return
+	end
+	local desc_text = self._scroll_panel:child("description_text")
+	local title_text = self._panel:child("title_text")
+	self._scroll_panel:set_h(self._panel:h())
+	self._scroll_panel:set_y(title_text:bottom())
+	self._scroll_panel:grow(0, -self._scroll_panel:y())
+	local show_scroll_line_top = 0 > desc_text:top()
+	local show_scroll_line_bottom = desc_text:bottom() > self._scroll_panel:h()
+	if self._scroll_box then
+		self._scroll_box:create_sides(self._scroll_panel, {
+			sides = {
+				0,
+				0,
+				show_scroll_line_top and 2 or 0,
+				show_scroll_line_bottom and 2 or 0
+			}
+		})
+	end
 end
 function DescriptionItem:_chk_add_scrolling()
 	local desc_text = self._scroll_panel:child("description_text")
@@ -806,7 +829,9 @@ function AssetsItem:select_asset(i, instant)
 		local can_client_unlock = managers.assets.ALLOW_CLIENTS_UNLOCK == true or type(managers.assets.ALLOW_CLIENTS_UNLOCK) == "string" and managers.player:has_team_category_upgrade("player", managers.assets.ALLOW_CLIENTS_UNLOCK)
 		local is_server = Network:is_server() or can_client_unlock
 		local can_unlock = self._assets_names[i][5]
-		text_string = self._assets_names[i][6] and text_string
+		if not self._assets_names[i][6] or not text_string then
+			text_string = managers.localization:text("bm_menu_mystery_asset")
+		end
 		if is_server and can_unlock then
 			extra_string = managers.localization:text("st_menu_cost") .. " " .. managers.experience:cash_string(managers.money:get_mission_asset_cost_by_id(self._assets_names[i][4]))
 			if not managers.money:can_afford_mission_asset(self._assets_names[i][4]) then
@@ -3107,7 +3132,7 @@ function MissionBriefingGui:special_btn_pressed(button)
 	if button == Idstring("menu_toggle_ready") then
 		self:on_ready_pressed()
 		return true
-	elseif button == Idstring("menu_toggle_pp_breakdown") and managers.preplanning:has_current_level_preplanning() then
+	elseif button == Idstring("menu_toggle_pp_breakdown") and managers.preplanning:has_current_level_preplanning() and self._assets_item and self._items[self._selected_item] == self._assets_item then
 		self._assets_item:open_preplanning()
 	end
 	return false

@@ -303,7 +303,7 @@ function MenuInput:select_node()
 	local item = self._logic:selected_item()
 	if item and item:visible() then
 		local parameters = item:parameters()
-		if parameters.next_node then
+		if parameters.next_node and (item:enabled() or parameters.ignore_disabled) then
 			self._logic:select_node(parameters.next_node, true, unpack(parameters.next_node_parameters or {}))
 		end
 		if parameters.previous_node then

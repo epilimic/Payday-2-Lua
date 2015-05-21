@@ -1935,7 +1935,7 @@ function NavigationManager:add_obstacle(obstacle_unit, obstacle_obj_name)
 	if self._debug then
 		for i, obs_data in ipairs(self._obstacles) do
 			if obstacle_unit == obs_data.unit and obstacle_obj_name == obs_data.obstacle_obj_name then
-				debug_pause_unit(obstacle_unit, "[NavigationManager:remove_obstacle] obstacle added twice", obstacle_unit, obstacle_obj_name)
+				debug_pause_unit(obstacle_unit, "[NavigationManager:add_obstacle] obstacle added twice", obstacle_unit, obstacle_obj_name)
 				return
 			end
 		end

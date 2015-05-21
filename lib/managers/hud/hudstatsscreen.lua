@@ -677,11 +677,13 @@ function HUDStatsScreen:_create_stats_screen_profile(profile_wrapper_panel)
 			color = tweak_data.screen_colors.text
 		})
 		local points = next_level_data.points - next_level_data.current_points
-		next_level_in:set_text(utf8.to_upper(managers.localization:text("menu_es_next_level") .. " " .. points))
+		next_level_in:set_text(utf8.to_upper(managers.localization:text("menu_es_next_level") .. " " .. managers.money:add_decimal_marks_to_string(tostring(points))))
 		managers.hud:make_fine_text(next_level_in)
 		next_level_in:set_left(math.round(exp_ring:right() + 4))
 		next_level_in:set_center_y(math.round(exp_ring:center_y()) - 20)
-		local text = managers.localization:to_upper_text("hud_potential_xp", {XP = gain_xp})
+		local text = managers.localization:to_upper_text("hud_potential_xp", {
+			XP = managers.money:add_decimal_marks_to_string(tostring(gain_xp))
+		})
 		local gain_xp_text = profile_wrapper_panel:text({
 			name = "gain_xp_text",
 			text = text,

@@ -25,10 +25,12 @@ function NpcVehicleStatePursuit:init(unit)
 			distance = 2000
 		}
 	}
+	local cop_position = self._unit:position()
+	local delayed_tick = Application:time() + 5
 	self._tachograph = {
-		timeframe = 2,
-		tick_at = 0,
-		last_pos = 0,
+		timeframe = 1,
+		tick_at = delayed_tick,
+		last_pos = cop_position,
 		distance = 0
 	}
 end
@@ -37,7 +39,7 @@ function NpcVehicleStatePursuit:on_enter(npc_driving_ext)
 	local cop_position = self._unit:position()
 	local delayed_tick = Application:time() + 5
 	self._tachograph = {
-		timeframe = 3,
+		timeframe = 1,
 		tick_at = delayed_tick,
 		last_pos = cop_position,
 		distance = 0
@@ -109,21 +111,8 @@ function NpcVehicleStatePursuit:handle_hard_turn(npc_driving_ext, angle_to_targe
 		npc_driving_ext._current_drive_controls = "accelerate"
 	end
 end
-function NpcVehicleStatePursuit:handle_end_of_the_road(npc_driving_ext, unit_and_pos, cop_path, target_path)
-	if npc_driving_ext._last_checkpoint_reached then
-		npc_driving_ext._current_drive_mode = "handbrake"
-		npc_driving_ext._last_checkpoint_reached = false
-		unit_and_pos.target_checkpoint = 1
-		if not unit_and_pos.direction or unit_and_pos.direction == "fwd" then
-			unit_and_pos.direction = "bck"
-		else
-			unit_and_pos.direction = "fwd"
-		end
-		self._unit:rotate_with(Rotation(180, 0, 0))
-	end
-end
 function NpcVehicleStatePursuit:evasion_maneuvers(npc_driving_ext, target_steering)
-	self:_loco_unit_proximity(npc_driving_ext, target_steering)
+	return self:_loco_unit_proximity(npc_driving_ext, target_steering)
 end
 function NpcVehicleStatePursuit:_loco_unit_proximity(npc_driving_ext, target_steering)
 	local retval
@@ -142,17 +131,20 @@ function NpcVehicleStatePursuit:_loco_unit_proximity(npc_driving_ext, target_ste
 		brake = npc_driving_ext._drive_mode[npc_driving_ext._current_drive_mode].brake
 		handbrake = npc_driving_ext._drive_mode[npc_driving_ext._current_drive_mode].handbrake
 	end
-	local PLAYER_DISTANCE_THRESHOLD = 20
 	if npc_driving_ext._debug.nav_paths then
 		npc_driving_ext._debug.nav_paths.distance_to_player = distance_to_player
 	end
-	if distance_to_player < PLAYER_DISTANCE_THRESHOLD then
+	local current_player_proximity_distance = managers.motion_path:get_player_proximity_distance()
+	if distance_to_player < current_player_proximity_distance then
+		local unit_id = self._unit:unit_data().unit_id
+		managers.motion_path:set_player_proximity_distance_for_unit(unit_id, current_player_proximity_distance)
+		managers.motion_path:increase_player_proximity_distance()
 		npc_driving_ext:set_state(NpcVehicleDrivingExt.STATE_PLAYER_PROXIMITY)
 		retval = {
 			acceleration = 0,
 			steering = target_steering,
 			brake = 1,
-			handbrake = handbrake
+			handbrake = 1
 		}
 	end
 	return retval
@@ -176,7 +168,6 @@ function NpcVehicleStatePursuit:handle_stuck_vehicle(npc_driving_ext, t, dt)
 		self._tachograph.last_pos = cop_position
 		if self._tachograph.distance <= 1 then
 			self._next_state = self:_choose_recovery_maneuver()
-			Application:trace("Unit stuck, desired direction, recovery maneuver: ", self._unit:unit_data().unit_id, self._desired_direction, self._next_state)
 		end
 	end
 end

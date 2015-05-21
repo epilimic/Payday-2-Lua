@@ -1,6 +1,8 @@
 MotionPathPathFinder = MotionPathPathFinder or class()
 MotionPathPathFinder._VERSION = 0.1
 function MotionPathPathFinder:init()
+	self._open_nodes = {}
+	self._closed_nodes = {}
 	self:recreate_graph()
 end
 function MotionPathPathFinder:recreate_graph()
@@ -12,6 +14,8 @@ function MotionPathPathFinder:recreate_graph()
 		end
 	end
 	self._graph_units = {}
+	self._open_nodes = {}
+	self._closed_nodes = {}
 end
 function MotionPathPathFinder:_make_link(current_pos, target_marker_index, path)
 	local link
@@ -50,7 +54,10 @@ function MotionPathPathFinder:_add_path(path)
 			path = path,
 			marker = current_marker,
 			links = links,
-			pos = current_pos
+			pos = current_pos,
+			g_score = 0,
+			heuristic = 1000000,
+			came_from = nil
 		}
 		self._nodes[current_marker] = node
 	end
@@ -76,76 +83,60 @@ function MotionPathPathFinder:_get_mop_marker_data(unit_id)
 end
 function MotionPathPathFinder:find_path(start_pos, end_pos)
 	self._graph_units = {}
-	local path_to_target = self:_astar_search(start_pos, end_pos)
-	if not path_to_target then
+	local end_node, start_node = self:_astar_search(start_pos, end_pos)
+	if not end_node or not start_node then
 		return nil
 	end
-	local path = path_to_target[1].path
-	for _, node in ipairs(path_to_target) do
-		if node.path ~= path then
-			path = node.path
-		else
-		end
+	local last_path = end_node.path
+	local current_node = end_node
+	while current_node and start_node.path ~= current_node.path do
+		last_path = current_node.path
+		current_node = current_node.came_from
 	end
-	return path
+	return last_path
 end
 function MotionPathPathFinder:_astar_search(start_pos, end_pos)
 	local start_node, end_node = self:_find_nodes(start_pos, end_pos)
 	if not start_node or not end_node then
-		return nil
+		return nil, nil
 	end
 	if start_node == end_node then
-		return {start_node}
+		return start_node, start_node
 	end
-	local open_nodes = {}
-	local closed_nodes = {}
-	local search_node = {
-		node = start_node,
-		g_score = 0,
-		heuristic = mvector3.distance(start_node.pos, end_pos),
-		came_from = nil
-	}
-	open_nodes[start_node.marker] = search_node
+	for k, v in pairs(self._open_nodes) do
+		self._open_nodes[k] = nil
+	end
+	for k, v in pairs(self._closed_nodes) do
+		self._closed_nodes[k] = nil
+	end
+	start_node.g_score = 0
+	start_node.heuristic = mvector3.distance(start_node.pos, end_pos)
+	start_node.came_from = nil
+	self._open_nodes[start_node.marker] = start_node
 	local g_score = 0
 	local iteration = 1
-	while next(open_nodes) ~= nil do
-		local best_node = self:_get_best_node(open_nodes)
-		if best_node.node.marker == end_node.marker then
-			local backtrack_path = {}
-			local current_node = best_node
-			repeat
-				table.insert(backtrack_path, current_node)
-				current_node = current_node.came_from
-			until not current_node
-			self._backtrack_path = backtrack_path
-			local path = {}
-			for i = #backtrack_path, 1, -1 do
-				table.insert(path, backtrack_path[i].node)
-			end
-			self._open_nodes = open_nodes
-			self._closed_nodes = closed_nodes
-			return path
+	while next(self._open_nodes) ~= nil do
+		local best_node = self:_get_best_node(self._open_nodes)
+		if best_node.marker == end_node.marker then
+			return best_node, start_node
 		end
-		open_nodes[best_node.node.marker] = nil
-		closed_nodes[best_node.node.marker] = best_node
-		for _, link in ipairs(best_node.node.links) do
-			if not closed_nodes[link.target_marker] then
+		self._open_nodes[best_node.marker] = nil
+		self._closed_nodes[best_node.marker] = best_node
+		for _, link in ipairs(best_node.links) do
+			if not self._closed_nodes[link.target_marker] then
 				local distance = link.distance or 0
 				local g_score = best_node.g_score + distance
-				local node_in_open = open_nodes[link.target_marker]
+				local node_in_open = self._open_nodes[link.target_marker]
 				if not node_in_open then
 					local target_node = self._nodes[link.target_marker]
 					if target_node then
-						local new_node = {
-							node = target_node,
-							g_score = g_score,
-							heuristic = mvector3.distance(target_node.pos, end_pos),
-							came_from = best_node
-						}
-						open_nodes[link.target_marker] = new_node
+						target_node.g_score = g_score
+						target_node.heuristic = mvector3.distance(target_node.pos, end_pos)
+						target_node.came_from = best_node
+						self._open_nodes[link.target_marker] = target_node
 					else
 						Application:error("A* failed, link doesn't have a target marker  - ", inspect(link))
-						return
+						return nil, nil
 					end
 				elseif g_score < node_in_open.g_score then
 					node_in_open.g_score = g_score
@@ -155,35 +146,38 @@ function MotionPathPathFinder:_astar_search(start_pos, end_pos)
 		end
 		iteration = iteration + 1
 	end
-	return nil
+	return nil, nil
 end
 function MotionPathPathFinder:_find_nodes(start_pos, end_pos)
 	if not start_pos or not end_pos then
 		return nil, nil
 	end
-	local start_node = {distance = 100000000, node = nil}
-	local end_node = {distance = 100000000, node = nil}
+	local start_node
+	local start_node_distance = 100000000
+	local end_node
+	local end_node_distance = 100000000
 	for marker, node in pairs(self._nodes) do
 		local start_distance = mvector3.distance(start_pos, node.pos)
-		if start_distance < start_node.distance then
-			start_node.distance = start_distance
-			start_node.node = node
+		if start_node_distance > start_distance then
+			start_node_distance = start_distance
+			start_node = node
 		end
 		local end_distance = mvector3.distance(end_pos, node.pos)
-		if end_distance < end_node.distance then
-			end_node.distance = end_distance
-			end_node.node = node
+		if end_node_distance > end_distance then
+			end_node_distance = end_distance
+			end_node = node
 		end
 	end
-	return start_node.node, end_node.node
+	return start_node, end_node
 end
 function MotionPathPathFinder:_get_best_node(open_nodes)
-	local best_node = {heuristic = 100000000, node = nil}
+	local best_node
+	local heuristic = 100000000
 	for marker, node in pairs(open_nodes) do
-		if node.heuristic < best_node.heuristic then
-			best_node.heuristic = node.heuristic
-			best_node.node = node
+		if heuristic > node.heuristic then
+			heuristic = node.heuristic
+			best_node = node
 		end
 	end
-	return best_node.node
+	return best_node
 end

@@ -1194,6 +1194,15 @@ function HudIconsTweakData:init()
 			32
 		}
 	}
+	self.equipment_fire_extinguisher = {
+		texture = "guis/textures/pd2/hud_pickups",
+		texture_rect = {
+			32,
+			160,
+			32,
+			32
+		}
+	}
 	self.interaction_free = {
 		texture = "guis/textures/hud_icons",
 		texture_rect = {

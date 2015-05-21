@@ -2452,7 +2452,9 @@ function CoreEditor:_save_packages(dir)
 	local streaming_options = {
 		win32 = {"texture"},
 		ps3 = {"texture"},
-		x360 = {"texture"}
+		x360 = {"texture"},
+		ps4 = {"texture"},
+		xb1 = {"texture"}
 	}
 	local package = SystemFS:open(dir .. "\\world.package", "w")
 	self:_save_package(package, self._world_package_table, streaming_options)
@@ -2513,6 +2515,8 @@ function CoreEditor:_save_package(file, package_table, streaming_options)
 			fill_platform_streaming_params("win32")
 			fill_platform_streaming_params("ps3")
 			fill_platform_streaming_params("x360")
+			fill_platform_streaming_params("xb1")
+			fill_platform_streaming_params("ps4")
 			streaming_element = streaming_element .. "/>"
 			file:puts(streaming_element)
 		end

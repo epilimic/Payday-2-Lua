@@ -14,7 +14,7 @@ end
 function FireManager:update(t, dt)
 	for index = #self._doted_enemies, 1, -1 do
 		local dot_info = self._doted_enemies[index]
-		if t > dot_info.fire_damage_received_time + self._fire_dot_grace_period and 1 <= dot_info.fire_dot_counter then
+		if t > dot_info.fire_damage_received_time + self._fire_dot_grace_period and dot_info.fire_dot_counter >= 0.5 then
 			self:_damage_fire_dot(dot_info)
 			dot_info.fire_dot_counter = 0
 		end
@@ -111,9 +111,7 @@ function FireManager:sync_add_fire_dot(enemy_unit, fire_damage_received_time, we
 end
 function FireManager:add_doted_enemy(enemy_unit, fire_damage_received_time, weapon_unit, dot_length, dot_damage)
 	local dot_info = self:_add_doted_enemy(enemy_unit, fire_damage_received_time, weapon_unit, dot_length, dot_damage)
-	if Network:is_server() then
-		managers.network:session():send_to_peers_synched("sync_add_doted_enemy", enemy_unit, fire_damage_received_time, weapon_unit, dot_length, dot_damage)
-	end
+	managers.network:session():send_to_peers_synched("sync_add_doted_enemy", enemy_unit, fire_damage_received_time, weapon_unit, dot_length, dot_damage)
 end
 function FireManager:_remove_flame_effects_from_doted_unit(enemy_unit)
 	if self._doted_enemies then
@@ -341,8 +339,9 @@ function FireManager:detect_and_give_dmg(params)
 					position = hit_body:position(),
 					ray = dir
 				}
+				action_data.is_fire_dot_damage = false
+				action_data.fire_dot_data = fire_dot_data
 				local t = TimerManager:game():time()
-				self:add_doted_enemy(hit_unit, t, action_data.weapon_unit, fire_dot_data.dot_length, fire_dot_data.dot_damage)
 				hit_unit:character_damage():damage_fire(action_data)
 				if not dead_before and hit_unit:base() and hit_unit:base()._tweak_table and hit_unit:character_damage():dead() then
 					type = hit_unit:base()._tweak_table

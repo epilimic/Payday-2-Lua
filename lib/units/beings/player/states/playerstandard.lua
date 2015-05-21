@@ -50,6 +50,7 @@ function PlayerStandard:init(unit)
 	self._ext_anim = unit:anim_data()
 	self._ext_network = unit:network()
 	self._camera_unit = self._ext_camera._camera_unit
+	self._camera_unit_anim_data = self._camera_unit:anim_data()
 	self._machine = unit:anim_state_machine()
 	self._m_pos = self._ext_movement:m_pos()
 	self._pos = Vector3()
@@ -970,7 +971,7 @@ function PlayerStandard:_interupt_action_throw_grenade(t, input)
 	self:_stance_entered()
 end
 function PlayerStandard:_is_throwing_grenade()
-	return self._state_data.throw_grenade_expire_t and true or false
+	return self._camera_unit_anim_data.throwing or self._state_data.throw_grenade_expire_t and true or false
 end
 function PlayerStandard:_check_action_interact(t, input)
 	local new_action, timer, interact_object
@@ -1295,8 +1296,12 @@ function PlayerStandard:_do_melee_damage(t, bayonet_melee)
 				managers.player:activate_temporary_upgrade("temporary", "melee_life_leech")
 				self._unit:character_damage():restore_health(managers.player:temporary_upgrade_value("temporary", "melee_life_leech", 1))
 			end
+			local special_weapon = tweak_data.blackmarket.melee_weapons[melee_entry].special_weapon
 			local action_data = {}
 			action_data.variant = "melee"
+			if special_weapon == "taser" then
+				action_data.variant = "taser_tased"
+			end
 			action_data.damage = shield_knock and 0 or damage * dmg_multiplier
 			action_data.damage_effect = damage_effect
 			action_data.attacker_unit = self._unit
@@ -2367,7 +2372,12 @@ function PlayerStandard:_check_action_primary_attack(t, input)
 						weap_base:dryfire()
 					end
 				elseif weap_base.clip_empty and weap_base:clip_empty() then
-					if fire_mode == "single" then
+					if self:_is_using_bipod() then
+						if input.btn_primary_attack_press then
+							weap_base:dryfire()
+						end
+						self._equipped_unit:base():tweak_data_anim_stop("fire")
+					elseif fire_mode == "single" then
 						if input.btn_primary_attack_press then
 							self:_start_action_reload_enter(t)
 						end

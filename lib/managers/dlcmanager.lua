@@ -16,20 +16,76 @@ function GenericDLCManager:_set_dlc_save_table()
 		}
 	end
 end
+function GenericDLCManager:setup()
+	self:_modify_locked_content()
+	self:_create_achievement_locked_content_table()
+end
 function GenericDLCManager:_create_achievement_locked_content_table()
 	self._achievement_locked_content = {}
+	self._dlc_locked_content = {}
 	for name, dlc in pairs(tweak_data.dlc) do
-		if dlc.achievement_id then
+		local content = dlc.content
+		if content then
+			local loot_drops = content.loot_drops
+			if loot_drops then
+				for _, loot_drop in ipairs(loot_drops) do
+					if loot_drop.type_items then
+						if dlc.achievement_id then
+							self._achievement_locked_content[loot_drop.type_items] = self._achievement_locked_content[loot_drop.type_items] or {}
+							self._achievement_locked_content[loot_drop.type_items][loot_drop.item_entry] = name
+						else
+							self._dlc_locked_content[loot_drop.type_items] = self._dlc_locked_content[loot_drop.type_items] or {}
+							self._dlc_locked_content[loot_drop.type_items][loot_drop.item_entry] = name
+						end
+					end
+				end
+			end
+		end
+	end
+end
+function GenericDLCManager:_modify_locked_content()
+	if SystemInfo:platform() == Idstring("WIN32") then
+		return
+	end
+	local _modify_loot_drop = function(loot_drop)
+		local entry = tweak_data.blackmarket[loot_drop.type_items] and tweak_data.blackmarket[loot_drop.type_items][loot_drop.item_entry]
+		if entry then
+			if not entry.pc and (not entry.pcs or #entry.pcs == 0) then
+				entry.pcs = {
+					10,
+					20,
+					30,
+					40
+				}
+				if loot_drop.type_items == "weapon_mods" then
+					tweak_data.weapon.factory.parts[loot_drop.item_entry].pcs = {
+						10,
+						20,
+						30,
+						40
+					}
+				end
+			end
+		else
+			print(" -- entry not exists")
+		end
+	end
+	for name, dlc in pairs(tweak_data.dlc) do
+		if not dlc.content_on_consoles then
 			local content = dlc.content
 			if content then
 				local loot_drops = content.loot_drops
 				if loot_drops then
 					for _, loot_drop in ipairs(loot_drops) do
-						if loot_drop.type_items then
-							self._achievement_locked_content[loot_drop.type_items] = self._achievement_locked_content[loot_drop.type_items] or {}
-							self._achievement_locked_content[loot_drop.type_items][loot_drop.item_entry] = name
+						if #loot_drop > 0 then
+							for _, lp in ipairs(loot_drop) do
+								_modify_loot_drop(lp)
+							end
+						else
+							_modify_loot_drop(loot_drop)
 						end
 					end
+					content.loot_drops = {}
 				end
 			end
 		end
@@ -51,13 +107,14 @@ function GenericDLCManager:is_weapon_mod_achievement_locked(weapon_mod_id)
 	return self._achievement_locked_content.weapon_mods and self._achievement_locked_content.weapon_mods[weapon_mod_id]
 end
 function GenericDLCManager:on_tweak_data_reloaded()
-	self:_create_achievement_locked_content_table()
+	self:setup()
 end
 function GenericDLCManager:init_finalize()
-	self:_create_achievement_locked_content_table()
 	managers.savefile:add_load_sequence_done_callback_handler(callback(self, self, "_load_done"))
 end
-function GenericDLCManager:_load_done(...)
+function GenericDLCManager:chk_content_updated()
+end
+function GenericDLCManager:give_dlc_and_verify_blackmarket()
 	self:give_dlc_package()
 	if managers.blackmarket then
 		managers.blackmarket:verify_dlc_items()
@@ -65,13 +122,18 @@ function GenericDLCManager:_load_done(...)
 		Application:error("[GenericDLCManager] _load_done(): BlackMarketManager not yet initialized!")
 	end
 end
+function GenericDLCManager:_load_done(...)
+	self:give_dlc_and_verify_blackmarket()
+end
 function GenericDLCManager:give_dlc_package()
 	for package_id, data in pairs(tweak_data.dlc) do
+		print("package_id", package_id, inspect(data))
 		if data.free or self[data.dlc](self, data) then
 			print("[DLC] Ownes dlc", data.free, data.dlc)
 			if not Global.dlc_save.packages[package_id] then
 				Global.dlc_save.packages[package_id] = true
 				for _, loot_drop in ipairs(data.content.loot_drops or {}) do
+					print("  loot_drop", inspect(loot_drop))
 					local loot_drop = #loot_drop > 0 and loot_drop[math.random(#loot_drop)] or loot_drop
 					for i = 1, loot_drop.amount do
 						local entry = tweak_data.blackmarket[loot_drop.type_items][loot_drop.item_entry]
@@ -83,13 +145,20 @@ function GenericDLCManager:give_dlc_package()
 			else
 				print("[DLC] Allready been given dlc package", package_id)
 			end
+			local identifier = UpgradesManager.AQUIRE_STRINGS[5] .. tostring(package_id)
 			for _, upgrade in ipairs(data.content.upgrades or {}) do
-				if not managers.upgrades:aquired(upgrade, UpgradesManager.AQUIRE_STRINGS[1]) then
-					managers.upgrades:aquire_default(upgrade, UpgradesManager.AQUIRE_STRINGS[1])
+				if not managers.upgrades:aquired(upgrade, identifier) then
+					managers.upgrades:aquire_default(upgrade, identifier)
 				end
 			end
 		else
 			print("[DLC] Didn't own DLC package", package_id)
+			local identifier = UpgradesManager.AQUIRE_STRINGS[5] .. tostring(package_id)
+			for _, upgrade in ipairs(data.content.upgrades or {}) do
+				if managers.upgrades:aquired(upgrade, identifier) then
+					managers.upgrades:unaquire(upgrade, identifier)
+				end
+			end
 		end
 	end
 end
@@ -192,8 +261,6 @@ function GenericDLCManager:on_achievement_award_loot()
 end
 function GenericDLCManager:on_signin_complete()
 end
-function GenericDLCManager:chk_dlc_purchase()
-end
 function GenericDLCManager:is_dlc_unlocked(dlc)
 	return tweak_data.dlc[dlc] and tweak_data.dlc[dlc].free or self:has_dlc(dlc)
 end
@@ -216,6 +283,14 @@ function GenericDLCManager:has_full_game()
 end
 function GenericDLCManager:is_trial()
 	return not self:has_full_game()
+end
+function GenericDLCManager:is_installing()
+	if not DB:is_bundled() or SystemInfo:platform() == Idstring("WIN32") then
+		return false, 1
+	end
+	local install_progress = Application:installer():get_progress()
+	local is_installing = install_progress < 1
+	return is_installing, install_progress
 end
 function GenericDLCManager:dlcs_string()
 	local s = ""
@@ -256,7 +331,10 @@ function GenericDLCManager:has_pd2_clan()
 	return Global.dlc_manager.all_dlc_data.pd2_clan and Global.dlc_manager.all_dlc_data.pd2_clan.verified
 end
 function GenericDLCManager:has_freed_old_hoxton(data)
-	return self:has_pd2_clan() and self:has_achievement(data)
+	if SystemInfo:platform() == Idstring("WIN32") then
+		return self:has_pd2_clan() and self:has_achievement(data)
+	end
+	return true
 end
 function GenericDLCManager:has_sweettooth()
 	return Global.dlc_manager.all_dlc_data.sweettooth and Global.dlc_manager.all_dlc_data.sweettooth.verified
@@ -335,6 +413,9 @@ function GenericDLCManager:has_bbq()
 end
 function GenericDLCManager:has_west()
 	return Global.dlc_manager.all_dlc_data.west and Global.dlc_manager.all_dlc_data.west.verified
+end
+function GenericDLCManager:has_arena()
+	return Global.dlc_manager.all_dlc_data.arena and Global.dlc_manager.all_dlc_data.arena.verified
 end
 function GenericDLCManager:has_xmas_soundtrack()
 	return Global.dlc_manager.all_dlc_data.xmas_soundtrack and Global.dlc_manager.all_dlc_data.xmas_soundtrack.verified
@@ -574,6 +655,470 @@ end
 function X360DLCManager:on_signin_complete()
 	self:_verify_dlcs()
 end
+PS4DLCManager = PS4DLCManager or class(GenericDLCManager)
+DLCManager.PLATFORM_CLASS_MAP[Idstring("PS4"):key()] = PS4DLCManager
+PS4DLCManager.SERVICE_ID = "EP4040-BLES01902_00"
+function PS4DLCManager:init()
+	PS4DLCManager.super.init(self)
+	if not Global.dlc_manager then
+		Global.dlc_manager = {}
+		Global.dlc_manager.all_dlc_data = {
+			full_game = {
+				filename = "full_game_key.edat",
+				app_id = "218620",
+				verified = true
+			},
+			preorder = {
+				filename = "preorder.edat",
+				app_id = "247450",
+				product_id = "PAYDAYLOOTBAGDLC",
+				no_install = true
+			},
+			career_criminal_edition = {
+				filename = "career_criminal_edition.edat",
+				app_id = "218630",
+				verified = true,
+				no_install = true
+			},
+			alienware_alpha = {
+				filename = "alienware_alpha.edat",
+				app_id = "328861",
+				verified = true,
+				no_install = true
+			},
+			alienware_alpha_promo = {
+				filename = "alienware_alpha_promo.edat",
+				app_id = "318720",
+				verified = true,
+				no_install = true
+			},
+			soundtrack = {
+				filename = "soundtrack.edat",
+				app_id = "254260",
+				verified = true,
+				no_install = true
+			},
+			pdth_soundtrack = {
+				filename = "pdth_soundtrack.edat",
+				app_id = "207816",
+				verified = true,
+				no_install = true
+			},
+			armored_transport = {
+				filename = "armored_transport.edat",
+				app_id = "264610",
+				verified = true,
+				no_install = true
+			},
+			gage_pack = {
+				filename = "gage_pack.edat",
+				app_id = "267380",
+				verified = true,
+				no_install = true
+			},
+			gage_pack_lmg = {
+				filename = "gage_pack_lmg.edat",
+				app_id = "275590",
+				verified = true,
+				no_install = true
+			},
+			gage_pack_jobs = {
+				filename = "gage_pack_jobs.edat",
+				app_id = "259381",
+				verified = true,
+				no_install = true
+			},
+			gage_pack_snp = {
+				filename = "gage_pack_snp.edat",
+				app_id = "259380",
+				verified = true,
+				no_install = true
+			},
+			gage_pack_shotgun = {
+				filename = "gage_pack_shotgun.edat",
+				app_id = "311050",
+				verified = true,
+				no_install = true
+			},
+			gage_pack_assault = {
+				filename = "gage_pack_assault.edat",
+				app_id = "320030",
+				verified = true,
+				no_install = true
+			},
+			big_bank = {
+				filename = "big_bank.edat",
+				app_id = "306690",
+				verified = true,
+				no_install = true
+			},
+			hl_miami = {
+				filename = "hi_miami.edat",
+				app_id = "323500",
+				verified = true,
+				no_install = true
+			},
+			hlm_game = {
+				filename = "hlm_game.edat",
+				app_id = "219150",
+				no_install = true,
+				verified = true,
+				external = true
+			},
+			character_pack_clover = {
+				filename = "character_pack_clover.edat",
+				app_id = "337661",
+				verified = true,
+				no_install = true
+			},
+			character_pack_dragan = {
+				filename = "character_pack_dragan.edat",
+				app_id = "344140",
+				verified = true,
+				no_install = true
+			},
+			hope_diamond = {
+				filename = "hope_diamond.edat",
+				app_id = "337660",
+				verified = true,
+				no_install = true
+			},
+			the_bomb = {
+				filename = "the_bomb.edat",
+				app_id = "339480",
+				verified = true,
+				no_install = true
+			},
+			xmas_soundtrack = {
+				filename = "xmas_soundtrack.edat",
+				app_id = "267381",
+				verified = true,
+				no_install = true
+			},
+			twitch_pack = {
+				filename = "twitch_pack.edat",
+				app_id = "306110",
+				verified = true,
+				no_install = true
+			},
+			humble_pack2 = {
+				filename = "humble_pack2.edat",
+				app_id = "331040",
+				verified = true,
+				no_install = true
+			},
+			gage_pack_historical = {
+				filename = "gage_pack_historical.edat",
+				app_id = "331900",
+				verified = true,
+				no_install = true
+			},
+			pd2_clan = {
+				filename = "pd2_clan.edat",
+				verified = true,
+				source_id = "103582791433980119"
+			}
+		}
+		self:_verify_dlcs()
+	end
+end
+function PS4DLCManager:_verify_dlcs()
+	for dlc_name, dlc_data in pairs(Global.dlc_manager.all_dlc_data) do
+		if dlc_data.is_default or dlc_data.verified == true then
+			dlc_data.verified = true
+		else
+			dlc_data.verified = PS3:has_entitlement(dlc_data.product_id)
+		end
+	end
+end
+function PS4DLCManager:_init_NPCommerce()
+	local result = NPCommerce:init()
+	print("init result", result)
+	if not result then
+		MenuManager:show_np_commerce_init_fail()
+		NPCommerce:destroy()
+		return
+	end
+	local result = NPCommerce:open(callback(self, self, "cb_NPCommerce"))
+	print("open result", result)
+	if result < 0 then
+		MenuManager:show_np_commerce_init_fail()
+		NPCommerce:destroy()
+		return
+	end
+	return true
+end
+function PS4DLCManager:buy_full_game()
+	print("[PS4DLCManager:buy_full_game]")
+	if self._activity then
+		return
+	end
+	if not self:_init_NPCommerce() then
+		return
+	end
+	managers.menu:show_waiting_NPCommerce_open()
+	self._request = {
+		type = "buy_product",
+		product = "full_game"
+	}
+	self._activity = {type = "open"}
+end
+function PS4DLCManager:buy_product(product_name)
+	print("[PS4DLCManager:buy_product]", product_name)
+	if self._activity then
+		return
+	end
+	if not self:_init_NPCommerce() then
+		return
+	end
+	managers.menu:show_waiting_NPCommerce_open()
+	self._request = {
+		type = "buy_product",
+		product = product_name
+	}
+	self._activity = {type = "open"}
+end
+function PS4DLCManager:cb_NPCommerce(result, info)
+	print("[PS4DLCManager:cb_NPCommerce]", result, info)
+	for i, k in pairs(info) do
+		print(i, k)
+	end
+	self._NPCommerce_cb_results = self._NPCommerce_cb_results or {}
+	print("self._activity", self._activity and inspect(self._activity))
+	table.insert(self._NPCommerce_cb_results, {result, info})
+	if not self._activity then
+		return
+	elseif self._activity.type == "open" then
+		if info.category_error or info.category_done == false then
+			self._activity = nil
+			managers.system_menu:close("waiting_for_NPCommerce_open")
+			self:_close_NPCommerce()
+		else
+			managers.system_menu:close("waiting_for_NPCommerce_open")
+			local product_id = Global.dlc_manager.all_dlc_data[self._request.product].product_id
+			print("starting storebrowse", product_id)
+			local ret = NPCommerce:storebrowse("product", product_id, true)
+			if not ret then
+				self._activity = nil
+				managers.menu:show_NPCommerce_checkout_fail()
+				self:_close_NPCommerce()
+			end
+			self._activity = {type = "browse"}
+		end
+	elseif self._activity.type == "browse" then
+		if info.browse_succes then
+			self._activity = nil
+			managers.menu:show_NPCommerce_browse_success()
+			self:_close_NPCommerce()
+		elseif info.browse_back then
+			self._activity = nil
+			self:_close_NPCommerce()
+		elseif info.category_error then
+			self._activity = nil
+			managers.menu:show_NPCommerce_browse_fail()
+			self:_close_NPCommerce()
+		end
+	elseif self._activity.type == "checkout" then
+		if info.checkout_error then
+			self._activity = nil
+			managers.menu:show_NPCommerce_checkout_fail()
+			self:_close_NPCommerce()
+		elseif info.checkout_cancel then
+			self._activity = nil
+			self:_close_NPCommerce()
+		elseif info.checkout_success then
+			self._activity = nil
+			self:_close_NPCommerce()
+		end
+	end
+	print("/[PS4DLCManager:cb_NPCommerce]")
+end
+function PS4DLCManager:_close_NPCommerce()
+	print("[PS4DLCManager:_close_NPCommerce]")
+	NPCommerce:destroy()
+end
+function PS4DLCManager:cb_confirm_purchase_yes(sku_data)
+	NPCommerce:checkout(sku_data.skuid)
+end
+function PS4DLCManager:cb_confirm_purchase_no()
+	self._activity = nil
+	self:_close_NPCommerce()
+end
+XB1DLCManager = XB1DLCManager or class(GenericDLCManager)
+DLCManager.PLATFORM_CLASS_MAP[Idstring("XB1"):key()] = XB1DLCManager
+function XB1DLCManager:init()
+	XB1DLCManager.super.init(self)
+	if not Global.dlc_manager then
+		Global.dlc_manager = {}
+		Global.dlc_manager.all_dlc_data = {
+			preorder = {
+				index = 1,
+				is_default = false,
+				product_id = "f4bfed8e-a74c-4bd5-baad-5b985d0ef15d",
+				no_install = true
+			},
+			full_game = {
+				index = 0,
+				is_default = true,
+				verified = true
+			},
+			career_criminal_edition = {
+				index = 2,
+				is_default = true,
+				no_install = true
+			},
+			alienware_alpha = {
+				index = 3,
+				is_default = true,
+				no_install = true
+			},
+			alienware_alpha_promo = {
+				index = 4,
+				is_default = true,
+				no_install = true
+			},
+			soundtrack = {
+				index = 5,
+				is_default = true,
+				no_install = true
+			},
+			pdth_soundtrack = {
+				index = 6,
+				is_default = true,
+				no_install = true
+			},
+			armored_transport = {
+				index = 7,
+				is_default = true,
+				no_install = true
+			},
+			gage_pack = {
+				index = 8,
+				is_default = true,
+				no_install = true
+			},
+			gage_pack_lmg = {
+				index = 9,
+				is_default = true,
+				no_install = true
+			},
+			gage_pack_jobs = {
+				index = 10,
+				is_default = true,
+				no_install = true
+			},
+			gage_pack_snp = {
+				index = 11,
+				is_default = true,
+				no_install = true
+			},
+			gage_pack_shotgun = {
+				index = 12,
+				is_default = true,
+				no_install = true
+			},
+			gage_pack_assault = {
+				index = 13,
+				is_default = true,
+				no_install = true
+			},
+			big_bank = {
+				index = 14,
+				is_default = true,
+				no_install = true
+			},
+			hl_miami = {
+				index = 15,
+				is_default = true,
+				no_install = true
+			},
+			hlm_game = {
+				index = 16,
+				is_default = true,
+				external = true
+			},
+			character_pack_clover = {
+				index = 17,
+				is_default = true,
+				no_install = true
+			},
+			character_pack_dragan = {
+				index = 18,
+				is_default = true,
+				no_install = true
+			},
+			hope_diamond = {
+				index = 19,
+				is_default = true,
+				no_install = true
+			},
+			the_bomb = {
+				index = 20,
+				is_default = true,
+				no_install = true
+			},
+			xmas_soundtrack = {
+				index = 21,
+				is_default = true,
+				no_install = true
+			},
+			twitch_pack = {
+				index = 22,
+				is_default = true,
+				no_install = true
+			},
+			humble_pack2 = {
+				index = 23,
+				is_default = true,
+				no_install = true
+			},
+			gage_pack_historical = {
+				index = 24,
+				is_default = true,
+				no_install = true
+			},
+			pd2_clan = {
+				index = 25,
+				is_default = true,
+				no_install = true
+			}
+		}
+		self:_verify_dlcs()
+	end
+end
+function XB1DLCManager:_verify_dlcs()
+	local dlc_content_updated = false
+	local old_verified
+	for dlc_name, dlc_data in pairs(Global.dlc_manager.all_dlc_data) do
+		old_verified = dlc_data.verified or false
+		if dlc_data.is_default then
+			dlc_data.verified = true
+		else
+			dlc_data.verified = XboxLive:check_dlc(dlc_data.product_id)
+		end
+		dlc_content_updated = dlc_content_updated or old_verified ~= dlc_data.verified
+	end
+	return dlc_content_updated
+end
+function XB1DLCManager:chk_content_updated()
+	print("[XB1DLCManager:chk_content_updated]")
+	if not managers.blackmarket:currently_customizing_mask() and self:_verify_dlcs() then
+		print("[XB1DLCManager:chk_content_updated] content updated")
+		if managers.experience and managers.upgrades then
+			for level = 1, managers.experience:current_level() do
+				managers.upgrades:aquire_from_level_tree(level, true)
+				managers.upgrades:verify_level_tree(level, true)
+			end
+		end
+		self:give_dlc_and_verify_blackmarket()
+		if managers.crimenet then
+			managers.crimenet:reset_seed()
+		end
+	end
+end
+function XB1DLCManager:on_signin_complete()
+	self:chk_content_updated()
+end
 WINDLCManager = WINDLCManager or class(GenericDLCManager)
 DLCManager.PLATFORM_CLASS_MAP[Idstring("WIN32"):key()] = WINDLCManager
 function WINDLCManager:init()
@@ -631,6 +1176,7 @@ function WINDLCManager:init()
 			the_bomb = {app_id = "339480", no_install = true},
 			bbq = {app_id = "358150", no_install = true},
 			west = {app_id = "349830", no_install = true},
+			arena = {app_id = "366660", no_install = true},
 			xmas_soundtrack = {app_id = "267381", no_install = true},
 			bsides_soundtrack = {app_id = "368870", no_install = true},
 			twitch_pack = {app_id = "306110", no_install = true},
@@ -663,7 +1209,7 @@ function WINDLCManager:_verify_dlcs()
 		end
 	end
 end
-function WINDLCManager:chk_dlc_purchase()
+function WINDLCManager:chk_content_updated()
 	for dlc_name, dlc_data in pairs(Global.dlc_manager.all_dlc_data) do
 		if not dlc_data.verified and self:_check_dlc_data(dlc_data) then
 			managers.menu:show_dlc_require_restart()

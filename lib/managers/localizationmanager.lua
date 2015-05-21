@@ -55,7 +55,7 @@ function LocalizationManager:_setup_macros()
 		btn_accept = btn_a
 		btn_cancel = btn_b
 	end
-	if SystemInfo:platform() ~= Idstring("PS3") then
+	if SystemInfo:platform() == Idstring("WIN32") then
 		btn_stick_r = stick_r
 		btn_stick_l = stick_l
 	end
@@ -115,5 +115,41 @@ function LocalizationManager:debug_file(file)
 		t[s] = text
 	end
 	return t
+end
+function LocalizationManager:check_translation()
+	local path = "g:/projects/payday2/trunk/assets/strings"
+	local files = SystemFS:list(path)
+	local p_files = {}
+	local l_files = {}
+	for i, file in ipairs(files) do
+		local s_index = string.find(file, ".", 1, true)
+		local e_index = string.find(file, ".", s_index + 1, true)
+		local prename = string.sub(file, 1, s_index - 1)
+		p_files[prename] = p_files[prename] or {}
+		table.insert(p_files[prename], file)
+		local language = not e_index and "english" or string.sub(file, s_index + 1, e_index - 1)
+		l_files[language] = l_files[language] or {}
+		table.insert(l_files[language], file)
+		if e_index then
+		end
+	end
+	local parsed = {}
+	for language, files in pairs(l_files) do
+		parsed[language] = parsed[language] or {}
+		for _, file in ipairs(files) do
+			for child in SystemFS:parse_xml(path .. "/" .. file):children() do
+				parsed[language][child:parameter("id")] = child:parameter("value")
+			end
+		end
+	end
+	for language, ids in pairs(parsed) do
+		if language ~= "english" then
+			for id, value in pairs(ids) do
+				if value == parsed.english[id] then
+					print("same as english", language, id, value)
+				end
+			end
+		end
+	end
 end
 CoreClass.override_class(CoreLocalizationManager.LocalizationManager, LocalizationManager)

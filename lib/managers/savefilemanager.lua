@@ -2,10 +2,10 @@ core:import("CoreEvent")
 SavefileManager = SavefileManager or class()
 SavefileManager.SETTING_SLOT = 0
 SavefileManager.AUTO_SAVE_SLOT = 1
-SavefileManager.PROGRESS_SLOT = 98
-SavefileManager.BACKUP_SLOT = 98
+SavefileManager.PROGRESS_SLOT = SystemInfo:platform() == Idstring("WIN32") and 98 or 2
+SavefileManager.BACKUP_SLOT = SystemInfo:platform() == Idstring("WIN32") and 98 or 3
 SavefileManager.MIN_SLOT = 0
-SavefileManager.MAX_SLOT = 99
+SavefileManager.MAX_SLOT = SystemInfo:platform() == Idstring("WIN32") and 99 or 2
 SavefileManager.MAX_PROFILE_SAVE_INTERVAL = 300
 if SystemInfo:platform() == Idstring("X360") then
 	SavefileManager.TASK_MIN_DURATION = 3
@@ -28,6 +28,12 @@ SavefileManager.VERSION = 5
 if SystemInfo:platform() == Idstring("PS3") then
 	SavefileManager.VERSION_NAME = "1.03"
 	SavefileManager.LOWEST_COMPATIBLE_VERSION = "1.02"
+elseif SystemInfo:platform() == Idstring("PS4") then
+	SavefileManager.VERSION_NAME = "01.00"
+	SavefileManager.LOWEST_COMPATIBLE_VERSION = "01.00"
+elseif SystemInfo:platform() == Idstring("XB1") then
+	SavefileManager.VERSION_NAME = "1.0.0.0"
+	SavefileManager.LOWEST_COMPATIBLE_VERSION = "1.0.0.0"
 else
 	SavefileManager.VERSION_NAME = "1.8"
 	SavefileManager.LOWEST_COMPATIBLE_VERSION = "1.7"
@@ -607,11 +613,6 @@ function SavefileManager:_remove(slot, save_system)
 		task_data.save_system = save_system or "steam_cloud"
 	end
 	self._save_slots_to_load[slot] = nil
-	self._ws = Overlay:gui():create_screen_workspace()
-	self._remove_rect = self._ws:panel():rect({
-		color = Color(0.97, 0, 0, 0),
-		layer = 1200
-	})
 	self:_on_task_queued(task_data)
 	SaveGameManager:remove(task_data, callback(self, self, "clbk_result_remove"))
 end
@@ -684,9 +685,10 @@ function SavefileManager:_set_current_task_type(task_type)
 			self._active_changed_callback_handler:dispatch(true, task_type)
 		end
 		local wall_time = TimerManager:wall():time()
-		local ps3_load_enabled = true
-		local use_load_task_type = ps3_load_enabled and SystemInfo:platform() == Idstring("PS3") and task_type == self.LOAD_TASK_TYPE
-		local check_t = ps3_load_enabled and SystemInfo:platform() == Idstring("PS3") and old_task_type == self.LOAD_TASK_TYPE and 0 or 3
+		local ps3_ps4_load_enabled = true
+		local is_ps3_ps4 = SystemInfo:platform() == Idstring("PS3") or SystemInfo:platform() == Idstring("PS4")
+		local use_load_task_type = ps3_ps4_load_enabled and is_ps3_ps4 and task_type == self.LOAD_TASK_TYPE
+		local check_t = ps3_ps4_load_enabled and is_ps3_ps4 and old_task_type == self.LOAD_TASK_TYPE and 0 or 3
 		if task_type == self.SAVE_TASK_TYPE or task_type == self.REMOVE_TASK_TYPE or use_load_task_type then
 			self._workspace:show()
 			self._hide_gui_time = nil
@@ -908,8 +910,6 @@ function SavefileManager:clbk_result_remove(task_data, result_data)
 	if not self:_on_task_completed(task_data) then
 		return
 	end
-	self._remove_rect:set_visible(false)
-	Overlay:gui():destroy_workspace(self._ws)
 end
 function SavefileManager:clbk_result_iterate_savegame_slots(task_data, result_data)
 	cat_print("savefile_manager", "[SavefileManager:clbk_result_iterate_savegame_slots]", inspect(task_data), inspect(result_data))
@@ -970,7 +970,7 @@ function SavefileManager:clbk_result_space_required(task_data, result_data)
 		return
 	end
 	if type_name(result_data) == "table" then
-		if SystemInfo:platform() == Idstring("PS3") then
+		if SystemInfo:platform() == Idstring("PS3") or SystemInfo:platform() == Idstring("PS4") then
 			self._savegame_hdd_space_required = (2 - table.size(result_data)) * self.RESERVED_BYTES / 1024
 		end
 	else

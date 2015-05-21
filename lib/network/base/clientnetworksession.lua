@@ -15,7 +15,7 @@ function ClientNetworkSession:request_join_host(host_rpc, result_cb)
 	Network:set_multiplayer(true)
 	Network:set_client(host_rpc)
 	local request_rpc = SystemInfo:platform() == self._ids_WIN32 and peer:steam_rpc() or host_rpc
-	local xuid = SystemInfo:platform() == Idstring("X360") and managers.network.account:player_id() or ""
+	local xuid = (SystemInfo:platform() == Idstring("X360") or SystemInfo:platform() == Idstring("XB1")) and managers.network.account:player_id() or ""
 	local lvl = managers.experience:current_level()
 	local gameversion = managers.network.matchmake.GAMEVERSION or -1
 	local join_req_id = self:_get_join_attempt_identifier()
@@ -75,9 +75,11 @@ function ClientNetworkSession:on_join_request_reply(reply, my_peer_id, my_charac
 		Global.game_settings.mission = mission
 		self._server_peer:set_character(server_character)
 		self._server_peer:set_xuid(xuid)
-		if SystemInfo:platform() == Idstring("X360") then
+		if SystemInfo:platform() == Idstring("X360") or SystemInfo:platform() == Idstring("XB1") then
 			local xnaddr = managers.network.matchmake:external_address(self._server_peer:rpc())
 			self._server_peer:set_xnaddr(xnaddr)
+			managers.network.matchmake:on_peer_added(self._server_peer)
+		elseif SystemInfo:platform() == Idstring("PS4") then
 			managers.network.matchmake:on_peer_added(self._server_peer)
 		end
 		self._local_peer:set_id(my_peer_id)
@@ -219,7 +221,7 @@ function ClientNetworkSession:peer_handshake(name, peer_id, peer_user_id, in_lob
 		rpc = Network:handshake(peer_user_id, nil, "STEAM")
 		Network:add_co_client(rpc)
 	end
-	if SystemInfo:platform() == Idstring("X360") then
+	if SystemInfo:platform() == Idstring("X360") or SystemInfo:platform() == Idstring("XB1") then
 		local ip = managers.network.matchmake:internal_address(xnaddr)
 		rpc = Network:handshake(ip, managers.network.DEFAULT_PORT, "TCP_IP")
 		Network:add_co_client(rpc)
@@ -232,14 +234,14 @@ function ClientNetworkSession:peer_handshake(name, peer_id, peer_user_id, in_lob
 	end
 	local id, peer = self:add_peer(name, rpc, in_lobby, loading, synched, peer_id, character, peer_user_id, xuid, xnaddr)
 	cat_print("multiplayer_base", "[ClientNetworkSession:peer_handshake]", name, peer_user_id, loading, synched, id, inspect(peer))
-	local check_peer = SystemInfo:platform() == Idstring("X360") and peer or nil
+	local check_peer = (SystemInfo:platform() == Idstring("X360") or SystemInfo:platform() == Idstring("XB1")) and peer or nil
 	self:chk_send_connection_established(name, peer_user_id, check_peer)
 	if managers.trade then
 		managers.trade:handshake_complete(peer_id)
 	end
 end
 function ClientNetworkSession:on_PSN_connection_established(name, ip)
-	if SystemInfo:platform() ~= Idstring("PS3") then
+	if SystemInfo:platform() ~= Idstring("PS3") and SystemInfo:platform() ~= Idstring("PS4") then
 		return
 	end
 	self:chk_send_connection_established(name, nil, false)
@@ -316,8 +318,8 @@ function ClientNetworkSession:on_peer_requested_info(peer_id)
 		return
 	end
 	other_peer:set_ip_verified(true)
-	Global.local_member:sync_lobby_data(other_peer)
-	Global.local_member:sync_data(other_peer)
+	self._local_peer:sync_lobby_data(other_peer)
+	self._local_peer:sync_data(other_peer)
 	other_peer:send("set_loading_state", self._local_peer:loading(), self._load_counter or 1)
 	other_peer:send("peer_exchange_info", self._local_peer:id())
 end

@@ -22,8 +22,12 @@ function MissionEndState:set_controller_enabled(enabled)
 	end
 end
 function MissionEndState:at_enter(old_state, params)
+	local is_safe_house = managers.job:current_job_data() and managers.job:current_job_id() == "safehouse"
 	managers.platform:set_presence("Mission_end")
-	managers.platform:set_rich_presence(Global.game_settings.single_player and "SPEnd" or "MPEnd")
+	if not is_safe_house then
+		managers.platform:set_rich_presence(Global.game_settings.single_player and "SPEnd" or "MPEnd")
+	end
+	managers.platform:set_playing(false)
 	managers.hud:remove_updator("point_of_no_return")
 	managers.hud:hide_stats_screen()
 	self._continue_block_timer = Application:time() + 1.5
@@ -94,10 +98,10 @@ function MissionEndState:at_enter(old_state, params)
 	self._sound_listener = SoundDevice:create_listener("lobby_menu")
 	self._sound_listener:set_position(Vector3(0, -50000, 0))
 	self._sound_listener:activate(true)
+	local total_killed = managers.statistics:session_total_killed()
 	if self._success then
 		if not managers.statistics:is_dropin() then
 			local ach_data = tweak_data.achievement.close_and_personal
-			local total_killed = managers.statistics:session_total_killed()
 			local session_killed = managers.statistics:session_killed()
 			local has_type_stats = ach_data.kill_type and not not total_killed[ach_data.kill_type]
 			if has_type_stats then
@@ -260,6 +264,10 @@ function MissionEndState:at_enter(old_state, params)
 						managers.achievment:award_progress(achievement_data.stat)
 					elseif achievement_data.award then
 						managers.achievment:award(achievement_data.award)
+					elseif achievement_data.challenge_stat then
+						managers.challenge:award_progress(achievement_data.challenge_stat)
+					elseif achievement_data.challenge_award then
+						managers.challenge:award(achievement_data.challenge_award)
 					else
 						Application:debug("[MissionEndState] complete_heist_achievements:", achievement)
 					end
@@ -295,6 +303,10 @@ function MissionEndState:at_enter(old_state, params)
 						managers.achievment:award_progress(achievement_data.stat)
 					elseif achievement_data.award then
 						managers.achievment:award(achievement_data.award)
+					elseif achievement_data.challenge_stat then
+						managers.challenge:award_progress(achievement_data.challenge_stat)
+					elseif achievement_data.challenge_award then
+						managers.challenge:award(achievement_data.challenge_award)
 					end
 				end
 			end
@@ -340,6 +352,10 @@ function MissionEndState:at_enter(old_state, params)
 						managers.achievment:award_progress(achievement_data.stat)
 					elseif achievement_data.award then
 						managers.achievment:award(achievement_data.award)
+					elseif achievement_data.challenge_stat then
+						managers.challenge:award_progress(achievement_data.challenge_stat)
+					elseif achievement_data.challenge_award then
+						managers.challenge:award(achievement_data.challenge_award)
 					end
 				end
 			end
@@ -355,6 +371,7 @@ function MissionEndState:at_enter(old_state, params)
 		managers.experience:mission_xp_process(self._success, managers.job:on_last_stage())
 		ghost_bonus = managers.job:accumulate_ghost_bonus(ghost_bonus)
 	end
+	local is_xb1 = SystemInfo:platform() == Idstring("XB1")
 	if self._success then
 		local gage_assignment_state = managers.gage_assignment:on_mission_completed()
 		local hud_ghost_bonus = 0
@@ -362,6 +379,9 @@ function MissionEndState:at_enter(old_state, params)
 			managers.job:check_add_heat_to_jobs()
 			managers.job:activate_accumulated_ghost_bonus()
 			hud_ghost_bonus = managers.job:get_saved_ghost_bonus()
+			if is_xb1 and not is_safe_house then
+				XboxLive:write_hero_stat("heists", 1)
+			end
 		else
 			hud_ghost_bonus = ghost_bonus
 		end
@@ -370,6 +390,10 @@ function MissionEndState:at_enter(old_state, params)
 			gage_assignment = gage_assignment_state,
 			challenge_completed = managers.challenge:any_challenge_completed()
 		})
+	end
+	if is_xb1 then
+		XboxLive:write_hero_stat("kills", total_killed.count)
+		XboxLive:write_hero_stat("time", managers.statistics:get_session_time_seconds())
 	end
 	if Network:is_server() then
 		managers.network:session():set_state("game_end")
@@ -613,6 +637,10 @@ function MissionEndState:on_statistics_result(best_kills_peer_id, best_kills_sco
 				managers.achievment:award_progress(achievement_data.stat)
 			elseif achievement_data.award then
 				managers.achievment:award(achievement_data.award)
+			elseif achievement_data.challenge_stat then
+				managers.challenge:award_progress(achievement_data.challenge_stat)
+			elseif achievement_data.challenge_award then
+				managers.challenge:award(achievement_data.challenge_award)
 			else
 				Application:debug("[MissionEndState] complete_heist_achievements:", achievement)
 			end

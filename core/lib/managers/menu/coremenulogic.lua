@@ -249,6 +249,7 @@ end
 function Logic:close(closing_menu)
 	local selected_node = self:selected_node()
 	managers.menu_component:set_active_components({})
+	self._action_queue = {}
 	for index = #self._node_stack, 1, -1 do
 		local node = self._node_stack[index]
 		if not closing_menu and node then

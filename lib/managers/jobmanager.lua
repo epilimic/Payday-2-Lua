@@ -522,7 +522,7 @@ function JobManager:_check_add_heat_to_jobs(debug_job_id, ignore_debug_prints)
 		local is_not_this_job = job_id ~= current_job
 		local is_cooldown_ok = self:check_ok_with_cooldown(job_id)
 		local is_not_wrapped = not job_tweak_data.wrapped_to_job
-		local is_not_dlc_or_got = not job_tweak_data.dlc or managers.dlc:has_dlc(job_tweak_data.dlc)
+		local is_not_dlc_or_got = not job_tweak_data.dlc or managers.dlc:is_dlc_unlocked(job_tweak_data.dlc)
 		local pass_all_tests = is_cooldown_ok and is_not_wrapped and is_not_dlc_or_got and is_not_this_job
 		if pass_all_tests then
 			table.insert(all_jobs, job_id)

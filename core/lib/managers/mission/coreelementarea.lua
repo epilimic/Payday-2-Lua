@@ -216,7 +216,7 @@ function ElementAreaTrigger:_check_amount(unit)
 		if inside > 0 and (amount and amount <= inside or not amount) then
 			self:on_executed(unit)
 		end
-	else
+	elseif self:is_instigator_valid(unit) then
 		self:on_executed(unit)
 	end
 end
@@ -263,7 +263,7 @@ function ElementAreaTrigger:_check_instigator_rules(unit)
 			return false
 		end
 	end
-	return self:is_instigator_valid(unit)
+	return true
 end
 function ElementAreaTrigger:_clean_destroyed_units()
 	local i = 1

@@ -1300,6 +1300,9 @@ function GroupAIStateBesiege:_draw_enemy_activity(t)
 	local group_id_texts = draw_data.group_id_texts
 	local panel = draw_data.panel
 	local camera = managers.viewport:get_current_camera()
+	if not camera then
+		return
+	end
 	local ws = draw_data.workspace
 	local mid_pos1 = Vector3()
 	local mid_pos2 = Vector3()
@@ -2293,13 +2296,16 @@ function GroupAIStateBesiege:_set_assault_objective_to_group(group, phase)
 			found_areas[assault_area] = alternate_assault_area_from
 			assault_path = alternate_assault_path
 		end
-		if assault_area then
-			local target_area = push and assault_area or found_areas[assault_area] == "init" and objective_area or found_areas[assault_area]
+		if assault_area and assault_path then
+			local assault_area = push and assault_area or found_areas[assault_area] == "init" and objective_area or found_areas[assault_area]
+			if #assault_path > 2 and assault_area.nav_segs[assault_path[#assault_path - 1][1]] then
+				table.remove(assault_path)
+			end
 			local used_grenade
 			if push then
 				local detonate_pos
 				if charge then
-					for c_key, c_data in pairs(target_area.criminal.units) do
+					for c_key, c_data in pairs(assault_area.criminal.units) do
 						detonate_pos = c_data.unit:movement():m_pos()
 						break
 					end
@@ -2501,7 +2507,8 @@ function GroupAIStateBesiege:_chk_group_use_smoke_grenade(group, task_data, deto
 					local nav_seg_id = u_data.tracker:nav_segment()
 					local nav_seg = managers.navigation._nav_segments[nav_seg_id]
 					for neighbour_nav_seg_id, door_list in pairs(nav_seg.neighbours) do
-						if task_data.target_areas[1].nav_segs[neighbour_nav_seg_id] then
+						local area = self:get_area_from_nav_seg_id(neighbour_nav_seg_id)
+						if task_data.target_areas[1].nav_segs[neighbour_nav_seg_id] or next(area.criminal.units) then
 							local random_door_id = door_list[math.random(#door_list)]
 							if type(random_door_id) == "number" then
 								detonate_pos = managers.navigation._room_doors[random_door_id].center

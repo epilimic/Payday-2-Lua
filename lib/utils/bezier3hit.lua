@@ -161,12 +161,3 @@ function bezier5_xintercept(x1, y1, x6, y6)
 	local X = 0 + XLK * S
 	return X
 end
-if not (...) then
-	local d, x, y, t = bezier3.hit(3.5, 2, 0, 0, 1, 2, 3, 3, 4, 2)
-	local assertf = function(x, y)
-		assert(math.abs(x - y) < 1.0E-7, x .. " ~= " .. y)
-	end
-	assertf(t, 0.8863117)
-	assertf(x, 3.623099)
-	assertf(y, 2.264984)
-end

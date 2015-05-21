@@ -1,10 +1,12 @@
 IngameContractGui = IngameContractGui or class()
 function IngameContractGui:init(ws, node)
+	local padding = SystemInfo:platform() == Idstring("WIN32") and 10 or 5
 	self._panel = ws:panel():panel({
-		w = math.round(ws:panel():w() / 2.2),
-		h = math.round(ws:panel():h() / 1.2)
+		w = math.round(ws:panel():w() * 0.6),
+		h = math.round(ws:panel():h() * 1)
 	})
-	self._panel:set_y(CoreMenuRenderer.Renderer.border_height + tweak_data.menu.pd2_large_font_size)
+	self._panel:set_y(CoreMenuRenderer.Renderer.border_height + tweak_data.menu.pd2_large_font_size - 5)
+	self._panel:grow(0, -(self._panel:y() + tweak_data.menu.pd2_medium_font_size))
 	self._node = node
 	local job_data = managers.job:current_job_data()
 	local job_chain = managers.job:current_job_chain_data()
@@ -21,13 +23,14 @@ function IngameContractGui:init(ws, node)
 		color = tweak_data.screen_colors.text
 	})
 	contract_text:set_text(self:get_text("cn_menu_contract_header") .. " " .. (job_data and self:get_text(job_data.name_id) or ""))
-	contract_text:set_bottom(0)
+	contract_text:set_bottom(5)
 	local text_panel = self._panel:panel({
 		layer = 1,
-		w = self._panel:w() - 32,
-		h = self._panel:h() - 32
+		w = self._panel:w() - padding * 2,
+		h = self._panel:h() - padding * 2
 	})
-	text_panel:set_center(self._panel:w() / 2, self._panel:h() / 2)
+	text_panel:set_left(padding)
+	text_panel:set_top(padding)
 	local briefing_title = text_panel:text({
 		font = tweak_data.menu.pd2_medium_font,
 		font_size = tweak_data.menu.pd2_medium_font_size,
@@ -50,8 +53,8 @@ function IngameContractGui:init(ws, node)
 		word_wrap = true,
 		h = 128
 	})
-	managers.hud:make_fine_text(briefing_description)
-	briefing_description:set_h(briefing_description:h() + 10)
+	local _, _, _, h = briefing_description:text_rect()
+	briefing_description:set_h(h)
 	briefing_description:set_top(briefing_title:bottom())
 	local is_job_ghostable = managers.job:is_job_ghostable(managers.job:current_job_id())
 	if is_job_ghostable then
@@ -81,7 +84,7 @@ function IngameContractGui:init(ws, node)
 			wrap = true,
 			wrap_word = true
 		})
-		ghostable_text:set_position(briefing_description:x(), briefing_description:bottom() + 10)
+		ghostable_text:set_position(briefing_description:x(), briefing_description:bottom() + padding)
 		managers.hud:make_fine_text(ghostable_text)
 	end
 	local modifiers_text = text_panel:text({

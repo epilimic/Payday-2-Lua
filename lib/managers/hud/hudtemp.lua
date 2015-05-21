@@ -38,7 +38,7 @@ function HUDTemp:init(hud)
 		layer = 10
 	})
 	self._bg_box = HUDBGBox_create(bag_panel, {
-		w = 142,
+		w = 204,
 		h = 56,
 		x = 0,
 		y = 0

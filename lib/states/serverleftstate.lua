@@ -11,6 +11,9 @@ function ServerLeftState:at_enter(...)
 	if Network:multiplayer() then
 		self:_shut_down_network()
 	end
+	if managers.network.matchmake then
+		managers.network.matchmake._room_id = nil
+	end
 	self:_create_server_left_dialog()
 end
 function ServerLeftState:on_server_left()

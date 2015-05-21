@@ -131,7 +131,7 @@ function ConnectionNetworkHandler:set_peer_synched(id, sender)
 end
 function ConnectionNetworkHandler:set_dropin()
 	if game_state_machine:current_state().set_dropin then
-		game_state_machine:current_state():set_dropin(Global.local_member:character_name())
+		game_state_machine:current_state():set_dropin(managers.network:session():local_peer():character())
 	end
 end
 function ConnectionNetworkHandler:spawn_dropin_penalty(dead, bleed_out, health, used_deployable, used_cable_ties, used_body_bags)
@@ -139,7 +139,7 @@ function ConnectionNetworkHandler:spawn_dropin_penalty(dead, bleed_out, health, 
 		return
 	end
 	managers.player:spawn_dropin_penalty(dead, bleed_out, health, used_deployable, used_cable_ties, used_body_bags)
-	if not managers.groupai:state():whisper_mode() and (game_state_machine:last_queued_state_name() == "ingame_clean" or game_state_machine:last_queued_state_name() == "ingame_mask_off") then
+	if not managers.groupai:state():whisper_mode() and (game_state_machine:last_queued_state_name() == "ingame_clean" or game_state_machine:last_queued_state_name() == "ingame_mask_off" or game_state_machine:last_queued_state_name() == "ingame_dirty") then
 		managers.player:set_player_state("standard")
 	end
 end

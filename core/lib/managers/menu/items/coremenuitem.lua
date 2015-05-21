@@ -36,6 +36,15 @@ function Item:init(data_node, parameters)
 		params.callback_name = params.callback
 		params.callback = {}
 	end
+	if params.callback_disabled then
+		params.callback_disabled = string.split(params.callback_disabled, " ")
+	else
+		params.callback_disabled = {}
+	end
+	if params.callback_disabled then
+		params.callback_disabled_name = params.callback_disabled
+		params.callback_disabled = {}
+	end
 	self:set_parameters(params)
 	self._enabled = true
 end
@@ -72,6 +81,9 @@ function Item:set_callback_handler(callback_handler)
 	for _, callback_name in pairs(self._parameters.callback_name) do
 		table.insert(self._parameters.callback, callback(callback_handler, callback_handler, callback_name))
 	end
+	for _, callback_name in pairs(self._parameters.callback_disabled_name) do
+		table.insert(self._parameters.callback_disabled, callback(callback_handler, callback_handler, callback_name))
+	end
 	if self._visible_callback_name_list then
 		for _, visible_callback_name in pairs(self._visible_callback_name_list) do
 			self._visible_callback_list = self._visible_callback_list or {}
@@ -98,7 +110,7 @@ function Item:set_callback_handler(callback_handler)
 	end
 end
 function Item:trigger()
-	for _, callback in pairs(self:parameters().callback) do
+	for _, callback in pairs((self:enabled() or self:parameters().ignore_disabled) and self:parameters().callback or self:parameters().callback_disabled) do
 		callback(self)
 	end
 end
@@ -121,6 +133,7 @@ function Item:on_delete_row_item()
 end
 function Item:on_delete_item()
 	self._parameters.callback = {}
+	self._parameters.callback_disabled = {}
 	self._visible_callback_list = nil
 	self._icon_visible_callback_list = nil
 end

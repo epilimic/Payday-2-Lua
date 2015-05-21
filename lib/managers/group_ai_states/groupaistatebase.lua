@@ -1260,7 +1260,7 @@ function GroupAIStateBase:unregister_criminal(unit)
 	self:check_gameover_conditions()
 end
 function GroupAIStateBase:check_gameover_conditions()
-	if not Network:is_server() or managers.platform:presence() ~= "Playing" then
+	if not Network:is_server() or managers.platform:presence() ~= "Playing" or setup:has_queued_exec() then
 		return false
 	end
 	if game_state_machine:current_state().game_ended and game_state_machine:current_state():game_ended() then
@@ -1966,7 +1966,7 @@ function GroupAIStateBase:load(load_data)
 	self:_call_listeners("team_def")
 end
 function GroupAIStateBase:set_point_of_no_return_timer(time, point_of_no_return_id)
-	if time == nil then
+	if time == nil or setup:has_queued_exec() then
 		return
 	end
 	self._forbid_drop_in = true
@@ -1984,6 +1984,11 @@ function GroupAIStateBase:set_is_inside_point_of_no_return(peer_id, is_inside)
 	self._peers_inside_point_of_no_return[peer_id] = is_inside
 end
 function GroupAIStateBase:_update_point_of_no_return(t, dt)
+	if setup:has_queued_exec() then
+		managers.hud:hide_point_of_no_return_timer()
+		managers.hud:remove_updator("point_of_no_return")
+		return
+	end
 	local get_mission_script_element = function(id)
 		for name, script in pairs(managers.mission:scripts()) do
 			if script:element(id) then
@@ -2749,7 +2754,7 @@ function GroupAIStateBase:on_occasional_event(event_type)
 	event_data.last_occurence_t = TimerManager:game():time()
 end
 function GroupAIStateBase:on_player_spawn_state_set(state_name)
-	if state_name ~= "clean" and state_name ~= "mask_off" then
+	if state_name ~= "clean" and state_name ~= "mask_off" and state_name ~= "dirty" then
 		self:on_player_weapons_hot()
 	end
 end

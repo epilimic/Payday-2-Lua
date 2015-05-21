@@ -4894,11 +4894,11 @@ function SpawnUnitElement:activate_callback(env)
 							end
 						end
 					end
-					physic_effect_name = Idstring("core/physic_effects/sequencemanager_push_with_ang")
+					physic_effect_name = "core/physic_effects/sequencemanager_push_with_ang"
 				else
-					physic_effect_name = Idstring("core/physic_effects/sequencemanager_push")
+					physic_effect_name = "core/physic_effects/sequencemanager_push"
 				end
-				World:play_physic_effect(physic_effect_name, unit, velocity, unit:mass(), ang_velocity)
+				World:play_physic_effect(Idstring(physic_effect_name), unit, velocity, unit:mass(), ang_velocity)
 			end
 		end
 		local params

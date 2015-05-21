@@ -14,7 +14,12 @@ function CoreShaderLibCompiler:compile(file, dest, force_recompile)
 		if target() == "win32" then
 			dest:skip_update("shaders", "core/temp/" .. self.SHADER_NAME, {"d3d9"})
 			dest:skip_update("shaders", "core/temp/" .. self.SHADER_NAME, {"d3d10"})
+			dest:skip_update("shaders", "core/temp/" .. self.SHADER_NAME, {"d3d11"})
 		elseif target() == "ps3" then
+			dest:skip_update("shaders", "core/temp/" .. self.SHADER_NAME, {})
+		elseif target() == "ps4" then
+			dest:skip_update("shaders", "core/temp/" .. self.SHADER_NAME, {})
+		elseif target() == "xb1" then
 			dest:skip_update("shaders", "core/temp/" .. self.SHADER_NAME, {})
 		elseif target() == "x360" then
 			dest:skip_update("shaders", "core/temp/" .. self.SHADER_NAME, {})
@@ -31,8 +36,13 @@ function CoreShaderLibCompiler:compile(file, dest, force_recompile)
 	if target() == "win32" then
 		self:copy_file(self:base_path() .. self.TEMP_PATH .. self.SHADER_NAME .. ".d3d9.win32.shaders", "core/temp/" .. self.SHADER_NAME, {"d3d9"}, dest)
 		self:copy_file(self:base_path() .. self.TEMP_PATH .. self.SHADER_NAME .. ".d3d10.win32.shaders", "core/temp/" .. self.SHADER_NAME, {"d3d10"}, dest)
+		self:copy_file(self:base_path() .. self.TEMP_PATH .. self.SHADER_NAME .. ".d3d11.win32.shaders", "core/temp/" .. self.SHADER_NAME, {"d3d11"}, dest)
 	elseif target() == "ps3" then
 		self:copy_file(self:base_path() .. self.TEMP_PATH .. self.SHADER_NAME .. ".ps3.shaders", "core/temp/" .. self.SHADER_NAME, {}, dest)
+	elseif target() == "xb1" then
+		self:copy_file(self:base_path() .. self.TEMP_PATH .. self.SHADER_NAME .. ".xb1.shaders", "core/temp/" .. self.SHADER_NAME, {}, dest)
+	elseif target() == "ps4" then
+		self:copy_file(self:base_path() .. self.TEMP_PATH .. self.SHADER_NAME .. ".ps4.shaders", "core/temp/" .. self.SHADER_NAME, {}, dest)
 	elseif target() == "x360" then
 		self:copy_file(self:base_path() .. self.TEMP_PATH .. self.SHADER_NAME .. ".x360.shaders", "core/temp/" .. self.SHADER_NAME, {}, dest)
 	elseif target() == "lrb" then
@@ -47,7 +57,10 @@ function CoreShaderLibCompiler:cleanup(params)
 	cat_print("debug", "[CoreShaderLibCompiler] Cleaning...")
 	os.remove(params.win32d3d9)
 	os.remove(params.win32d3d10)
+	os.remove(params.win32d3d11)
 	os.remove(params.ps3)
+	os.remove(params.ps4)
+	os.remove(params.xb1)
 	os.remove(params.x360d3d9)
 	os.remove(params.lrb)
 	os.remove(self:base_path() .. self.TEMP_PATH .. "make.xml")
@@ -121,25 +134,55 @@ function CoreShaderLibCompiler:get_make_params()
 	if target() == "win32" then
 		make_params.win32d3d9 = tmp .. self.SHADER_NAME .. ".d3d9.win32.shaders"
 		make_params.win32d3d10 = tmp .. self.SHADER_NAME .. ".d3d10.win32.shaders"
+		make_params.win32d3d11 = tmp .. self.SHADER_NAME .. ".d3d11.win32.shaders"
 		make_params.ps3 = ""
+		make_params.ps4 = ""
+		make_params.xb1 = ""
 		make_params.x360d3d9 = ""
 		make_params.lrb = ""
 	elseif target() == "ps3" then
 		make_params.win32d3d9 = ""
 		make_params.win32d3d10 = ""
+		make_params.win32d3d11 = ""
 		make_params.ps3 = tmp .. self.SHADER_NAME .. ".ps3.shaders"
+		make_params.ps4 = ""
+		make_params.xb1 = ""
+		make_params.x360d3d9 = ""
+		make_params.lrb = ""
+	elseif target() == "ps4" then
+		make_params.win32d3d9 = ""
+		make_params.win32d3d10 = ""
+		make_params.win32d3d11 = ""
+		make_params.ps3 = ""
+		make_params.ps4 = tmp .. self.SHADER_NAME .. ".ps4.shaders"
+		make_params.xb1 = ""
+		make_params.x360d3d9 = ""
+		make_params.lrb = ""
+	elseif target() == "xb1" then
+		make_params.win32d3d9 = ""
+		make_params.win32d3d10 = ""
+		make_params.win32d3d11 = ""
+		make_params.ps3 = ""
+		make_params.ps4 = ""
+		make_params.xb1 = tmp .. self.SHADER_NAME .. ".xb1.shaders"
 		make_params.x360d3d9 = ""
 		make_params.lrb = ""
 	elseif target() == "x360" then
 		make_params.win32d3d9 = ""
 		make_params.win32d3d10 = ""
+		make_params.win32d3d11 = ""
 		make_params.ps3 = ""
+		make_params.ps4 = ""
+		make_params.xb1 = ""
 		make_params.x360d3d9 = tmp .. self.SHADER_NAME .. ".x360.shaders"
 		make_params.lrb = ""
 	elseif target() == "lrb" then
 		make_params.win32d3d9 = ""
 		make_params.win32d3d10 = ""
+		make_params.win32d3d11 = ""
 		make_params.ps3 = ""
+		make_params.ps4 = ""
+		make_params.xb1 = ""
 		make_params.x360d3d9 = ""
 		make_params.lrb = tmp .. self.SHADER_NAME .. ".lrb.shaders"
 	else

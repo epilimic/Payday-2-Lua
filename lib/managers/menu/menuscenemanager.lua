@@ -1624,7 +1624,15 @@ function MenuSceneManager:character_screen_position(peer_id)
 		if peer_id == 3 then
 			peer_3_x_offset = is_me and -20 or -40
 		end
-		local spine_pos = unit:get_object(Idstring("Spine")):position() + Vector3(peer_3_x_offset, 0, 5 * (peer_id % 4))
+		local peer_y_offset = 0
+		if peer_id == 2 then
+			peer_y_offset = is_me and -3 or 0
+		elseif peer_id == 3 then
+			peer_y_offset = is_me and -7 or 0
+		elseif peer_id == 4 then
+			peer_y_offset = is_me and 5 or 0
+		end
+		local spine_pos = unit:get_object(Idstring("Spine")):position() + Vector3(peer_3_x_offset, 0, -5 + 15 * (peer_id % 4) + peer_y_offset)
 		return self._workspace:world_to_screen(self._camera_object, spine_pos)
 	end
 end

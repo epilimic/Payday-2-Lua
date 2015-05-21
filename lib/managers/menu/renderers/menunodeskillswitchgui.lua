@@ -13,7 +13,7 @@ function MenuNodeSkillSwitchGui:init(node, layer, parameters)
 	parameters.row_item_hightlight_color = tweak_data.screen_colors.button_stage_2
 	parameters.marker_alpha = 1
 	parameters.to_upper = true
-	parameters._align_line_proportions = 0.5
+	parameters._align_line_proportions = 0.4
 	self.static_y = node:parameters().static_y
 	MenuNodeSkillSwitchGui.super.init(self, node, layer, parameters)
 end

@@ -105,6 +105,13 @@ function SentryGunDamage:damage_bullet(attack_data)
 	if not self._dead then
 		self._unit:brain():on_damage_received(attack_data.attacker_unit)
 	end
+	local attacker_unit = attack_data and attack_data.attacker_unit
+	if alive(attacker_unit) and attacker_unit:base() and attacker_unit:base().thrower_unit then
+		attacker_unit = attacker_unit:base():thrower_unit()
+	end
+	if attacker_unit == managers.player:player_unit() and attack_data then
+		managers.player:on_damage_dealt(self._unit, attack_data)
+	end
 end
 function SentryGunDamage:damage_fire(attack_data)
 	if self._dead or self._invulnerable or Network:is_client() and self._ignore_client_damage or attack_data.variant == "stun" or not tweak_data.weapon[self._unit:base():get_name_id()].FIRE_DMG_MUL then
@@ -136,6 +143,13 @@ function SentryGunDamage:damage_fire(attack_data)
 	end
 	if not self._dead then
 		self._unit:brain():on_damage_received(attack_data.attacker_unit)
+	end
+	local attacker_unit = attack_data and attack_data.attacker_unit
+	if alive(attacker_unit) and attacker_unit:base() and attacker_unit:base().thrower_unit then
+		attacker_unit = attacker_unit:base():thrower_unit()
+	end
+	if attacker_unit == managers.player:player_unit() and attack_data then
+		managers.player:on_damage_dealt(self._unit, attack_data)
 	end
 end
 function SentryGunDamage:damage_explosion(attack_data)
@@ -178,6 +192,13 @@ function SentryGunDamage:damage_explosion(attack_data)
 	end
 	if not self._dead then
 		self._unit:brain():on_damage_received(attacker_unit)
+	end
+	local attacker_unit = attack_data and attack_data.attacker_unit
+	if alive(attacker_unit) and attacker_unit:base() and attacker_unit:base().thrower_unit then
+		attacker_unit = attacker_unit:base():thrower_unit()
+	end
+	if attacker_unit == managers.player:player_unit() and attack_data then
+		managers.player:on_damage_dealt(self._unit, attack_data)
 	end
 end
 function SentryGunDamage:dead()

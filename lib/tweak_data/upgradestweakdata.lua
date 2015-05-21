@@ -107,7 +107,7 @@ function UpgradesTweakData:_init_pd2_values()
 	self.hostage_max_num = {
 		health_regen = 1,
 		health = 10,
-		steamina = 10
+		stamina = 10
 	}
 	self.on_headshot_dealt_cooldown = 3
 	self.on_killshot_cooldown = 3
@@ -1435,7 +1435,11 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[13] = {
 		name_id = "weapons",
-		upgrades = {"new_mp5", "serbu"}
+		upgrades = {
+			"new_mp5",
+			"serbu",
+			"microphone"
+		}
 	}
 	self.level_tree[14] = {
 		name_id = "weapons",
@@ -1461,7 +1465,8 @@ function UpgradesTweakData:init()
 		name_id = "weapons",
 		upgrades = {
 			"baseballbat",
-			"scorpion"
+			"scorpion",
+			"oldbaton"
 		}
 	}
 	self.level_tree[19] = {
@@ -1486,7 +1491,8 @@ function UpgradesTweakData:init()
 		upgrades = {
 			"g22c",
 			"ksg",
-			"branding_iron"
+			"branding_iron",
+			"detector"
 		}
 	}
 	self.level_tree[23] = {
@@ -1521,7 +1527,8 @@ function UpgradesTweakData:init()
 		upgrades = {
 			"hs2000",
 			"vhs",
-			"bowie"
+			"bowie",
+			"micstand"
 		}
 	}
 	self.level_tree[29] = {
@@ -1552,7 +1559,11 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[34] = {
 		name_id = "weapons",
-		upgrades = {"galil", "cleaver"}
+		upgrades = {
+			"galil",
+			"cleaver",
+			"mateba"
+		}
 	}
 	self.level_tree[35] = {
 		name_id = "weapons",
@@ -1898,6 +1909,7 @@ function UpgradesTweakData:init()
 	self:_peacemaker_definitions()
 	self:_winchester1874_definitions()
 	self:_plainsrider_definitions()
+	self:_mateba_definitions()
 	self:_melee_weapon_definitions()
 	self:_grenades_definitions()
 	self:_carry_definitions()
@@ -6263,6 +6275,22 @@ function UpgradesTweakData:_melee_weapon_definitions()
 		category = "melee_weapon",
 		dlc = "west"
 	}
+	self.definitions.microphone = {
+		category = "melee_weapon",
+		dlc = "arena"
+	}
+	self.definitions.detector = {
+		category = "melee_weapon",
+		dlc = "arena"
+	}
+	self.definitions.micstand = {
+		category = "melee_weapon",
+		dlc = "arena"
+	}
+	self.definitions.oldbaton = {
+		category = "melee_weapon",
+		dlc = "arena"
+	}
 end
 function UpgradesTweakData:_grenades_definitions()
 	self.definitions.molotov = {category = "grenade", dlc = "bbq"}
@@ -8638,5 +8666,13 @@ function UpgradesTweakData:_plainsrider_definitions()
 		weapon_id = "plainsrider",
 		factory_id = "wpn_fps_bow_plainsrider",
 		dlc = "west"
+	}
+end
+function UpgradesTweakData:_mateba_definitions()
+	self.definitions.mateba = {
+		category = "weapon",
+		weapon_id = "mateba",
+		factory_id = "wpn_fps_pis_2006m",
+		dlc = "arena"
 	}
 end

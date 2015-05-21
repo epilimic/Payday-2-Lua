@@ -3,6 +3,7 @@ function VehicleTweakData:init(tweak_data)
 	self:_init_data_falcogini()
 	self:_init_data_muscle()
 	self:_init_data_forklift()
+	self:_init_data_forklift_2()
 end
 function VehicleTweakData:_init_data_falcogini()
 	self.falcogini = {}
@@ -165,4 +166,45 @@ function VehicleTweakData:_init_data_forklift()
 	self.forklift.interact_distance = 350
 	self.forklift.driver_camera_offset = Vector3(0, 0, 7.5)
 	self.forklift.fov = 70
+end
+function VehicleTweakData:_init_data_forklift_2()
+	self.forklift_2 = {}
+	self.forklift_2.name = "Forklift"
+	self.forklift_2.hud_label_offset = 220
+	self.forklift_2.animations = {
+		vehicle_id = "forklift",
+		driver = "drive_forklift_driver"
+	}
+	self.forklift_2.sound = {
+		bump_treshold = 5,
+		lateral_slip_treshold = 10,
+		longitudal_slip_treshold = 10,
+		engine_sound_event = "forklift",
+		engine_start = "forklift_start",
+		door_close = "sit_down_in_forklift",
+		going_reverse = "forklift_reverse_warning",
+		going_reverse_stop = "forklift_reverse_warning_stop",
+		slip = "car_skid_01",
+		slip_stop = "car_skid_stop_01",
+		bump = "car_bumper_01",
+		bump_rtpc = "car_bump_vel",
+		hit = "car_hit_gen_01",
+		hit_rtpc = "car_hit_vel",
+		engine_speed_rtpc = "car_falcogini_speed",
+		engine_rpm_rtpc = "car_falcogini_rpm"
+	}
+	self.forklift_2.seats = {
+		driver = {name = "driver", driving = true}
+	}
+	self.forklift_2.loot_points = {
+		loot_left = {name = "loot"}
+	}
+	self.forklift_2.damage = {max_health = 100000}
+	self.forklift_2.max_speed = 20
+	self.forklift_2.max_rpm = 1600
+	self.forklift_2.loot_drop_point = "v_repair_engine"
+	self.forklift_2.max_loot_bags = 0
+	self.forklift_2.interact_distance = 350
+	self.forklift_2.driver_camera_offset = Vector3(0, 0, 7.5)
+	self.forklift_2.fov = 70
 end

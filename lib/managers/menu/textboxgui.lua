@@ -150,7 +150,8 @@ function TextBoxGui:_create_text_box(ws, title, text, content_data, config)
 		vertical = "top",
 		valign = "top",
 		x = 10,
-		y = 10
+		y = 10,
+		rotation = 360
 	})
 	local _, _, tw, th = title_text:text_rect()
 	title_text:set_size(tw, th)

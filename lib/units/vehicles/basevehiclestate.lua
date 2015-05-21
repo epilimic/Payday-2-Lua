@@ -8,7 +8,6 @@ function BaseVehicleState:update(t, dt)
 	self._unit:vehicle_driving():_detect_collisions(t, dt)
 	self._unit:vehicle_driving():_detect_invalid_possition(t, dt)
 	self._unit:vehicle_driving():_play_sound_events(t, dt)
-	self._unit:vehicle_driving():_move_team_ai()
 end
 function BaseVehicleState:enter(state_data, enter_data)
 end

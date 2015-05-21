@@ -833,6 +833,11 @@ function StageEndScreenGui:back_pressed()
 		return false
 	end
 end
+function StageEndScreenGui:special_btn_pressed(btn)
+	if btn == Idstring("menu_challenge_claim") then
+		managers.hud:set_speed_up_endscreen_hud(5)
+	end
+end
 function StageEndScreenGui:accept_input(accept)
 	print("StageEndScreenGui:accept_input", accept)
 end

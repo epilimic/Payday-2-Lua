@@ -293,6 +293,9 @@ end
 function PlayerManager:default_player_state()
 	return self._DEFAULT_STATE
 end
+function PlayerManager:current_sync_state()
+	return self._current_sync_state
+end
 function PlayerManager:set_player_state(state)
 	state = state or self._current_state
 	if state == "standard" and self:get_my_carry_data() then
@@ -347,7 +350,6 @@ end
 function PlayerManager:player_destroyed(id)
 	self._players[id] = nil
 	self._respawn = true
-	self._global.synced_vehicle_data[id] = nil
 end
 function PlayerManager:players()
 	return self._players
@@ -472,12 +474,13 @@ function PlayerManager:on_killshot(killed_unit, variant)
 		self._on_killshot_t = t + (tweak_data.upgrades.on_killshot_cooldown or 0)
 	end
 end
-function PlayerManager:on_damage_dealt()
+function PlayerManager:on_damage_dealt(unit, damage_info)
 	local player_unit = self:player_unit()
 	if not player_unit then
 		return
 	end
 	local t = Application:time()
+	self:_check_damage_to_hot(t, unit, damage_info)
 	if self._on_damage_dealt_t and t < self._on_damage_dealt_t then
 		return
 	end
@@ -498,6 +501,44 @@ function PlayerManager:on_headshot_dealt()
 	if damage_ext and regen_armor_bonus > 0 then
 		damage_ext:restore_armor(regen_armor_bonus)
 	end
+end
+function PlayerManager:_check_damage_to_hot(t, unit, damage_info)
+	local player_unit = self:player_unit()
+	if not self:has_category_upgrade("player", "damage_to_hot") then
+		do break end
+		return
+	end
+	if not alive(player_unit) or player_unit:character_damage():need_revive() or player_unit:character_damage():dead() then
+		return
+	end
+	if not alive(unit) or not unit:base() or not damage_info then
+		return
+	end
+	if damage_info.is_fire_dot_damage then
+		return
+	end
+	local data = tweak_data.upgrades.damage_to_hot_data
+	if not data then
+		return
+	end
+	if self._next_allowed_doh_t and t < self._next_allowed_doh_t then
+		return
+	end
+	local add_stack_sources = data.add_stack_sources or {}
+	if not add_stack_sources.swat_van and unit:base().sentry_gun then
+		return
+	elseif not add_stack_sources.civilian and CopDamage.is_civilian(unit:base()._tweak_table) then
+		return
+	end
+	if not add_stack_sources[damage_info.variant] then
+		return
+	end
+	local player_armor = managers.blackmarket:equipped_armor(data.works_with_armor_kit)
+	if not table.contains(data.armors_allowed or {}, player_armor) then
+		return
+	end
+	player_unit:character_damage():add_damage_to_hot()
+	self._next_allowed_doh_t = t + data.stacking_cooldown
 end
 function PlayerManager:unaquire_equipment(upgrade, id)
 	if not self._global.equipment[id] then
@@ -1357,12 +1398,17 @@ function PlayerManager:transfer_special_equipment(peer_id, include_custody)
 			local equipment_data = tweak_data.equipments.specials[name]
 			if equipment_data and not equipment_data.avoid_tranfer then
 				local equipment_lost = true
+				local amount_to_transfer = amount
+				local max_amount = equipment_data.max_quantity or 1
 				for _, p in ipairs(peers) do
 					local id = p:id()
-					if not self._global.synced_equipment_possession[id] or not self._global.synced_equipment_possession[id][name] then
+					local peer_amount = self._global.synced_equipment_possession[id] and self._global.synced_equipment_possession[id][name] or 0
+					if max_amount > peer_amount then
+						local transfer_amount = math.min(amount_to_transfer, max_amount - peer_amount)
+						amount_to_transfer = amount_to_transfer - transfer_amount
 						if Network:is_server() then
 							if p == managers.network:session():local_peer() then
-								managers.player:add_special({name = name, amount = amount})
+								managers.player:add_special({name = name, amount = transfer_amount})
 							else
 								p:send("give_equipment", name, amount)
 							end
@@ -1373,6 +1419,8 @@ function PlayerManager:transfer_special_equipment(peer_id, include_custody)
 							end
 						end
 						equipment_lost = false
+						if amount_to_transfer == 0 then
+						end
 					else
 					end
 				end
@@ -1678,25 +1726,35 @@ function PlayerManager:verify_equipment(peer_id, equipment_id)
 		end
 		self._asset_equipment[id] = (self._asset_equipment[id] or 0) + 1
 		return true
-	elseif not managers.network:game():member(peer_id) then
+	end
+	local peer = managers.network:session():local_peer():id() == peer_id and managers.network:session():local_peer() or managers.network:session():peer(peer_id)
+	if not peer then
 		return false
 	end
-	return managers.network:game():member(peer_id):place_deployable(equipment_id)
+	return peer:verify_deployable(equipment_id)
 end
 function PlayerManager:verify_grenade(peer_id)
-	if not managers.network:game():member(peer_id) then
+	if not managers.network:session() then
+		return true
+	end
+	local peer = managers.network:session():local_peer():id() == peer_id and managers.network:session():local_peer() or managers.network:session():peer(peer_id)
+	if not peer then
 		return false
 	end
-	return managers.network:game():member(peer_id):set_grenade(1)
+	return peer:verify_grenade(1)
 end
 function PlayerManager:register_grenade(peer_id)
-	if not managers.network:game():member(peer_id) then
+	if not managers.network:session() then
+		return true
+	end
+	local peer = managers.network:session():local_peer():id() == peer_id and managers.network:session():local_peer() or managers.network:session():peer(peer_id)
+	if not peer then
 		return false
 	end
-	return managers.network:game():member(peer_id):set_grenade(-1)
+	return peer:verify_grenade(-1)
 end
 function PlayerManager:verify_carry(peer_id, carry_id)
-	if Network:is_client() then
+	if Network:is_client() or not managers.network:session() then
 		return true
 	end
 	if peer_id == 0 then
@@ -1712,19 +1770,21 @@ function PlayerManager:verify_carry(peer_id, carry_id)
 			return false
 		end
 	end
-	if not managers.network:game():member(peer_id) then
+	local peer = managers.network:session():local_peer():id() == peer_id and managers.network:session():local_peer() or managers.network:session():peer(peer_id)
+	if not peer then
 		return false
 	end
-	return managers.network:game():member(peer_id):place_bag(carry_id, -1)
+	return peer:verify_bag(carry_id, -1)
 end
 function PlayerManager:register_carry(peer_id, carry_id)
-	if Network:is_client() then
+	if Network:is_client() or not managers.network:session() then
 		return true
 	end
-	if not managers.network:game():member(peer_id) then
+	local peer = managers.network:session():local_peer():id() == peer_id and managers.network:session():local_peer() or managers.network:session():peer(peer_id)
+	if not peer then
 		return false
 	end
-	return managers.network:game():member(peer_id):place_bag(carry_id, 1)
+	return peer:verify_bag(carry_id, 1)
 end
 function PlayerManager:add_special(params)
 	local name = params.equipment or params.name
@@ -1742,9 +1802,9 @@ function PlayerManager:add_special(params)
 		extra = self:upgrade_value(name, "quantity_1") + self:upgrade_value(name, "quantity_2")
 	end
 	if special_equipment then
-		if equipment.quantity then
+		if equipment.max_quantity or equipment.quantity then
 			local dedigested_amount = Application:digest_value(special_equipment.amount, false)
-			local new_amount = self:has_category_upgrade(name, "quantity_unlimited") and -1 or math.min(dedigested_amount + amount, equipment.quantity + extra)
+			local new_amount = self:has_category_upgrade(name, "quantity_unlimited") and -1 or math.min(dedigested_amount + amount, (equipment.max_quantity or equipment.quantity) + extra)
 			special_equipment.amount = Application:digest_value(new_amount, true)
 			if special_equipment.is_cable_tie then
 				managers.hud:set_cable_ties_amount(HUDManager.PLAYER_PANEL, new_amount)
@@ -1775,7 +1835,6 @@ function PlayerManager:add_special(params)
 			managers.network:session():send_to_peers_synched("sync_show_action_message", unit, action_message)
 		end
 	end
-	local quantity = (not self:has_category_upgrade(name, "quantity_unlimited") or not -1) and equipment.quantity and (not respawn or not math.min(params.amount, equipment.quantity + extra)) and equipment.quantity and math.min(amount + extra, equipment.quantity + extra)
 	local is_cable_tie = name == "cable_tie"
 	if is_cable_tie then
 		managers.hud:set_cable_tie(HUDManager.PLAYER_PANEL, {
@@ -1815,7 +1874,7 @@ function PlayerManager:_can_pickup_special_equipment(special_equipment, name)
 	if special_equipment.amount then
 		local equipment = tweak_data.equipments.specials[name]
 		local extra = self:_equipped_upgrade_value(equipment)
-		return Application:digest_value(special_equipment.amount, false) < equipment.quantity + extra
+		return Application:digest_value(special_equipment.amount, false) < (equipment.max_quantity or equipment.quantity) + extra, not not equipment.max_quantity
 	end
 	return false
 end
@@ -2268,6 +2327,9 @@ function PlayerManager:enter_vehicle(vehicle, locator)
 	local peer_id = managers.network:session():local_peer():id()
 	local player = self:local_player()
 	local seat = vehicle:vehicle_driving():get_available_seat(locator:position())
+	if not seat then
+		return
+	end
 	if Network:is_server() then
 		self:server_enter_vehicle(vehicle, peer_id, player, seat.name)
 	else

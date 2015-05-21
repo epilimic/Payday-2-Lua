@@ -64,6 +64,28 @@ function HUDManager:text_clone(text)
 end
 function HUDManager:set_player_location(location_id)
 end
+function HUDManager:hide_local_player_gear()
+	self:hide_player_gear(HUDManager.PLAYER_PANEL)
+end
+function HUDManager:show_local_player_gear()
+	self:show_player_gear(HUDManager.PLAYER_PANEL)
+end
+function HUDManager:hide_player_gear(panel_id)
+	if self._teammate_panels[panel_id] and self._teammate_panels[panel_id]:panel() then
+		self._teammate_panels[panel_id]:panel():child("player"):child("weapons_panel"):set_visible(false)
+		self._teammate_panels[panel_id]:panel():child("player"):child("deployable_equipment_panel"):set_visible(false)
+		self._teammate_panels[panel_id]:panel():child("player"):child("cable_ties_panel"):set_visible(false)
+		self._teammate_panels[panel_id]:panel():child("player"):child("grenades_panel"):set_visible(false)
+	end
+end
+function HUDManager:show_player_gear(panel_id)
+	if self._teammate_panels[panel_id] and self._teammate_panels[panel_id]:panel() then
+		self._teammate_panels[panel_id]:panel():child("player"):child("weapons_panel"):set_visible(true)
+		self._teammate_panels[panel_id]:panel():child("player"):child("deployable_equipment_panel"):set_visible(true)
+		self._teammate_panels[panel_id]:panel():child("player"):child("cable_ties_panel"):set_visible(true)
+		self._teammate_panels[panel_id]:panel():child("player"):child("grenades_panel"):set_visible(true)
+	end
+end
 function HUDManager:add_weapon(data)
 	self:_set_weapon(data)
 	print("add_weapon", inspect(data))
@@ -533,8 +555,8 @@ function HUDManager:sync_end_assault(result)
 	end
 	self._hud_assault_corner:sync_end_assault(result)
 end
-function HUDManager:show_casing()
-	self._hud_assault_corner:show_casing()
+function HUDManager:show_casing(mode)
+	self._hud_assault_corner:show_casing(mode)
 end
 function HUDManager:hide_casing()
 	self._hud_assault_corner:hide_casing()
@@ -807,7 +829,7 @@ function HUDManager:_add_name_label(data)
 	local crim_color = tweak_data.chat_colors[color_id]
 	local text = panel:text({
 		name = "text",
-		text = utf8.to_upper(data.name),
+		text = data.name,
 		font = tweak_data.hud.medium_font,
 		font_size = tweak_data.hud.name_label_font_size,
 		color = crim_color,
@@ -1262,6 +1284,11 @@ end
 function HUDManager:set_special_packages_endscreen_hud(params)
 	if self._hud_stage_endscreen then
 		self._hud_stage_endscreen:set_special_packages(params)
+	end
+end
+function HUDManager:set_speed_up_endscreen_hud(multiplier)
+	if self._hud_stage_endscreen then
+		self._hud_stage_endscreen:set_speed_up(multiplier)
 	end
 end
 function HUDManager:set_group_statistics_endscreen_hud(best_kills, best_kills_score, best_special_kills, best_special_kills_score, best_accuracy, best_accuracy_score, most_downs, most_downs_score, total_kills, total_specials_kills, total_head_shots, group_accuracy, group_downs)

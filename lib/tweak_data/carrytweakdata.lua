@@ -319,9 +319,9 @@ end
 function CarryTweakData:get_zipline_offset(carry_id)
 	local unit_name = tweak_data.carry[carry_id].unit or "units/payday2/pickups/gen_pku_lootbag/gen_pku_lootbag"
 	if unit_name == "units/payday2/pickups/gen_pku_bodybag/gen_pku_bodybag" then
-		return Vector3(0, 0, 163)
+		return Vector3(0, 0, -17)
 	elseif unit_name == "units/payday2/pickups/gen_pku_canvasbag/gen_pku_canvasbag" then
-		return Vector3(0, 0, 180)
+		return Vector3(0, 0, 0)
 	end
-	return Vector3(15, 0, 172)
+	return Vector3(15, 0, -8)
 end

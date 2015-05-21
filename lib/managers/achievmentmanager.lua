@@ -32,15 +32,39 @@ function AchievmentManager:init()
 		end
 		self:_parse_achievments("PSN")
 		AchievmentManager.do_award = AchievmentManager.award_psn
+	elseif SystemInfo:platform() == Idstring("PS4") then
+		if not Global.achievment_manager then
+			self:_parse_achievments("PS4")
+			Global.achievment_manager = {
+				trophy_requests = {},
+				achievments = self.achievments
+			}
+		else
+			self.achievments = Global.achievment_manager.achievments
+		end
+		AchievmentManager.do_award = AchievmentManager.award_psn
 	elseif SystemInfo:platform() == Idstring("X360") then
 		self:_parse_achievments("X360")
+		AchievmentManager.do_award = AchievmentManager.award_x360
+	elseif SystemInfo:platform() == Idstring("XB1") then
+		if not Global.achievment_manager then
+			self:_parse_achievments("XB1")
+			Global.achievment_manager = {
+				achievments = self.achievments
+			}
+		else
+			self.achievments = Global.achievment_manager.achievments
+		end
 		AchievmentManager.do_award = AchievmentManager.award_x360
 	else
 		Application:error("[AchievmentManager:init] Unsupported platform")
 	end
 end
+function AchievmentManager:init_finalize()
+	managers.savefile:add_load_sequence_done_callback_handler(callback(self, self, "_load_done"))
+end
 function AchievmentManager:fetch_trophies()
-	if SystemInfo:platform() == Idstring("PS3") then
+	if SystemInfo:platform() == Idstring("PS3") or SystemInfo:platform() == Idstring("PS4") then
 		Trophies:get_unlockstate(AchievmentManager.unlockstate_result)
 	end
 end
@@ -71,6 +95,39 @@ function AchievmentManager.fetch_achievments(error_str)
 		end
 	end
 	managers.network.account:achievements_fetched()
+end
+function AchievmentManager:_load_done()
+	if SystemInfo:platform() == Idstring("XB1") then
+		print("[AchievmentManager] _load_done()")
+		self._is_fetching_achievments = XboxLive:achievements(0, 1000, true, callback(self, self, "_achievments_loaded"))
+	end
+end
+function AchievmentManager:_achievments_loaded(achievment_list)
+	print("[AchievmentManager] Achievment loaded: " .. tostring(achievment_list and #achievment_list))
+	if not self._is_fetching_achievments then
+		print("[AchievmentManager] Achievment loading aborted.")
+		return
+	end
+	for _, achievment in ipairs(achievment_list) do
+		if achievment.type == "achieved" then
+			for _, achievment2 in pairs(managers.achievment.achievments) do
+				if achievment.id == tostring(achievment2.id) then
+					print("[AchievmentManager] Awarded by load: " .. tostring(achievment.id))
+					achievment2.awarded = true
+				else
+				end
+			end
+		end
+	end
+end
+function AchievmentManager:on_user_signout()
+	if SystemInfo:platform() == Idstring("XB1") then
+		print("[AchievmentManager] on_user_signout()")
+		self._is_fetching_achievments = nil
+		for id, ach in pairs(managers.achievment.achievments) do
+			ach.awarded = false
+		end
+	end
 end
 function AchievmentManager:_parse_achievments(platform)
 	local list = PackageManager:script_data(self.FILE_EXTENSION:id(), self.PATH:id())
@@ -145,6 +202,7 @@ function AchievmentManager:award_progress(stat, value)
 		return
 	end
 	print("[AchievmentManager:award_progress]: ", stat .. " increased by " .. tostring(value or 1))
+	managers.challenge:on_achievement_progressed(stat)
 	if SystemInfo:platform() == Idstring("WIN32") then
 		self.handler:achievement_store_callback(AchievmentManager.steam_unlock_result)
 	end
@@ -209,7 +267,7 @@ function AchievmentManager:award_x360(id)
 	XboxLive:award_achievement(managers.user:get_platform_id(), self:get_info(id).id, x360_unlock_result)
 end
 function AchievmentManager:award_psn(id)
-	print("[AchievmentManager:award] Awarded PSN achievment", id)
+	print("[AchievmentManager:award] Awarded PSN achievment", id, self:get_info(id).id)
 	if not self._trophies_installed then
 		print("[AchievmentManager:award] Trophies are not installed. Cannot award trophy:", id)
 		return

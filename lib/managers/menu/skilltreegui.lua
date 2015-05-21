@@ -3,7 +3,8 @@ SkillTreeLogic = SkillTreeLogic or class()
 local NOT_WIN_32 = SystemInfo:platform() ~= Idstring("WIN32")
 local WIDTH_MULTIPLIER = NOT_WIN_32 and 0.6 or 0.6
 local SPEC_WIDTH_MULTIPLIER = NOT_WIN_32 and 0.7 or 0.7
-local CONSOLE_PAGE_ADJUSTMENT = NOT_WIN_32 and 1 or 0
+local CONSOLE_PAGE_ADJUSTMENT = NOT_WIN_32 and 0 or 0
+local TOP_ADJUSTMENT = NOT_WIN_32 and 50 or 60
 local BOX_GAP = 54
 local NUM_TREES_PER_PAGE = 4
 local make_fine_text = function(text)
@@ -375,7 +376,7 @@ function SkillTreePage:init(tree, data, parent_panel, fullscreen_panel, tree_tab
 	self._bg_image:set_right(fullscreen_panel:w())
 	self._bg_image:set_center_y(fullscreen_panel:h() / 2)
 	local panel_h = 0
-	local h = (parent_panel:h() - tree_tab_h - 60) / (8 - CONSOLE_PAGE_ADJUSTMENT)
+	local h = (parent_panel:h() - tree_tab_h - TOP_ADJUSTMENT) / (8 - CONSOLE_PAGE_ADJUSTMENT)
 	for i = 1, 7 do
 		local color = Color.black
 		local rect = tree_panel:rect({
@@ -848,7 +849,7 @@ function SkillTreeGui:_setup()
 		blend_mode = "add"
 	})
 	self:make_fine_text(skill_set_text)
-	self._skill_tree_panel:text({
+	local skill_switch_button = self._skill_tree_panel:text({
 		name = "switch_skills_button",
 		text = prefix .. managers.localization:to_upper_text("menu_st_skill_switch_title"),
 		align = "left",
@@ -857,9 +858,15 @@ function SkillTreeGui:_setup()
 		font = tweak_data.menu.pd2_medium_font,
 		color = Color.black,
 		blend_mode = "add",
-		layer = 0
+		layer = 0,
+		wrap = true,
+		word_wrap = true,
+		w = self._skill_tree_panel:w() * WIDTH_MULTIPLIER * 1 / 3 - 10
 	})
-	self:make_fine_text(self._skill_tree_panel:child("switch_skills_button"))
+	do
+		local _, _, _, h = skill_switch_button:text_rect()
+		skill_switch_button:set_h(h)
+	end
 	local black_rect = self._fullscreen_panel:rect({
 		color = Color(0.4, 0, 0, 0),
 		layer = 1
@@ -882,7 +889,7 @@ function SkillTreeGui:_setup()
 		name = "tree_tabs_panel",
 		w = self._skill_tree_panel:w() * WIDTH_MULTIPLIER,
 		h = tree_tab_h,
-		y = 61
+		y = TOP_ADJUSTMENT + 1
 	})
 	local controller_page_tab_panel = self._skill_tree_panel:panel({
 		name = "controller_page_tab_panel"
@@ -1071,7 +1078,7 @@ function SkillTreeGui:_setup()
 		self._active_spec_tree = nil
 		self._selected_spec_tier = nil
 		local skill_tree_h = math.round(self._specialization_panel:h() / 14)
-		local h = (self._specialization_panel:h() - skill_tree_h - 60) / 8 * 7 + 10
+		local h = (self._specialization_panel:h() - skill_tree_h - TOP_ADJUSTMENT) / 8 * 7 + 10
 		local spec_box_panel = self._specialization_panel:panel({
 			name = "spec_box_panel"
 		})
@@ -1151,7 +1158,7 @@ function SkillTreeGui:_setup()
 			name = "spec_tabs_panel",
 			w = self._specialization_panel:w() * SPEC_WIDTH_MULTIPLIER,
 			h = tree_tab_h,
-			y = 61
+			y = TOP_ADJUSTMENT + 1
 		})
 		self._spec_tabs_scroll_panel = spec_tabs_panel:panel({
 			name = "spec_tabs_scroll_panel",
@@ -1229,7 +1236,7 @@ function SkillTreeGui:_setup()
 			next_page:set_w(w)
 			next_page:set_right(controller_page_tab_panel:w())
 			tab_x = math.round(next_page:w() + 15)
-			tree_tabs_panel:grow(-tab_x, 0)
+			spec_tabs_panel:grow(-tab_x, 0)
 		end
 		self._spec_scroll_bar_panel = self._specialization_panel:panel({
 			name = "spec_scroll_bar_panel",
@@ -2403,6 +2410,14 @@ function SkillTreeGui:set_skilltree_page_active(active)
 		self._specialization_fullscreen_panel:set_visible(not active)
 		self._skilltree_text_highlighted = active
 		self._specialization_text_highlighted = not active
+		if self._is_skilltree_page_active then
+			self:set_selected_item(self._active_page:item(), true)
+		else
+			self:_set_active_spec_tree(managers.skilltree:get_specialization_value("current_specialization"))
+			local current_tier = managers.skilltree:get_specialization_value(self._active_spec_tree, "tiers", "current_tier") + 1
+			local next_tier = math.clamp(current_tier, 1, managers.skilltree:get_specialization_value(self._active_spec_tree, "tiers", "max_tier"))
+			self:set_selected_item(self._spec_tree_items[self._active_spec_tree]:item(next_tier), true)
+		end
 		if not active then
 			self:_chk_specialization_present()
 		end
@@ -2897,7 +2912,23 @@ end
 function SkillTreeGui:activate_specialization(tree, tier)
 	if tree then
 		managers.skilltree:set_current_specialization(tree)
-		self:show_btns()
+		if not managers.menu:is_pc_controller() then
+			local btns = {}
+			local item = self._selected_spec_item
+			if item and item.tree then
+				local dlc = tweak_data:get_raw_value("skilltree", "specializations", item:tree(), "dlc")
+				if not dlc or managers.dlc:is_dlc_unlocked(dlc) then
+					local current_tier = managers.skilltree:get_specialization_value(item:tree(), "tiers", "current_tier")
+					if item.tier and item:tier() == current_tier + 1 then
+						table.insert(btns, "add_points")
+						table.insert(btns, "remove_points")
+					end
+				end
+			end
+			self:show_btns(unpack(btns))
+		else
+			self:show_btns()
+		end
 		for tree, item in ipairs(self._spec_tab_items) do
 			item:refresh()
 		end
@@ -3052,11 +3083,12 @@ function SpecializationTreeItem:init(tree, parent_panel, tab_iem)
 		font = tweak_data.menu.pd2_small_font,
 		font_size = tweak_data.menu.pd2_small_font_size,
 		color = tweak_data.screen_colors.text,
-		x = 4
+		x = 4,
+		blend_mode = "add"
 	})
 	make_fine_text(active_text)
 	active_text:set_left(tree_panel:left() + 4)
-	active_text:set_bottom(tree_panel:top())
+	active_text:set_bottom(tree_panel:top() + 3)
 	local selected_text = parent_panel:text({
 		name = "selected_text" .. tostring(self._tree),
 		visible = true,
@@ -3065,11 +3097,12 @@ function SpecializationTreeItem:init(tree, parent_panel, tab_iem)
 		font = tweak_data.menu.pd2_small_font,
 		font_size = tweak_data.menu.pd2_small_font_size,
 		color = tweak_data.screen_colors.text,
-		x = 4
+		x = 4,
+		blend_mode = "add"
 	})
 	make_fine_text(selected_text)
 	selected_text:set_left(tree_panel:left() + 4)
-	selected_text:set_bottom(tree_panel:top())
+	selected_text:set_bottom(tree_panel:top() + 3)
 	self._active_box_panel = parent_panel:panel({
 		name = "active_box_panel" .. tostring(self._tree),
 		visible = false
@@ -3100,7 +3133,8 @@ function SpecializationTreeItem:init(tree, parent_panel, tab_iem)
 		visible = true,
 		w = 16,
 		h = 16,
-		rotation = 360
+		rotation = 360,
+		blend_mode = "add"
 	})
 	local increase_points = point_btns_panel:bitmap({
 		name = "increase_points",
@@ -3110,7 +3144,8 @@ function SpecializationTreeItem:init(tree, parent_panel, tab_iem)
 		w = 16,
 		h = 16,
 		x = 20,
-		rotation = 360
+		rotation = 360,
+		blend_mode = "add"
 	})
 	point_btns_panel:set_size(36, 16)
 	point_btns_panel:set_top(tree_panel:bottom())
@@ -3184,6 +3219,9 @@ function SpecializationTreeItem:refresh()
 			self._tree_panel:set_alpha(alpha)
 			is_done = alpha == end_alpha
 			for _, item in ipairs(self._items) do
+				if not alive(item) then
+					return
+				end
 				if not item:update_size(dt, self._selected) then
 					is_done = false
 				end
@@ -3195,6 +3233,8 @@ function SpecializationTreeItem:refresh()
 	local point_btns_panel = self._parent_panel:child("point_btns_panel" .. tostring(self._tree))
 	local reduce_points = point_btns_panel:child("reduce_points")
 	local increase_points = point_btns_panel:child("increase_points")
+	reduce_points:set_alpha(self._selected and 1 or 0.5)
+	increase_points:set_alpha(self._selected and 1 or 0.5)
 	local dlc = tweak_data:get_raw_value("skilltree", "specializations", self._tree, "dlc")
 	local can_place_points = current_tier < max_tier and (not dlc or managers.dlc:is_dlc_unlocked(dlc))
 	point_btns_panel:set_alpha(can_place_points and 1 or 0)
@@ -3205,7 +3245,7 @@ function SpecializationTreeItem:refresh()
 	local active_text = self._parent_panel:child("active_text" .. tostring(self._tree))
 	active_text:set_alpha(self._active and 1 or 0)
 	local selected_text = self._parent_panel:child("selected_text" .. tostring(self._tree))
-	selected_text:set_alpha(not self._active and self._selected and 1 or 0)
+	selected_text:set_alpha(not self._active and self._selected and 1 or self._active and 0 or 0.5)
 	self._active_box_panel:set_visible(self._active)
 	self._tree_panel:stop()
 	self._tree_panel:animate(anim_refresh)
@@ -3350,6 +3390,9 @@ end
 function SpecializationTierItem:panel()
 	return self._tier_panel
 end
+function SpecializationTierItem:alive()
+	return alive(self._tier_panel)
+end
 function SpecializationTierItem:inside(x, y)
 	return self._inside_panel:tree_visible() and self._inside_panel:inside(x, y)
 end
@@ -3390,6 +3433,8 @@ function SpecializationTierItem:refresh()
 	local progress_circle = self._tier_panel:child("progress_circle")
 	local progress_circle_bg = self._tier_panel:child("progress_circle_bg")
 	local select_box = self._select_box
+	local dlc = tweak_data:get_raw_value("skilltree", "specializations", self._tree, "dlc")
+	local is_dlc_locked = dlc and not managers.dlc:is_dlc_unlocked(dlc)
 	if current_tier < max_tier then
 		local next_tier = current_tier + 1
 		if next_tier > self._tier then
@@ -3400,6 +3445,7 @@ function SpecializationTierItem:refresh()
 			progress_circle_bg:hide()
 			progress_circle_current:hide()
 			unlocked_bg:show()
+			unlocked_bg:set_color(is_dlc_locked and tweak_data.screen_colors.important_1 or Color.white)
 			if self._is_progressing then
 				SimpleGUIEffectSpewer.skill_up(self._tier_panel:center_x(), self._tier_panel:center_y(), self._tier_panel:parent())
 				managers.menu_component:post_event("menu_skill_investment")
@@ -3407,7 +3453,7 @@ function SpecializationTierItem:refresh()
 			end
 		elseif next_tier < self._tier then
 			tier_icon:set_blend_mode("add")
-			tier_icon:set_color(Color.white)
+			tier_icon:set_color(is_dlc_locked and tweak_data.screen_colors.important_1 or Color.white)
 			tier_icon:set_layer(1)
 			progress_circle:hide()
 			progress_circle_bg:hide()
@@ -3415,7 +3461,7 @@ function SpecializationTierItem:refresh()
 			unlocked_bg:hide()
 		else
 			tier_icon:set_blend_mode("add")
-			tier_icon:set_color(Color.white)
+			tier_icon:set_color(is_dlc_locked and tweak_data.screen_colors.important_1 or Color.white)
 			tier_icon:set_layer(1)
 			progress_circle:show()
 			progress_circle_bg:show()
@@ -3432,6 +3478,7 @@ function SpecializationTierItem:refresh()
 		progress_circle_bg:hide()
 		progress_circle_current:hide()
 		unlocked_bg:show()
+		unlocked_bg:set_color(is_dlc_locked and tweak_data.screen_colors.important_1 or Color.white)
 		if self._is_progressing then
 			SimpleGUIEffectSpewer.skill_up(self._tier_panel:center_x(), self._tier_panel:center_y(), self._tier_panel:parent())
 			managers.menu_component:post_event("menu_skill_investment")

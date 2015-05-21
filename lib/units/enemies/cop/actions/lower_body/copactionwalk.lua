@@ -943,34 +943,22 @@ function CopActionWalk:update(t)
 				end
 			elseif self._ext_anim.run then
 				if not self._walk_anim_velocities[pose] then
-					print("No walk anim velocities for pose:", pose)
-					print(inspect(self._walk_anim_velocities))
+					debug_pause_unit(self._unit, "No walk anim velocities for pose:", pose, inspect(self._walk_anim_velocities), self._unit)
 				elseif not self._walk_anim_velocities[pose][self._stance.name] then
-					print("No stance info for stance name:", self._stance.name)
-					print(inspect(self._walk_anim_velocities[pose]))
-				end
-				if real_velocity > 530 and self._walk_anim_velocities[pose][self._stance.name].sprint and self._ext_anim.pose == "stand" then
+					debug_pause_unit(self._unit, "No walk anim velocities for (pose, stance name):", pose, self._stance.name, inspect(self._walk_anim_velocities), inspect(self._walk_anim_velocities[pose]), self._unit)
+				elseif real_velocity > 530 and self._walk_anim_velocities[pose] and self._walk_anim_velocities[pose][self._stance.name] and self._walk_anim_velocities[pose][self._stance.name].sprint and self._ext_anim.pose == "stand" then
 					variant = "sprint"
 				elseif real_velocity > 250 then
 					variant = "run"
 				else
 					variant = "walk"
 				end
+			elseif real_velocity > 530 and self._walk_anim_velocities[pose][self._stance.name].sprint and self._ext_anim.pose == "stand" then
+				variant = "sprint"
+			elseif real_velocity > 300 then
+				variant = "run"
 			else
-				if not self._walk_anim_velocities[pose] then
-					print("No walk anim velocities for pose:", pose)
-					print(inspect(self._walk_anim_velocities))
-				elseif not self._walk_anim_velocities[pose][self._stance.name] then
-					print("No stance info for stance name:", self._stance.name)
-					print(inspect(self._walk_anim_velocities[pose]))
-				end
-				if real_velocity > 530 and self._walk_anim_velocities[pose][self._stance.name].sprint and self._ext_anim.pose == "stand" then
-					variant = "sprint"
-				elseif real_velocity > 300 then
-					variant = "run"
-				else
-					variant = "walk"
-				end
+				variant = "walk"
 			end
 		end
 		self:_adjust_move_anim(wanted_walk_dir, variant)
@@ -1707,7 +1695,7 @@ function CopActionWalk:stop()
 	local pos = s_path[#s_path]
 	self._persistent = false
 	if is_initialized then
-		if self.update == self._upd_wait then
+		if self.update == self._upd_wait or self.update == self._upd_start_anim_first_frame or self.update == self._upd_start_anim then
 			self._end_of_curved_path = nil
 			self._end_of_path = nil
 		elseif not self._next_is_nav_link then
@@ -1766,7 +1754,7 @@ function CopActionWalk:append_nav_point(nav_point)
 		self._next_is_nav_link = nav_point
 	end
 	if is_initialized then
-		if self.update == self._upd_wait then
+		if self.update == self._upd_wait or self.update == self._upd_start_anim_first_frame or self.update == self._upd_start_anim then
 			self._end_of_curved_path = nil
 			self._end_of_path = nil
 		elseif not self._next_is_nav_link then

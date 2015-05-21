@@ -495,6 +495,7 @@ function EnemyManager:on_enemy_died(dead_unit, damage_info)
 	local u_data = enemy_data.unit_data[u_key]
 	self:on_enemy_unregistered(dead_unit)
 	enemy_data.unit_data[u_key] = nil
+	managers.mission:call_global_event("enemy_killed")
 	if enemy_data.nr_corpses == 0 and self:is_corpse_disposal_enabled() then
 		self:queue_task("EnemyManager._upd_corpse_disposal", EnemyManager._upd_corpse_disposal, self, self._t + self._corpse_disposal_upd_interval)
 	end

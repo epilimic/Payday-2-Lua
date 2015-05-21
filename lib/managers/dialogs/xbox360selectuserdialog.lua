@@ -19,7 +19,7 @@ function Xbox360SelectUserDialog:show()
 	return true
 end
 function Xbox360SelectUserDialog:update(t, dt)
-	if self._show_time and self._show_time ~= t and not Application:is_showing_system_dialog() and not self._manager:_is_engine_delaying_signin_change() then
+	if self._show_time and self._show_time ~= t and not XboxLive:is_showing_user_dialog() and not self._manager:_is_engine_delaying_signin_change() then
 		self:done_callback()
 	end
 end

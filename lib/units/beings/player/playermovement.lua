@@ -494,7 +494,7 @@ function PlayerMovement.clbk_msg_overwrite_suspicion(overwrite_data, msg_queue, 
 	end
 end
 function PlayerMovement:clbk_enemy_weapons_hot()
-	if self._current_state_name == "mask_off" or self._current_state_name == "clean" then
+	if self._current_state_name == "mask_off" then
 		self:on_uncovered(nil)
 	end
 	self._suspicion_ratio = false

@@ -4,6 +4,7 @@ function NetworkVoiceChatPSN:init()
 	self._room_id = nil
 	self._team = 1
 	self._restart_session = nil
+	self._peers = {}
 	self:_load_globals()
 	self._muted_players = {}
 end
@@ -29,6 +30,7 @@ function NetworkVoiceChatPSN:init_voice()
 		end)
 		PSNVoice:init(4, 4, 50, 8000)
 		self:set_volume(managers.user:get_setting("voice_volume"))
+		self._started = true
 	end
 end
 function NetworkVoiceChatPSN:destroy_voice(disconnected)
@@ -59,21 +61,24 @@ function NetworkVoiceChatPSN:num_peers()
 end
 function NetworkVoiceChatPSN:open_session(roomid)
 	if self._room_id and self._room_id == roomid then
+		print("Voice: same_room")
 		return
 	end
 	if self._restart_session and self._restart_session == roomid then
+		print("Voice: restart")
 		return
 	end
 	if self._closing or self._joining then
+		print("Voice: closing|joining")
 		self._restart_session = roomid
 		return
 	end
 	if self._started == false then
 		self._restart_session = roomid
 		self:init_voice()
-		return
 	end
 	if self._room_id then
+		print("Voice: restart room")
 		self._restart_session = roomid
 		self:close_session()
 		return
@@ -100,8 +105,11 @@ function NetworkVoiceChatPSN:close_session()
 	end
 end
 function NetworkVoiceChatPSN:open_channel_to(player_info, context)
+	print("NetworkVoiceChatPSN:open_channel_to")
 end
 function NetworkVoiceChatPSN:close_channel_to(player_info)
+	print("NetworkVoiceChatPSN:close_channel_to")
+	PSNVoice:stop_sending_to(player_info._name)
 end
 function NetworkVoiceChatPSN:lost_peer(peer)
 end
@@ -251,12 +259,9 @@ function NetworkVoiceChatPSN:_get_peer_user_id(peer)
 		end
 	end
 end
-function NetworkVoiceChatPSN:mute_player(peer, mute)
-	local id = self:_get_peer_user_id(peer)
-	if id then
-		self._muted_players[peer:name()] = mute
-		PSNVoice:mute_player(mute, id)
-	end
+function NetworkVoiceChatPSN:mute_player(mute, peer)
+	self._muted_players[peer:name()] = mute
+	PSNVoice:mute_player(mute, peer:name())
 end
 function NetworkVoiceChatPSN:is_muted(peer)
 	return self._muted_players[peer:name()] or false

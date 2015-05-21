@@ -143,7 +143,7 @@ function CoreMaterialEditor:_on_save_global()
 end
 function CoreMaterialEditor:_on_reload()
 	if self._material_config_path then
-		Application:reload_material_config(managers.database:entry_path(self._material_config_path))
+		Application:reload_material_config(Idstring(managers.database:entry_path(self._material_config_path)))
 	end
 end
 function CoreMaterialEditor:_on_rebuild()

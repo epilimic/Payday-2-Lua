@@ -102,6 +102,15 @@ function MenuManager:show_joining_lobby_dialog()
 	dialog_data.indicator = true
 	managers.system_menu:show(dialog_data)
 end
+function MenuManager:show_fetching_status_dialog()
+	local dialog_data = {}
+	dialog_data.title = managers.localization:text("dialog_fetching_status_title")
+	dialog_data.text = managers.localization:text("dialog_wait")
+	dialog_data.id = "fetching_status"
+	dialog_data.no_buttons = true
+	dialog_data.indicator = true
+	managers.system_menu:show(dialog_data)
+end
 function MenuManager:show_no_connection_to_game_servers_dialog()
 	local dialog_data = {}
 	dialog_data.title = managers.localization:text("dialog_error_title")
@@ -190,20 +199,44 @@ function MenuManager:show_mp_disconnected_internet_dialog(params)
 	dialog_data.button_list = {ok_button}
 	managers.system_menu:show(dialog_data)
 end
-function MenuManager:show_err_no_chat_parental_control()
+function MenuManager:show_internet_connection_required()
 	local dialog_data = {}
-	dialog_data.title = string.upper(managers.localization:text("dialog_information_title"))
-	dialog_data.text = managers.localization:text("dialog_no_chat_parental_control")
+	dialog_data.title = string.upper(managers.localization:text("dialog_error_title"))
+	dialog_data.text = managers.localization:text("dialog_internet_connection_required")
 	dialog_data.no_upper = true
 	local ok_button = {}
 	ok_button.text = managers.localization:text("dialog_ok")
 	dialog_data.button_list = {ok_button}
 	managers.system_menu:show(dialog_data)
 end
+function MenuManager:show_err_no_chat_parental_control()
+	if SystemInfo:platform() == Idstring("PS4") then
+		PSN:show_chat_parental_control()
+	else
+		local dialog_data = {}
+		dialog_data.title = string.upper(managers.localization:text("dialog_information_title"))
+		dialog_data.text = managers.localization:text("dialog_no_chat_parental_control")
+		dialog_data.no_upper = true
+		local ok_button = {}
+		ok_button.text = managers.localization:text("dialog_ok")
+		dialog_data.button_list = {ok_button}
+		managers.system_menu:show(dialog_data)
+	end
+end
 function MenuManager:show_err_under_age()
 	local dialog_data = {}
 	dialog_data.title = string.upper(managers.localization:text("dialog_information_title"))
 	dialog_data.text = managers.localization:text("dialog_age_restriction")
+	dialog_data.no_upper = true
+	local ok_button = {}
+	ok_button.text = managers.localization:text("dialog_ok")
+	dialog_data.button_list = {ok_button}
+	managers.system_menu:show(dialog_data)
+end
+function MenuManager:show_err_new_patch()
+	local dialog_data = {}
+	dialog_data.title = string.upper(managers.localization:text("dialog_information_title"))
+	dialog_data.text = managers.localization:text("dialog_new_patch")
 	dialog_data.no_upper = true
 	local ok_button = {}
 	ok_button.text = managers.localization:text("dialog_ok")
@@ -262,6 +295,15 @@ function MenuManager:show_invite_wrong_version_message()
 	dialog_data.button_list = {ok_button}
 	managers.system_menu:show(dialog_data)
 end
+function MenuManager:show_invite_wrong_room_message()
+	local dialog_data = {}
+	dialog_data.title = managers.localization:text("dialog_information_title")
+	dialog_data.text = managers.localization:text("dialog_mp_invite_wrong_room_message")
+	local ok_button = {}
+	ok_button.text = managers.localization:text("dialog_ok")
+	dialog_data.button_list = {ok_button}
+	managers.system_menu:show(dialog_data)
+end
 function MenuManager:show_invite_join_message(params)
 	local dialog_data = {}
 	dialog_data.title = managers.localization:text("dialog_information_title")
@@ -281,6 +323,26 @@ function MenuManager:show_pending_invite_message(params)
 	local ok_button = {}
 	ok_button.text = managers.localization:text("dialog_ok")
 	ok_button.callback_func = params.ok_func
+	dialog_data.button_list = {ok_button}
+	managers.system_menu:show(dialog_data)
+end
+function MenuManager:show_game_is_installing()
+	local dialog_data = {}
+	dialog_data.title = string.upper(managers.localization:text("dialog_information_title"))
+	dialog_data.text = managers.localization:text("dialog_game_is_installing")
+	dialog_data.no_upper = true
+	local ok_button = {}
+	ok_button.text = managers.localization:text("dialog_ok")
+	dialog_data.button_list = {ok_button}
+	managers.system_menu:show(dialog_data)
+end
+function MenuManager:show_game_is_installing_menu()
+	local dialog_data = {}
+	dialog_data.title = string.upper(managers.localization:text("dialog_information_title"))
+	dialog_data.text = managers.localization:text("dialog_game_is_installing_menu")
+	dialog_data.no_upper = true
+	local ok_button = {}
+	ok_button.text = managers.localization:text("dialog_ok")
 	dialog_data.button_list = {ok_button}
 	managers.system_menu:show(dialog_data)
 end
@@ -1091,13 +1153,13 @@ end
 function MenuManager:show_inactive_user_accepted_invite(params)
 	local dialog_data = {}
 	dialog_data.title = managers.localization:text("dialog_information_title")
-	dialog_data.text = managers.localization:text("dialog_inactive_user_accepted_invite")
+	dialog_data.text = managers.localization:text("dialog_inactive_user_accepted_invite_error")
 	dialog_data.id = "inactive_user_accepted_invite"
 	local ok_button = {}
 	ok_button.text = managers.localization:text("dialog_ok")
 	ok_button.callback_func = params.ok_func
 	dialog_data.button_list = {ok_button}
-	managers.system_menu:add_init_show(dialog_data)
+	managers.system_menu:show(dialog_data)
 end
 function MenuManager:show_question_start_tutorial(params)
 	local dialog_data = {}
@@ -1166,6 +1228,19 @@ function MenuManager:show_savefile_wrong_user(params)
 	ok_button.text = managers.localization:text("dialog_ok")
 	dialog_data.button_list = {ok_button}
 	managers.system_menu:add_init_show(dialog_data)
+end
+function MenuManager:show_account_picker_dialog(params)
+	local dialog_data = {}
+	dialog_data.title = managers.localization:text("dialog_warning_title")
+	dialog_data.text = managers.localization:text("dialog_account_picker")
+	local yes_button = {}
+	yes_button.text = managers.localization:text("dialog_yes")
+	yes_button.callback_func = params.yes_func
+	local no_button = {}
+	no_button.text = managers.localization:text("dialog_no")
+	no_button.cancel_button = true
+	dialog_data.button_list = {yes_button, no_button}
+	managers.system_menu:show(dialog_data)
 end
 function MenuManager:show_abort_mission_dialog(params)
 	local dialog_data = {}

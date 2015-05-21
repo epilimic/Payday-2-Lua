@@ -7,7 +7,8 @@ CopDamage._all_event_types = {
 	"death",
 	"shield_knock",
 	"stun",
-	"counter_tased"
+	"counter_tased",
+	"taser_tased"
 }
 CopDamage._ATTACK_VARIANTS = {
 	"explosion",
@@ -143,6 +144,7 @@ function CopDamage:damage_bullet(attack_data)
 		local armor_pierce_value = 0
 		if attack_data.attacker_unit == managers.player:player_unit() then
 			armor_pierce_value = armor_pierce_value + attack_data.weapon_unit:base():armor_piercing_chance()
+			armor_pierce_value = armor_pierce_value + managers.player:upgrade_value("player", "armor_piercing_chance", 0)
 			armor_pierce_value = armor_pierce_value + managers.player:upgrade_value("weapon", "armor_piercing_chance", 0)
 			armor_pierce_value = armor_pierce_value + managers.player:upgrade_value("weapon", "armor_piercing_chance_2", 0)
 			armor_pierce_value = armor_pierce_value + managers.player:upgrade_value("weapon", "armor_piercing_chance_silencer", 0)
@@ -192,8 +194,6 @@ function CopDamage:damage_bullet(attack_data)
 		end
 		if head then
 			managers.player:on_headshot_dealt()
-		else
-			managers.player:on_damage_dealt()
 		end
 	end
 	if self._damage_reduction_multiplier then
@@ -364,9 +364,12 @@ function CopDamage:_check_damage_achievements(attack_data, head)
 			if all_pass then
 				if achievement_data.stat then
 					managers.achievment:award_progress(achievement_data.stat)
-				end
-				if achievement_data.award then
+				elseif achievement_data.award then
 					managers.achievment:award(achievement_data.award)
+				elseif achievement_data.challenge_stat then
+					managers.challenge:award_progress(achievement_data.challenge_stat)
+				elseif achievement_data.challenge_award then
+					managers.challenge:award(achievement_data.challenge_award)
 				end
 			end
 		end
@@ -476,8 +479,6 @@ function CopDamage:damage_fire(attack_data)
 		end
 		if head then
 			managers.player:on_headshot_dealt()
-		else
-			managers.player:on_damage_dealt()
 		end
 	end
 	if self._damage_reduction_multiplier then
@@ -530,17 +531,38 @@ function CopDamage:damage_fire(attack_data)
 	if alive(attacker) and attacker:base() and attacker:base().add_damage_result then
 		attacker:base():add_damage_result(self._unit, result.type == "death", damage_percent)
 	end
-	local fire_dot
-	if attacker_unit and attacker_unit:base() and attacker_unit:base()._grenade_entry == "molotov" then
-		fire_dot = tweak_data.grenades[attacker_unit:base()._grenade_entry].fire_dot_data
-	elseif alive(attack_data.weapon_unit) then
-		if attack_data.weapon_unit.base and attack_data.weapon_unit:base()._ammo_data and attack_data.weapon_unit:base()._ammo_data.fire_dot_data then
-			fire_dot = attack_data.weapon_unit:base()._ammo_data.fire_dot_data
-		elseif attack_data.weapon_unit:base()._name_id ~= nil and tweak_data.weapon[attack_data.weapon_unit:base()._name_id] ~= nil and tweak_data.weapon[attack_data.weapon_unit:base()._name_id].fire_dot_data ~= nil then
-			fire_dot = tweak_data.weapon[attack_data.weapon_unit:base()._name_id].fire_dot_data
+	if not attack_data.is_fire_dot_damage then
+		local fire_dot_data = attack_data.fire_dot_data
+		local flammable
+		local char_tweak = tweak_data.character[self._unit:base()._tweak_table]
+		if char_tweak.flammable == nil then
+			flammable = true
+		else
+			flammable = char_tweak.flammable
 		end
+		local distance = 1000
+		local hit_loc = attack_data.col_ray.hit_position
+		if hit_loc and attacker_unit and attacker_unit.position then
+			distance = mvector3.distance(hit_loc, attacker_unit:position())
+		end
+		local fire_dot_max_distance = 3000
+		local fire_dot_trigger_chance = 30
+		if fire_dot_data then
+			fire_dot_max_distance = tonumber(fire_dot_data.dot_trigger_max_distance)
+			fire_dot_trigger_chance = tonumber(fire_dot_data.dot_trigger_chance)
+		end
+		local start_dot_damage_roll = math.random(1, 100)
+		local start_dot_dance_antimation = false
+		if flammable and not attack_data.is_fire_dot_damage and distance < fire_dot_max_distance and fire_dot_trigger_chance >= start_dot_damage_roll then
+			managers.fire:add_doted_enemy(self._unit, TimerManager:game():time(), attack_data.weapon_unit, fire_dot_data.dot_length, fire_dot_data.dot_damage)
+			start_dot_dance_antimation = true
+		end
+		if fire_dot_data then
+			fire_dot_data.start_dot_dance_antimation = start_dot_dance_antimation
+			attack_data.fire_dot_data = fire_dot_data
+		end
+	else
 	end
-	attack_data.fire_dot_data = fire_dot
 	self:_send_fire_attack_result(attack_data, attacker, damage_percent, attack_data.is_fire_dot_damage, attack_data.col_ray.ray)
 	self:_on_damage_received(attack_data)
 end
@@ -706,7 +728,7 @@ function CopDamage:damage_melee(attack_data)
 		damage_effect = math.clamp(damage_effect, self._HEALTH_INIT_PRECENT, self._HEALTH_INIT)
 		damage_effect_percent = math.ceil(damage_effect / self._HEALTH_INIT_PRECENT)
 		damage_effect_percent = math.clamp(damage_effect_percent, 1, self._HEALTH_GRANULARITY)
-		local result_type = attack_data.shield_knock and self._char_tweak.damage.shield_knocked and "shield_knock" or attack_data.variant == "counter_tased" and "counter_tased" or attack_data.variant == "counter_spooc" and "expl_hurt" or self:get_damage_type(damage_effect_percent, "melee") or "fire_hurt"
+		local result_type = attack_data.shield_knock and self._char_tweak.damage.shield_knocked and "shield_knock" or attack_data.variant == "counter_tased" and "counter_tased" or attack_data.variant == "taser_tased" and "taser_tased" or attack_data.variant == "counter_spooc" and "expl_hurt" or self:get_damage_type(damage_effect_percent, "melee") or "fire_hurt"
 		result = {
 			type = result_type,
 			variant = attack_data.variant
@@ -779,6 +801,10 @@ function CopDamage:damage_melee(attack_data)
 							managers.achievment:award_progress(achievement_data.stat)
 						elseif achievement_data.award then
 							managers.achievment:award(achievement_data.award)
+						elseif achievement_data.challenge_stat then
+							managers.challenge:award_progress(achievement_data.challenge_stat)
+						elseif achievement_data.challenge_award then
+							managers.challenge:award(achievement_data.challenge_award)
 						end
 					end
 				end
@@ -804,6 +830,8 @@ function CopDamage:damage_melee(attack_data)
 		variant = 4
 	elseif snatch_pager then
 		variant = 3
+	elseif result.type == "taser_tased" then
+		variant = 5
 	else
 		variant = 0
 	end
@@ -1173,7 +1201,7 @@ function CopDamage:sync_damage_explosion(attacker_unit, damage_percent, i_attack
 	self:_send_sync_explosion_attack_result(attack_data)
 	self:_on_damage_received(attack_data)
 end
-function CopDamage:sync_damage_fire(attacker_unit, damage_percent, death, direction, weapon_type, weapon_id)
+function CopDamage:sync_damage_fire(attacker_unit, damage_percent, start_dot_dance_antimation, death, direction, weapon_type, weapon_id)
 	if self._dead then
 		return
 	end
@@ -1194,6 +1222,9 @@ function CopDamage:sync_damage_fire(attacker_unit, damage_percent, death, direct
 			fire_dot = tweak_data.weapon[weapon_id].fire_dot_data
 		end
 		attack_data.fire_dot_data = fire_dot
+		if attack_data.fire_dot_data then
+			attack_data.fire_dot_data.start_dot_dance_antimation = start_dot_dance_antimation
+		end
 	end
 	if death then
 		result = {type = "death", variant = variant}
@@ -1262,11 +1293,6 @@ function CopDamage:sync_damage_fire(attacker_unit, damage_percent, death, direct
 	if alive(attacker_unit) and attacker_unit:base() and attacker_unit:base().add_damage_result then
 		attacker_unit:base():add_damage_result(self._unit, result.type == "death", damage_percent)
 	end
-	if not self._no_blood then
-		local hit_pos = mvector3.copy(self._unit:movement():m_pos())
-		mvector3.set_z(hit_pos, hit_pos.z + 100)
-		managers.game_play_central:sync_play_impact_flesh(hit_pos, attack_dir)
-	end
 	attack_data.pos = self._unit:position()
 	mvector3.set_z(attack_data.pos, attack_data.pos.z + math.random() * 180)
 	self:_send_sync_fire_attack_result(attack_data)
@@ -1290,10 +1316,11 @@ function CopDamage:sync_damage_melee(attacker_unit, damage_percent, damage_effec
 		}
 		managers.statistics:killed_by_anyone(data)
 	else
-		local result_type = variant == 1 and "shield_knock" or variant == 2 and "counter_tased" or variant == 4 and "expl_hurt" or self:get_damage_type(damage_effect_percent, "bullet") or "fire_hurt"
+		local result_type = variant == 1 and "shield_knock" or variant == 2 and "counter_tased" or variant == 5 and "taser_tased" or variant == 4 and "expl_hurt" or self:get_damage_type(damage_effect_percent, "bullet") or "fire_hurt"
 		result = {type = result_type, variant = "melee"}
 		self._health = self._health - damage
 		self._health_ratio = self._health / self._HEALTH_INIT
+		attack_data.variant = result_type
 	end
 	attack_data.variant = "melee"
 	attack_data.attacker_unit = attacker_unit
@@ -1340,7 +1367,8 @@ function CopDamage:_send_fire_attack_result(attack_data, attacker, damage_percen
 			end
 		end
 	end
-	self._unit:network():send("damage_fire", attacker, damage_percent, self._dead and true or false, direction, weapon_type, weapon_unit)
+	local start_dot_dance_antimation = attack_data.fire_dot_data and attack_data.fire_dot_data.start_dot_dance_antimation
+	self._unit:network():send("damage_fire", attacker, damage_percent, start_dot_dance_antimation, self._dead and true or false, direction, weapon_type, weapon_unit)
 end
 function CopDamage:_send_melee_attack_result(attack_data, damage_percent, damage_effect_percent, hit_offset_height, variant)
 	self._unit:network():send("damage_melee", attack_data.attacker_unit, damage_percent, damage_effect_percent, 1, hit_offset_height, variant, self._dead and true or false)
@@ -1371,6 +1399,13 @@ function CopDamage:_on_damage_received(damage_info)
 	end
 	if self._dead and self._unit:movement():attention() then
 		debug_pause_unit(self._unit, "[CopDamage:_on_damage_received] dead AI", self._unit, inspect(self._unit:movement():attention()))
+	end
+	local attacker_unit = damage_info and damage_info.attacker_unit
+	if alive(attacker_unit) and attacker_unit:base() and attacker_unit:base().thrower_unit then
+		attacker_unit = attacker_unit:base():thrower_unit()
+	end
+	if attacker_unit == managers.player:player_unit() and damage_info then
+		managers.player:on_damage_dealt(self._unit, damage_info)
 	end
 end
 function CopDamage:_call_listeners(damage_info)

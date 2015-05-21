@@ -939,6 +939,9 @@ function MoneyManager:total()
 end
 function MoneyManager:_set_total(value)
 	self._global.total = Application:digest_value(value, true)
+	if SystemInfo:platform() == Idstring("XB1") then
+		XboxLive:write_hero_stat("cash", value)
+	end
 end
 function MoneyManager:total_collected()
 	return Application:digest_value(self._global.total_collected, false)
@@ -951,6 +954,9 @@ function MoneyManager:offshore()
 end
 function MoneyManager:_set_offshore(value)
 	self._global.offshore = Application:digest_value(value, true)
+	if SystemInfo:platform() == Idstring("XB1") then
+		XboxLive:write_hero_stat("offshore", value)
+	end
 end
 function MoneyManager:total_spent()
 	return Application:digest_value(self._global.total_spent, false)
@@ -975,6 +981,10 @@ function MoneyManager:_add_to_total(amount, params)
 	self:_set_total_collected(self:total_collected() + math.round(amount))
 	self:_set_offshore(self:offshore() + offshore)
 	self:_on_total_changed(amount, spending_cash, offshore)
+	if managers.challenge then
+		managers.challenge:award_progress("earn_cash", math.max(spending_cash, 0))
+		managers.challenge:award_progress("earn_offshore_cash", math.max(offshore, 0))
+	end
 end
 function MoneyManager:deduct_from_total(amount)
 	amount = math.round(amount)
@@ -1107,4 +1117,8 @@ function MoneyManager:load(data)
 	self._global.total_collected = state.total_collected and Application:digest_value(math.max(0, Application:digest_value(state.total_collected, false)), true) or Application:digest_value(0, true)
 	self._global.offshore = state.offshore and Application:digest_value(math.max(0, Application:digest_value(state.offshore, false)), true) or Application:digest_value(0, true)
 	self._global.total_spent = state.total_spent and Application:digest_value(math.max(0, Application:digest_value(state.total_spent, false)), true) or Application:digest_value(0, true)
+	if SystemInfo:platform() == Idstring("XB1") then
+		XboxLive:write_hero_stat("cash", self._global.total)
+		XboxLive:write_hero_stat("offshore", self._global.offshore)
+	end
 end

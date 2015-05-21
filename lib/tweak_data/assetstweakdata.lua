@@ -112,7 +112,8 @@ function AssetsTweakData:_init_assets(tweak_data)
 		"family",
 		"roberts",
 		"cage",
-		"hox_3"
+		"hox_3",
+		"arena"
 	}
 	self.bodybags_bag.visible_if_locked = true
 	self.bodybags_bag.unlock_desc_id = "menu_asset_bodybags_bag_desc"
@@ -163,7 +164,8 @@ function AssetsTweakData:_init_assets(tweak_data)
 		"election_day_3_skip1",
 		"election_day_3_skip2",
 		"rat",
-		"hox_3"
+		"hox_3",
+		"arena"
 	}
 	self.grenade_crate.visible_if_locked = true
 	self.grenade_crate.unlock_desc_id = "menu_asset_grenade_crate_desc"
@@ -185,7 +187,8 @@ function AssetsTweakData:_init_assets(tweak_data)
 		"arm_for",
 		"rat",
 		"hox_3",
-		"shoutout_raid"
+		"shoutout_raid",
+		"arena"
 	}
 	self.ammo_bag.visible_if_locked = true
 	self.ammo_bag.unlock_desc_id = "menu_asset_ammo_desc"
@@ -204,7 +207,8 @@ function AssetsTweakData:_init_assets(tweak_data)
 		"arm_for",
 		"rat",
 		"hox_3",
-		"shoutout_raid"
+		"shoutout_raid",
+		"arena"
 	}
 	self.health_bag.visible_if_locked = true
 	self.health_bag.unlock_desc_id = "menu_asset_health_desc"
@@ -862,6 +866,15 @@ function AssetsTweakData:_init_assets(tweak_data)
 	self.hox_3_alarm.stages = {"hox_3"}
 	self.hox_3_alarm.visible_if_locked = true
 	self.hox_3_alarm.no_mystery = true
+	self.extra_cutter = {}
+	self.extra_cutter.name_id = "menu_asset_extra_cutter"
+	self.extra_cutter.texture = "guis/dlcs/dlc_arena/textures/pd2/mission_briefing/assets/asset_arena_metal_cutter"
+	self.extra_cutter.stages = {"arena"}
+	self.extra_cutter.visible_if_locked = true
+	self.extra_cutter.server_lock = true
+	self.extra_cutter.no_mystery = true
+	self.extra_cutter.unlock_desc_id = "menu_asset_extra_cutter_desc"
+	self.extra_cutter.money_lock = tweak_data:get_value("money_manager", "mission_asset_cost_medium", 3)
 end
 function AssetsTweakData:_init_debug_assets(tweak_data)
 	self.debug_1 = {}

@@ -30,6 +30,13 @@ function CivilianDamage:_on_damage_received(damage_info)
 			self._unit:interaction():set_active(false, false)
 		end
 	end
+	local attacker_unit = damage_info and damage_info.attacker_unit
+	if alive(attacker_unit) and attacker_unit:base() and attacker_unit:base().thrower_unit then
+		attacker_unit = attacker_unit:base():thrower_unit()
+	end
+	if attacker_unit == managers.player:player_unit() and damage_info then
+		managers.player:on_damage_dealt(self._unit, damage_info)
+	end
 end
 function CivilianDamage:print(...)
 	cat_print("civ_damage", ...)

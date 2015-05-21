@@ -168,13 +168,6 @@ function VehicleDrivingExt:update(unit, t, dt)
 	end
 	self._current_state:update(t, dt)
 end
-function VehicleDrivingExt:_move_team_ai()
-	for _, seat in pairs(self._seats) do
-		if alive(seat.occupant) and seat.occupant:brain() ~= nil then
-			seat.occupant:movement():set_position(seat.occupant:position())
-		end
-	end
-end
 function VehicleDrivingExt:_create_position_reservation()
 	self._pos_reservation_id = managers.navigation:get_pos_reservation_id()
 	if self._pos_reservation_id then
@@ -567,12 +560,16 @@ function VehicleDrivingExt:_evacuate_seat(seat)
 	seat.occupant:movement().seat = nil
 	if seat.occupant:character_damage():dead() then
 	elseif Network:is_server() then
-		seat.occupant:movement():action_request({type = "idle", body_part = 1})
+		seat.occupant:movement():action_request({
+			type = "idle",
+			body_part = 1,
+			sync = true
+		})
 	end
 	local rot = seat.SO_object:rotation()
 	local pos = seat.SO_object:position()
-	seat.occupant:set_rotation(rot)
-	seat.occupant:set_position(pos)
+	seat.occupant:movement():set_rotation(rot)
+	seat.occupant:movement():set_position(pos)
 	seat.occupant = nil
 end
 function VehicleDrivingExt:find_exit_position(player)
@@ -661,7 +658,7 @@ function VehicleDrivingExt:num_players_inside()
 	return num_players
 end
 function VehicleDrivingExt:on_team_ai_enter(ai_unit)
-	ai_unit:movement().vehicle_unit:link(Idstring(VehicleDrivingExt.THIRD_PREFIX .. ai_unit:movement().vehicle_seat.name), ai_unit, Idstring("root_point"))
+	ai_unit:movement().vehicle_unit:link(Idstring(VehicleDrivingExt.THIRD_PREFIX .. ai_unit:movement().vehicle_seat.name), ai_unit, ai_unit:orientation_object():name())
 	ai_unit:movement().vehicle_seat.occupant = ai_unit
 	Application:debug("VehicleDrivingExt:sync_ai_vehicle_action")
 	self._door_soundsource:set_position(ai_unit:movement().vehicle_seat.object:position())
@@ -1110,6 +1107,7 @@ function VehicleDrivingExt:_cereate_seat_SO(seat)
 			variant = team_ai_animation,
 			body_part = 1,
 			align_sync = false,
+			needs_full_blend = true,
 			blocks = {
 				action = -1,
 				walk = -1,

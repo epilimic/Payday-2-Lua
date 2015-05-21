@@ -806,6 +806,12 @@ function CopLogicTravel.complete_coarse_path(data, my_data, coarse_path)
 	if not coarse_path[1][2] then
 		coarse_path[1][2] = mvector3.copy(all_nav_segs[first_seg_id].pos)
 	end
+	if first_seg_id ~= current_seg_id then
+		table.insert(coarse_path, 1, {
+			current_seg_id,
+			mvector3.copy(data.m_pos)
+		})
+	end
 	local i_nav_point = 1
 	while i_nav_point < #coarse_path do
 		local nav_seg_id = coarse_path[i_nav_point][1]

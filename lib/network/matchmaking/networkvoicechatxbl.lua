@@ -34,11 +34,10 @@ end
 function NetworkVoiceChatXBL:pause()
 	cat_print("lobby", "NetworkVoiceChatXBL:pause")
 	self._paused = true
-	XboxVoice:stop()
 end
 function NetworkVoiceChatXBL:resume()
 	cat_print("lobby", "NetworkVoiceChatXBL:resume")
-	self:open_session()
+	self._paused = false
 	self:_update_all()
 end
 function NetworkVoiceChatXBL:open_channel_to(player_info, context)
@@ -75,10 +74,8 @@ function NetworkVoiceChatXBL:open_channel_to(player_info, context)
 	peer_info.why = "open"
 	peer_info.dead = false
 	self._peers[peer_info.player_id] = peer_info
-	if self._paused == false then
-		self:_peer_flags(peer_info)
-		self:_peer_update(peer_info)
-	end
+	XboxVoice:register_talker(peer_info.xuid)
+	XboxVoice:send_to(player_index, peer_info.xuid, peer_info.rpc)
 end
 function NetworkVoiceChatXBL:playerid_to_name(player_id)
 	return self._peers[tostring(player_id)].name
@@ -163,96 +160,22 @@ function NetworkVoiceChatXBL:update(time)
 		XboxVoice:register_talker(player_index)
 		self._current_player_index = player_index
 	end
-	local headset = XboxVoice:has_headset(player_index)
-	if headset ~= self._has_headset then
-		if headset then
-			cat_print("lobby", "Voice: Headset connected ")
-			self._has_headset = true
-		else
-			cat_print("lobby", "Voice: Headset disconneted ")
-			self._has_headset = false
-		end
-		self:_update_all()
-	end
 	if self._user_changed then
 		cat_print("lobby", "Voice: Users (Login/Settings) has changed. Updating voice flags.")
 		self._user_changed = false
 		self:_update_numberofusers()
-		self:_check_privilege()
 		self:_update_all()
 	end
 end
 function NetworkVoiceChatXBL:_close_peer(peer)
 	local player_index = managers.user:get_platform_id()
-	if not self._paused and not peer.dead then
-		XboxVoice:unregister_talker(peer.xuid)
-		XboxVoice:stop_sending_to(player_index, peer.rpc)
-	end
+	XboxVoice:stop_sending_to(player_index, peer.xuid, peer.rpc)
 	peer.dead = true
 	peer.rpc = nil
 end
 function NetworkVoiceChatXBL:_peer_update(peer_info)
-	if peer_info.dead then
-		return
-	end
-	local player_index = managers.user:get_platform_id()
-	if peer_info.listen then
-		XboxVoice:register_talker(peer_info.xuid)
-	else
-		XboxVoice:unregister_talker(peer_info.xuid)
-	end
-	if peer_info.talk then
-		if self._has_headset then
-			XboxVoice:send_to(player_index, peer_info.rpc)
-		end
-	else
-		XboxVoice:stop_sending_to(player_index, peer_info.rpc)
-	end
 end
 function NetworkVoiceChatXBL:_peer_flags(peer_info)
-	if peer_info.dead then
-		peer_info.why = "Dead"
-		return
-	end
-	local player_index = managers.user:get_platform_id()
-	XboxVoice:unregister_talker(peer_info.xuid)
-	XboxVoice:stop_sending_to(player_index, peer_info.rpc)
-	peer_info.listen = true
-	peer_info.talk = true
-	peer_info.why = "Open"
-	if self._can_communicate == false then
-		peer_info.listen = false
-		peer_info.talk = false
-		peer_info.why = "Communications off"
-		return
-	end
-	if self._only_friends then
-		if self._number_of_users == 1 then
-			if XboxLive:is_friend(player_index, peer_info.xuid) == false then
-				peer_info.listen = false
-				peer_info.talk = false
-				peer_info.why = "Non friend"
-				return
-			end
-		else
-			peer_info.listen = false
-			peer_info.talk = false
-			peer_info.why = "Friend Limiting"
-			return
-		end
-	end
-	if XboxLive:muted(player_index, peer_info.xuid) then
-		cat_print("lobby", "Voice: Mute, stop talking to ", peer_info.name)
-		peer_info.listen = false
-		peer_info.talk = false
-		peer_info.why = "Muted"
-		return
-	end
-	if peer_info.team ~= self._team then
-		peer_info.listen = false
-		peer_info.talk = false
-		peer_info.why = "Other Team"
-	end
 end
 function NetworkVoiceChatXBL:_update_all()
 	if self._paused == true then
@@ -336,18 +259,19 @@ function NetworkVoiceChatXBL:num_peers()
 	return true
 end
 function NetworkVoiceChatXBL:destroy_voice(disconnected)
-	self:pause()
+	self._paused = true
+	XboxVoice:stop()
 end
 function NetworkVoiceChatXBL:set_volume(new_value)
 	print("new_value", new_value)
 end
 function NetworkVoiceChatXBL:is_muted(xuid)
 	local player_index = managers.user:get_platform_id()
-	return XboxLive:muted(player_index, xuid)
+	return XboxVoice:muted(xuid)
 end
 function NetworkVoiceChatXBL:set_muted(xuid, state)
 	local player_index = managers.user:get_platform_id()
-	XboxLive:set_muted(player_index, xuid, state)
+	XboxVoice:set_muted(xuid, state)
 end
 function NetworkVoiceChatXBL:user_id_update(id, changed_player_map)
 end

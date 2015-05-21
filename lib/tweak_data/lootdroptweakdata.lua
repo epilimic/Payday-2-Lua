@@ -227,7 +227,7 @@ function LootDropTweakData:init(tweak_data)
 	self.global_values.pd2_clan.track = true
 	self.global_values.pd2_clan.sort_number = -100
 	self.global_values.pd2_clan.unique_lock_icon = "guis/textures/pd2/lock_community"
-	self.global_values.pd2_clan.category = nil
+	self.global_values.pd2_clan.category = SystemInfo:platform() ~= Idstring("WIN32") and "normal" or nil
 	self.global_values.poetry_soundtrack = {}
 	self.global_values.poetry_soundtrack.name_id = "bm_global_value_poetry_soundtrack"
 	self.global_values.poetry_soundtrack.desc_id = "menu_l_global_value_poetry_soundtrack"
@@ -692,6 +692,19 @@ function LootDropTweakData:init(tweak_data)
 	self.global_values.west.track = true
 	self.global_values.west.sort_number = 102
 	self.global_values.west.category = "dlc"
+	self.global_values.arena = {}
+	self.global_values.arena.name_id = "bm_global_value_arena"
+	self.global_values.arena.desc_id = "menu_l_global_value_arena"
+	self.global_values.arena.unlock_id = "bm_global_value_arena_unlock"
+	self.global_values.arena.color = Color(255, 255, 212, 0) / 255
+	self.global_values.arena.dlc = true
+	self.global_values.arena.chance = 1
+	self.global_values.arena.value_multiplier = tweak_data:get_value("money_manager", "global_value_multipliers", "arena")
+	self.global_values.arena.durability_multiplier = 1
+	self.global_values.arena.drops = true
+	self.global_values.arena.track = true
+	self.global_values.arena.sort_number = 103
+	self.global_values.arena.category = "dlc"
 	self.global_values.legendary = {}
 	self.global_values.legendary.name_id = "bm_global_value_legendary"
 	self.global_values.legendary.desc_id = "menu_l_global_value_legendary"
@@ -740,7 +753,8 @@ function LootDropTweakData:init(tweak_data)
 		"character_pack_dragan",
 		"hlm2_deluxe",
 		"bbq",
-		"west"
+		"west",
+		"arena"
 	}
 	self:_create_global_value_list_map()
 end

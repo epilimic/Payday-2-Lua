@@ -145,7 +145,8 @@ function MissionManager:init(...)
 		"pku_evidence_bag",
 		"ecm_jammer_on",
 		"ecm_jammer_off",
-		"pku_warhead"
+		"pku_warhead",
+		"enemy_killed"
 	})
 	self._mission_filter = {}
 	if not Global.mission_manager then

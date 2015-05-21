@@ -13,6 +13,8 @@ function NetworkPeer:init(name, rpc, id, loading, synced, in_lobby, character, u
 	if self._rpc then
 		if self._rpc:ip_at_index(0) == Network:self("TCP_IP"):ip_at_index(0) then
 			is_local_peer = true
+		elseif SystemInfo:platform() == Idstring("PS4") then
+			PSNVoice:send_to(self._name, self._rpc)
 		end
 	elseif self._steam_rpc and self._steam_rpc:ip_at_index(0) == Network:self("STEAM"):ip_at_index(0) then
 		is_local_peer = true
@@ -82,6 +84,9 @@ function NetworkPeer:set_rpc(rpc)
 		Network:set_throttling_disabled(self._rpc, not managers.user:get_setting("net_packet_throttling"))
 		Network:set_connection_id(self._rpc, self._id)
 		self:_chk_flush_msg_queues()
+		if SystemInfo:platform() == Idstring("PS4") then
+			PSNVoice:send_to(self._name, self._rpc)
+		end
 		if managers.network.voice_chat.on_member_added then
 			managers.network.voice_chat:on_member_added(self)
 		end
@@ -265,6 +270,71 @@ function NetworkPeer:_verify_content(item_type, item_id)
 		end
 	end
 	return true
+end
+function NetworkPeer:verify_grenade(value)
+	if self._grenades and self._grenades + value > tweak_data.equipments.max_amount.grenades then
+		if Network:is_server() then
+			self:mark_cheater(VoteManager.REASON.many_grenades, true)
+		else
+			managers.network:session():server_peer():mark_cheater(VoteManager.REASON.many_grenades, Network:is_server())
+		end
+		print("[NetworkPeer:verify_grenade]: Failed to use grenade", self:id(), self._grenades, value)
+		return false
+	end
+	self._grenades = self._grenades and self._grenades + value or value
+	return true
+end
+function NetworkPeer:verify_bag(carry_id, amount)
+	local cheating = false
+	if amount < 0 then
+		if self._carry_id ~= carry_id then
+			cheating = true
+		else
+			self._carry_id = nil
+		end
+	elseif self._carry_id then
+		cheating = true
+	else
+		self._carry_id = carry_id
+	end
+	if cheating then
+		if Network:is_client() and amount < 0 and not self._skipped_first_cheat then
+			self._skipped_first_cheat = true
+			return true
+		end
+		if Network:is_server() then
+			self:mark_cheater(amount < 0 and VoteManager.REASON.many_bags or VoteManager.REASON.many_bags_pickup, true)
+		else
+			managers.network:session():server_peer():mark_cheater(amount < 0 and VoteManager.REASON.many_bags or VoteManager.REASON.many_bags_pickup, Network:is_server())
+		end
+		print("[NetworkPeer:verify_bag]: Failed to place bag", self:id(), self._carry_id, carry_id, amount)
+		return false
+	end
+	return true
+end
+function NetworkPeer:verify_deployable(id)
+	if tweak_data.equipments.max_amount[id] then
+		if not self._deployable then
+			self._deployable = id
+			self._depolyable_count = 1
+			return true
+		elseif self._deployable == id and self._depolyable_count < tweak_data.equipments.max_amount[id] then
+			self._depolyable_count = self._depolyable_count + 1
+			return true
+		elseif not self._deployable_swap and (self._deployable == "sentry_gun" and id == "trip_mine" or self._deployable == "trip_mine" and id == "sentry_gun") then
+			self._deployable_swap = true
+			self._deployable = id
+			self._depolyable_count = 1
+			return true
+		end
+	end
+	if Network:is_server() then
+		self:mark_cheater(self._deployable ~= id and VoteManager.REASON.wrong_equipment or VoteManager.REASON.many_equipments, true)
+	else
+		managers.network:session():server_peer():mark_cheater(self._deployable ~= id and VoteManager.REASON.wrong_equipment or VoteManager.REASON.many_equipments, Network:is_server())
+	end
+	print("[NetworkPeer:verify_deployable]: Failed to deploy equipment", self:id(), id, self._deployable, self._depolyable_count)
+	return false
 end
 function NetworkPeer:is_cheater()
 	return self._cheater
@@ -1134,5 +1204,49 @@ function NetworkPeer:set_throttling_enabled(state)
 	end
 	if self._steam_rpc then
 		Network:set_throttling_disabled(self._steam_rpc, not state)
+	end
+end
+function NetworkPeer:drop_in_progress()
+	return self._dropin_progress
+end
+function NetworkPeer:set_drop_in_progress(dropin_progress)
+	self._dropin_progress = dropin_progress
+end
+function NetworkPeer:sync_lobby_data(peer)
+	print("[NetworkPeer:sync_lobby_data] to", peer:id())
+	local level = managers.experience:current_level()
+	local rank = managers.experience:current_rank()
+	local character = self:character()
+	local mask_set = "remove"
+	local progress = managers.upgrades:progress()
+	local menu_state = managers.menu:get_peer_state(self:id())
+	local menu_state_index = tweak_data:menu_sync_state_to_index(menu_state)
+	cat_print("multiplayer_base", "NetworkPeer:sync_lobby_data to", peer:id(), " : ", self:id(), level)
+	peer:send_after_load("lobby_info", level, rank, character, mask_set)
+	peer:send_after_load("sync_profile", level, rank)
+	managers.network:session():check_send_outfit()
+	if menu_state_index then
+		peer:send_after_load("set_menu_sync_state_index", menu_state_index)
+	end
+	if Network:is_server() then
+		peer:send_after_load("lobby_sync_update_level_id", tweak_data.levels:get_index_from_level_id(Global.game_settings.level_id))
+		peer:send_after_load("lobby_sync_update_difficulty", Global.game_settings.difficulty)
+	end
+end
+function NetworkPeer:sync_data(peer)
+	print("[NetworkPeer:sync_data] to", peer:id())
+	local level = managers.experience:current_level()
+	local rank = managers.experience:current_rank()
+	peer:send_queued_sync("sync_profile", level, rank)
+	managers.network:session():check_send_outfit(peer)
+	managers.player:update_deployable_equipment_to_peer(peer)
+	managers.player:update_cable_ties_to_peer(peer)
+	managers.player:update_grenades_to_peer(peer)
+	managers.player:update_equipment_possession_to_peer(peer)
+	managers.player:update_ammo_info_to_peer(peer)
+	managers.player:update_carry_to_peer(peer)
+	managers.player:update_team_upgrades_to_peer(peer)
+	if Network:is_server() then
+		managers.vehicle:update_vehicles_data_to_peer(peer)
 	end
 end

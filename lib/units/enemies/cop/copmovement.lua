@@ -246,6 +246,7 @@ function CopMovement:post_init()
 		"hurt_sick",
 		"shield_knock",
 		"counter_tased",
+		"taser_tased",
 		"death",
 		"fatal",
 		"fire_hurt"
@@ -1097,7 +1098,7 @@ function CopMovement:damage_clbk(my_unit, damage_info)
 		block_type = hurt_type
 	end
 	local client_interrupt
-	if Network:is_client() and (hurt_type == "light_hurt" or hurt_type == "hurt" and damage_info.variant ~= "tase" or hurt_type == "heavy_hurt" or hurt_type == "expl_hurt" or hurt_type == "shield_knock" or hurt_type == "counter_tased" or hurt_type == "counter_spooc" or hurt_type == "death" or hurt_type == "hurt_sick" or hurt_type == "fire_hurt") then
+	if Network:is_client() and (hurt_type == "light_hurt" or hurt_type == "hurt" and damage_info.variant ~= "tase" or hurt_type == "heavy_hurt" or hurt_type == "expl_hurt" or hurt_type == "shield_knock" or hurt_type == "counter_tased" or hurt_type == "taser_tased" or hurt_type == "counter_spooc" or hurt_type == "death" or hurt_type == "hurt_sick" or hurt_type == "fire_hurt") then
 		client_interrupt = true
 	end
 	local tweak = self._tweak_data
@@ -1725,7 +1726,7 @@ function CopMovement:sync_pose(pose_code)
 	local new_action_data = {type = pose, body_part = 4}
 	self:action_request(new_action_data)
 end
-function CopMovement:sync_action_act_start(index, blocks_hurt, clamp_to_graph, start_rot, start_pos)
+function CopMovement:sync_action_act_start(index, blocks_hurt, clamp_to_graph, needs_full_blend, start_rot, start_pos)
 	if self._ext_damage:dead() then
 		return
 	end
@@ -1742,7 +1743,8 @@ function CopMovement:sync_action_act_start(index, blocks_hurt, clamp_to_graph, s
 		},
 		start_rot = start_rot,
 		start_pos = start_pos,
-		clamp_to_graph = clamp_to_graph
+		clamp_to_graph = clamp_to_graph,
+		needs_full_blend = needs_full_blend
 	}
 	if blocks_hurt then
 		action_data.blocks.light_hurt = -1

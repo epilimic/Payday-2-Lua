@@ -361,6 +361,14 @@ function GuiTweakData:init()
 		webpage = "http://www.overkillsoftware.com/meltdown/",
 		image = "guis/textures/pd2/content_updates/shoutout"
 	}
+	local arena = {
+		id = "arena",
+		name_id = "menu_content_arena",
+		desc_id = "menu_content_arena_desc",
+		date_id = "menu_content_arena_date",
+		store = 366660,
+		image = "guis/dlcs/dlc_arena/textures/pd2/content_updates/arena"
+	}
 	self.content_updates = {
 		title_id = "menu_content_updates",
 		choice_id = "menu_content_updates_previous",
@@ -411,7 +419,8 @@ function GuiTweakData:init()
 			springcleaning,
 			west,
 			bsides,
-			shoutout
+			shoutout,
+			arena
 		}
 	elseif SystemInfo:platform() == Idstring("PS3") then
 		self.content_updates.item_list = {
@@ -419,6 +428,10 @@ function GuiTweakData:init()
 			gage_pack,
 			gage_pack_lmg
 		}
+	elseif SystemInfo:platform() == Idstring("PS4") then
+		self.content_updates.item_list = {armored_transport}
+	elseif SystemInfo:platform() == Idstring("XB1") then
+		self.content_updates.item_list = {armored_transport}
 	elseif SystemInfo:platform() == Idstring("X360") then
 		self.content_updates.item_list = {}
 	end
@@ -1488,7 +1501,7 @@ function GuiTweakData:init()
 			icon = "guis/textures/pd2/crimenet_challenge"
 		}
 	}
-	if Application:production_build() then
+	if Application:production_build() or SystemInfo:platform() == Idstring("PS4") or SystemInfo:platform() == Idstring("XB1") then
 		table.insert(self.crime_net.special_contracts, {
 			id = "casino",
 			name_id = "menu_cn_casino",

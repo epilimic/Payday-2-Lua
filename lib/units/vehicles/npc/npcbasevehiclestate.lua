@@ -4,6 +4,8 @@ function NpcBaseVehicleState:init(unit)
 end
 function NpcBaseVehicleState:on_enter(npc_driving_ext)
 end
+function NpcBaseVehicleState:on_exit(npc_driving_ext)
+end
 function NpcBaseVehicleState:update(t, dt)
 end
 function NpcBaseVehicleState:name()

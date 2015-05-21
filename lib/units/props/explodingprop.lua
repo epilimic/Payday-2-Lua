@@ -52,6 +52,7 @@ function ExplodingProp:detonate(pos, range, damage, player_damage)
 			pos = pos,
 			effect_params = effect_params
 		})
+		self:_check_detonation_ready()
 	end
 end
 function ExplodingProp:sync_net_event(event_id)
@@ -60,8 +61,14 @@ function ExplodingProp:sync_net_event(event_id)
 	end
 end
 function ExplodingProp:_detonate_on_client()
+	self._recieved_detonate_on_client = true
+	self:_check_detonation_ready()
+end
+function ExplodingProp:_check_detonation_ready()
+	if not self._recieved_detonate_on_client then
+		return
+	end
 	if self._data_list == nil then
-		Application:error("ExplodingProp:_detonate_on_client() occurred before ExplodingProp:detonate( ... )")
 		return
 	end
 	local data = table.remove(self._data_list, 1)

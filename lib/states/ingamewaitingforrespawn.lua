@@ -5,7 +5,7 @@ IngameWaitingForRespawnState.GUI_SPECTATOR_FULLSCREEN = Idstring("guis/spectator
 IngameWaitingForRespawnState.GUI_SPECTATOR = Idstring("guis/spectator_mode")
 function IngameWaitingForRespawnState:init(game_state_machine)
 	GameState.init(self, "ingame_waiting_for_respawn", game_state_machine)
-	self._slotmask = managers.slot:get_mask("world_geometry")
+	self._slotmask = managers.slot:get_mask("world_geometry") + 39
 	self._fwd = Vector3(1, 0, 0)
 	self._up_offset = math.UP * 80
 	self._rot = Rotation()
@@ -214,7 +214,29 @@ function IngameWaitingForRespawnState:_upd_watch(t, dt)
 				mvec3_rotate_with(self._fwd, self._rot)
 			end
 		end
-		watch_u_head:m_position(self._vec_target)
+		local vehicle_unit, vehicle_seat
+		if managers.network and managers.network:session() and watch_u_record.unit:network() then
+			if watch_u_record.unit:brain() then
+				vehicle_unit = watch_u_record.unit:movement().vehicle_unit
+				vehicle_seat = watch_u_record.unit:movement().vehicle_seat
+			elseif watch_u_record.unit:network():peer() then
+				local peer_id = watch_u_record.unit:network():peer():id()
+				local vehicle_data = managers.player:get_vehicle_for_peer(peer_id)
+				if vehicle_data then
+					vehicle_unit = vehicle_data.vehicle_unit
+					vehicle_seat = vehicle_unit:vehicle_driving()._seats[vehicle_data.seat]
+				end
+			end
+		end
+		if vehicle_unit and vehicle_seat then
+			local target_pos = vehicle_unit:vehicle():object_position(vehicle_seat.object)
+			mvec3_set(self._vec_target, target_pos)
+			local oobb = vehicle_unit:oobb()
+			local up = oobb:z() * 2.5
+			mvec3_add(self._vec_target, up)
+		else
+			watch_u_head:m_position(self._vec_target)
+		end
 		mvec3_set(self._vec_eye, self._fwd)
 		mvec3_multiply(self._vec_eye, 150)
 		mvec3_negate(self._vec_eye)
@@ -268,6 +290,11 @@ function IngameWaitingForRespawnState:at_enter()
 	self._player_state_change_needed = true
 	self._respawn_delay = nil
 	self._play_too_long_line_t = nil
+	local level_tweak = tweak_data.levels[managers.job:current_level_id()]
+	if level_tweak and (level_tweak.death_track or level_tweak.death_event) then
+		self.music_on_death = true
+		managers.music:track_listen_start(level_tweak.death_event or Global.music_manager.current_event, level_tweak.death_track or Global.music_manager.current_track)
+	end
 	if not managers.hud:exists(self.GUI_SPECTATOR_FULLSCREEN) then
 		managers.hud:load_hud(self.GUI_SPECTATOR_FULLSCREEN, false, false, false, {})
 	end
@@ -303,6 +330,10 @@ function IngameWaitingForRespawnState:at_enter()
 	end
 end
 function IngameWaitingForRespawnState:at_exit()
+	if self.music_on_death then
+		managers.music:track_listen_stop()
+		self.music_on_death = nil
+	end
 	managers.hud:hide(self.GUI_SPECTATOR)
 	managers.hud:hide(PlayerBase.PLAYER_INFO_HUD)
 	managers.hud:hide(PlayerBase.PLAYER_INFO_HUD_FULLSCREEN)

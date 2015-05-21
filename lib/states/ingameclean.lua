@@ -15,6 +15,7 @@ function IngameCleanState:at_enter()
 	end
 	managers.hud:show(PlayerBase.PLAYER_INFO_HUD)
 	managers.hud:show(PlayerBase.PLAYER_INFO_HUD_FULLSCREEN)
+	managers.hud:hide_local_player_gear()
 	local player = managers.player:player_unit()
 	if player then
 		player:base():set_enabled(true)
@@ -27,6 +28,7 @@ function IngameCleanState:at_exit()
 		player:base():set_enabled(false)
 		player:character_damage():set_invulnerable(false)
 	end
+	managers.hud:show_local_player_gear()
 	managers.hud:hide(PlayerBase.PLAYER_INFO_HUD)
 	managers.hud:hide(PlayerBase.PLAYER_INFO_HUD_FULLSCREEN)
 end

@@ -162,14 +162,20 @@ function GenericSystemMenuManager:close(id)
 	print("close active dialog", self._active_dialog and self._active_dialog:id(), id)
 	if self._active_dialog and self._active_dialog:id() == id then
 		self._active_dialog:fade_out_close()
-		return
 	end
 	if not self._dialog_queue then
 		return
 	end
+	local remove_list
 	for i, dialog in ipairs(self._dialog_queue) do
 		if dialog:id() == id then
 			print("remove from queue", id)
+			remove_list = remove_list or {}
+			table.insert(remove_list, 1, i)
+		end
+	end
+	if remove_list then
+		for _, i in ipairs(remove_list) do
 			table.remove(self._dialog_queue, i)
 		end
 	end
@@ -415,6 +421,26 @@ function Xbox360SystemMenuManager:is_active(skip_block_exec)
 	local dialog_block = self._active_dialog and (skip_block_exec or self._active_dialog:blocks_exec())
 	return dialog_block and (GenericSystemMenuManager.is_active(self) or Application:is_showing_system_dialog())
 end
+XB1SystemMenuManager = XB1SystemMenuManager or class(GenericSystemMenuManager)
+XB1SystemMenuManager.KEYBOARD_INPUT_DIALOG = Xbox360KeyboardInputDialog
+XB1SystemMenuManager.GENERIC_KEYBOARD_INPUT_DIALOG = Xbox360KeyboardInputDialog
+XB1SystemMenuManager.GENERIC_SELECT_USER_DIALOG = Xbox360SelectUserDialog
+XB1SystemMenuManager.SELECT_USER_DIALOG = Xbox360SelectUserDialog
+XB1SystemMenuManager.GENERIC_ACHIEVEMENTS_DIALOG = Xbox360AchievementsDialog
+XB1SystemMenuManager.ACHIEVEMENTS_DIALOG = Xbox360AchievementsDialog
+XB1SystemMenuManager.GENERIC_FRIENDS_DIALOG = Xbox360FriendsDialog
+XB1SystemMenuManager.FRIENDS_DIALOG = Xbox360FriendsDialog
+XB1SystemMenuManager.GENERIC_PLAYER_REVIEW_DIALOG = Xbox360PlayerReviewDialog
+XB1SystemMenuManager.PLAYER_REVIEW_DIALOG = Xbox360PlayerReviewDialog
+XB1SystemMenuManager.GENERIC_PLAYER_DIALOG = Xbox360PlayerDialog
+XB1SystemMenuManager.PLAYER_DIALOG = Xbox360PlayerDialog
+XB1SystemMenuManager.GENERIC_MARKETPLACE_DIALOG = Xbox360MarketplaceDialog
+XB1SystemMenuManager.MARKETPLACE_DIALOG = Xbox360MarketplaceDialog
+SystemMenuManager.PLATFORM_CLASS_MAP[Idstring("XB1"):key()] = XB1SystemMenuManager
+function XB1SystemMenuManager:is_active(skip_block_exec)
+	local dialog_block = self._active_dialog and (skip_block_exec or self._active_dialog:blocks_exec())
+	return dialog_block and (GenericSystemMenuManager.is_active(self) or Application:is_showing_system_dialog())
+end
 PS3SystemMenuManager = PS3SystemMenuManager or class(GenericSystemMenuManager)
 PS3SystemMenuManager.DELETE_FILE_DIALOG_CLASS = PS3DeleteFileDialog
 PS3SystemMenuManager.GENERIC_DELETE_FILE_DIALOG_CLASS = PS3DeleteFileDialog
@@ -433,5 +459,25 @@ function PS3SystemMenuManager:block_exec()
 	return GenericSystemMenuManager.is_active(self) or PS3:is_displaying_box()
 end
 function PS3SystemMenuManager:is_active()
+	return GenericSystemMenuManager.is_active(self) or PS3:is_displaying_box() or self._is_ps_button_menu_visible
+end
+PS4SystemMenuManager = PS4SystemMenuManager or class(GenericSystemMenuManager)
+PS4SystemMenuManager.DELETE_FILE_DIALOG_CLASS = PS3DeleteFileDialog
+PS4SystemMenuManager.GENERIC_DELETE_FILE_DIALOG_CLASS = PS3DeleteFileDialog
+PS4SystemMenuManager.KEYBOARD_INPUT_DIALOG = PS3KeyboardInputDialog
+PS4SystemMenuManager.GENERIC_KEYBOARD_INPUT_DIALOG = PS3KeyboardInputDialog
+SystemMenuManager.PLATFORM_CLASS_MAP[Idstring("PS4"):key()] = PS4SystemMenuManager
+function PS4SystemMenuManager:init()
+	GenericSystemMenuManager.init(self)
+	self._is_ps_button_menu_visible = false
+	PS3:set_ps_button_callback(callback(self, self, "ps_button_menu_callback"))
+end
+function PS4SystemMenuManager:ps_button_menu_callback(is_ps_button_menu_visible)
+	self._is_ps_button_menu_visible = is_ps_button_menu_visible
+end
+function PS4SystemMenuManager:block_exec()
+	return GenericSystemMenuManager.is_active(self) or PS3:is_displaying_box()
+end
+function PS4SystemMenuManager:is_active()
 	return GenericSystemMenuManager.is_active(self) or PS3:is_displaying_box() or self._is_ps_button_menu_visible
 end

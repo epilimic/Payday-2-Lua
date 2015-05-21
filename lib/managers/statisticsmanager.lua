@@ -325,6 +325,10 @@ function StatisticsManager:start_session(data)
 	self._start_session_drop_in = data.drop_in
 	self._session_started = true
 end
+function StatisticsManager:get_session_time_seconds()
+	local t = Application:time()
+	return t - (self._start_session_time or t)
+end
 function StatisticsManager:stop_session(data)
 	if not self._session_started then
 		if data and data.quit then
@@ -340,7 +344,7 @@ function StatisticsManager:stop_session(data)
 	self._data_log = nil
 	self._session_started = nil
 	local success = data and data.success
-	local session_time = Application:time() - self._start_session_time
+	local session_time = self:get_session_time_seconds()
 	if Global.level_data.level_id then
 		self._global.sessions.levels[Global.level_data.level_id].time = self._global.sessions.levels[Global.level_data.level_id].time + session_time
 		if success then
@@ -442,7 +446,7 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 	self:check_version()
 	local max_ranks = 25
 	local max_specializations = 10
-	local session_time_seconds = Application:time() - self._start_session_time
+	local session_time_seconds = self:get_session_time_seconds()
 	local session_time_minutes = session_time_seconds / 60
 	local session_time = session_time_minutes / 60
 	if session_time_seconds == 0 or session_time_minutes == 0 or session_time == 0 then

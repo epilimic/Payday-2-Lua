@@ -107,13 +107,18 @@ function CopLogicIntimidated._update_enemy_detection(data, my_data)
 	end
 	if fight then
 		my_data.surrender_clbk_registered = nil
+		data.brain:set_objective(nil)
+		CopLogicBase._exit(data.unit, "idle")
 		local new_action = {
 			type = "act",
 			variant = "idle",
 			body_part = 1
 		}
-		data.unit:brain():action_request(new_action)
-		data.unit:brain():set_logic("idle")
+		data.brain:set_objective({
+			type = "free",
+			scan = true,
+			action = new_action
+		})
 	end
 end
 function CopLogicIntimidated.action_complete_clbk(data, action)

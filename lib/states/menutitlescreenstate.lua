@@ -7,6 +7,8 @@ function MenuTitlescreenState:init(game_state_machine, setup)
 	end
 end
 local is_ps3 = SystemInfo:platform() == Idstring("PS3")
+local is_ps4 = SystemInfo:platform() == Idstring("PS4")
+local is_xb1 = SystemInfo:platform() == Idstring("XB1")
 local is_x360 = SystemInfo:platform() == Idstring("X360")
 local is_win32 = SystemInfo:platform() == Idstring("WIN32")
 function MenuTitlescreenState:setup()
@@ -29,7 +31,7 @@ function MenuTitlescreenState:setup()
 		color = Color.black,
 		layer = 0
 	})
-	local text_id = (is_ps3 or is_x360) and "menu_press_start" or "menu_visit_forum3"
+	local text_id = (is_ps3 or is_x360 or is_ps4 or is_xb1) and "menu_press_start" or "menu_visit_forum3"
 	local text = self._workspace:panel():text({
 		text = managers.localization:text(text_id),
 		font = tweak_data.menu.pd2_large_font,
@@ -124,7 +126,11 @@ function MenuTitlescreenState:update(t, dt)
 end
 function MenuTitlescreenState:get_start_pressed_controller_index()
 	for index, controller in ipairs(self._controller_list) do
-		if is_ps3 or is_x360 then
+		if is_ps4 or is_xb1 then
+			if controller:get_input_pressed("confirm") then
+				return index
+			end
+		elseif is_ps3 or is_x360 then
 			if controller:get_input_pressed("start") then
 				return index
 			end

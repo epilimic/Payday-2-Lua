@@ -13,11 +13,12 @@ function CrimeNetContractGui:init(ws, fullscreen_ws, node)
 	local job_data = self._node:parameters().menu_component_data
 	self._customizable = job_data.customize_contract or false
 	local is_win_32 = SystemInfo:platform() == Idstring("WIN32")
+	local is_nextgen = SystemInfo:platform() == Idstring("PS4") or SystemInfo:platform() == Idstring("XB1")
 	local width = 900
 	local height = 580
 	if not is_win_32 then
 		width = 900
-		height = 525
+		height = is_nextgen and 550 or 525
 	end
 	local blur = self._fullscreen_panel:bitmap({
 		texture = "guis/textures/test_blur_df",
@@ -625,7 +626,7 @@ function CrimeNetContractGui:init(ws, fullscreen_ws, node)
 		if self._briefing_len_panel then
 			self._briefing_len_panel:hide()
 		end
-		if not is_win_32 then
+		if not is_win_32 and not is_nextgen then
 			contact_panel:hide()
 			contact_text:set_top(contact_panel:top())
 			contact_text:set_text("")
@@ -1298,7 +1299,9 @@ function CrimeNetContractGui:free_memory(t, dt)
 			BTN_Y = managers.localization:btn_macro("menu_modify_item")
 		}))
 		self:make_fine_text(self._potential_rewards_title)
-		managers.menu_component:post_event("menu_enter")
+		if self._step > 3 then
+			managers.menu_component:post_event("menu_enter")
+		end
 	end
 end
 function CrimeNetContractGui:sound_event_callback(event_type, duration)

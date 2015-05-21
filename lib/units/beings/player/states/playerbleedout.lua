@@ -288,6 +288,9 @@ function PlayerBleedOut:call_civilian(line, t, no_gesture, skip_alert, revive_SO
 	end
 end
 function PlayerBleedOut:_unregister_revive_SO()
+	if not self._revive_SO_data then
+		return
+	end
 	if self._revive_SO_data.deathguard_SO_id then
 		PlayerBleedOut._unregister_deathguard_SO(self._revive_SO_data.deathguard_SO_id)
 		self._revive_SO_data.deathguard_SO_id = nil

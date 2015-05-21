@@ -649,22 +649,24 @@ function LevelsTweakData:init()
 	self.big.cube = "cube_apply_heist_bank"
 	self.big.ghost_bonus = 0.15
 	self.big.max_bags = 28
-	self.roberts = {}
-	self.roberts.name_id = "heist_roberts_hl"
-	self.roberts.briefing_id = "heist_roberts_briefing"
-	self.roberts.briefing_dialog = "Play_pln_cs1_brf"
-	self.roberts.world_name = "narratives/bain/roberts"
-	self.roberts.intro_event = "Play_pln_cs1_intro_01"
-	self.roberts.outro_event = {
-		"Play_pln_cs1_end_01",
-		"Play_pln_cs1_end_02",
-		"Play_pln_cs1_end_03"
-	}
-	self.roberts.music = "heist"
-	self.roberts.package = "packages/narr_roberts"
-	self.roberts.cube = "cube_apply_heist_bank"
-	self.roberts.ghost_bonus = 0.1
-	self.roberts.max_bags = 14
+	if SystemInfo:platform() == Idstring("WIN32") then
+		self.roberts = {}
+		self.roberts.name_id = "heist_roberts_hl"
+		self.roberts.briefing_id = "heist_roberts_briefing"
+		self.roberts.briefing_dialog = "Play_pln_cs1_brf"
+		self.roberts.world_name = "narratives/bain/roberts"
+		self.roberts.intro_event = "Play_pln_cs1_intro_01"
+		self.roberts.outro_event = {
+			"Play_pln_cs1_end_01",
+			"Play_pln_cs1_end_02",
+			"Play_pln_cs1_end_03"
+		}
+		self.roberts.music = "heist"
+		self.roberts.package = "packages/narr_roberts"
+		self.roberts.cube = "cube_apply_heist_bank"
+		self.roberts.ghost_bonus = 0.1
+		self.roberts.max_bags = 14
+	end
 	self.haunted = {}
 	self.haunted.name_id = "heist_haunted_hl"
 	self.haunted.briefing_id = "heist_haunted_briefing"
@@ -871,16 +873,29 @@ function LevelsTweakData:init()
 	self.shoutout_raid.briefing_id = "heist_shoutout_raid_briefing"
 	self.shoutout_raid.briefing_dialog = "Play_pln_ko1b_brf_01"
 	self.shoutout_raid.world_name = "narratives/vlad/shout"
-	self.shoutout_raid.intro_event = "Play_pln_rat_stage1_intro_a"
-	self.shoutout_raid.outro_event = {
-		"Play_pln_rat_stage1_end_a",
-		"Play_pln_rat_stage1_end_b",
-		"Play_pln_rat_stage1_end_c"
-	}
+	self.shoutout_raid.intro_event = "Play_pln_ko1b_intro_01"
+	self.shoutout_raid.outro_event = "Play_vld_ko1b_end_01"
 	self.shoutout_raid.music = "heist"
 	self.shoutout_raid.package = "packages/vlad_shout"
 	self.shoutout_raid.cube = "cube_apply_heist_bank"
 	self.shoutout_raid.max_bags = 20
+	self.arena = {}
+	self.arena.name_id = "heist_arena_hl"
+	self.arena.briefing_id = "heist_arena_briefing"
+	self.arena.briefing_dialog = "Play_pln_al1_brf_01"
+	self.arena.world_name = "narratives/bain/arena"
+	self.arena.intro_event = "Play_pln_al1_intro_01"
+	self.arena.outro_event = {
+		"Play_pln_al1_54",
+		"Play_pln_al1_55"
+	}
+	self.arena.music = "no_music"
+	self.arena.death_track = "track_01"
+	self.arena.death_event = "music_heist_assault"
+	self.arena.package = "packages/narr_arena"
+	self.arena.cube = "cube_apply_heist_bank"
+	self.arena.max_bags = 25
+	self.arena.ghost_bonus = 0.1
 	self._level_index = {
 		"welcome_to_the_jungle_1",
 		"welcome_to_the_jungle_1_night",
@@ -926,7 +941,6 @@ function LevelsTweakData:init()
 		"arm_for",
 		"family",
 		"big",
-		"roberts",
 		"mia_1",
 		"mia_2",
 		"mia2_new",
@@ -942,8 +956,12 @@ function LevelsTweakData:init()
 		"crojob3",
 		"crojob3_night",
 		"rat",
-		"shoutout_raid"
+		"shoutout_raid",
+		"arena"
 	}
+	if SystemInfo:platform() == Idstring("WIN32") then
+		table.insert(self._level_index, "roberts")
+	end
 	self.escape_levels = {
 		"escape_cafe",
 		"escape_park",

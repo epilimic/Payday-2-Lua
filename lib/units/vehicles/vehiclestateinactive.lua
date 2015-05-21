@@ -6,7 +6,7 @@ function VehicleStateInactive:update(t, dt)
 end
 function VehicleStateInactive:enter(state_data, enter_data)
 	self._unit:vehicle_driving():_stop_engine_sound()
-	if self._unit.interaction and self._unit:interaction() then
+	if self._unit.interaction and self._unit:interaction() and self._unit:interaction().set_override_timer_value then
 		self._unit:interaction():set_override_timer_value(VehicleDrivingExt.TIME_ENTER)
 	end
 	self:adjust_interactions()
@@ -33,9 +33,11 @@ function VehicleStateInactive:is_vulnerable()
 	return true
 end
 function VehicleStateInactive:exit()
-	local id = managers.hud:add_vehicle_name_label({
-		name = self._unit:vehicle_driving()._tweak_data.name,
-		unit = self._unit
-	})
-	self._unit:unit_data().name_label_id = id
+	if self._unit:unit_data().name_label_id == nil then
+		local id = managers.hud:add_vehicle_name_label({
+			name = self._unit:vehicle_driving()._tweak_data.name,
+			unit = self._unit
+		})
+		self._unit:unit_data().name_label_id = id
+	end
 end

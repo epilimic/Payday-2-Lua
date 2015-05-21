@@ -9,7 +9,11 @@ function SpecializationBoxGui:init(...)
 end
 local make_fine_text = function(text)
 	local x, y, w, h = text:text_rect()
-	text:set_size(w, h)
+	if text:wrap() == true then
+		text:set_h(h)
+	else
+		text:set_size(w, h)
+	end
 	text:set_position(math.round(text:x()), math.round(text:y()))
 end
 function SpecializationBoxGui:_create_text_box(ws, title, text, content_data, config)
@@ -87,7 +91,10 @@ function SpecializationBoxGui:_create_text_box(ws, title, text, content_data, co
 		}
 	})
 	local exp_title_text = exp_panel:text(small_text)
+	exp_title_text:set_wrap(true)
+	exp_title_text:set_word_wrap(true)
 	exp_title_text:set_position(5, 5)
+	exp_title_text:set_w(exp_panel:w() - 10)
 	exp_title_text:set_text(managers.localization:to_upper_text("menu_st_spec_xp_gained"))
 	make_fine_text(exp_title_text)
 	local exp_count_text = exp_panel:text(medium_text)

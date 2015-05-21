@@ -91,6 +91,7 @@ function WeaponTweakData:init(tweak_data)
 	self:_init_data_peacemaker_npc()
 	self:_init_data_winchester1874_npc()
 	self:_init_data_plainsrider_npc()
+	self:_init_data_mateba_npc()
 	self:_precalculate_values()
 end
 function WeaponTweakData:_set_easy()
@@ -1453,6 +1454,19 @@ function WeaponTweakData:_init_data_plainsrider_npc()
 	self.plainsrider_npc.has_fire_animation = true
 	self.plainsrider_npc.alert_size = 2800
 	self.plainsrider_npc.suppression = 1
+end
+function WeaponTweakData:_init_data_mateba_npc()
+	self.mateba_npc.sounds.prefix = "rbull_npc"
+	self.mateba_npc.use_data.selection_index = 1
+	self.mateba_npc.DAMAGE = 4
+	self.mateba_npc.muzzleflash = "effects/payday2/particles/weapons/9mm_auto"
+	self.mateba_npc.muzzleflash_silenced = "effects/payday2/particles/weapons/9mm_auto_silence"
+	self.mateba_npc.shell_ejection = "effects/payday2/particles/weapons/shells/shell_empty"
+	self.mateba_npc.CLIP_AMMO_MAX = 6
+	self.mateba_npc.NR_CLIPS_MAX = 8
+	self.mateba_npc.hold = "pistol"
+	self.mateba_npc.alert_size = 5000
+	self.mateba_npc.suppression = 1.8
 end
 function WeaponTweakData:_init_data_player_weapons(tweak_data)
 	local autohit_rifle_default, autohit_pistol_default, autohit_shotgun_default, autohit_lmg_default, autohit_snp_default, autohit_smg_default, autohit_minigun_default, aim_assist_rifle_default, aim_assist_pistol_default, aim_assist_shotgun_default, aim_assist_lmg_default, aim_assist_snp_default, aim_assist_smg_default, aim_assist_minigun_default
@@ -8362,11 +8376,11 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.flamethrower_mk2.global_value = "bbq"
 	self.flamethrower_mk2.texture_bundle_folder = "bbq"
 	self.flamethrower_mk2.fire_dot_data = {
-		dot_damage = 2,
+		dot_damage = 1,
 		dot_trigger_max_distance = 3000,
 		dot_trigger_chance = 10,
-		dot_length = 3,
-		dot_tick_damage = 0.5
+		dot_length = 3.1,
+		dot_tick_period = 0.5
 	}
 	self.flamethrower_mk2.stats = {
 		damage = 5,
@@ -8857,6 +8871,91 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 		value = 1
 	}
 	self.plainsrider.stats_modifiers = {damage = 6.5}
+	self.mateba = {}
+	self.mateba.category = "pistol"
+	self.mateba.upgrade_blocks = {
+		weapon = {
+			"clip_ammo_increase"
+		}
+	}
+	self.mateba.damage_melee = damage_melee_default
+	self.mateba.damage_melee_effect_mul = damage_melee_effect_multiplier_default
+	self.mateba.sounds = {}
+	self.mateba.sounds.fire = "mateba_fire"
+	self.mateba.sounds.dryfire = "secondary_dryfire"
+	self.mateba.sounds.enter_steelsight = "pistol_steel_sight_enter"
+	self.mateba.sounds.leave_steelsight = "pistol_steel_sight_exit"
+	self.mateba.timers = {}
+	self.mateba.timers.reload_not_empty = 3.6
+	self.mateba.timers.reload_empty = 3.6
+	self.mateba.timers.unequip = 0.65
+	self.mateba.timers.equip = 0.65
+	self.mateba.FIRE_MODE = "single"
+	self.mateba.fire_mode_data = {}
+	self.mateba.fire_mode_data.fire_rate = 0.21
+	self.mateba.single = {}
+	self.mateba.single.fire_rate = 0.21
+	self.mateba.name_id = "bm_w_mateba"
+	self.mateba.desc_id = "bm_w_mateba_desc"
+	self.mateba.description_id = "des_mateba"
+	self.mateba.muzzleflash = "effects/payday2/particles/weapons/762_auto_fps"
+	self.mateba.shell_ejection = "effects/payday2/particles/weapons/shells/shell_empty"
+	self.mateba.use_data = {}
+	self.mateba.use_data.selection_index = 1
+	self.mateba.DAMAGE = 2
+	self.mateba.CLIP_AMMO_MAX = 6
+	self.mateba.NR_CLIPS_MAX = math.round(total_damage_secondary / 4.7 / self.mateba.CLIP_AMMO_MAX)
+	self.mateba.AMMO_MAX = self.mateba.CLIP_AMMO_MAX * self.mateba.NR_CLIPS_MAX
+	self.mateba.AMMO_PICKUP = self:_pickup_chance(self.mateba.AMMO_MAX, 1)
+	self.mateba.spread = {}
+	self.mateba.spread.standing = self.new_m4.spread.standing * 0.75
+	self.mateba.spread.crouching = self.new_m4.spread.standing * 0.75
+	self.mateba.spread.steelsight = self.new_m4.spread.steelsight
+	self.mateba.spread.moving_standing = self.new_m4.spread.standing * 0.75
+	self.mateba.spread.moving_crouching = self.new_m4.spread.standing * 0.75
+	self.mateba.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
+	self.mateba.kick = {}
+	self.mateba.kick.standing = self.glock_17.kick.standing
+	self.mateba.kick.crouching = self.mateba.kick.standing
+	self.mateba.kick.steelsight = self.mateba.kick.standing
+	self.mateba.crosshair = {}
+	self.mateba.crosshair.standing = {}
+	self.mateba.crosshair.crouching = {}
+	self.mateba.crosshair.steelsight = {}
+	self.mateba.crosshair.standing.offset = 0.2
+	self.mateba.crosshair.standing.moving_offset = 0.6
+	self.mateba.crosshair.standing.kick_offset = 0.4
+	self.mateba.crosshair.crouching.offset = 0.1
+	self.mateba.crosshair.crouching.moving_offset = 0.6
+	self.mateba.crosshair.crouching.kick_offset = 0.3
+	self.mateba.crosshair.steelsight.hidden = true
+	self.mateba.crosshair.steelsight.offset = 0
+	self.mateba.crosshair.steelsight.moving_offset = 0
+	self.mateba.crosshair.steelsight.kick_offset = 0.1
+	self.mateba.shake = {}
+	self.mateba.shake.fire_multiplier = 1
+	self.mateba.shake.fire_steelsight_multiplier = -1
+	self.mateba.autohit = autohit_pistol_default
+	self.mateba.aim_assist = aim_assist_pistol_default
+	self.mateba.weapon_hold = "mateba"
+	self.mateba.animations = {}
+	self.mateba.animations.equip_id = "equip_raging_bull"
+	self.mateba.animations.recoil_steelsight = true
+	self.mateba.global_value = "arena"
+	self.mateba.texture_bundle_folder = "dlc_arena"
+	self.mateba.stats = {
+		damage = 30,
+		spread = 9,
+		recoil = 10,
+		spread_moving = 5,
+		zoom = 3,
+		concealment = 20,
+		suppression = 7,
+		alert_size = 7,
+		extra_ammo = 6,
+		total_ammo_mod = 21,
+		value = 1
+	}
 end
 function WeaponTweakData:_init_data_offhand_weapons()
 	self.b92fs_primary = deep_clone(self.b92fs)
@@ -9478,6 +9577,12 @@ function WeaponTweakData:_create_table_structure()
 		use_data = {},
 		auto = {}
 	}
+	self.mateba_npc = {
+		usage = "c45",
+		sounds = {},
+		use_data = {},
+		auto = {}
+	}
 end
 function WeaponTweakData:_precalculate_values_wip()
 end
@@ -9569,4 +9674,5 @@ function WeaponTweakData:_precalculate_values()
 	self.peacemaker_npc.AMMO_MAX = self.peacemaker_npc.CLIP_AMMO_MAX * self.peacemaker_npc.NR_CLIPS_MAX
 	self.winchester1874_npc.AMMO_MAX = self.winchester1874_npc.CLIP_AMMO_MAX * self.winchester1874_npc.NR_CLIPS_MAX
 	self.plainsrider_npc.AMMO_MAX = self.plainsrider_npc.CLIP_AMMO_MAX * self.plainsrider_npc.NR_CLIPS_MAX
+	self.mateba_npc.AMMO_MAX = self.mateba_npc.CLIP_AMMO_MAX * self.mateba_npc.NR_CLIPS_MAX
 end

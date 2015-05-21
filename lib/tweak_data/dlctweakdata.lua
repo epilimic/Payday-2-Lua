@@ -26,9 +26,11 @@ function DLCTweakData:init(tweak_data)
 		dlc_pack_overkill = true,
 		bbq = true,
 		west = true,
+		dlc_arena = true,
 		pd2_goty = 1,
 		pd2_hw_boxing = true,
 		hlm2 = true,
+		speedrunners = 1,
 		alienware_alpha = true,
 		season_pass = true,
 		animal = true
@@ -319,6 +321,7 @@ function DLCTweakData:init(tweak_data)
 	self.preorder = {}
 	self.preorder.dlc = "has_preorder"
 	self.preorder.content = {}
+	self.preorder.content_on_consoles = true
 	self.preorder.content.loot_drops = {
 		{
 			type_items = "colors",
@@ -349,6 +352,19 @@ function DLCTweakData:init(tweak_data)
 	self.preorder.content.upgrades = {
 		"player_crime_net_deal"
 	}
+	if SystemInfo:platform() == Idstring("PS4") then
+		table.insert(self.preorder.content.loot_drops, {
+			type_items = "masks",
+			item_entry = "finger",
+			amount = 1
+		})
+	elseif SystemInfo:platform() == Idstring("XB1") then
+		table.insert(self.preorder.content.loot_drops, {
+			type_items = "masks",
+			item_entry = "instinct",
+			amount = 1
+		})
+	end
 	self.cce = {}
 	self.cce.dlc = "has_cce"
 	self.cce.content = {}
@@ -642,17 +658,19 @@ function DLCTweakData:init(tweak_data)
 		"scar",
 		"p226"
 	}
-	self.gage_pack_shotgun_free = {}
-	self.gage_pack_shotgun_free.free = true
-	self.gage_pack_shotgun_free.content = {}
-	self.gage_pack_shotgun_free.content.loot_global_value = "normal"
-	self.gage_pack_shotgun_free.content.loot_drops = {
-		{
-			type_items = "weapon_mods",
-			item_entry = "wpn_fps_upg_a_custom_free",
-			amount = 2
+	if SystemInfo:platform() == Idstring("WIN32") then
+		self.gage_pack_shotgun_free = {}
+		self.gage_pack_shotgun_free.free = true
+		self.gage_pack_shotgun_free.content = {}
+		self.gage_pack_shotgun_free.content.loot_global_value = "normal"
+		self.gage_pack_shotgun_free.content.loot_drops = {
+			{
+				type_items = "weapon_mods",
+				item_entry = "wpn_fps_upg_a_custom_free",
+				amount = 2
+			}
 		}
-	}
+	end
 	self.gage_pack_shotgun = {}
 	self.gage_pack_shotgun.dlc = "has_gage_pack_shotgun"
 	self.gage_pack_shotgun.content = {}
@@ -2195,26 +2213,28 @@ function DLCTweakData:init(tweak_data)
 		}
 	}
 	self.gage_pack_historical.content.upgrades = {"swagger"}
-	self.alienware_alpha = {}
-	self.alienware_alpha.dlc = "has_alienware_alpha"
-	self.alienware_alpha.content = {}
-	self.alienware_alpha.content.loot_drops = {
-		{
-			type_items = "masks",
-			item_entry = "area51",
-			amount = 1
-		},
-		{
-			type_items = "masks",
-			item_entry = "alien_helmet",
-			amount = 1
+	if SystemInfo:platform() == Idstring("WIN32") then
+		self.alienware_alpha = {}
+		self.alienware_alpha.dlc = "has_alienware_alpha"
+		self.alienware_alpha.content = {}
+		self.alienware_alpha.content.loot_drops = {
+			{
+				type_items = "masks",
+				item_entry = "area51",
+				amount = 1
+			},
+			{
+				type_items = "masks",
+				item_entry = "alien_helmet",
+				amount = 1
+			}
 		}
-	}
-	self.alienware_alpha_promo = {}
-	self.alienware_alpha_promo.dlc = "has_alienware_alpha_promo"
-	self.alienware_alpha_promo.content = {}
-	self.alienware_alpha_promo.content.loot_drops = {}
-	self.alienware_alpha_promo.content.upgrades = {"alien_maul"}
+		self.alienware_alpha_promo = {}
+		self.alienware_alpha_promo.dlc = "has_alienware_alpha_promo"
+		self.alienware_alpha_promo.content = {}
+		self.alienware_alpha_promo.content.loot_drops = {}
+		self.alienware_alpha_promo.content.upgrades = {"alien_maul"}
+	end
 	self.goty_weapon_bundle_2014 = {}
 	self.goty_weapon_bundle_2014.dlc = "has_goty_weapon_bundle_2014"
 	self.goty_weapon_bundle_2014.use_custom_func = true
@@ -3338,6 +3358,119 @@ function DLCTweakData:init(tweak_data)
 		{
 			type_items = "masks",
 			item_entry = "grendel",
+			amount = 1
+		}
+	}
+	self.arena = {}
+	self.arena.dlc = "has_arena"
+	self.arena.content = {}
+	self.arena.content.loot_drops = {
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_pis_2006m_b_long",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_pis_2006m_b_medium",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_pis_2006m_b_short",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_pis_2006m_g_bling",
+			amount = 1
+		}
+	}
+	self.ach_arena_2 = {}
+	self.ach_arena_2.dlc = "has_achievement"
+	self.ach_arena_2.achievement_id = "live_2"
+	self.ach_arena_2.content = {}
+	self.ach_arena_2.content.loot_global_value = "arena"
+	self.ach_arena_2.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "boombox",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "enlightment",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "arena_logo",
+			amount = 1
+		}
+	}
+	self.ach_arena_3 = {}
+	self.ach_arena_3.dlc = "has_achievement"
+	self.ach_arena_3.achievement_id = "live_3"
+	self.ach_arena_3.content = {}
+	self.ach_arena_3.content.loot_global_value = "arena"
+	self.ach_arena_3.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "cantus",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "bionic",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "circle_raster",
+			amount = 1
+		}
+	}
+	self.ach_arena_4 = {}
+	self.ach_arena_4.dlc = "has_achievement"
+	self.ach_arena_4.achievement_id = "live_4"
+	self.ach_arena_4.content = {}
+	self.ach_arena_4.content.loot_global_value = "arena"
+	self.ach_arena_4.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "concert_female",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "stained_glass",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "soundwave",
+			amount = 1
+		}
+	}
+	self.ach_arena_5 = {}
+	self.ach_arena_5.dlc = "has_achievement"
+	self.ach_arena_5.achievement_id = "live_5"
+	self.ach_arena_5.content = {}
+	self.ach_arena_5.content.loot_global_value = "arena"
+	self.ach_arena_5.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "concert_male",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "dimblue",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "smoke",
 			amount = 1
 		}
 	}

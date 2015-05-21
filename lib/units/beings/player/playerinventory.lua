@@ -341,8 +341,8 @@ function PlayerInventory._get_weapon_name_from_sync_index(w_index)
 	return PlayerInventory._weapon_factory_indexed[w_index]
 end
 function PlayerInventory:hide_equipped_unit()
-	local unit = self._available_selections[self._equipped_selection].unit
-	if self._equipped_selection and unit then
+	local unit = self._equipped_selection and self._available_selections[self._equipped_selection].unit
+	if unit then
 		self._was_gadget_on = unit:base().is_gadget_on and unit:base():is_gadget_on() or false
 		unit:set_visible(false)
 		unit:base():on_disabled()

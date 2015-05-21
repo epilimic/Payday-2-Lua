@@ -22,8 +22,8 @@ core:import("CoreEvent")
 MenuManager = MenuManager or class(CoreMenuManager.Manager)
 MenuCallbackHandler = MenuCallbackHandler or class(CoreMenuCallbackHandler.CallbackHandler)
 require("lib/managers/MenuManagerPD2")
-MenuManager.IS_NORTH_AMERICA = true
-MenuManager.ONLINE_AGE = SystemInfo:platform() == Idstring("PS3") and MenuManager.IS_NORTH_AMERICA and 17 or 18
+MenuManager.IS_NORTH_AMERICA = SystemInfo:platform() == Idstring("WIN32") or Application:is_northamerica()
+MenuManager.ONLINE_AGE = (SystemInfo:platform() == Idstring("PS3") or SystemInfo:platform() == Idstring("PS4")) and MenuManager.IS_NORTH_AMERICA and 17 or 18
 require("lib/managers/MenuManagerDialogs")
 require("lib/managers/MenuManagerDebug")
 function MenuManager:init(is_start_menu)
@@ -431,7 +431,7 @@ function MenuManager:invert_camera_y_changed(name, old_value, new_value)
 	managers.controller:rebind_connections()
 end
 function MenuManager:southpaw_changed(name, old_value, new_value)
-	if self._controller.TYPE ~= "xbox360" and self._controller.TYPE ~= "ps3" then
+	if self._controller.TYPE ~= "xbox360" and self._controller.TYPE ~= "ps3" and self._controller.TYPE ~= "xb1" and self._controller.TYPE ~= "ps4" then
 		return
 	end
 	local setup = self._controller:get_setup()
@@ -583,13 +583,19 @@ end
 function MenuManager:_dialog_progress_resetted_ok()
 end
 function MenuManager:is_console()
-	return self:is_ps3() or self:is_x360()
+	return self:is_ps3() or self:is_x360() or self:is_ps4() or self:is_xb1()
 end
 function MenuManager:is_ps3()
 	return SystemInfo:platform() == Idstring("PS3")
 end
+function MenuManager:is_ps4()
+	return SystemInfo:platform() == Idstring("PS4")
+end
 function MenuManager:is_x360()
 	return SystemInfo:platform() == Idstring("X360")
+end
+function MenuManager:is_xb1()
+	return SystemInfo:platform() == Idstring("XB1")
 end
 function MenuManager:is_na()
 	return MenuManager.IS_NORTH_AMERICA
@@ -599,9 +605,35 @@ function MenuManager:open_sign_in_menu(cb)
 		managers.network.matchmake:register_callback("found_game", callback(self, self, "_cb_matchmake_found_game"))
 		managers.network.matchmake:register_callback("player_joined", callback(self, self, "_cb_matchmake_player_joined"))
 		self:open_ps3_sign_in_menu(cb)
+	elseif self:is_ps4() then
+		managers.network.matchmake:register_callback("found_game", callback(self, self, "_cb_matchmake_found_game"))
+		managers.network.matchmake:register_callback("player_joined", callback(self, self, "_cb_matchmake_player_joined"))
+		if PSN:is_fetching_status() then
+			self:show_fetching_status_dialog()
+			local function f()
+				self:open_ps4_sign_in_menu(cb)
+			end
+			PSN:set_matchmaking_callback("fetch_status", f)
+			PSN:fetch_status()
+		else
+			self:open_ps4_sign_in_menu(cb)
+		end
 	elseif self:is_x360() then
 		if managers.network.account:signin_state() == "signed in" and managers.user:check_privilege(nil, "multiplayer_sessions") then
 			self:open_x360_sign_in_menu(cb)
+		else
+			self:show_err_not_signed_in_dialog()
+		end
+	elseif self:is_xb1() then
+		self._queued_privilege_check_cb = nil
+		managers.system_menu:close("fetching_status")
+		if managers.network.account:signin_state() == "signed in" then
+			if managers.user:check_privilege(nil, "multiplayer_sessions", callback(self, self, "_check_privilege_callback")) then
+				self:show_fetching_status_dialog()
+				self._queued_privilege_check_cb = cb
+			else
+				self:show_err_not_signed_in_dialog()
+			end
 		else
 			self:show_err_not_signed_in_dialog()
 		end
@@ -609,6 +641,18 @@ function MenuManager:open_sign_in_menu(cb)
 		cb(true)
 	else
 		self:show_err_not_signed_in_dialog()
+	end
+end
+function MenuManager:_check_privilege_callback(is_success)
+	if self._queued_privilege_check_cb then
+		local cb = self._queued_privilege_check_cb
+		managers.system_menu:close("fetching_status")
+		self._queued_privilege_check_cb = nil
+		if is_success then
+			self:open_xb1_sign_in_menu(cb)
+		else
+			self:show_err_not_signed_in_dialog()
+		end
 	end
 end
 function MenuManager:open_ps3_sign_in_menu(cb)
@@ -633,16 +677,60 @@ function MenuManager:open_ps3_sign_in_menu(cb)
 	end
 	cb(success)
 end
+function MenuManager:open_ps4_sign_in_menu(cb)
+	if managers.system_menu:is_active_by_id("fetching_status") then
+		managers.system_menu:close("fetching_status")
+	end
+	local success = true
+	if PSN:needs_update() then
+		Global.boot_invite = nil
+		success = false
+		self:show_err_new_patch()
+	elseif not PSN:cable_connected() then
+		self:show_internet_connection_required()
+		success = false
+	elseif managers.network.account:signin_state() == "not signed in" then
+		managers.network.account:show_signin_ui()
+		if managers.network.account:signin_state() == "signed in" then
+			print("SIGNED IN")
+			if #PSN:get_world_list() == 0 then
+				managers.network.matchmake:getting_world_list()
+			end
+			success = self:_enter_online_menus()
+		else
+			success = false
+		end
+	elseif PSN:user_age() < MenuManager.ONLINE_AGE and PSN:parental_control_settings_active() then
+		Global.boot_invite = nil
+		success = false
+		self:show_err_under_age()
+	else
+		if #PSN:get_world_list() == 0 then
+			managers.network.matchmake:getting_world_list()
+			PSN:init_matchmaking()
+		end
+		success = self:_enter_online_menus()
+	end
+	cb(success)
+end
 function MenuManager:open_x360_sign_in_menu(cb)
 	local success = self:_enter_online_menus_x360()
+	cb(success)
+end
+function MenuManager:open_xb1_sign_in_menu(cb)
+	local success = self:_enter_online_menus_xb1()
 	cb(success)
 end
 function MenuManager:external_enter_online_menus()
 	if self:is_ps3() then
 		self:_enter_online_menus()
+	elseif self:is_ps4() then
+		self:_enter_online_menus_ps4()
+	elseif self:is_x360() then
+		self:_enter_online_menus_x360()
 	else
-		if self:is_x360() then
-			self:_enter_online_menus_x360()
+		if self:is_xb1() then
+			self:_enter_online_menus_xb1()
 		else
 		end
 	end
@@ -653,14 +741,33 @@ function MenuManager:_enter_online_menus()
 		self:show_err_under_age()
 		return false
 	else
-		managers.platform:set_presence("Signed_in")
-		managers.network:ps3_determine_voice(false)
-		managers.network.voice_chat:check_status_information()
-		PSN:set_online_callback(callback(self, self, "ps3_disconnect"))
-		return true
+		local res = PSN:check_plus()
+		if res == 1 then
+			managers.platform:set_presence("Signed_in")
+			print("voice chat from enter_online_menus")
+			managers.network:ps3_determine_voice(false)
+			managers.network.voice_chat:check_status_information()
+			PSN:set_online_callback(callback(self, self, "ps3_disconnect"))
+			return true
+		elseif res ~= 2 then
+			self:show_err_not_signed_in_dialog()
+		end
 	end
+	return false
+end
+function MenuManager:_enter_online_menus_ps4()
+	managers.platform:set_presence("Signed_in")
+	print("voice chat from enter_online_menus_ps4")
+	managers.network:ps3_determine_voice(false)
+	managers.network.voice_chat:check_status_information()
+	PSN:set_online_callback(callback(self, self, "ps3_disconnect"))
 end
 function MenuManager:_enter_online_menus_x360()
+	managers.platform:set_presence("Signed_in")
+	managers.user:on_entered_online_menus()
+	return true
+end
+function MenuManager:_enter_online_menus_xb1()
 	managers.platform:set_presence("Signed_in")
 	managers.user:on_entered_online_menus()
 	return true
@@ -688,7 +795,7 @@ function MenuManager:steam_disconnected()
 end
 function MenuManager:xbox_disconnected()
 	print("xbox_disconnected()")
-	if managers.network:session() then
+	if managers.network:session() or managers.user:is_online_menu() then
 		managers.network:queue_stop_network()
 		managers.platform:set_presence("Idle")
 		managers.network.matchmake:leave_game()
@@ -699,10 +806,11 @@ function MenuManager:xbox_disconnected()
 	self:show_mp_disconnected_internet_dialog({ok_func = nil})
 end
 function MenuManager:ps3_disconnect(connected)
-	if not connected and not PSN:is_online() then
+	if not connected then
 		managers.network:queue_stop_network()
 		managers.platform:set_presence("Idle")
 		managers.network.matchmake:leave_game()
+		managers.network.matchmake:psn_disconnected()
 		managers.network.friends:psn_disconnected()
 		managers.network.voice_chat:destroy_voice(true)
 		self:show_disconnect_message(true)
@@ -720,7 +828,11 @@ function MenuManager:show_disconnect_message(requires_signin)
 	end
 	self:exit_online_menues()
 	self._showing_disconnect_message = true
-	self:show_err_not_signed_in_dialog()
+	self:show_mp_disconnected_internet_dialog({
+		ok_func = function()
+			self._showing_disconnect_message = nil
+		end
+	})
 end
 function MenuManager:created_lobby()
 	Global.game_settings.single_player = false
@@ -741,10 +853,10 @@ function MenuManager:exit_online_menues()
 	end
 end
 function MenuManager:leave_online_menu()
-	if self:is_ps3() then
+	if self:is_ps3() or self:is_ps4() then
 		PSN:set_online_callback(callback(self, self, "refresh_player_profile_gui"))
 	end
-	if self:is_x360() then
+	if self:is_x360() or self:is_xb1() then
 		managers.user:on_exit_online_menus()
 	end
 end
@@ -761,9 +873,9 @@ function MenuManager:_close_lobby_menu_components()
 	managers.menu_component:close_chat_gui()
 end
 function MenuManager:on_leave_lobby()
-	local skip_destroy_matchmaking = self:is_ps3()
+	local skip_destroy_matchmaking = self:is_ps3() or self:is_ps4()
 	managers.network:prepare_stop_network(skip_destroy_matchmaking)
-	if self:is_x360() then
+	if self:is_x360() or self:is_xb1() then
 		managers.user:on_exit_online_menus()
 	end
 	managers.platform:set_rich_presence("Idle")
@@ -828,7 +940,7 @@ function MenuManager:change_theme(theme)
 	end
 end
 function MenuManager:on_storage_changed(old_user_data, user_data)
-	if old_user_data and old_user_data.storage_id and user_data and user_data.signin_state ~= "not_signed_in" and not old_user_data.has_signed_out and managers.user:get_platform_id() == user_data.platform_id then
+	if old_user_data and old_user_data.storage_id and user_data and user_data.signin_state ~= "not_signed_in" and not old_user_data.has_signed_out and managers.user:get_platform_id() == user_data.platform_id and not self:is_xb1() then
 		self:show_storage_removed_dialog()
 		print("!!!!!!!!!!!!!!!!!!! STORAGE LOST")
 		managers.savefile:break_loading_sequence()
@@ -850,6 +962,7 @@ function MenuManager:reset_all_loaded_data()
 	self:do_clear_progress()
 	managers.user:reset_setting_map()
 	managers.statistics:reset()
+	managers.achievment:on_user_signout()
 end
 function MenuManager:do_clear_progress()
 	managers.skilltree:reset()
@@ -972,6 +1085,10 @@ function MenuCallbackHandler:dlc_buy_west_pc()
 	print("[MenuCallbackHandler:dlc_buy_west_pc]")
 	Steam:overlay_activate("store", 349830)
 end
+function MenuCallbackHandler:dlc_buy_arena_pc()
+	print("[MenuCallbackHandler:dlc_buy_arena_pc]")
+	Steam:overlay_activate("store", 366660)
+end
 function MenuCallbackHandler:dlc_buy_ps3()
 	print("[MenuCallbackHandler:dlc_buy_ps3]")
 	managers.dlc:buy_product("dlc1")
@@ -997,8 +1114,19 @@ end
 function MenuCallbackHandler:is_overlay_enabled()
 	return true
 end
+function MenuCallbackHandler:is_installed()
+	if SystemInfo:platform() == Idstring("WIN32") then
+		return true
+	end
+	local is_installing, install_progress = managers.dlc:is_installing()
+	return not is_installing
+end
+function MenuCallbackHandler:show_game_is_installing_menu()
+	managers.menu:show_game_is_installing_menu()
+end
 function MenuCallbackHandler:is_dlc_latest_locked(check_dlc)
 	local dlcs = {
+		"arena",
 		"west",
 		"bbq",
 		"overkill_pack",
@@ -1097,6 +1225,9 @@ end
 function MenuCallbackHandler:visible_callback_west()
 	return self:is_dlc_latest_locked("west")
 end
+function MenuCallbackHandler:visible_callback_arena()
+	return self:is_dlc_latest_locked("arena")
+end
 function MenuCallbackHandler:not_has_all_dlcs()
 	return not self:has_all_dlcs()
 end
@@ -1146,19 +1277,28 @@ function MenuCallbackHandler:is_win32_not_lan()
 	return SystemInfo:platform() == Idstring("WIN32") and not Global.game_settings.playing_lan
 end
 function MenuCallbackHandler:is_console()
-	return self:is_ps3() or self:is_x360()
+	return self:is_ps3() or self:is_x360() or self:is_ps4() or self:is_xb1()
 end
 function MenuCallbackHandler:is_ps3()
 	return SystemInfo:platform() == Idstring("PS3")
 end
+function MenuCallbackHandler:is_ps4()
+	return SystemInfo:platform() == Idstring("PS4")
+end
 function MenuCallbackHandler:is_x360()
 	return SystemInfo:platform() == Idstring("X360")
+end
+function MenuCallbackHandler:is_xb1()
+	return SystemInfo:platform() == Idstring("XB1")
 end
 function MenuCallbackHandler:is_not_x360()
 	return not self:is_x360()
 end
 function MenuCallbackHandler:is_not_xbox()
 	return not self:is_x360()
+end
+function MenuCallbackHandler:is_not_nextgen()
+	return not self:is_xb1() and not self:is_ps4()
 end
 function MenuCallbackHandler:is_na()
 	return MenuManager.IS_NORTH_AMERICA
@@ -1281,6 +1421,20 @@ end
 function MenuCallbackHandler:on_buy_dlc1()
 	Steam:overlay_activate("store", 218620)
 end
+function MenuCallbackHandler:on_account_picker()
+	print("MenuCallbackHandler:on_account_picker()")
+	local confirm_cb = function()
+		local f = function(...)
+			print("result", ...)
+		end
+		managers.system_menu:show_select_user({count = 1, callback_func = f})
+	end
+	managers.menu:show_account_picker_dialog({yes_func = confirm_cb})
+end
+function MenuCallbackHandler:on_menu_option_help()
+	print("MenuCallbackHandler:on_menu_option_help()")
+	XboxLive:show_help_ui()
+end
 function MenuCallbackHandler:quit_game()
 	local dialog_data = {}
 	dialog_data.title = managers.localization:text("dialog_warning_title")
@@ -1306,6 +1460,11 @@ function MenuCallbackHandler:_dialog_save_progress_backup_yes()
 end
 function MenuCallbackHandler:_dialog_save_progress_backup_no()
 	setup:quit()
+end
+function MenuCallbackHandler:chk_dlc_content_updated()
+	if managers.dlc then
+		managers.dlc:chk_content_updated()
+	end
 end
 function MenuCallbackHandler:toggle_ready(item)
 	local ready = item:value() == "on"
@@ -1900,15 +2059,59 @@ end
 function MenuCallbackHandler:choice_choose_video_adapter(item)
 	managers.viewport:set_adapter_index(item:value())
 end
+function MenuCallbackHandler:apply_and_save_render_settings()
+	local func = function()
+		Application:apply_render_settings()
+		Application:save_render_settings()
+	end
+	local fullscreen_ws = managers.menu_component and managers.menu_component._fullscreen_ws
+	do break end
+	if alive(fullscreen_ws) then
+		do
+			local black_overlay = fullscreen_ws:panel():panel({
+				layer = tweak_data.gui.MOUSE_LAYER - 1
+			})
+			black_overlay:rect({
+				color = Color.black
+			})
+			black_overlay:text({
+				text = managers.localization:to_upper_text("menu_apply_render_settings"),
+				font = tweak_data.menu.pd2_large_font,
+				font_size = 50,
+				align = "center",
+				valign = "center",
+				halign = "center",
+				vertical = "center"
+			})
+			black_overlay:animate(function(o)
+				coroutine.yield()
+				coroutine.yield()
+				func()
+				over(0.05, function(p)
+					black_overlay:set_alpha(1 - p)
+				end)
+				fullscreen_ws:panel():remove(black_overlay)
+			end)
+		end
+	else
+		func()
+	end
+end
 function MenuCallbackHandler:choice_choose_texture_quality(item)
 	RenderSettings.texture_quality_default = item:value()
-	Application:apply_render_settings()
+	MenuCallbackHandler:apply_and_save_render_settings()
+end
+function MenuCallbackHandler:choice_choose_shadow_quality(item)
+	RenderSettings.shadow_quality_default = item:value()
+	MenuCallbackHandler:apply_and_save_render_settings()
+end
+function MenuCallbackHandler:toggle_gpu_flush_setting(item)
+	RenderSettings.flush_gpu_command_queue = item:value() == "on"
 	Application:save_render_settings()
 end
 function MenuCallbackHandler:choice_choose_anisotropic(item)
 	RenderSettings.max_anisotropy = item:value()
-	Application:apply_render_settings()
-	Application:save_render_settings()
+	MenuCallbackHandler:apply_and_save_render_settings()
 end
 function MenuCallbackHandler:choice_fps_cap(item)
 	setup:set_fps_cap(item:value())
@@ -2099,7 +2302,7 @@ function MenuCallbackHandler:_find_online_games(friends_only)
 		Steam:sa_handler():concurrent_users_callback(usrs_f)
 		Steam:sa_handler():get_concurrent_users()
 	end
-	if self:is_ps3() then
+	if self:is_ps3() or self:is_ps4() then
 		if #PSN:get_world_list() == 0 then
 			return
 		end
@@ -2139,9 +2342,16 @@ function MenuCallbackHandler:invite_friends_X360()
 	local platform_id = managers.user:get_platform_id()
 	XboxLive:show_friends_ui(platform_id)
 end
+function MenuCallbackHandler:invite_friends_XB1()
+	local platform_id = managers.user:get_platform_id()
+	XboxLive:invite_friends_ui(platform_id, managers.network.matchmake._session)
+end
 function MenuCallbackHandler:invite_xbox_live_party()
 	local platform_id = managers.user:get_platform_id()
 	XboxLive:show_party_ui(platform_id)
+end
+function MenuCallbackHandler:invite_friends_ps4()
+	PSN:invite_friends()
 end
 function MenuCallbackHandler:view_invites()
 	print("View invites")
@@ -2163,6 +2373,18 @@ end
 function MenuCallbackHandler:mute_xbox_player(item)
 	if managers.network.voice_chat then
 		managers.network.voice_chat:set_muted(item:parameters().xuid, item:value() == "on")
+		item:parameters().peer:set_muted(item:value() == "on")
+	end
+end
+function MenuCallbackHandler:mute_xb1_player(item)
+	if managers.network.voice_chat then
+		managers.network.voice_chat:set_muted(item:parameters().xuid, item:value() == "on")
+		item:parameters().peer:set_muted(item:value() == "on")
+	end
+end
+function MenuCallbackHandler:mute_ps4_player(item)
+	if managers.network.voice_chat then
+		managers.network.voice_chat:mute_player(item:value() == "on", item:parameters().peer)
 		item:parameters().peer:set_muted(item:value() == "on")
 	end
 end
@@ -2328,6 +2550,7 @@ function MenuCallbackHandler:end_game()
 	managers.system_menu:show(dialog_data)
 end
 function MenuCallbackHandler:_dialog_end_game_yes()
+	managers.platform:set_playing(false)
 	managers.job:clear_saved_ghost_bonus()
 	managers.experience:mission_xp_clear()
 	managers.statistics:stop_session({quit = true})
@@ -2431,7 +2654,6 @@ function MenuCallbackHandler:resume_game()
 	managers.menu:close_menu("menu_pause")
 end
 function MenuCallbackHandler:change_upgrade(menu_item)
-	cat_print("johan", "change upgrade")
 end
 function MenuCallbackHandler:delayed_open_savefile_menu(item)
 	if not self._delayed_open_savefile_menu_callback then
@@ -2731,6 +2953,113 @@ function MutePlayerX360:modify_node(node, up)
 				rpc = peer:rpc(),
 				peer = peer,
 				xuid = peer:xuid()
+			}
+			local data = {
+				type = "CoreMenuItemToggle.ItemToggle",
+				{
+					_meta = "option",
+					icon = "guis/textures/menu_tickbox",
+					value = "on",
+					x = 24,
+					y = 0,
+					w = 24,
+					h = 24,
+					s_icon = "guis/textures/menu_tickbox",
+					s_x = 24,
+					s_y = 24,
+					s_w = 24,
+					s_h = 24
+				},
+				{
+					_meta = "option",
+					icon = "guis/textures/menu_tickbox",
+					value = "off",
+					x = 0,
+					y = 0,
+					w = 24,
+					h = 24,
+					s_icon = "guis/textures/menu_tickbox",
+					s_x = 0,
+					s_y = 24,
+					s_w = 24,
+					s_h = 24
+				}
+			}
+			local new_item = node:create_item(data, params)
+			new_item:set_value(peer:is_muted() and "on" or "off")
+			new_node:add_item(new_item)
+		end
+	end
+	managers.menu:add_back_button(new_node)
+	return new_node
+end
+MutePlayerXB1 = MutePlayerXB1 or class()
+function MutePlayerXB1:modify_node(node, up)
+	local new_node = deep_clone(node)
+	if managers.network:session() then
+		for _, peer in pairs(managers.network:session():peers()) do
+			local params = {
+				name = peer:name(),
+				text_id = peer:name(),
+				callback = "mute_xb1_player",
+				to_upper = false,
+				localize = "false",
+				rpc = peer:rpc(),
+				peer = peer,
+				xuid = peer:xuid()
+			}
+			local data = {
+				type = "CoreMenuItemToggle.ItemToggle",
+				{
+					_meta = "option",
+					icon = "guis/textures/menu_tickbox",
+					value = "on",
+					x = 24,
+					y = 0,
+					w = 24,
+					h = 24,
+					s_icon = "guis/textures/menu_tickbox",
+					s_x = 24,
+					s_y = 24,
+					s_w = 24,
+					s_h = 24
+				},
+				{
+					_meta = "option",
+					icon = "guis/textures/menu_tickbox",
+					value = "off",
+					x = 0,
+					y = 0,
+					w = 24,
+					h = 24,
+					s_icon = "guis/textures/menu_tickbox",
+					s_x = 0,
+					s_y = 24,
+					s_w = 24,
+					s_h = 24
+				}
+			}
+			local new_item = node:create_item(data, params)
+			new_item:set_value(peer:is_muted() and "on" or "off")
+			new_node:add_item(new_item)
+		end
+	end
+	managers.menu:add_back_button(new_node)
+	return new_node
+end
+MutePlayerPS4 = MutePlayerPS4 or class()
+function MutePlayerPS4:modify_node(node, up)
+	local new_node = deep_clone(node)
+	if managers.network:session() then
+		for _, peer in pairs(managers.network:session():peers()) do
+			local params = {
+				name = peer:name(),
+				text_id = peer:name(),
+				callback = "mute_ps4_player",
+				to_upper = false,
+				localize = "false",
+				rpc = peer:rpc(),
+				peer = peer
 			}
 			local data = {
 				type = "CoreMenuItemToggle.ItemToggle",
@@ -3380,7 +3709,7 @@ function MenuManager.refresh_level_select(node, verify_dlc_owned)
 end
 MenuPSNPlayerProfileInitiator = MenuPSNPlayerProfileInitiator or class()
 function MenuPSNPlayerProfileInitiator:modify_node(node)
-	if managers.menu:is_ps3() and not managers.network:session() then
+	if (managers.menu:is_ps3() or managers.menu:is_ps4()) and not managers.network:session() then
 		PSN:set_online_callback(callback(managers.menu, managers.menu, "refresh_player_profile_gui"))
 	end
 	return node
@@ -4164,6 +4493,7 @@ function MenuPrePlanningInitiator:set_locks_to_param(params, key, index)
 		end
 	end
 	params.enabled = enabled
+	params.ignore_disabled = true
 end
 function MenuPrePlanningInitiator:modifiy_node_preplanning(node, item_name, selected_item)
 	if not managers.preplanning:can_edit_preplan() then
@@ -4904,10 +5234,12 @@ function MenuCrimeNetGageAssignmentInitiator:modify_node(original_node, data)
 		id = "_summary",
 		name_lozalized = managers.localization:text("menu_gage_assignment_summary_title")
 	})
-	self:create_item(node, {
-		id = "_video",
-		name_lozalized = managers.localization:text("menu_gage_assignment_video_title")
-	})
+	if SystemInfo:platform() ~= Idstring("XB1") then
+		self:create_item(node, {
+			id = "_video",
+			name_lozalized = managers.localization:text("menu_gage_assignment_video_title")
+		})
+	end
 	self:create_divider(node, 2)
 	self:create_divider(node, 3, managers.localization:text("menu_gage_assignment_div_packages"), nil, tweak_data.screen_colors.text)
 	local node_data = {}
@@ -4961,6 +5293,7 @@ function MenuCrimeNetSpecialInitiator:refresh_node(node)
 end
 function MenuCrimeNetSpecialInitiator:setup_node(node)
 	local listed_contact = node:parameters().listed_contact or "bain"
+	MenuCallbackHandler:chk_dlc_content_updated()
 	node:clean_items()
 	if not node:item("divider_end") then
 		local contacts = {}
@@ -5824,10 +6157,12 @@ function MenuOptionInitiator:modify_adv_video(node)
 	end
 	node:item("use_lightfx"):set_value(managers.user:get_setting("use_lightfx") and "on" or "off")
 	node:item("choose_texture_quality"):set_value(RenderSettings.texture_quality_default)
+	node:item("choose_shadow_quality"):set_value(RenderSettings.shadow_quality_default)
 	node:item("choose_anisotropic"):set_value(RenderSettings.max_anisotropy)
 	if node:item("fov_multiplier") then
 		node:item("fov_multiplier"):set_value(managers.user:get_setting("fov_multiplier"))
 	end
+	node:item("choose_gpu_flush"):set_value(RenderSettings.flush_gpu_command_queue and "on" or "off")
 	node:item("choose_fps_cap"):set_value(managers.user:get_setting("fps_cap"))
 	node:item("use_headbob"):set_value(managers.user:get_setting("use_headbob") and "on" or "off")
 	node:item("max_streaming_chunk"):set_value(managers.user:get_setting("max_streaming_chunk"))
@@ -5843,7 +6178,7 @@ function MenuOptionInitiator:modify_adv_video(node)
 end
 function MenuOptionInitiator:modify_video(node)
 	local adapter_item = node:item("choose_video_adapter")
-	if adapter_item then
+	if adapter_item and adapter_item:visible() then
 		adapter_item:clear_options()
 		for i = 0, RenderSettings.adapter_count - 1 do
 			local option = CoreMenuItemOption.ItemOption:new({
@@ -6162,7 +6497,7 @@ function MenuCallbackHandler:set_active_skill_switch(item)
 	self:refresh_node()
 end
 function MenuCallbackHandler:has_installed_mods()
-	return table.size(DB:mods()) > 0
+	return not self:is_console() and table.size(DB:mods()) > 0
 end
 ModMenuCreator = ModMenuCreator or class()
 function ModMenuCreator:modify_node(original_node, data)
@@ -6365,7 +6700,7 @@ function MenuCrimeNetChallengeInitiator:setup_node(node)
 			self:create_divider(node, category, managers.localization:text("menu_challenge_div_cat_" .. category), nil, tweak_data.screen_colors.text)
 			node_data = {}
 			local hightlight_color, row_item_color, marker_color, icon, icon_rotation, icon_visible_callback
-			for assignment, challenge in pairs(challenges[category]) do
+			for assignment, challenge in ipairs(challenges[category]) do
 				hightlight_color = challenge.rewarded and tweak_data.screen_colors.text:with_alpha(0.5) or challenge.completed and tweak_data.screen_colors.challenge_completed_color
 				row_item_color = challenge.rewarded and tweak_data.screen_colors.text:with_alpha(0.5) or challenge.completed and tweak_data.screen_colors.challenge_completed_color
 				marker_color = challenge.rewarded and tweak_data.screen_colors.text:with_alpha(0.5) or challenge.completed and tweak_data.screen_colors.challenge_completed_color:with_alpha(0.15)
@@ -6373,9 +6708,10 @@ function MenuCrimeNetChallengeInitiator:setup_node(node)
 				icon_rotation = selected_item ~= challenge.id and (challenge.rewarded and 360 or challenge.completed and 360) or nil
 				icon_visible_callback = "is_current_challenge"
 				table.insert(node_data, {
-					name_lozalized = managers.localization:text(challenge.name_id),
+					name_lozalized = challenge.name_s or managers.localization:text(challenge.name_id),
 					interval = challenge.interval,
 					id = challenge.id,
+					completed = challenge.completed,
 					hightlight_color = hightlight_color,
 					row_item_color = row_item_color,
 					marker_color = marker_color,
@@ -6385,10 +6721,13 @@ function MenuCrimeNetChallengeInitiator:setup_node(node)
 				})
 			end
 			table.sort(node_data, function(x, y)
+				if x.completed ~= y.completed then
+					return x.completed
+				end
 				if x.interval ~= y.interval then
 					return x.interval < y.interval
 				end
-				return x.id > y.id
+				return x.name_lozalized < y.name_lozalized
 			end)
 			for assignment, data in ipairs(node_data) do
 				self:create_item(node, data)

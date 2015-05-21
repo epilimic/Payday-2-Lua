@@ -388,7 +388,8 @@ function MusicManager:jukebox_menu_tracks()
 		"im_a_wild_one"
 	}
 	local new_tracks = {
-		"the_flames_of_love"
+		"the_flames_of_love",
+		"alesso_payday"
 	}
 	local bsides_tracks = {
 		"bsides_04_double_lmgs",
@@ -458,12 +459,15 @@ function MusicManager:jukebox_menu_tracks()
 			tracks_locked[sound] = "xmas"
 		end
 	end
+	if not managers.dlc:has_arena() then
+		tracks_locked.alesso_payday = "alesso"
+	end
 	return tracks, tracks_locked
 end
 function MusicManager:music_tracks()
 	local tracks = {
 		"soundbanks/music",
-		"soundbanks/alesso_heist"
+		"soundbanks/music_alesso"
 	}
 	return tracks
 end

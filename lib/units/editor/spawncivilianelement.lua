@@ -102,7 +102,19 @@ SpawnCivilianUnitElement._options = {
 	"units/pd2_dlc_casino/characters/civ_male_casino_2/civ_male_casino_2",
 	"units/pd2_dlc_casino/characters/civ_male_casino_3/civ_male_casino_3",
 	"units/pd2_dlc_casino/characters/civ_male_casino_4/civ_male_casino_4",
-	"units/pd2_dlc_casino/characters/civ_male_impersonator/civ_male_impersonator"
+	"units/pd2_dlc_casino/characters/civ_male_impersonator/civ_male_impersonator",
+	"units/pd2_dlc_arena/characters/civ_female_fastfood_1/civ_female_fastfood_1",
+	"units/pd2_dlc_arena/characters/civ_male_fastfood_1/civ_male_fastfood_1",
+	"units/pd2_dlc_arena/characters/civ_male_fastfood_2/civ_male_fastfood_2",
+	"units/pd2_dlc_arena/characters/civ_female_party_alesso_1/civ_female_party_alesso_1",
+	"units/pd2_dlc_arena/characters/civ_female_party_alesso_2/civ_female_party_alesso_2",
+	"units/pd2_dlc_arena/characters/civ_female_party_alesso_3/civ_female_party_alesso_3",
+	"units/pd2_dlc_arena/characters/civ_female_party_alesso_4/civ_female_party_alesso_4",
+	"units/pd2_dlc_arena/characters/civ_female_party_alesso_5/civ_female_party_alesso_5",
+	"units/pd2_dlc_arena/characters/civ_female_party_alesso_6/civ_female_party_alesso_6",
+	"units/pd2_dlc_arena/characters/civ_male_party_alesso_1/civ_male_party_alesso_1",
+	"units/pd2_dlc_arena/characters/civ_male_party_alesso_2/civ_male_party_alesso_2",
+	"units/pd2_dlc_arena/characters/civ_male_alesso_booth/civ_male_alesso_booth"
 }
 function SpawnCivilianUnitElement:init(unit)
 	SpawnCivilianUnitElement.super.init(self, unit)

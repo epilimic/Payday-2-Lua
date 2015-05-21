@@ -28,7 +28,7 @@ function HUDPackageUnlockedItem:init(panel, row, params, hud_stage_end_screen)
 	local text_string = ""
 	local blend_mode = "normal"
 	local post_event = "stinger_new_weapon"
-	local wait_time = 0
+	local wait_time = 0.35
 	if announcement then
 		bitmap_texture = "guis/textures/pd2/endscreen/announcement"
 		text_string = managers.localization:to_upper_text("menu_es_announcement") .. "\n" .. managers.localization:to_upper_text(announcement)
@@ -151,8 +151,8 @@ function HUDPackageUnlockedItem:init(panel, row, params, hud_stage_end_screen)
 end
 function HUDPackageUnlockedItem:create_animation(params)
 	managers.menu_component:post_event(params.post_event)
-	wait(params.wait_time or 0)
-	over(0.3, function(p)
+	wait(params.wait_time or 0.1)
+	over(0.13, function(p)
 		self._panel:set_alpha(math.lerp(0, 1, p))
 	end)
 end
@@ -1016,7 +1016,7 @@ function HUDStageEndScreen:_check_special_packages()
 		table.insert(package_items, challenge_completed)
 	end
 	if #package_items > 0 then
-		for _, item in ipairs(self._package_items) do
+		for _, item in pairs(self._package_items) do
 			item:close()
 		end
 		self._package_items = package_items
@@ -1638,8 +1638,9 @@ function HUDStageEndScreen:stage_spin_levels(t, dt)
 			self._gained_xp = self._static_gained_xp
 			self._static_start_xp = 0
 			self._speed = math.max(1, self._speed * 0.55)
-			if self:level_up(current_level_data.level) then
-				self._wait_t = t + 1.4
+			local package_unlocked = self:level_up(current_level_data.level)
+			if package_unlocked then
+				self._wait_t = t + 0.63 + (package_unlocked.upgrades and #package_unlocked.upgrades * 0.57 or 0)
 				managers.menu_component:post_event("count_1_finished")
 				self._playing_sound = nil
 			else
@@ -1802,7 +1803,7 @@ function HUDStageEndScreen:level_up(level)
 	end
 	local function package_func(o, data)
 		local start_alpha = o:alpha()
-		for _, item in ipairs(self._package_items) do
+		for _, item in pairs(self._package_items) do
 			item:close()
 		end
 		self._package_items = {}
@@ -1831,9 +1832,17 @@ function HUDStageEndScreen:level_up(level)
 			o:set_alpha(math.step(o:alpha(), 1, p))
 		end)
 		o:set_alpha(1)
+		local row
 		for i, item in ipairs(new_items) do
-			table.insert(self._package_items, HUDPackageUnlockedItem:new(o, i, item, self))
-			wait(0.24)
+			row = i % 2
+			if self._package_items[row] then
+				wait(0.23)
+				self._package_items[row]:close()
+				self._package_items[row] = nil
+				wait(0.33)
+			end
+			self._package_items[row] = HUDPackageUnlockedItem:new(o, 2 - row, item, self)
+			wait(0.27)
 		end
 	end
 	managers.menu_component:post_event("stinger_levelup")
@@ -1886,6 +1895,9 @@ function HUDStageEndScreen:stage_debug_loop(t, dt)
 	self:reset_stage()
 	self._wait_t = t + 3
 end
+function HUDStageEndScreen:set_speed_up(multiplier)
+	self._speed_up = multiplier
+end
 HUDStageEndScreen.stages = {
 	"create_money_counter",
 	"count_money",
@@ -1903,12 +1915,12 @@ function HUDStageEndScreen:update(t, dt)
 	if self._wait_t then
 		if t > self._wait_t then
 			self._wait_t = nil
+			self._speed_up = 1
 		end
+	elseif self._stage and self.stages[self._stage] then
+		self[self.stages[self._stage]](self, t, dt * (self._speed_up or 1))
 	else
-		if self._stage and self.stages[self._stage] then
-			self[self.stages[self._stage]](self, t, dt)
-		else
-		end
+		self._speed_up = 1
 	end
 	if self._update_skill_points then
 		self._update_skill_points = nil

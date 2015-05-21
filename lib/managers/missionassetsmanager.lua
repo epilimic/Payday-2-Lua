@@ -80,7 +80,7 @@ function MissionAssetsManager:_setup_mission_assets()
 				end
 			end
 			if asset.dlc_lock then
-				requirements.dlc_lock = managers.dlc:has_dlc(asset.dlc_lock)
+				requirements.dlc_lock = managers.dlc:is_dlc_unlocked(asset.dlc_lock)
 				if not requirements.dlc_lock or not can_unlock then
 					can_unlock = false
 				end
@@ -318,7 +318,7 @@ function MissionAssetsManager:is_asset_unlockable(id)
 		end
 	end
 	if asset_tweak_data.dlc_lock then
-		dlc_lock = managers.dlc:has_dlc(asset_tweak_data.dlc_lock) or false
+		dlc_lock = managers.dlc:is_dlc_unlocked(asset_tweak_data.dlc_lock) or false
 		if not dlc_lock or not can_unlock then
 			can_unlock = false
 		end

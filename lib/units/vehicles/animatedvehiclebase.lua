@@ -148,7 +148,7 @@ function AnimatedVehicleBase:run_module_function(module_id, extension_name, func
 		return
 	end
 	if Network:is_server() then
-		local params = param1 .. " " .. param2
+		local params = (param1 or "") .. " " .. (param2 or "")
 		managers.network:session():send_to_peers_synched("run_unit_module_function", self._unit, module_id, "base", extension_name, func_name, params)
 	end
 	self:run_module_function_unsafe(module_id, extension_name, func_name, param1, param2)

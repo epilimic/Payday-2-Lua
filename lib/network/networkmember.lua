@@ -105,7 +105,7 @@ function NetworkMember:spawn_unit(spawn_point_id, is_drop_in, spawn_as)
 		old_plr_entry.hostages_killed = nil
 		old_plr_entry.respawn_penalty = nil
 	end
-	local character_name = self:character_name()
+	local character_name = self._peer:character()
 	local trade_entry, spawn_in_custody
 	print("[NetworkMember:spawn_unit] Member assigned as", character_name)
 	local old_unit
@@ -202,115 +202,6 @@ function NetworkMember:update_equipped_armor()
 		self._unit:base():setup_hud_offset(self._peer)
 	end
 end
-function NetworkMember:sync_lobby_data(peer)
-	print("[NetworkMember:sync_lobby_data] to", peer:id())
-	local local_peer = managers.network:session():local_peer()
-	local peer_id = local_peer:id()
-	local level = managers.experience:current_level()
-	local rank = managers.experience:current_rank()
-	local character = local_peer:character()
-	local mask_set = "remove"
-	local progress = managers.upgrades:progress()
-	local menu_state = managers.menu:get_peer_state(local_peer:id())
-	local menu_state_index = tweak_data:menu_sync_state_to_index(menu_state)
-	cat_print("multiplayer_base", "NetworkMember:sync_lobby_data to", peer:id(), " : ", peer_id, level)
-	peer:send_after_load("lobby_info", level, rank, character, mask_set)
-	peer:send_after_load("sync_profile", level, rank)
-	managers.network:session():check_send_outfit()
-	if menu_state_index then
-		peer:send_after_load("set_menu_sync_state_index", menu_state_index)
-	end
-	if Network:is_server() then
-		local level_id_index = tweak_data.levels:get_index_from_level_id(Global.game_settings.level_id)
-		peer:send_after_load("lobby_sync_update_level_id", level_id_index)
-		local difficulty = Global.game_settings.difficulty
-		peer:send_after_load("lobby_sync_update_difficulty", difficulty)
-	end
-end
-function NetworkMember:sync_data(peer)
-	print("[NetworkMember:sync_data] to", peer:id())
-	local level = managers.experience:current_level()
-	local rank = managers.experience:current_rank()
-	peer:send_queued_sync("sync_profile", level, rank)
-	managers.network:session():check_send_outfit(peer)
-	managers.player:update_deployable_equipment_to_peer(peer)
-	managers.player:update_cable_ties_to_peer(peer)
-	managers.player:update_grenades_to_peer(peer)
-	managers.player:update_equipment_possession_to_peer(peer)
-	managers.player:update_ammo_info_to_peer(peer)
-	managers.player:update_carry_to_peer(peer)
-	managers.player:update_team_upgrades_to_peer(peer)
-	if Network:is_server() then
-		managers.vehicle:update_vehicles_data_to_peer(peer)
-	end
-	if self._unit then
-	end
-end
 function NetworkMember:spawn_unit_called()
 	return self._spawn_unit_called
-end
-function NetworkMember:drop_in_progress()
-	return self._dropin_progress
-end
-function NetworkMember:set_drop_in_progress(dropin_progress)
-	self._dropin_progress = dropin_progress
-end
-function NetworkMember:character_name()
-	return self._peer:character()
-end
-function NetworkMember:place_deployable(id)
-	if tweak_data.equipments.max_amount[id] then
-		if not self._deployable then
-			self._deployable = id
-			self._depolyable_count = 1
-			return true
-		elseif self._deployable == id and self._depolyable_count < tweak_data.equipments.max_amount[id] then
-			self._depolyable_count = self._depolyable_count + 1
-			return true
-		elseif not self._deployable_swap and (self._deployable == "sentry_gun" and id == "trip_mine" or self._deployable == "trip_mine" and id == "sentry_gun") then
-			self._deployable_swap = true
-			self._deployable = id
-			self._depolyable_count = 1
-			return true
-		end
-	end
-	local peer = Network:is_server() and self._peer or managers.network:session():server_peer()
-	peer:mark_cheater(self._deployable ~= id and VoteManager.REASON.wrong_equipment or VoteManager.REASON.many_equipments, Network:is_server())
-	print("[NetworkMember:place_deployable]: Failed to deploy equipment", self._peer:id(), id, self._deployable, self._depolyable_count)
-	return false
-end
-function NetworkMember:place_bag(carry_id, amount)
-	local cheating = false
-	if amount < 0 then
-		if self._carry_id ~= carry_id then
-			cheating = true
-		else
-			self._carry_id = nil
-		end
-	elseif self._carry_id then
-		cheating = true
-	else
-		self._carry_id = carry_id
-	end
-	if cheating then
-		if Network:is_client() and amount < 0 and not self._skipped_first_cheat then
-			self._skipped_first_cheat = true
-			return true
-		end
-		local peer = Network:is_server() and self._peer or managers.network:session():server_peer()
-		peer:mark_cheater(amount < 0 and VoteManager.REASON.many_bags or VoteManager.REASON.many_bags_pickup, Network:is_server())
-		print("[NetworkMember:place_bag]: Failed to place bag", self._peer:id(), self._carry_id, carry_id, amount)
-		return false
-	end
-	return true
-end
-function NetworkMember:set_grenade(value)
-	if self._grenades and self._grenades + value > tweak_data.equipments.max_amount.grenades then
-		local peer = Network:is_server() and self._peer or managers.network:session():server_peer()
-		peer:mark_cheater(VoteManager.REASON.many_grenades, Network:is_server())
-		print("[NetworkMember:set_grenade]: Failed to use grenade", self._peer:id(), self._grenades, value)
-		return false
-	end
-	self._grenades = self._grenades and self._grenades + value or value
-	return true
 end

@@ -16,6 +16,7 @@ function MolotovGrenade:_setup_from_tweak_data(grenade_entry)
 	self._player_damage = self._tweak_data.player_damage
 	self._alert_radius = self._tweak_data.alert_radius
 	self._fire_alert_radius = self._tweak_data.fire_alert_radius
+	self._fire_dot_data = self._tweak_data.fire_dot_data
 	local sound_event = self._tweak_data.sound_event or "molotov_impact"
 	local sound_event_burning = self._tweak_data.sound_event_burning or "burn_loop_gen"
 	local sound_event_impact_duration = self._tweak_data.sound_event_impact_duration or 1
@@ -102,7 +103,6 @@ function MolotovGrenade:_do_damage()
 					end
 				end
 				if Network:is_server() then
-					local fire_dot_data = self._tweak_data.fire_dot_data
 					local hit_units, splinters = managers.fire:detect_and_give_dmg({
 						hit_pos = effect_position,
 						range = damage_range,
@@ -114,7 +114,7 @@ function MolotovGrenade:_do_damage()
 						user = self._unit,
 						push_units = false,
 						alert_radius = self._fire_alert_radius,
-						fire_dot_data = fire_dot_data
+						fire_dot_data = self._fire_dot_data
 					})
 				end
 			end
@@ -270,4 +270,17 @@ function MolotovGrenade:bullet_hit()
 	self:_detonate()
 end
 function MolotovGrenade:add_damage_result(unit, is_dead, damage_percent)
+	if not alive(self._thrower_unit) or self._thrower_unit ~= managers.player:player_unit() then
+		return
+	end
+	local unit_type = unit:base()._tweak_table
+	local is_civlian = unit:character_damage().is_civilian(unit_type)
+	local is_gangster = unit:character_damage().is_gangster(unit_type)
+	local is_cop = unit:character_damage().is_cop(unit_type)
+	if is_civlian then
+		return
+	end
+	if is_dead then
+		self:_check_achievements(unit, is_dead, damage_percent, 1, 1)
+	end
 end

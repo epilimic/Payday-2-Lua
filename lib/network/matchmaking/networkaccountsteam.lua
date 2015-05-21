@@ -111,7 +111,7 @@ function NetworkAccountSTEAM:_on_close_overlay()
 	end
 	self._overlay_opened = false
 	game_state_machine:_set_controller_enabled(true)
-	managers.dlc:chk_dlc_purchase()
+	managers.dlc:chk_content_updated()
 end
 function NetworkAccountSTEAM:_on_gamepad_text_submitted(submitted, submitted_text)
 	print("[NetworkAccountSTEAM:_on_gamepad_text_submitted]", "submitted", submitted, "submitted_text", submitted_text)
@@ -199,18 +199,20 @@ function NetworkAccountSTEAM:publish_statistics(stats, force_store)
 		print("[NetworkAccountSTEAM:publish_statistics] Error, SA handler not initialized! Not sending stats.")
 		return
 	end
-	if Application:production_build() and not force_store then
+	if Application:production_build() then
 		local err = false
 		for key, _ in pairs(stats) do
 			if not handler:set_stat(key, handler:get_stat(key)) then
-				Application:error("[NetworkAccountSTEAM:publish_statistics] WARNING - Stat is missing on Steam: '" .. key .. "'")
+				Application:error("[NetworkAccountSTEAM:publish_statistics] ERROR - Stat is missing on Steam: '" .. key .. "'")
 				err = true
 			end
 		end
 		if err then
 			Application:throw_exception("[NetworkAccountSTEAM:publish_statistics] Missing statistics, needs to be added!!")
 		end
-		return
+		if not force_store then
+			return
+		end
 	end
 	local err = false
 	for key, stat in pairs(stats) do

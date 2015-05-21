@@ -27,7 +27,7 @@ function HUDTeammate:init(i, teammates_panel, is_player, width)
 	self._player_panel = teammate_panel:panel({name = "player"})
 	local name = teammate_panel:text({
 		name = "name",
-		text = " " .. utf8.to_upper(names[i]),
+		text = " " .. names[i],
 		layer = 1,
 		color = Color.white,
 		y = 0,
@@ -974,7 +974,7 @@ function HUDTeammate:set_name(teammate_name)
 	local name = teammate_panel:child("name")
 	local name_bg = teammate_panel:child("name_bg")
 	local callsign = teammate_panel:child("callsign")
-	name:set_text(utf8.to_upper(" " .. teammate_name))
+	name:set_text(" " .. teammate_name)
 	local h = name:h()
 	managers.hud:make_fine_text(name)
 	name:set_h(h)

@@ -5,6 +5,7 @@ local mvec3_mul = mvector3.multiply
 local mvec3_norm = mvector3.normalize
 local mvec3_dot = mvector3.dot
 local mvec3_set_z = mvector3.set_z
+local mvec3_z = mvector3.z
 local tmp_vec1 = Vector3()
 local tmp_vec2 = Vector3()
 local tmp_rot1 = Rotation()
@@ -238,6 +239,7 @@ HuskPlayerMovement._mask_off_modifier_name = Idstring("look_mask_off")
 function HuskPlayerMovement:init(unit)
 	self._unit = unit
 	self._machine = unit:anim_state_machine()
+	self._crouch_detection_offset_z = mvec3_z(tweak_data.player.stances.default.crouched.head.translation)
 	self._m_pos = unit:position()
 	self._m_rot = unit:rotation()
 	self._look_dir = self._m_rot:y()
@@ -435,18 +437,19 @@ function HuskPlayerMovement:look_dir()
 end
 function HuskPlayerMovement:_calculate_m_pose()
 	mrotation.set_look_at(self._m_head_rot, self._look_dir, math.UP)
-	mvector3.set(self._m_head_pos, self._obj_head:position())
+	self._obj_head:m_position(self._m_head_pos)
 	self._obj_spine:m_position(self._m_com)
 	local det_pos = self._m_detect_pos
 	if self._move_data then
 		local path = self._move_data.path
 		mvector3.set(det_pos, path[#path])
 		mvector3.set(self._m_newest_pos, det_pos)
-		mvector3.set_z(det_pos, det_pos.z + self._m_head_pos.z - self._m_pos.z)
 	else
-		mvector3.set(det_pos, self._m_head_pos)
+		mvector3.set(det_pos, self._m_pos)
 		mvector3.set(self._m_newest_pos, self._m_pos)
 	end
+	local offset_z = self._pose_code == 2 and self._crouch_detection_offset_z or mvec3_z(self._m_head_pos) - mvec3_z(self._m_pos)
+	mvec3_set_z(det_pos, mvec3_z(det_pos) + offset_z)
 end
 function HuskPlayerMovement:set_position(pos)
 	mvector3.set(self._m_pos, pos)
@@ -1445,9 +1448,19 @@ function HuskPlayerMovement:_start_standard(event_desc)
 	self:set_need_revive(false)
 	self:set_need_assistance(false)
 	managers.hud:set_mugshot_normal(self._unit:unit_data().mugshot_id)
+	local panel_id = managers.criminals:character_data_by_unit(self._unit) and managers.criminals:character_data_by_unit(self._unit).panel_id
+	if panel_id then
+		if self._state == "clean" then
+			managers.hud:hide_player_gear(panel_id)
+		else
+			managers.hud:show_player_gear(panel_id)
+		end
+	end
 	if self._state == "mask_off" or self._state == "clean" then
 		self._unit:set_slot(5)
 		self:_change_pose(1)
+		self._unit:inventory():hide_equipped_unit()
+		self:_chk_change_stance()
 	else
 		self._unit:set_slot(3)
 		if Network:is_server() then
@@ -2041,7 +2054,9 @@ function HuskPlayerMovement:sync_stance(stance_code)
 end
 function HuskPlayerMovement:_chk_change_stance()
 	local wanted_stance_code
-	if self._is_weapon_gadget_on then
+	if self._state == "mask_off" or self._state == "clean" then
+		wanted_stance_code = self._stance.owner_stance_code
+	elseif self._is_weapon_gadget_on then
 		wanted_stance_code = 3
 	elseif self._aim_up_expire_t then
 		wanted_stance_code = 3
@@ -2054,8 +2069,7 @@ function HuskPlayerMovement:_chk_change_stance()
 end
 function HuskPlayerMovement:_get_max_move_speed(run)
 	local my_tweak = tweak_data.player.movement_state.standard
-	if self._state.name == "cbt" then
-		return my_tweak.movement.speed.STEELSIGHT_MAX
+	if self._stance.name == "cbt" then
 	end
 	if self._pose_code == 2 then
 		return my_tweak.movement.speed.CROUCHING_MAX * (self._unit:base():upgrade_value("player", "crouch_speed_multiplier") or 1)

@@ -8,6 +8,9 @@ function DisconnectedState:at_enter(...)
 	self._completion_bonus_done = true
 	DisconnectedState.super.at_enter(self, ...)
 	managers.network.voice_chat:destroy_voice(true)
+	if managers.network.matchmake then
+		managers.network.matchmake._room_id = nil
+	end
 	self:_create_disconnected_dialog()
 end
 function DisconnectedState:_create_disconnected_dialog()

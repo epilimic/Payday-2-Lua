@@ -12,6 +12,10 @@ function LocalizationManager:init()
 		self._platform = "X360"
 	elseif platform_id == Idstring("PS3") then
 		self._platform = "PS3"
+	elseif platform_id == Idstring("XB1") then
+		self._platform = "X360"
+	elseif platform_id == Idstring("PS4") then
+		self._platform = "PS3"
 	else
 		self._platform = "WIN32"
 	end

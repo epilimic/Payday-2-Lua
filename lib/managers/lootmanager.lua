@@ -151,9 +151,12 @@ function LootManager:check_achievements(carry_id, multiplier)
 		if all_pass then
 			if achievement_data.stat then
 				managers.achievment:award_progress(achievement_data.stat)
-			end
-			if achievement_data.award then
+			elseif achievement_data.award then
 				managers.achievment:award(achievement_data.award)
+			elseif achievement_data.challenge_stat then
+				managers.challenge:award_progress(achievement_data.challenge_stat)
+			elseif achievement_data.challenge_award then
+				managers.challenge:award(achievement_data.challenge_award)
 			end
 		end
 	end

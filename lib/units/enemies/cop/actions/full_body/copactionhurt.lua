@@ -146,9 +146,7 @@ function CopActionHurt:init(action_desc, common_data)
 	local redir_res
 	local action_type = action_desc.hurt_type
 	local ignite_character = action_desc.ignite_character
-	local is_fire_dot_damage = not action_desc.fire_dot_data
-	local fire_dot_data = action_desc.fire_dot_data
-	local start_dot_damage_roll = action_desc.start_dot_damage_roll or 101
+	local start_dot_dance_antimation = action_desc.fire_dot_data and action_desc.fire_dot_data.start_dot_dance_antimation
 	if action_type == "fatal" then
 		redir_res = self._ext_movement:play_redirect("fatal")
 		if not redir_res then
@@ -164,40 +162,20 @@ function CopActionHurt:init(action_desc, common_data)
 		end
 		managers.hud:set_mugshot_tased(self._unit:unit_data().mugshot_id)
 	elseif action_type == "fire_hurt" or action_type == "light_hurt" and action_desc.variant == "fire" then
-		local fire_dot_max_distance = 3000
-		local fire_dot_trigger_chance = 30
-		local distance = 1000
-		local hit_loc = action_desc.hit_pos
 		local char_tweak = tweak_data.character[self._unit:base()._tweak_table]
 		local use_animation_on_fire_damage
-		if fire_dot_data then
-			fire_dot_max_distance = tonumber(fire_dot_data.dot_trigger_max_distance)
-			fire_dot_trigger_chance = tonumber(fire_dot_data.dot_trigger_chance)
-		end
-		if hit_loc and action_desc.attacker_unit and action_desc.attacker_unit.position then
-			distance = mvector3.distance(hit_loc, action_desc.attacker_unit:position())
-		end
 		if char_tweak.use_animation_on_fire_damage == nil then
 			use_animation_on_fire_damage = true
 		else
 			use_animation_on_fire_damage = char_tweak.use_animation_on_fire_damage
 		end
-		local flammable
-		if char_tweak.flammable == nil then
-			flammable = true
-		else
-			flammable = char_tweak.flammable
-		end
-		if not is_fire_dot_damage and fire_dot_max_distance > distance and start_dot_damage_roll <= fire_dot_trigger_chance and flammable then
-			if Network:is_server() then
-				managers.fire:add_doted_enemy(self._unit, t, self._ext_inventory:equipped_unit(), fire_dot_data.dot_length, fire_dot_data.dot_tick_damage)
-			end
+		if start_dot_dance_antimation then
 			if ignite_character == "dragonsbreath" then
 				self:_dragons_breath_sparks()
 			end
 			if self._unit:character_damage() ~= nil and self._unit:character_damage().get_last_time_unit_got_fire_damage ~= nil then
 				local last_fire_recieved = self._unit:character_damage():get_last_time_unit_got_fire_damage()
-				if last_fire_recieved == nil or t - last_fire_recieved > 5 then
+				if last_fire_recieved == nil or t - last_fire_recieved > 1 then
 					if use_animation_on_fire_damage then
 						redir_res = self._ext_movement:play_redirect("fire_hurt")
 						local dir_str
@@ -218,6 +196,25 @@ function CopActionHurt:init(action_desc, common_data)
 					self._unit:character_damage():set_last_time_unit_got_fire_damage(t)
 				end
 			end
+		end
+	elseif action_type == "taser_tased" then
+		local char_tweak = tweak_data.character[self._unit:base()._tweak_table]
+		if char_tweak.can_be_tased == nil or char_tweak.can_be_tased then
+			redir_res = self._ext_movement:play_redirect("taser")
+			local variant = math.random(4)
+			local dir_str
+			if variant == 1 then
+				dir_str = "var1"
+			elseif variant == 2 then
+				dir_str = "var2"
+			elseif variant == 3 then
+				dir_str = "var3"
+			elseif variant == 4 then
+				dir_str = "var4"
+			else
+				dir_str = "fwd"
+			end
+			self._machine:set_parameter(redir_res, dir_str, 1)
 		end
 	elseif action_type == "light_hurt" then
 		if not self._ext_anim.upper_body_active or self._ext_anim.upper_body_empty or self._ext_anim.recoil then
@@ -294,7 +291,6 @@ function CopActionHurt:init(action_desc, common_data)
 			end
 			self._machine:set_parameter(redir_res, "var" .. tostring(i), state_value)
 		end
-		managers.fire:_remove_flame_effects_from_doted_unit(self._unit)
 		self:_start_enemy_fire_effect_on_death(variant)
 		managers.fire:check_achievemnts(self._unit, t)
 	elseif action_type == "death" and (self._ext_anim.run and self._ext_anim.move_fwd or self._ext_anim.sprint) and not common_data.char_tweak.no_run_death_anim then
@@ -382,7 +378,7 @@ function CopActionHurt:init(action_desc, common_data)
 					if variant > 1 then
 						variant = math.random(variant)
 					end
-				elseif action_type ~= "shield_knock" and action_type ~= "counter_tased" then
+				elseif action_type ~= "shield_knock" and action_type ~= "counter_tased" and action_type ~= "taser_tased" then
 					if old_variant and (old_info[dir_str] == 1 and old_info[height] == 1 and old_info.mod == 1 and action_type == "hurt" or old_info.hvy == 1 and action_type == "heavy_hurt") then
 						variant = old_variant
 					end
@@ -466,10 +462,10 @@ function CopActionHurt:init(action_desc, common_data)
 		self.update = self._upd_hurt
 	end
 	local shoot_chance
-	if self._ext_inventory and not self._weapon_dropped and common_data.char_tweak.shooting_death and not self._ext_movement:cool() and t - self._ext_movement:not_cool_t() > 3 then
+	if self._ext_inventory and not self._weapon_dropped and common_data.char_tweak.shooting_death and not self._ext_movement:cool() and 3 < t - self._ext_movement:not_cool_t() then
 		local weapon_unit = self._ext_inventory:equipped_unit()
 		if weapon_unit then
-			if action_type == "counter_tased" then
+			if action_type == "counter_tased" or action_type == "taser_tased" then
 				weapon_unit:base():on_reload()
 				shoot_chance = 1
 			elseif action_type == "death" or action_type == "hurt" or action_type == "heavy_hurt" then
@@ -503,7 +499,7 @@ function CopActionHurt:init(action_desc, common_data)
 			end
 		elseif action_type == "death" then
 			self._unit:sound():say("x02a_any_3p")
-		elseif action_type == "counter_tased" then
+		elseif action_type == "counter_tased" or action_type == "taser_tased" then
 			self._unit:sound():say("tasered")
 		else
 			self._unit:sound():say("x01a_any_3p")

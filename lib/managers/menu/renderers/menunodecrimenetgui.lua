@@ -20,9 +20,10 @@ function MenuNodeCrimenetGui:_setup_item_panel(safe_rect, res)
 	MenuNodeCrimenetGui.super._setup_item_panel(self, safe_rect, res)
 	local width = 900
 	local height = 580
+	local is_nextgen = SystemInfo:platform() == Idstring("PS4") or SystemInfo:platform() == Idstring("XB1")
 	if SystemInfo:platform() ~= Idstring("WIN32") then
 		width = 900
-		height = 525
+		height = is_nextgen and 550 or 525
 	end
 	self.item_panel:set_rightbottom(self.item_panel:parent():w() * 0.5 + width / 2 - 10, self.item_panel:parent():h() * 0.5 + height / 2 - 10)
 	self:_set_topic_position()
@@ -168,6 +169,34 @@ function MenuNodeCrimenetSpecialGui:_setup_item_panel(safe_rect, res)
 	make_fine_text(title_text)
 	title_text:set_left(self.box_panel:left())
 	title_text:set_bottom(self.box_panel:top())
+	local active_menu = managers.menu:active_menu()
+	if active_menu then
+		active_menu.input:set_force_input(true)
+	end
+end
+function MenuNodeCrimenetSpecialGui:previous_page()
+	local item = self.node:item("contact_filter")
+	if managers.menu:active_menu() and managers.menu:active_menu().logic and item and item:previous() then
+		managers.menu_component:post_event("selection_previous")
+		managers.menu:active_menu().logic:trigger_item(true, item)
+	end
+end
+function MenuNodeCrimenetSpecialGui:next_page()
+	local item = self.node:item("contact_filter")
+	if managers.menu:active_menu() and managers.menu:active_menu().logic and item and item:next() then
+		managers.menu_component:post_event("selection_next")
+		managers.menu:active_menu().logic:trigger_item(true, item)
+	end
+end
+function MenuNodeCrimenetSpecialGui:input_focus()
+	return false
+end
+function MenuNodeCrimenetSpecialGui:close()
+	MenuNodeCrimenetSpecialGui.super.close(self)
+	local active_menu = managers.menu:active_menu()
+	if active_menu then
+		active_menu.input:set_force_input(false)
+	end
 end
 MenuNodeCrimenetCasinoGui = MenuNodeCrimenetCasinoGui or class(MenuNodeGui)
 function MenuNodeCrimenetCasinoGui:init(node, layer, parameters)
@@ -1772,19 +1801,20 @@ function MenuNodeCrimenetChallengeGui:set_contact_info(id, name, files, override
 		local _, _, _, h = desc_text:text_rect()
 		desc_text:set_h(h)
 		local y = desc_text:bottom()
+		local objective_title_text = self._info_panel:text({
+			name = "objective_title_text",
+			text = managers.localization:to_upper_text("menu_challenge_objective_title"),
+			font = tweak_data.menu.pd2_small_font,
+			font_size = tweak_data.menu.pd2_small_font_size,
+			color = tweak_data.screen_colors.text,
+			wrap = true,
+			word_wrap = true,
+			blend_mode = "add"
+		})
+		make_fine_text(objective_title_text)
+		objective_title_text:set_top(y + tweak_data.menu.pd2_small_font_size)
+		y = objective_title_text:bottom()
 		if challenge.objective_s or challenge.objective_id then
-			local objective_title_text = self._info_panel:text({
-				name = "objective_title_text",
-				text = managers.localization:to_upper_text("menu_challenge_objective_title"),
-				font = tweak_data.menu.pd2_small_font,
-				font_size = tweak_data.menu.pd2_small_font_size,
-				color = tweak_data.screen_colors.text,
-				wrap = true,
-				word_wrap = true,
-				blend_mode = "add"
-			})
-			make_fine_text(objective_title_text)
-			objective_title_text:set_top(y + tweak_data.menu.pd2_small_font_size)
 			local objective_text = self._info_panel:text({
 				name = "objectives_text",
 				text = challenge.objective_s or managers.localization:text(challenge.objective_id),
@@ -1796,11 +1826,50 @@ function MenuNodeCrimenetChallengeGui:set_contact_info(id, name, files, override
 				blend_mode = "add"
 			})
 			objective_text:set_left(objective_title_text:left() + 15)
-			objective_text:set_top(objective_title_text:bottom())
+			objective_text:set_top(y)
 			objective_text:grow(-objective_text:left(), 0)
 			local _, _, _, h = objective_text:text_rect()
 			objective_text:set_h(h)
 			y = objective_text:bottom()
+		end
+		for _, objective in ipairs(challenge.objectives or {}) do
+			if objective.desc_s or objective.desc_id then
+				local name_text = self._info_panel:text({
+					name = "name_text_objective_" .. tostring(_),
+					text = objective.name_s or objective.name_id and managers.localization:text(objective.name_id) or "",
+					font = tweak_data.menu.pd2_small_font,
+					font_size = tweak_data.menu.pd2_small_font_size,
+					color = tweak_data.screen_colors.text,
+					wrap = true,
+					word_wrap = true,
+					blend_mode = "add"
+				})
+				if not objective.desc_s then
+					if objective.desc_id then
+					else
+					end
+				end
+				local desc_text = self._info_panel:text({
+					name = "desc_text_objective_" .. tostring(_),
+					text = managers.localization:text(objective.desc_id, {
+						progress = objective.progress and managers.money:add_decimal_marks_to_string(tostring(objective.progress)),
+						max_progress = objective.max_progress and managers.money:add_decimal_marks_to_string(tostring(objective.max_progress))
+					}) or "",
+					font = tweak_data.menu.pd2_small_font,
+					font_size = tweak_data.menu.pd2_small_font_size,
+					color = tweak_data.screen_colors.text,
+					wrap = true,
+					word_wrap = true,
+					blend_mode = "add"
+				})
+				make_fine_text(name_text)
+				make_fine_text(desc_text)
+				name_text:set_left(objective_title_text:left() + 15)
+				name_text:set_top(y)
+				desc_text:set_left(name_text:right())
+				desc_text:set_top(y)
+				y = math.max(name_text:bottom(), desc_text:bottom())
+			end
 		end
 		if challenge.reward_s or challenge.reward_id then
 			local reward_title_text = self._info_panel:text({

@@ -204,14 +204,14 @@ function UnitNetworkHandler:damage_explosion_fire(subject_unit, attacker_unit, d
 		subject_unit:character_damage():sync_damage_explosion(attacker_unit, damage, i_attack_variant, death, direction)
 	end
 end
-function UnitNetworkHandler:damage_fire(subject_unit, attacker_unit, damage, death, direction, weapon_type, weapon_unit, sender)
+function UnitNetworkHandler:damage_fire(subject_unit, attacker_unit, damage, start_dot_dance_antimation, death, direction, weapon_type, weapon_unit, sender)
 	if not self._verify_character_and_sender(subject_unit, sender) or not self._verify_gamestate(self._gamestate_filter.any_ingame) then
 		return
 	end
 	if not alive(attacker_unit) or attacker_unit:key() == subject_unit:key() then
 		attacker_unit = nil
 	end
-	subject_unit:character_damage():sync_damage_fire(attacker_unit, damage, death, direction, weapon_type, weapon_unit)
+	subject_unit:character_damage():sync_damage_fire(attacker_unit, damage, start_dot_dance_antimation, death, direction, weapon_type, weapon_unit)
 end
 function UnitNetworkHandler:damage_melee(subject_unit, attacker_unit, damage, damage_effect, i_body, height_offset, variant, death, sender)
 	if not self._verify_character_and_sender(subject_unit, sender) or not self._verify_gamestate(self._gamestate_filter.any_ingame) then
@@ -720,10 +720,10 @@ function UnitNetworkHandler:action_idle_start(unit, body_part, sender)
 	end
 	unit:movement():action_request({type = "idle", body_part = body_part})
 end
-function UnitNetworkHandler:action_act_start(unit, act_index, blocks_hurt, clamp_to_graph)
-	self:action_act_start_align(unit, act_index, blocks_hurt, clamp_to_graph, nil, nil)
+function UnitNetworkHandler:action_act_start(unit, act_index, blocks_hurt, clamp_to_graph, needs_full_blend)
+	self:action_act_start_align(unit, act_index, blocks_hurt, clamp_to_graph, needs_full_blend, nil, nil)
 end
-function UnitNetworkHandler:action_act_start_align(unit, act_index, blocks_hurt, clamp_to_graph, start_yaw, start_pos)
+function UnitNetworkHandler:action_act_start_align(unit, act_index, blocks_hurt, clamp_to_graph, needs_full_blend, start_yaw, start_pos)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not self._verify_character(unit) then
 		return
 	end
@@ -731,7 +731,7 @@ function UnitNetworkHandler:action_act_start_align(unit, act_index, blocks_hurt,
 	if start_yaw and start_yaw ~= 0 then
 		start_rot = Rotation(360 * (start_yaw - 1) / 254, 0, 0)
 	end
-	unit:movement():sync_action_act_start(act_index, blocks_hurt, clamp_to_graph, start_rot, start_pos)
+	unit:movement():sync_action_act_start(act_index, blocks_hurt, clamp_to_graph, needs_full_blend, start_rot, start_pos)
 end
 function UnitNetworkHandler:action_act_end(unit)
 	if not alive(unit) or unit:character_damage():dead() then

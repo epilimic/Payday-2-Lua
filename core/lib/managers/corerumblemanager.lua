@@ -16,6 +16,8 @@ end
 function RumbleManager:initialize_controller_types()
 	self._rumbling_controller_types.xbox360 = true
 	self._rumbling_controller_types.ps3 = true
+	self._rumbling_controller_types.ps4 = true
+	self._rumbling_controller_types.xb1 = true
 end
 function RumbleManager:stop(rumble_id)
 	if rumble_id then

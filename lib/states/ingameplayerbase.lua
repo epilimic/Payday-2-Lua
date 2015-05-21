@@ -11,6 +11,8 @@ function IngamePlayerBaseState:set_controller_enabled(enabled)
 			controller:set_enabled(enabled)
 		end
 		if enabled then
+			controller:clear_input_pressed_state("duck")
+			controller:clear_input_pressed_state("jump")
 			if controller:get_input_bool("stats_screen") then
 				player:base():set_stats_screen_visible(true)
 			end

@@ -1298,6 +1298,32 @@ function TweakData:init()
 			grenade_type = "dynamite",
 			award = "scorpion_2",
 			kill = true
+		},
+		any_kills = {challenge_stat = "any_kills", kill = true},
+		any_sniper_kills = {
+			challenge_stat = "any_sniper_kills",
+			kill = true,
+			enemy = "sniper"
+		},
+		any_shield_kills = {
+			challenge_stat = "any_shield_kills",
+			kill = true,
+			enemy = "shield"
+		},
+		any_taser_kills = {
+			challenge_stat = "any_taser_kills",
+			kill = true,
+			enemy = "taser"
+		},
+		any_tank_kills = {
+			challenge_stat = "any_tank_kills",
+			kill = true,
+			enemy = "tank"
+		},
+		any_spooc_kills = {
+			challenge_stat = "any_spooc_kills",
+			kill = true,
+			enemy = "spooc"
 		}
 	}
 	self.achievement.enemy_kill_achievements = {
@@ -1490,6 +1516,44 @@ function TweakData:init()
 			in_steelsight = false,
 			timer = 6,
 			count = 6
+		},
+		assault_rifle_kills = {
+			challenge_stat = "assault_rifle_kills",
+			weapon_type = "assault_rifle"
+		},
+		shotgun_kills = {
+			challenge_stat = "shotgun_kills",
+			weapon_type = "shotgun"
+		},
+		smg_kills = {challenge_stat = "smg_kills", weapon_type = "smg"},
+		pistol_kills = {
+			challenge_stat = "pistol_kills",
+			weapon_type = "pistol"
+		},
+		any_kills = {challenge_stat = "any_kills"},
+		any_headshot_kills = {
+			challenge_stat = "any_headshot_kills",
+			in_head = true
+		},
+		any_sniper_kills = {
+			challenge_stat = "any_sniper_kills",
+			enemy = "sniper"
+		},
+		any_shield_kills = {
+			challenge_stat = "any_shield_kills",
+			enemy = "shield"
+		},
+		any_taser_kills = {
+			challenge_stat = "any_taser_kills",
+			enemy = "taser"
+		},
+		any_tank_kills = {
+			challenge_stat = "any_tank_kills",
+			enemy = "tank"
+		},
+		any_spooc_kills = {
+			challenge_stat = "any_spooc_kills",
+			enemy = "spooc"
 		}
 	}
 	self.achievement.enemy_melee_kill_achievements = {
@@ -1556,6 +1620,36 @@ function TweakData:init()
 			award = "grill_2",
 			melee_id = "fork",
 			is_on_fire = true,
+			is_not_civilian = true
+		},
+		melee_kills = {
+			challenge_stat = "melee_kills",
+			is_not_civilian = true
+		},
+		any_kills = {challenge_stat = "any_kills", is_not_civilian = true},
+		any_sniper_kills = {
+			challenge_stat = "any_sniper_kills",
+			enemy = "sniper",
+			is_not_civilian = true
+		},
+		any_shield_kills = {
+			challenge_stat = "any_shield_kills",
+			enemy = "shield",
+			is_not_civilian = true
+		},
+		any_taser_kills = {
+			challenge_stat = "any_taser_kills",
+			enemy = "taser",
+			is_not_civilian = true
+		},
+		any_tank_kills = {
+			challenge_stat = "any_tank_kills",
+			enemy = "tank",
+			is_not_civilian = true
+		},
+		any_spooc_kills = {
+			challenge_stat = "any_spooc_kills",
+			enemy = "spooc",
 			is_not_civilian = true
 		}
 	}
@@ -2089,6 +2183,13 @@ function TweakData:init()
 			},
 			job = "shoutout_raid"
 		},
+		death_arena = {
+			award = "live_1",
+			difficulty = {
+				"overkill_290"
+			},
+			job = "arena"
+		},
 		not_for_old_men = {
 			award = "gage4_11",
 			stealth = true,
@@ -2102,7 +2203,38 @@ function TweakData:init()
 					}
 				}
 			}
-		}
+		},
+		bain_jobs = {
+			challenge_stat = "bain_jobs",
+			need_full_job = true,
+			contract = "bain"
+		},
+		vlad_jobs = {
+			challenge_stat = "vlad_jobs",
+			need_full_job = true,
+			contract = "vlad"
+		},
+		hector_jobs = {
+			challenge_stat = "hector_jobs",
+			need_full_job = true,
+			contract = "hector"
+		},
+		elephant_jobs = {
+			challenge_stat = "elephant_jobs",
+			need_full_job = true,
+			contract = "the_elephant"
+		},
+		dentist_jobs = {
+			challenge_stat = "dentist_jobs",
+			need_full_job = true,
+			contract = "the_dentist"
+		},
+		butcher_jobs = {
+			challenge_stat = "butcher_jobs",
+			need_full_job = true,
+			contract = "the_butcher"
+		},
+		any_jobs = {challenge_stat = "any_jobs", need_full_job = true}
 	}
 	self.achievement.complete_heist_statistics_achievements = {
 		immortal_ballot = {
@@ -2165,7 +2297,6 @@ function TweakData:init()
 	self.achievement.job_list.bain = {
 		"jewelry_store",
 		"family",
-		"roberts",
 		"branchbank_prof",
 		"branchbank_gold_prof",
 		"branchbank_cash",
@@ -2179,7 +2310,8 @@ function TweakData:init()
 		"kosugi",
 		"gallery",
 		"rat",
-		"cage"
+		"cage",
+		"arena"
 	}
 	self.achievement.job_list.dentist = {
 		"big",
@@ -2194,6 +2326,9 @@ function TweakData:init()
 		"crojob_wrapper",
 		"crojob1"
 	}
+	if SystemInfo:platform() == Idstring("WIN32") then
+		table.insert(self.achievement.job_list.bain, "roberts")
+	end
 	self.achievement.complete_heist_stats_achievements = {
 		death_vlad = {
 			award = "death_5",
@@ -2708,6 +2843,9 @@ function TweakData:init()
 		wpn_fps_upg_ak_fg_krebs = ameno_8_achievement,
 		wpn_fps_upg_ak_b_ak105 = ameno_8_achievement
 	}
+	if SystemInfo:platform() == Idstring("PS4") or SystemInfo:platform() == Idstring("XB1") then
+		self.achievement.weapon_part_tracker = {}
+	end
 	self.pickups = {}
 	self.pickups.ammo = {
 		unit = Idstring("units/pickups/ammo/ammo_pickup")
@@ -2944,11 +3082,11 @@ function TweakData:init()
 	self.projectiles.molotov.damage = 3
 	self.projectiles.molotov.player_damage = 2
 	self.projectiles.molotov.fire_dot_data = {
-		dot_damage = 2,
+		dot_damage = 1,
 		dot_trigger_max_distance = 3000,
 		dot_trigger_chance = 35,
 		dot_length = 3,
-		dot_tick_damage = 0.5
+		dot_tick_period = 0.5
 	}
 	self.projectiles.molotov.range = 75
 	self.projectiles.molotov.burn_duration = 20
@@ -2964,11 +3102,11 @@ function TweakData:init()
 	self.projectiles.launcher_incendiary.curve_pow = 0.1
 	self.projectiles.launcher_incendiary.player_damage = 2
 	self.projectiles.launcher_incendiary.fire_dot_data = {
-		dot_damage = 2,
+		dot_damage = 1,
 		dot_trigger_max_distance = 3000,
 		dot_trigger_chance = 35,
-		dot_length = 3,
-		dot_tick_damage = 0.5
+		dot_length = 3.1,
+		dot_tick_period = 0.5
 	}
 	self.projectiles.launcher_incendiary.range = 75
 	self.projectiles.launcher_incendiary.init_timer = 2.5
@@ -3506,6 +3644,196 @@ function TweakData:get_controller_help_coords()
 		coords.menu_button_weapon_firemode = {
 			x = 0,
 			y = 87,
+			align = "right",
+			vertical = "center"
+		}
+	elseif SystemInfo:platform() == Idstring("PS4") then
+		coords.menu_button_sprint = {
+			x = 199,
+			y = 255,
+			align = "right",
+			vertical = "top"
+		}
+		coords.menu_button_move = {
+			x = 199,
+			y = 280,
+			align = "right",
+			vertical = "top"
+		}
+		coords.menu_button_melee = {
+			x = 313,
+			y = 255,
+			align = "left",
+			vertical = "top"
+		}
+		coords.menu_button_look = {
+			x = 313,
+			y = 280,
+			align = "left",
+			vertical = "top"
+		}
+		coords.menu_button_switch_weapon = {
+			x = 511,
+			y = 104,
+			align = "left"
+		}
+		coords.menu_button_crouch = {
+			x = 511,
+			y = 128,
+			align = "left"
+		}
+		coords.menu_button_jump = {
+			x = 511,
+			y = 153,
+			align = "left"
+		}
+		coords.menu_button_reload = {
+			x = 511,
+			y = 181,
+			align = "left"
+		}
+		coords.menu_button_fire_weapon = {
+			x = 511,
+			y = 10,
+			align = "left"
+		}
+		coords.menu_button_shout = {
+			x = 511,
+			y = 55,
+			align = "left"
+		}
+		coords.menu_button_aim_down_sight = {
+			x = 0,
+			y = 10,
+			align = "right"
+		}
+		coords.menu_button_deploy = {
+			x = 0,
+			y = 55,
+			align = "right"
+		}
+		coords.menu_button_ingame_menu = {
+			x = 219,
+			y = 0,
+			align = "right",
+			vertical = "bottom"
+		}
+		coords.menu_button_stats_screen = {
+			x = 328,
+			y = 0,
+			align = "left",
+			vertical = "bottom"
+		}
+		coords.menu_button_throw_grenade = {
+			x = 0,
+			y = 128,
+			align = "right",
+			vertical = "center"
+		}
+		coords.menu_button_weapon_gadget = {
+			x = 0,
+			y = 153,
+			align = "right",
+			vertical = "center"
+		}
+		coords.menu_button_weapon_firemode = {
+			x = 0,
+			y = 181,
+			align = "right",
+			vertical = "center"
+		}
+	elseif SystemInfo:platform() == Idstring("XB1") then
+		coords.menu_button_sprint = {
+			x = 0,
+			y = 78,
+			align = "right",
+			vertical = "bottom"
+		}
+		coords.menu_button_move = {
+			x = 0,
+			y = 78,
+			align = "right",
+			vertical = "top"
+		}
+		coords.menu_button_melee = {
+			x = 302,
+			y = 276,
+			align = "center",
+			vertical = "top"
+		}
+		coords.menu_button_look = {
+			x = 302,
+			y = 301,
+			align = "center",
+			vertical = "top"
+		}
+		coords.menu_button_switch_weapon = {
+			x = 512,
+			y = 57,
+			align = "left"
+		}
+		coords.menu_button_reload = {
+			x = 512,
+			y = 140,
+			align = "left"
+		}
+		coords.menu_button_crouch = {
+			x = 512,
+			y = 85,
+			align = "left"
+		}
+		coords.menu_button_jump = {
+			x = 512,
+			y = 113,
+			align = "left"
+		}
+		coords.menu_button_shout = {
+			x = 390,
+			y = -10,
+			align = "center"
+		}
+		coords.menu_button_fire_weapon = {
+			x = 512,
+			y = 18,
+			align = "left"
+		}
+		coords.menu_button_deploy = {
+			x = 180,
+			y = -10,
+			align = "right"
+		}
+		coords.menu_button_aim_down_sight = {
+			x = 0,
+			y = 18,
+			align = "right"
+		}
+		coords.menu_button_ingame_menu = {
+			x = 288,
+			y = -25,
+			align = "left",
+			vertical = "bottom"
+		}
+		coords.menu_button_stats_screen = {
+			x = 235,
+			y = -25,
+			align = "right",
+			vertical = "bottom"
+		}
+		coords.menu_button_weapon_gadget = {
+			x = 0,
+			y = 193,
+			align = "right",
+			vertical = "center"
+		}
+		coords.menu_button_throw_grenade = {
+			x = 0,
+			y = 158,
+			align = "right",
+			vertical = "center"
+		}
+		coords.menu_button_weapon_firemode = {
+			x = 270,
+			y = 266,
 			align = "right",
 			vertical = "center"
 		}

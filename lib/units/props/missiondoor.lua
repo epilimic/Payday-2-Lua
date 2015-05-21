@@ -96,6 +96,10 @@ function MissionDoor:set_on(state)
 	end
 end
 function MissionDoor:_get_device_unit_data(unit, type)
+	if not self._devices or not self._devices[type] then
+		debug_pause("[MissionDoor:_get_device_unit_data] Mission Door do not have any devices of this type!", "type", type, "Mission Door", unit, "Devices", inspect(self._devices))
+		return nil
+	end
 	for _, unit_data in ipairs(self._devices[type].units) do
 		if unit_data.unit == unit then
 			return unit_data

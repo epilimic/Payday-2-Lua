@@ -2122,79 +2122,81 @@ function NarrativeTweakData:init()
 		70000,
 		140000
 	}
-	self.jobs.roberts = {}
-	self.jobs.roberts.name_id = "heist_roberts"
-	self.jobs.roberts.briefing_id = "heist_roberts_crimenet"
-	self.jobs.roberts.package = "packages/job_roberts"
-	self.jobs.roberts.contact = "bain"
-	self.jobs.roberts.region = "street"
-	self.jobs.roberts.jc = 40
-	self.jobs.roberts.chain = {
-		{
-			level_id = "roberts",
-			type_id = "heist_type_assault",
-			type = "d"
+	if SystemInfo:platform() == Idstring("WIN32") then
+		self.jobs.roberts = {}
+		self.jobs.roberts.name_id = "heist_roberts"
+		self.jobs.roberts.briefing_id = "heist_roberts_crimenet"
+		self.jobs.roberts.package = "packages/job_roberts"
+		self.jobs.roberts.contact = "bain"
+		self.jobs.roberts.region = "street"
+		self.jobs.roberts.jc = 40
+		self.jobs.roberts.chain = {
+			{
+				level_id = "roberts",
+				type_id = "heist_type_assault",
+				type = "d"
+			}
 		}
-	}
-	self.jobs.roberts.briefing_event = "pln_cs1_cbf_01"
-	self.jobs.roberts.debrief_event = nil
-	self.jobs.roberts.crimenet_callouts = {
-		"pln_cs1_cnc_01",
-		"pln_cs1_cnc_02",
-		"pln_cs1_cnc_03"
-	}
-	self.jobs.roberts.crimenet_videos = {
-		"cn_jewel1",
-		"cn_jewel2",
-		"cn_jewel3"
-	}
-	self.jobs.roberts.payout = {
-		55000,
-		110000,
-		275000,
-		550000,
-		700000
-	}
-	self.jobs.roberts.experience_mul = {
-		1,
-		1,
-		1,
-		1.2,
-		1.2
-	}
-	self.jobs.roberts.contract_cost = {
-		24000,
-		48000,
-		120000,
-		240000,
-		300000
-	}
-	self.jobs.roberts.contract_visuals = {}
-	self.jobs.roberts.contract_visuals.min_mission_xp = {
-		12000,
-		12000,
-		12000,
-		12000,
-		12000
-	}
-	self.jobs.roberts.contract_visuals.max_mission_xp = {
-		18000,
-		18000,
-		18000,
-		18000,
-		18000
-	}
-	self.jobs.roberts_prof = deep_clone(self.jobs.roberts)
-	self.jobs.roberts_prof.jc = 40
-	self.jobs.roberts_prof.professional = true
-	self.jobs.roberts_prof.region = "professional"
-	self.jobs.roberts_prof.payout = {
-		40000,
-		44000,
-		62000,
-		70000,
-		140000
-	}
+		self.jobs.roberts.briefing_event = "pln_cs1_cbf_01"
+		self.jobs.roberts.debrief_event = nil
+		self.jobs.roberts.crimenet_callouts = {
+			"pln_cs1_cnc_01",
+			"pln_cs1_cnc_02",
+			"pln_cs1_cnc_03"
+		}
+		self.jobs.roberts.crimenet_videos = {
+			"cn_jewel1",
+			"cn_jewel2",
+			"cn_jewel3"
+		}
+		self.jobs.roberts.payout = {
+			55000,
+			110000,
+			275000,
+			550000,
+			700000
+		}
+		self.jobs.roberts.experience_mul = {
+			1,
+			1,
+			1,
+			1.2,
+			1.2
+		}
+		self.jobs.roberts.contract_cost = {
+			24000,
+			48000,
+			120000,
+			240000,
+			300000
+		}
+		self.jobs.roberts.contract_visuals = {}
+		self.jobs.roberts.contract_visuals.min_mission_xp = {
+			12000,
+			12000,
+			12000,
+			12000,
+			12000
+		}
+		self.jobs.roberts.contract_visuals.max_mission_xp = {
+			18000,
+			18000,
+			18000,
+			18000,
+			18000
+		}
+		self.jobs.roberts_prof = deep_clone(self.jobs.roberts)
+		self.jobs.roberts_prof.jc = 40
+		self.jobs.roberts_prof.professional = true
+		self.jobs.roberts_prof.region = "professional"
+		self.jobs.roberts_prof.payout = {
+			40000,
+			44000,
+			62000,
+			70000,
+			140000
+		}
+	end
 	self.jobs.haunted = {}
 	self.jobs.haunted.name_id = "heist_haunted"
 	self.jobs.haunted.briefing_id = "heist_haunted_crimenet"
@@ -2288,18 +2290,18 @@ function NarrativeTweakData:init()
 	}
 	self.jobs.kosugi.contract_visuals = {}
 	self.jobs.kosugi.contract_visuals.min_mission_xp = {
-		4000,
-		4000,
-		4000,
-		4000,
-		4000
+		1000,
+		1000,
+		1000,
+		1000,
+		1000
 	}
 	self.jobs.kosugi.contract_visuals.max_mission_xp = {
-		70000,
-		70000,
-		70000,
-		70000,
-		70000
+		5500,
+		5500,
+		5500,
+		5500,
+		5000
 	}
 	self.jobs.kosugi_prof = deep_clone(self.jobs.kosugi)
 	self.jobs.kosugi_prof.jc = 40
@@ -2623,11 +2625,11 @@ function NarrativeTweakData:init()
 		8000
 	}
 	self.jobs.pines.contract_visuals.max_mission_xp = {
-		4808000,
-		4808000,
-		4808000,
-		4808000,
-		4808000
+		2408000,
+		2408000,
+		2408000,
+		2408000,
+		2408000
 	}
 	self.jobs.pines_prof = deep_clone(self.jobs.pines)
 	self.jobs.pines_prof.jc = 70
@@ -3100,6 +3102,72 @@ function NarrativeTweakData:init()
 			world_setting = "night"
 		}
 	}
+	self.jobs.arena = {}
+	self.jobs.arena.name_id = "heist_arena"
+	self.jobs.arena.briefing_id = "heist_arena_crimenet"
+	self.jobs.arena.contact = "bain"
+	self.jobs.arena.region = "street"
+	self.jobs.arena.jc = 60
+	self.jobs.arena.chain = {
+		{
+			level_id = "arena",
+			type_id = "heist_type_assault",
+			type = "d"
+		}
+	}
+	self.jobs.arena.briefing_event = "pln_al1_cbf_01_01"
+	self.jobs.arena.debrief_event = nil
+	self.jobs.arena.crimenet_callouts = {
+		"pln_al1_cnc_01_01",
+		"pln_al1_cnc_01_02",
+		"pln_al1_cnc_01_03"
+	}
+	self.jobs.arena.crimenet_videos = {
+		"cn_branchbank1",
+		"cn_branchbank2",
+		"cn_branchbank3"
+	}
+	self.jobs.arena.payout = {
+		93000,
+		186000,
+		465000,
+		930000,
+		1209000
+	}
+	self.jobs.arena.contract_cost = {
+		62000,
+		124000,
+		310000,
+		620000,
+		800000
+	}
+	self.jobs.arena.dlc = "arena"
+	self.jobs.arena.contract_visuals = {}
+	self.jobs.arena.contract_visuals.min_mission_xp = {
+		19500,
+		19500,
+		19500,
+		19500,
+		19500
+	}
+	self.jobs.arena.contract_visuals.max_mission_xp = {
+		51600,
+		51600,
+		51600,
+		51600,
+		51600
+	}
+	self.jobs.arena_prof = deep_clone(self.jobs.arena)
+	self.jobs.arena_prof.jc = 40
+	self.jobs.arena_prof.professional = true
+	self.jobs.arena_prof.region = "professional"
+	self.jobs.arena_prof.payout = {
+		10000,
+		20000,
+		30000,
+		40000,
+		80000
+	}
 	self._jobs_index = {
 		"jewelry_store",
 		"four_stores",
@@ -3126,7 +3194,6 @@ function NarrativeTweakData:init()
 		"welcome_to_the_jungle_prof",
 		"welcome_to_the_jungle_night_prof",
 		"family",
-		"roberts",
 		"election_day",
 		"election_day_prof",
 		"kosugi",
@@ -3151,8 +3218,12 @@ function NarrativeTweakData:init()
 		"crojob2",
 		"crojob2_night",
 		"rat",
-		"shoutout_raid"
+		"shoutout_raid",
+		"arena"
 	}
+	if SystemInfo:platform() == Idstring("WIN32") then
+		table.insert(self._jobs_index, "roberts")
+	end
 	self:set_job_wrappers()
 end
 function NarrativeTweakData:set_job_wrappers()
@@ -3217,7 +3288,7 @@ function NarrativeTweakData:create_job_name(job_id, skip_professional)
 	local job_tweak = self:job_data(job_id)
 	local text_id = managers.localization:to_upper_text(job_tweak.name_id)
 	if job_tweak.dlc and tweak_data.dlc[job_tweak.dlc] and not tweak_data.dlc[job_tweak.dlc].free then
-		if job_tweak.dlc ~= "pd2_clan" or not managers.localization:to_upper_text("cn_menu_community") then
+		if job_tweak.dlc ~= "pd2_clan" or (SystemInfo:platform() ~= Idstring("WIN32") or not managers.localization:to_upper_text("cn_menu_community")) and not "" then
 		end
 		local pro_text = "  " .. managers.localization:to_upper_text("cn_menu_dlc")
 		local s_len = utf8.len(text_id)

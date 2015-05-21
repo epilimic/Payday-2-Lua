@@ -474,6 +474,7 @@ function CharacterTweakData:_init_mobster_boss(presets)
 	self.mobster_boss.calls_in = nil
 	self.mobster_boss.chatter = presets.enemy_chatter.no_chatter
 	self.mobster_boss.use_radio = nil
+	self.mobster_boss.can_be_tased = false
 end
 function CharacterTweakData:_init_hector_boss(presets)
 	self.hector_boss = deep_clone(self.mobster_boss)
@@ -559,6 +560,7 @@ function CharacterTweakData:_init_hector_boss(presets)
 			}
 		}
 	}
+	self.hector_boss.can_be_tased = false
 	self:_process_weapon_usage_table(self.hector_boss.weapon)
 end
 function CharacterTweakData:_init_hector_boss_no_armor(presets)
@@ -572,6 +574,7 @@ function CharacterTweakData:_init_hector_boss_no_armor(presets)
 	self.hector_boss_no_armor.calls_in = nil
 	self.hector_boss_no_armor.chatter = presets.enemy_chatter.no_chatter
 	self.hector_boss_no_armor.use_radio = nil
+	self.hector_boss_no_armor.can_be_tased = false
 end
 function CharacterTweakData:_init_tank(presets)
 	self.tank = deep_clone(presets.base)
@@ -782,6 +785,7 @@ function CharacterTweakData:_init_tank(presets)
 	self.tank.calls_in = nil
 	self.tank.use_animation_on_fire_damage = false
 	self.tank.flammable = true
+	self.tank.can_be_tased = false
 	self.tank_hw = deep_clone(self.tank)
 	self.tank_hw.move_speed = {
 		stand = {
@@ -847,6 +851,7 @@ function CharacterTweakData:_init_tank(presets)
 	self.tank_hw.damage.explosion_damage_mul = 1
 	self.tank_hw.use_animation_on_fire_damage = false
 	self.tank_hw.flammable = true
+	self.tank_hw.can_be_tased = false
 end
 function CharacterTweakData:_init_spooc(presets)
 	self.spooc = deep_clone(presets.base)
@@ -6196,4 +6201,224 @@ function CharacterTweakData:_set_characters_weapon_preset(preset)
 	for _, name in ipairs(all_units) do
 		self[name].weapon = self.presets.weapon[preset]
 	end
+end
+function CharacterTweakData:character_map()
+	local char_map = {
+		basic = {
+			path = "units/payday2/characters/",
+			list = {
+				"civ_female_bank_1",
+				"civ_female_bank_manager_1",
+				"civ_female_bikini_1",
+				"civ_female_bikini_2",
+				"civ_female_casual_1",
+				"civ_female_casual_2",
+				"civ_female_casual_3",
+				"civ_female_casual_4",
+				"civ_female_casual_5",
+				"civ_female_casual_6",
+				"civ_female_casual_7",
+				"civ_female_casual_8",
+				"civ_female_casual_9",
+				"civ_female_casual_10",
+				"civ_female_crackwhore_1",
+				"civ_female_curator_1",
+				"civ_female_curator_2",
+				"civ_female_hostess_apron_1",
+				"civ_female_hostess_jacket_1",
+				"civ_female_hostess_shirt_1",
+				"civ_female_party_1",
+				"civ_female_party_2",
+				"civ_female_party_3",
+				"civ_female_party_4",
+				"civ_female_waitress_1",
+				"civ_female_waitress_2",
+				"civ_female_waitress_3",
+				"civ_female_waitress_4",
+				"civ_female_wife_trophy_1",
+				"civ_female_wife_trophy_2",
+				"civ_male_bank_1",
+				"civ_male_bank_2",
+				"civ_male_bank_manager_1",
+				"civ_male_bank_manager_3",
+				"civ_male_bank_manager_4",
+				"civ_male_bartender_1",
+				"civ_male_bartender_2",
+				"civ_male_business_1",
+				"civ_male_business_2",
+				"civ_male_casual_1",
+				"civ_male_casual_2",
+				"civ_male_casual_3",
+				"civ_male_casual_4",
+				"civ_male_casual_5",
+				"civ_male_casual_6",
+				"civ_male_casual_7",
+				"civ_male_casual_8",
+				"civ_male_casual_9",
+				"civ_male_casual_12",
+				"civ_male_casual_13",
+				"civ_male_casual_14",
+				"civ_male_curator_1",
+				"civ_male_curator_2",
+				"civ_male_curator_3",
+				"civ_male_dj_1",
+				"civ_male_italian_robe_1",
+				"civ_male_janitor_1",
+				"civ_male_janitor_2",
+				"civ_male_janitor_3",
+				"civ_male_meth_cook_1",
+				"civ_male_party_1",
+				"civ_male_party_2",
+				"civ_male_party_3",
+				"civ_male_pilot_1",
+				"civ_male_scientist_1",
+				"civ_male_miami_store_clerk_1",
+				"civ_male_taxman",
+				"civ_male_trucker_1",
+				"civ_male_worker_1",
+				"civ_male_worker_2",
+				"civ_male_worker_3",
+				"civ_male_worker_docks_1",
+				"civ_male_worker_docks_2",
+				"civ_male_worker_docks_3",
+				"ene_biker_1",
+				"ene_biker_2",
+				"ene_biker_3",
+				"ene_biker_4",
+				"ene_bulldozer_1",
+				"ene_bulldozer_2",
+				"ene_bulldozer_3",
+				"ene_bulldozer_4",
+				"ene_city_swat_1",
+				"ene_city_swat_2",
+				"ene_city_swat_3",
+				"ene_murkywater_1",
+				"ene_murkywater_2",
+				"ene_cop_1",
+				"ene_cop_2",
+				"ene_cop_3",
+				"ene_cop_4",
+				"ene_fbi_1",
+				"ene_fbi_2",
+				"ene_fbi_3",
+				"ene_fbi_boss_1",
+				"ene_fbi_female_1",
+				"ene_fbi_female_2",
+				"ene_fbi_female_3",
+				"ene_fbi_female_4",
+				"ene_fbi_heavy_1",
+				"ene_fbi_office_1",
+				"ene_fbi_office_2",
+				"ene_fbi_office_3",
+				"ene_fbi_office_4",
+				"ene_fbi_swat_1",
+				"ene_fbi_swat_2",
+				"ene_gang_black_1",
+				"ene_gang_black_2",
+				"ene_gang_black_3",
+				"ene_gang_black_4",
+				"ene_gang_mexican_1",
+				"ene_gang_mexican_2",
+				"ene_gang_mexican_3",
+				"ene_gang_mexican_4",
+				"ene_gang_russian_1",
+				"ene_gang_russian_2",
+				"ene_gang_russian_3",
+				"ene_gang_russian_4",
+				"ene_gang_russian_5",
+				"ene_gang_mobster_1",
+				"ene_gang_mobster_2",
+				"ene_gang_mobster_3",
+				"ene_gang_mobster_4",
+				"ene_gang_mobster_boss",
+				"ene_guard_national_1",
+				"ene_hoxton_breakout_guard_1",
+				"ene_hoxton_breakout_guard_2",
+				"ene_male_tgt_1",
+				"ene_murkywater_1",
+				"ene_murkywater_2",
+				"ene_prisonguard_female_1",
+				"ene_prisonguard_male_1",
+				"ene_secret_service_1",
+				"ene_secret_service_2",
+				"ene_security_1",
+				"ene_security_2",
+				"ene_security_3",
+				"ene_security_4",
+				"ene_security_5",
+				"ene_security_6",
+				"ene_security_7",
+				"ene_security_8",
+				"ene_shield_1",
+				"ene_shield_2",
+				"ene_sniper_1",
+				"ene_sniper_2",
+				"ene_spook_1",
+				"ene_swat_1",
+				"ene_swat_2",
+				"ene_swat_heavy_1",
+				"ene_tazer_1",
+				"ene_veteran_cop_1",
+				"npc_old_hoxton_prisonsuit_1",
+				"npc_old_hoxton_prisonsuit_2"
+			}
+		},
+		dlc1 = {
+			path = "units/pd2_dlc1/characters/",
+			list = {
+				"civ_male_bank_manager_2",
+				"civ_male_casual_10",
+				"civ_male_casual_11",
+				"civ_male_firefighter_1",
+				"civ_male_paramedic_1",
+				"civ_male_paramedic_2",
+				"ene_security_gensec_1",
+				"ene_security_gensec_2"
+			}
+		},
+		dlc2 = {
+			path = "units/pd2_dlc2/characters/",
+			list = {
+				"civ_female_bank_assistant_1",
+				"civ_female_bank_assistant_2"
+			}
+		},
+		mansion = {
+			path = "units/pd2_mcmansion/characters/",
+			list = {
+				"ene_male_hector_1",
+				"ene_male_hector_2",
+				"ene_hoxton_breakout_guard_1",
+				"ene_hoxton_breakout_guard_2"
+			}
+		},
+		cage = {
+			path = "units/pd2_dlc_cage/characters/",
+			list = {
+				"civ_female_bank_2"
+			}
+		},
+		arena = {
+			path = "units/pd2_dlc_arena/characters/",
+			list = {
+				"civ_female_fastfood_1",
+				"civ_female_party_alesso_1",
+				"civ_female_party_alesso_2",
+				"civ_female_party_alesso_3",
+				"civ_female_party_alesso_4",
+				"civ_female_party_alesso_5",
+				"civ_female_party_alesso_6",
+				"civ_male_party_alesso_1",
+				"civ_male_party_alesso_2",
+				"civ_male_alesso_booth",
+				"civ_male_fastfood_1",
+				"ene_guard_security_heavy_2",
+				"ene_guard_security_heavy_1"
+			}
+		}
+	}
+	if TweakData._init_wip_character_map then
+		TweakData._init_wip_character_map(char_map)
+	end
+	return char_map
 end
