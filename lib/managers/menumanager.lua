@@ -107,6 +107,7 @@ function MenuManager:init(is_start_menu)
 	managers.user:add_setting_changed_callback("net_packet_throttling", callback(self, self, "net_packet_throttling_changed"), true)
 	managers.user:add_setting_changed_callback("net_forwarding", callback(self, self, "net_forwarding_changed"), true)
 	managers.user:add_setting_changed_callback("net_use_compression", callback(self, self, "net_use_compression_changed"), true)
+	managers.user:add_setting_changed_callback("flush_gpu_command_queue", callback(self, self, "flush_gpu_command_queue_changed"), true)
 	managers.user:add_active_user_state_changed_callback(callback(self, self, "on_user_changed"))
 	managers.user:add_storage_changed_callback(callback(self, self, "on_storage_changed"))
 	managers.savefile:add_active_changed_callback(callback(self, self, "safefile_manager_active_changed"))
@@ -118,6 +119,7 @@ function MenuManager:init(is_start_menu)
 	self:net_packet_throttling_changed(nil, nil, managers.user:get_setting("net_packet_throttling"))
 	self:net_forwarding_changed(nil, nil, managers.user:get_setting("net_forwarding"))
 	self:net_use_compression_changed(nil, nil, managers.user:get_setting("net_use_compression"))
+	self:flush_gpu_command_queue_changed(nil, nil, managers.user:get_setting("flush_gpu_command_queue"))
 	self:invert_camera_y_changed("invert_camera_y", nil, managers.user:get_setting("invert_camera_y"))
 	self:southpaw_changed("southpaw", nil, managers.user:get_setting("southpaw"))
 	self:dof_setting_changed("dof_setting", nil, managers.user:get_setting("dof_setting"))
@@ -493,6 +495,10 @@ function MenuManager:net_forwarding_changed(name, old_value, new_value)
 end
 function MenuManager:net_use_compression_changed(name, old_value, new_value)
 	Network:set_use_compression(new_value)
+end
+function MenuManager:flush_gpu_command_queue_changed(name, old_value, new_value)
+	RenderSettings.flush_gpu_command_queue = new_value
+	Application:save_render_settings()
 end
 function MenuManager:subtitle_changed(name, old_value, new_value)
 	managers.subtitle:set_visible(new_value)
@@ -2106,8 +2112,7 @@ function MenuCallbackHandler:choice_choose_shadow_quality(item)
 	MenuCallbackHandler:apply_and_save_render_settings()
 end
 function MenuCallbackHandler:toggle_gpu_flush_setting(item)
-	RenderSettings.flush_gpu_command_queue = item:value() == "on"
-	Application:save_render_settings()
+	managers.user:set_setting("flush_gpu_command_queue", item:value() == "on")
 end
 function MenuCallbackHandler:choice_choose_anisotropic(item)
 	RenderSettings.max_anisotropy = item:value()
@@ -6162,7 +6167,7 @@ function MenuOptionInitiator:modify_adv_video(node)
 	if node:item("fov_multiplier") then
 		node:item("fov_multiplier"):set_value(managers.user:get_setting("fov_multiplier"))
 	end
-	node:item("choose_gpu_flush"):set_value(RenderSettings.flush_gpu_command_queue and "on" or "off")
+	node:item("choose_gpu_flush"):set_value(managers.user:get_setting("flush_gpu_command_queue") and "on" or "off")
 	node:item("choose_fps_cap"):set_value(managers.user:get_setting("fps_cap"))
 	node:item("use_headbob"):set_value(managers.user:get_setting("use_headbob") and "on" or "off")
 	node:item("max_streaming_chunk"):set_value(managers.user:get_setting("max_streaming_chunk"))

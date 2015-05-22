@@ -89,6 +89,7 @@ function GenericUserManager:setup_setting_map()
 	self:setup_setting(43, "__unused", false)
 	self:setup_setting(44, "net_use_compression", true)
 	self:setup_setting(45, "net_forwarding", true)
+	self:setup_setting(46, "flush_gpu_command_queue", true)
 end
 function GenericUserManager:setup_setting(id, name, default_value)
 	assert(not Global.user_manager.setting_data_map[name], "[UserManager] Setting name \"" .. tostring(name) .. "\" already exists.")
@@ -145,6 +146,7 @@ function GenericUserManager:reset_video_setting_map()
 		"fov_multiplier",
 		"use_headbob",
 		"max_streaming_chunk",
+		"flush_gpu_command_queue",
 		"video_color_grading",
 		"video_anti_alias",
 		"video_streaks",
