@@ -1770,21 +1770,19 @@ function PlayerManager:verify_carry(peer_id, carry_id)
 			return false
 		end
 	end
-	local peer = managers.network:session():local_peer():id() == peer_id and managers.network:session():local_peer() or managers.network:session():peer(peer_id)
-	if not peer then
+	if not managers.network:game():member(peer_id) then
 		return false
 	end
-	return peer:verify_bag(carry_id, -1)
+	return managers.network:game():member(peer_id):place_bag(carry_id, -1)
 end
 function PlayerManager:register_carry(peer_id, carry_id)
 	if Network:is_client() or not managers.network:session() then
 		return true
 	end
-	local peer = managers.network:session():local_peer():id() == peer_id and managers.network:session():local_peer() or managers.network:session():peer(peer_id)
-	if not peer then
+	if not managers.network:game():member(peer_id) then
 		return false
 	end
-	return peer:verify_bag(carry_id, 1)
+	return managers.network:game():member(peer_id):place_bag(carry_id, 1)
 end
 function PlayerManager:add_special(params)
 	local name = params.equipment or params.name

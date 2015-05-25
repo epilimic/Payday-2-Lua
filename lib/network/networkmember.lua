@@ -205,3 +205,28 @@ end
 function NetworkMember:spawn_unit_called()
 	return self._spawn_unit_called
 end
+function NetworkMember:place_bag(carry_id, amount)
+	local cheating = false
+	if amount < 0 then
+		if self._carry_id ~= carry_id then
+			cheating = true
+		else
+			self._carry_id = nil
+		end
+	elseif self._carry_id then
+		cheating = true
+	else
+		self._carry_id = carry_id
+	end
+	if cheating then
+		if Network:is_client() and amount < 0 and not self._skipped_first_cheat then
+			self._skipped_first_cheat = true
+			return true
+		end
+		local peer = Network:is_server() and self._peer or managers.network:session():server_peer()
+		peer:mark_cheater(amount < 0 and VoteManager.REASON.many_bags or VoteManager.REASON.many_bags_pickup, Network:is_server())
+		print("[NetworkMember:place_bag]: Failed to place bag", self._peer:id(), self._carry_id, carry_id, amount)
+		return false
+	end
+	return true
+end
