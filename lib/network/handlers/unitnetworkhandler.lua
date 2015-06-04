@@ -1214,11 +1214,15 @@ function UnitNetworkHandler:start_timer_gui(unit, timer, sender)
 	end
 	unit:timer_gui():sync_start(timer)
 end
-function UnitNetworkHandler:give_equipment(equipment, amount, sender)
+function UnitNetworkHandler:give_equipment(equipment, amount, transfer, sender)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not self._verify_sender(sender) then
 		return
 	end
-	managers.player:add_special({name = equipment, amount = amount})
+	managers.player:add_special({
+		name = equipment,
+		amount = amount,
+		transfer = transfer
+	})
 end
 function UnitNetworkHandler:killzone_set_unit(type)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then

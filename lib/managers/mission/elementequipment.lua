@@ -17,7 +17,8 @@ function ElementEquipment:on_executed(instigator)
 			local rpc_params = {
 				"give_equipment",
 				self._values.equipment,
-				self._values.amount
+				self._values.amount,
+				false
 			}
 			instigator:network():send_to_unit(rpc_params)
 		end

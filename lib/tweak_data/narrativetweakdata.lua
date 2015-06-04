@@ -2333,7 +2333,7 @@ function NarrativeTweakData:init()
 		}
 	}
 	self.jobs.mia.briefing_event = "dentist_hm1_cnc_01"
-	self.jobs.mia.debrief_event = "Play_pln_hm1_end_01"
+	self.jobs.mia.debrief_event = "dentist_hm1_debrief_01_01"
 	self.jobs.mia.crimenet_callouts = {
 		"dentist_hm1_cnc_01",
 		"dentist_hm1_cnc_01",

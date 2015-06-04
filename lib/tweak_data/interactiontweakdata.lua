@@ -1584,6 +1584,10 @@ function InteractionTweakData:init()
 	self.gen_pku_crowbar.text_id = "hud_int_take_crowbar"
 	self.gen_pku_crowbar.special_equipment_block = "crowbar"
 	self.gen_pku_crowbar.sound_done = "pick_up_crowbar"
+	self.gen_pku_crowbar_stack = {}
+	self.gen_pku_crowbar_stack.text_id = "hud_int_take_crowbar"
+	self.gen_pku_crowbar_stack.special_equipment_block = "crowbar_stack"
+	self.gen_pku_crowbar_stack.sound_done = "pick_up_crowbar"
 	self.gen_pku_thermite = {}
 	self.gen_pku_thermite.text_id = "hud_int_take_thermite"
 	self.gen_pku_thermite.special_equipment_block = "thermite"

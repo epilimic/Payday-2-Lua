@@ -769,6 +769,7 @@ function JobManager:synced_on_retry_job_stage()
 end
 function JobManager:_on_retry_job_stage()
 	managers.game_play_central:stop_the_game()
+	managers.experience:mission_xp_process(false)
 	self._global.shortterm_memory = {}
 	self._global.next_alternative_stage = nil
 	self._global.next_interupt_stage = nil
@@ -852,6 +853,7 @@ function JobManager:activate_job(job_id, current_stage)
 	}
 	self._global.start_time = TimerManager:wall_running():time()
 	self:start_accumulate_ghost_bonus(job_id)
+	managers.experience:mission_xp_clear()
 	self._global.memory = {}
 	self._global.shortterm_memory = {}
 	return true
@@ -867,6 +869,7 @@ function JobManager:deactivate_current_job()
 	self._global.shortterm_memory = nil
 	managers.loot:on_job_deactivated()
 	managers.mission:on_job_deactivated()
+	managers.experience:mission_xp_clear()
 	self._global.active_ghost_bonus = nil
 	self._global.accumulated_ghost_bonus = nil
 end

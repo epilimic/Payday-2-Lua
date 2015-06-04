@@ -1376,52 +1376,67 @@ function PlayerManager:set_synced_equipment_possession(peer_id, equipment, amoun
 end
 function PlayerManager:transfer_special_equipment(peer_id, include_custody)
 	if self._global.synced_equipment_possession[peer_id] then
-		local peers = {}
 		local local_peer = managers.network:session():local_peer()
-		if managers.trade:is_peer_in_custody(local_peer:id()) then
+		local local_peer_id = local_peer:id()
+		local peers = {}
+		local peers_loadout = {}
+		local peers_custody = {}
+		if not local_peer:waiting_for_player_ready() then
+			table.insert(peers_loadout, local_peer)
+		elseif managers.trade:is_peer_in_custody(local_peer:id()) then
 			if include_custody then
-				table.insert(peers, local_peer)
+				table.insert(peers_custody, local_peer)
 			end
 		else
 			table.insert(peers, local_peer)
 		end
-		for _, p in pairs(managers.network:session():peers()) do
-			if managers.trade:is_peer_in_custody(p:id()) then
+		for _, peer in pairs(managers.network:session():peers()) do
+			if not peer:waiting_for_player_ready() then
+				table.insert(peers_loadout, peer)
+			elseif managers.trade:is_peer_in_custody(peer:id()) then
 				if include_custody then
-					table.insert(peers, p)
+					table.insert(peers_custody, peer)
 				end
+			elseif peer:is_host() then
+				table.insert(peers, 1, peer)
 			else
-				table.insert(peers, 1, p)
+				table.insert(peers, peer)
 			end
 		end
+		peers = table.list_add(peers, peers_loadout)
+		peers = table.list_add(peers, peers_custody)
 		for name, amount in pairs(self._global.synced_equipment_possession[peer_id]) do
 			local equipment_data = tweak_data.equipments.specials[name]
 			if equipment_data and not equipment_data.avoid_tranfer then
 				local equipment_lost = true
 				local amount_to_transfer = amount
-				local max_amount = equipment_data.max_quantity or 1
+				local max_amount = equipment_data.transfer_quantity or 1
 				for _, p in ipairs(peers) do
 					local id = p:id()
 					local peer_amount = self._global.synced_equipment_possession[id] and self._global.synced_equipment_possession[id][name] or 0
-					if max_amount > peer_amount then
+					if max_amount > peer_amount and id ~= peer_id then
 						local transfer_amount = math.min(amount_to_transfer, max_amount - peer_amount)
 						amount_to_transfer = amount_to_transfer - transfer_amount
 						if Network:is_server() then
-							if p == managers.network:session():local_peer() then
-								managers.player:add_special({name = name, amount = transfer_amount})
+							if id == local_peer_id then
+								managers.player:add_special({
+									name = name,
+									amount = transfer_amount,
+									transfer = true
+								})
 							else
-								p:send("give_equipment", name, amount)
+								p:send("give_equipment", name, transfer_amount, true)
 							end
 						end
-						if peer_id == managers.network:session():local_peer():id() then
-							for i = 1, amount do
-								self:remove_special(name)
-							end
-						end
-						equipment_lost = false
 						if amount_to_transfer == 0 then
+							equipment_lost = false
 						end
 					else
+					end
+				end
+				if peer_id == local_peer_id then
+					for i = 1, amount - amount_to_transfer do
+						self:remove_special(name)
 					end
 				end
 				if equipment_lost and name == "evidence" then
@@ -1800,9 +1815,9 @@ function PlayerManager:add_special(params)
 		extra = self:upgrade_value(name, "quantity_1") + self:upgrade_value(name, "quantity_2")
 	end
 	if special_equipment then
-		if equipment.max_quantity or equipment.quantity then
-			local dedigested_amount = Application:digest_value(special_equipment.amount, false)
-			local new_amount = self:has_category_upgrade(name, "quantity_unlimited") and -1 or math.min(dedigested_amount + amount, (equipment.max_quantity or equipment.quantity) + extra)
+		if equipment.max_quantity or equipment.quantity or params.transfer and equipment.transfer_quantity then
+			local dedigested_amount = special_equipment.amount and Application:digest_value(special_equipment.amount, false) or 1
+			local new_amount = self:has_category_upgrade(name, "quantity_unlimited") and -1 or math.min(dedigested_amount + amount, (params.transfer and equipment.transfer_quantity or equipment.max_quantity or equipment.quantity) + extra)
 			special_equipment.amount = Application:digest_value(new_amount, true)
 			if special_equipment.is_cable_tie then
 				managers.hud:set_cable_ties_amount(HUDManager.PLAYER_PANEL, new_amount)
@@ -1844,7 +1859,7 @@ function PlayerManager:add_special(params)
 		managers.hud:add_special_equipment({
 			id = name,
 			icon = icon,
-			amount = quantity or nil
+			amount = quantity or equipment.transfer_quantity and 1 or nil
 		})
 		self:update_equipment_possession_to_peers(name, quantity)
 	end
@@ -1872,7 +1887,7 @@ function PlayerManager:_can_pickup_special_equipment(special_equipment, name)
 	if special_equipment.amount then
 		local equipment = tweak_data.equipments.specials[name]
 		local extra = self:_equipped_upgrade_value(equipment)
-		return Application:digest_value(special_equipment.amount, false) < (equipment.max_quantity or equipment.quantity) + extra, not not equipment.max_quantity
+		return Application:digest_value(special_equipment.amount, false) < (equipment.max_quantity or equipment.quantity or 1) + extra, not not equipment.max_quantity
 	end
 	return false
 end

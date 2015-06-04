@@ -2557,7 +2557,6 @@ end
 function MenuCallbackHandler:_dialog_end_game_yes()
 	managers.platform:set_playing(false)
 	managers.job:clear_saved_ghost_bonus()
-	managers.experience:mission_xp_clear()
 	managers.statistics:stop_session({quit = true})
 	managers.savefile:save_progress()
 	managers.job:deactivate_current_job()
