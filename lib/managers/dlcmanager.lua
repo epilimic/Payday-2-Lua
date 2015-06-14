@@ -429,6 +429,24 @@ end
 function GenericDLCManager:has_humble_pack2()
 	return Global.dlc_manager.all_dlc_data.humble_pack2 and Global.dlc_manager.all_dlc_data.humble_pack2.verified
 end
+function GenericDLCManager:has_humble_pack3()
+	return Global.dlc_manager.all_dlc_data.humble_pack3 and Global.dlc_manager.all_dlc_data.humble_pack3.verified
+end
+function GenericDLCManager:has_humble_pack4()
+	return Global.dlc_manager.all_dlc_data.humble_pack4 and Global.dlc_manager.all_dlc_data.humble_pack4.verified
+end
+function GenericDLCManager:has_e3_s15a()
+	return Global.dlc_manager.all_dlc_data.e3_s15a and Global.dlc_manager.all_dlc_data.e3_s15a.verified
+end
+function GenericDLCManager:has_e3_s15b()
+	return Global.dlc_manager.all_dlc_data.e3_s15b and Global.dlc_manager.all_dlc_data.e3_s15b.verified
+end
+function GenericDLCManager:has_e3_s15c()
+	return Global.dlc_manager.all_dlc_data.e3_s15c and Global.dlc_manager.all_dlc_data.e3_s15c.verified
+end
+function GenericDLCManager:has_e3_s15d()
+	return Global.dlc_manager.all_dlc_data.e3_s15d and Global.dlc_manager.all_dlc_data.e3_s15d.verified
+end
 function GenericDLCManager:has_gage_pack_historical()
 	return Global.dlc_manager.all_dlc_data.gage_pack_historical and Global.dlc_manager.all_dlc_data.gage_pack_historical.verified
 end
@@ -1181,6 +1199,12 @@ function WINDLCManager:init()
 			bsides_soundtrack = {app_id = "368870", no_install = true},
 			twitch_pack = {app_id = "306110", no_install = true},
 			humble_pack2 = {app_id = "331040", no_install = true},
+			humble_pack3 = {app_id = "375380", no_install = true},
+			humble_pack4 = {app_id = "375381", no_install = true},
+			e3_s15a = {app_id = "375382", no_install = true},
+			e3_s15b = {app_id = "375383", no_install = true},
+			e3_s15c = {app_id = "375384", no_install = true},
+			e3_s15d = {app_id = "375385", no_install = true},
 			gage_pack_historical = {app_id = "331900", no_install = true},
 			pd2_clan = {
 				source_id = "103582791433980119"
