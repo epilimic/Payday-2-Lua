@@ -336,7 +336,7 @@ function HuskPlayerMovement:set_character_anim_variables()
 	end
 end
 function HuskPlayerMovement:check_visual_equipment()
-	local peer_id = managers.network:game():member_from_unit(self._unit):peer():id()
+	local peer_id = managers.network:session():peer_by_unit(self._unit):id()
 	local deploy_data = managers.player:get_synced_deployable_equipment(peer_id)
 	if deploy_data then
 		self:set_visual_deployable_equipment(deploy_data.deployable, deploy_data.amount)
@@ -374,7 +374,7 @@ function HuskPlayerMovement:update(unit, t, dt)
 	if self._attention_updator then
 		self._attention_updator(dt)
 	end
-	if not self._movement_updator and self._move_data and (self._state == "standard" or self._state == "mask_off" or self._state == "clean" or self._state == "carry") then
+	if not self._movement_updator and self._move_data and (self._state == "standard" or self._state == "mask_off" or self._state == "clean" or self._state == "civilian" or self._state == "carry") then
 		self._movement_updator = callback(self, self, "_upd_move_standard")
 		self._last_vel_z = 0
 	end
@@ -382,6 +382,14 @@ function HuskPlayerMovement:update(unit, t, dt)
 		self._movement_updator(t, dt)
 	end
 	self:_upd_stance(t)
+	local panel_id = managers.criminals:character_data_by_unit(self._unit) and managers.criminals:character_data_by_unit(self._unit).panel_id
+	if panel_id then
+		if self._state == "civilian" then
+			managers.hud:hide_player_gear(panel_id)
+		else
+			managers.hud:show_player_gear(panel_id)
+		end
+	end
 	if not self._peer_weapon_spawned and alive(self._unit) then
 		local inventory = self._unit:inventory()
 		if inventory and inventory.check_peer_weapon_spawn then
@@ -519,19 +527,19 @@ function HuskPlayerMovement:anim_cbk_set_melee_item_state_vars(unit)
 	local state = self._unit:anim_state_machine():segment_state(Idstring("upper_body"))
 	local anim_attack_vars = {"var1", "var2"}
 	self._unit:anim_state_machine():set_parameter(state, anim_attack_vars[math.random(#anim_attack_vars)], 1)
-	local peer_id = managers.network:game():member_from_unit(self._unit):peer():id()
+	local peer_id = managers.network:session():peer_by_unit(self._unit):id()
 	local peer = managers.network:session():peer(peer_id)
 	local melee_entry = peer:melee_id()
 	local anim_global_param = tweak_data.blackmarket.melee_weapons[melee_entry].anim_global_param
 	self._unit:anim_state_machine():set_parameter(state, anim_global_param, 1)
 end
 function HuskPlayerMovement:anim_cbk_spawn_melee_item(unit, graphic_object)
-	if alive(self._melee_item_unit) or not managers.network:game() or not managers.network:game():member_from_unit(self._unit) then
+	if alive(self._melee_item_unit) or not managers.network:session() or not managers.network:session():peer_by_unit(self._unit) then
 		return
 	end
 	local align_obj_name = Idstring("a_weapon_left_front")
 	local align_obj = self._unit:get_object(align_obj_name)
-	local peer_id = managers.network:game():member_from_unit(self._unit):peer():id()
+	local peer_id = managers.network:session():peer_by_unit(self._unit):id()
 	local peer = managers.network:session():peer(peer_id)
 	local melee_entry = peer:melee_id()
 	local graphic_object_name = Idstring(graphic_object)
@@ -1448,15 +1456,7 @@ function HuskPlayerMovement:_start_standard(event_desc)
 	self:set_need_revive(false)
 	self:set_need_assistance(false)
 	managers.hud:set_mugshot_normal(self._unit:unit_data().mugshot_id)
-	local panel_id = managers.criminals:character_data_by_unit(self._unit) and managers.criminals:character_data_by_unit(self._unit).panel_id
-	if panel_id then
-		if self._state == "clean" then
-			managers.hud:hide_player_gear(panel_id)
-		else
-			managers.hud:show_player_gear(panel_id)
-		end
-	end
-	if self._state == "mask_off" or self._state == "clean" then
+	if self._state == "mask_off" or self._state == "clean" or self._state == "civilian" then
 		self._unit:set_slot(5)
 		self:_change_pose(1)
 		self._unit:inventory():hide_equipped_unit()
@@ -1469,7 +1469,7 @@ function HuskPlayerMovement:_start_standard(event_desc)
 		managers.groupai:state():on_criminal_recovered(self._unit)
 	end
 	local previous_state = event_desc.previous_state
-	if previous_state == "mask_off" or previous_state == "clean" then
+	if previous_state == "mask_off" or previous_state == "clean" or previous_state == "civilian" then
 		local redir_res = self:play_redirect("equip")
 		if redir_res then
 			local weapon = self._unit:inventory():equipped_unit()
@@ -1494,7 +1494,7 @@ function HuskPlayerMovement:_start_standard(event_desc)
 		self._machine:forbid_modifier(self._mask_off_modifier_name)
 		self._atention_on = false
 	end
-	if self._state == "mask_off" or self._state == "clean" then
+	if self._state == "mask_off" or self._state == "clean" or self._state == "civilian" then
 		self._attention_updator = callback(self, self, "_upd_attention_mask_off")
 		self._mask_off_modifier:set_target_z(self._look_dir)
 	else
@@ -1636,7 +1636,7 @@ function HuskPlayerMovement:_start_arrested(event_desc)
 	return true
 end
 function HuskPlayerMovement:_start_driving(event_desc)
-	local peer_id = managers.network:game():member_from_unit(self._unit):peer():id()
+	local peer_id = managers.network:session():peer_by_unit(self._unit):id()
 	local vehicle_data = managers.player:get_vehicle_for_peer(peer_id)
 	if not vehicle_data then
 		return false
@@ -1683,7 +1683,7 @@ function HuskPlayerMovement:_adjust_walk_anim_speed(dt, target_speed)
 	end
 end
 function HuskPlayerMovement:sync_shot_blank(impact)
-	if self._state == "mask_off" or self._state == "clean" then
+	if self._state == "mask_off" or self._state == "clean" or self._state == "civilian" then
 		return
 	end
 	local delay = self._stance.values[3] < 0.7
@@ -1785,6 +1785,9 @@ function HuskPlayerMovement:sync_movement_state(state, down_time)
 	elseif state == "mask_off" then
 		local event_desc = {type = "standard"}
 		self:_add_sequenced_event(event_desc)
+	elseif state == "civilian" then
+		local event_desc = {type = "standard"}
+		self:_add_sequenced_event(event_desc)
 	elseif state == "fatal" then
 		local event_desc = {type = "fatal", down_time = down_time}
 		self:_add_sequenced_event(event_desc)
@@ -1810,7 +1813,7 @@ function HuskPlayerMovement:sync_movement_state(state, down_time)
 		local event_desc = {type = "driving", previous_state = previous_state}
 		self:_add_sequenced_event(event_desc)
 	elseif state == "dead" then
-		local peer_id = managers.network:game():member_from_unit(self._unit):peer():id()
+		local peer_id = managers.network:session():peer_by_unit(self._unit):id()
 		managers.groupai:state():on_player_criminal_death(peer_id)
 	end
 end
@@ -1840,7 +1843,7 @@ end
 function HuskPlayerMovement:clbk_inventory_event(unit, event)
 	local weapon = self._unit:inventory():equipped_unit()
 	if weapon then
-		if self._state == "mask_off" or self._state == "clean" then
+		if self._state == "mask_off" or self._state == "clean" or self._state == "civilian" then
 			self._unit:inventory():hide_equipped_unit()
 		end
 		if self._weapon_hold then
@@ -1892,7 +1895,7 @@ function HuskPlayerMovement:_post_load(unit, t, dt)
 		end
 		peer:set_outfit_string(my_data.outfit, my_data.outfit_version)
 		UnitNetworkHandler.set_unit(UnitNetworkHandler, unit, my_data.character_name, my_data.outfit, my_data.outfit_version, my_data.peer_id)
-		if managers.network:game():member_from_unit(unit) == nil then
+		if managers.network:session():peer_by_unit(unit) == nil then
 			Application:error("[HuskPlayerBase:_post_load] A player husk who appears to not have an owning member was detached.")
 			Network:detach_unit(unit)
 			unit:set_slot(0)
@@ -1912,7 +1915,7 @@ function HuskPlayerMovement:_post_load(unit, t, dt)
 	end
 end
 function HuskPlayerMovement:save(data)
-	local peer_id = managers.network:game():member_from_unit(self._unit):peer():id()
+	local peer_id = managers.network:session():peer_by_unit(self._unit):id()
 	data.movement = {
 		state_name = self._state,
 		look_fwd = self:detect_look_dir(),
@@ -2054,7 +2057,7 @@ function HuskPlayerMovement:sync_stance(stance_code)
 end
 function HuskPlayerMovement:_chk_change_stance()
 	local wanted_stance_code
-	if self._state == "mask_off" or self._state == "clean" then
+	if self._state == "mask_off" or self._state == "clean" or self._state == "civilian" then
 		wanted_stance_code = self._stance.owner_stance_code
 	elseif self._is_weapon_gadget_on then
 		wanted_stance_code = 3

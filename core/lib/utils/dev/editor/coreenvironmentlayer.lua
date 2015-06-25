@@ -135,6 +135,9 @@ end
 function EnvironmentLayer:_load_effects(effects)
 	for _, effect in ipairs(effects) do
 		local unit = self:do_spawn_unit(self._effect_unit, effect.position, effect.rotation)
+		if effect.name_id then
+			self:set_name_id(unit, effect.name_id)
+		end
 		self:play_effect(unit, effect.name)
 	end
 end
@@ -217,8 +220,10 @@ function EnvironmentLayer:save()
 	for _, unit in ipairs(self._created_units) do
 		if unit:name() == Idstring(self._effect_unit) then
 			local effect = unit:unit_data().effect or "none"
+			local name_id = unit:unit_data().name_id
 			table.insert(effects, {
 				name = effect,
+				name_id = name_id,
 				position = unit:position(),
 				rotation = unit:rotation()
 			})

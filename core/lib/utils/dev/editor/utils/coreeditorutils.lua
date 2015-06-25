@@ -13,7 +13,7 @@ function all_lights()
 end
 function get_editable_lights(unit)
 	local lights = {}
-	local object_file = CoreEngineAccess._editor_unit_data(unit:name():id()):model()
+	local object_file = unit:model_filename()
 	local node = DB:has("object", object_file) and DB:load_node("object", object_file)
 	if node then
 		for child in node:children() do
@@ -27,6 +27,9 @@ function get_editable_lights(unit)
 		end
 	end
 	return lights
+end
+function has_editable_lights(unit)
+	return #get_editable_lights(unit) > 0
 end
 function has_any_projection_light(unit)
 	return has_projection_light(unit, "shadow_projection") or has_projection_light(unit, "projection")

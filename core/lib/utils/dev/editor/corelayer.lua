@@ -66,11 +66,28 @@ function Layer:load(world_holder, offset)
 	end
 	return world_units
 end
-function Layer:add_unit_to_created_units(unit)
-	if unit:unit_data().unit_id == 0 then
+function Layer:post_load()
+	if not self._post_register_units then
+		return
+	end
+	for _, unit in ipairs(self._post_register_units) do
+		local previous_id = unit:unit_data().unit_id
 		unit:unit_data().unit_id = self._owner:get_unit_id(unit)
-	else
-		self._owner:register_unit_id(unit)
+		local msg = "A unit, " .. unit:name():s() .. " in layer " .. self._save_name .. ", had duplicate unit id. The unit id was changed from " .. previous_id .. " to " .. unit:unit_data().unit_id .. [[
+.
+
+Please verify that no references to the unit is broken.]]
+		EWS:message_box(Global.frame_panel, msg, self._save_name, "OK,ICON_ERROR", Vector3(-1, -1, 0))
+		managers.editor:output(msg)
+		self:add_unit_to_created_units(unit, true)
+	end
+	self._post_register_units = nil
+end
+function Layer:add_unit_to_created_units(unit, skip_register)
+	if not skip_register and not self._owner:register_unit_id(unit) then
+		self._post_register_units = self._post_register_units or {}
+		table.insert(self._post_register_units, unit)
+		return
 	end
 	self:set_up_name_id(unit)
 	table.insert(self._created_units, unit)

@@ -1,11 +1,13 @@
 PlayerBipod = PlayerBipod or class(PlayerStandard)
 PlayerBipod.target_tilt = -5
 PlayerBipod._shoulder_pos = nil
+PlayerBipod._camera_pos = nil
 function PlayerBipod:init(unit)
 	PlayerBipod.super.init(self, unit)
 end
-function PlayerBipod:set_shoulder_pos(pos)
-	self._shoulder_pos = Vector3(pos.x, pos.y, pos.z)
+function PlayerBipod:set_camera_positions(bipod_pos, camera_pos)
+	self._shoulder_pos = Vector3(bipod_pos.x, bipod_pos.y, bipod_pos.z)
+	self._camera_pos = Vector3(camera_pos.x, camera_pos.y, camera_pos.z)
 end
 function PlayerBipod:enter(state_data, enter_data)
 	PlayerBipod.super.enter(self, state_data, enter_data)
@@ -23,12 +25,6 @@ function PlayerBipod:_enter(enter_data)
 		self._headbob = 0
 		self._target_headbob = 0
 		self._ext_camera:set_shaker_parameter("headbob", "amplitude", 0)
-		self._ext_camera:stop_shaker("player_start_running")
-		self._ext_camera:play_shaker("player_stop_running")
-		self:_end_action_running(managers.player:player_timer():time())
-		self:set_running(false)
-		self._last_velocity_xy = Vector3()
-		self._ext_camera:play_redirect(self.IDS_IDLE)
 	end
 end
 function PlayerBipod:exit(state_data, new_state_name)

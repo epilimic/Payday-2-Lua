@@ -92,6 +92,8 @@ function WeaponTweakData:init(tweak_data)
 	self:_init_data_winchester1874_npc()
 	self:_init_data_plainsrider_npc()
 	self:_init_data_mateba_npc()
+	self:_init_data_asval_npc()
+	self:_init_data_sub2000_npc()
 	self:_precalculate_values()
 end
 function WeaponTweakData:_set_easy()
@@ -1467,6 +1469,32 @@ function WeaponTweakData:_init_data_mateba_npc()
 	self.mateba_npc.hold = "pistol"
 	self.mateba_npc.alert_size = 5000
 	self.mateba_npc.suppression = 1.8
+end
+function WeaponTweakData:_init_data_asval_npc()
+	self.asval_npc.sounds.prefix = "val_npc"
+	self.asval_npc.use_data.selection_index = 2
+	self.asval_npc.DAMAGE = 2
+	self.asval_npc.muzzleflash = "effects/payday2/particles/weapons/762_auto"
+	self.asval_npc.shell_ejection = "effects/payday2/particles/weapons/shells/shell_556"
+	self.asval_npc.CLIP_AMMO_MAX = 20
+	self.asval_npc.NR_CLIPS_MAX = 5
+	self.asval_npc.auto.fire_rate = 0.19
+	self.asval_npc.hold = "rifle"
+	self.asval_npc.alert_size = 5000
+	self.asval_npc.suppression = 1
+end
+function WeaponTweakData:_init_data_sub2000_npc()
+	self.sub2000_npc.sounds.prefix = "sub2k_npc"
+	self.sub2000_npc.use_data.selection_index = 2
+	self.sub2000_npc.DAMAGE = 4
+	self.sub2000_npc.muzzleflash = "effects/payday2/particles/weapons/762_auto"
+	self.sub2000_npc.shell_ejection = "effects/payday2/particles/weapons/shells/shell_556"
+	self.sub2000_npc.CLIP_AMMO_MAX = 12
+	self.sub2000_npc.NR_CLIPS_MAX = 8
+	self.sub2000_npc.auto.fire_rate = 0.2
+	self.sub2000_npc.hold = "rifle"
+	self.sub2000_npc.alert_size = 5000
+	self.sub2000_npc.suppression = 1
 end
 function WeaponTweakData:_init_data_player_weapons(tweak_data)
 	local autohit_rifle_default, autohit_pistol_default, autohit_shotgun_default, autohit_lmg_default, autohit_snp_default, autohit_smg_default, autohit_minigun_default, aim_assist_rifle_default, aim_assist_pistol_default, aim_assist_shotgun_default, aim_assist_lmg_default, aim_assist_snp_default, aim_assist_smg_default, aim_assist_minigun_default
@@ -4908,6 +4936,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.hk21.timers.deploy_bipod = 1
 	self.hk21.bipod_camera_spin_limit = 40
 	self.hk21.bipod_camera_pitch_limit = 15
+	self.hk21.bipod_weapon_translation = Vector3(-8.5, 10, 0)
 	self.hk21.name_id = "bm_w_hk21"
 	self.hk21.desc_id = "bm_w_hk21_desc"
 	self.hk21.description_id = "des_hk21"
@@ -5001,6 +5030,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.m249.timers.deploy_bipod = 2
 	self.m249.bipod_camera_spin_limit = 40
 	self.m249.bipod_camera_pitch_limit = 15
+	self.m249.bipod_weapon_translation = Vector3(-8.5, 10, 0)
 	self.m249.name_id = "bm_w_m249"
 	self.m249.desc_id = "bm_w_m249_desc"
 	self.m249.description_id = "des_m249"
@@ -5091,6 +5121,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.rpk.timers.reload_empty = 4.56
 	self.rpk.timers.unequip = 0.9
 	self.rpk.timers.equip = 0.9
+	self.rpk.timers.deploy_bipod = 1
+	self.rpk.bipod_camera_spin_limit = 40
+	self.rpk.bipod_camera_pitch_limit = 15
+	self.rpk.bipod_weapon_translation = Vector3(-8.5, 10, 0)
 	self.rpk.name_id = "bm_w_rpk"
 	self.rpk.desc_id = "bm_w_rpk_desc"
 	self.rpk.description_id = "des_rpk"
@@ -6958,6 +6992,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.mg42.timers.reload_empty = 6.5
 	self.mg42.timers.unequip = 0.9
 	self.mg42.timers.equip = 0.9
+	self.mg42.timers.deploy_bipod = 1
+	self.mg42.bipod_camera_spin_limit = 40
+	self.mg42.bipod_camera_pitch_limit = 15
+	self.mg42.bipod_weapon_translation = Vector3(-8.5, 10, 0)
 	self.mg42.name_id = "bm_w_mg42"
 	self.mg42.desc_id = "bm_w_mg42_desc"
 	self.mg42.description_id = "des_mg42"
@@ -8956,6 +8994,175 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 		total_ammo_mod = 21,
 		value = 1
 	}
+	self.asval = {}
+	self.asval.category = "assault_rifle"
+	self.asval.damage_melee = damage_melee_default
+	self.asval.damage_melee_effect_mul = damage_melee_effect_multiplier_default
+	self.asval.sounds = {}
+	self.asval.sounds.fire = "val_fire"
+	self.asval.sounds.fire_single = "val_fire_single"
+	self.asval.sounds.fire_auto = "val_fire"
+	self.asval.sounds.stop_fire = "val_stop"
+	self.asval.sounds.dryfire = "primary_dryfire"
+	self.asval.sounds.enter_steelsight = "primary_steel_sight_enter"
+	self.asval.sounds.leave_steelsight = "primary_steel_sight_exit"
+	self.asval.timers = {}
+	self.asval.timers.reload_not_empty = 2.6
+	self.asval.timers.reload_empty = 3.7
+	self.asval.timers.unequip = 0.8
+	self.asval.timers.equip = 0.8
+	self.asval.name_id = "bm_w_asval"
+	self.asval.desc_id = "bm_w_asval_desc"
+	self.asval.description_id = "des_asval"
+	self.asval.muzzleflash = "effects/payday2/particles/weapons/9mm_auto_fps"
+	self.asval.shell_ejection = "effects/payday2/particles/weapons/shells/shell_556"
+	self.asval.use_data = {}
+	self.asval.use_data.selection_index = 2
+	self.asval.DAMAGE = 1
+	self.asval.CLIP_AMMO_MAX = 20
+	self.asval.NR_CLIPS_MAX = math.round(total_damage_primary / 2 / self.asval.CLIP_AMMO_MAX)
+	self.asval.AMMO_MAX = self.asval.CLIP_AMMO_MAX * self.asval.NR_CLIPS_MAX
+	self.asval.AMMO_PICKUP = self:_pickup_chance(self.asval.AMMO_MAX, 2)
+	self.asval.FIRE_MODE = "auto"
+	self.asval.fire_mode_data = {}
+	self.asval.fire_mode_data.fire_rate = 0.067
+	self.asval.CAN_TOGGLE_FIREMODE = true
+	self.asval.auto = {}
+	self.asval.auto.fire_rate = 0.067
+	self.asval.spread = {}
+	self.asval.spread.standing = self.new_m4.spread.standing
+	self.asval.spread.crouching = self.new_m4.spread.standing
+	self.asval.spread.steelsight = self.new_m4.spread.steelsight
+	self.asval.spread.moving_standing = self.new_m4.spread.standing
+	self.asval.spread.moving_crouching = self.new_m4.spread.standing
+	self.asval.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
+	self.asval.kick = {}
+	self.asval.kick.standing = self.new_m4.kick.standing
+	self.asval.kick.crouching = self.asval.kick.standing
+	self.asval.kick.steelsight = self.asval.kick.standing
+	self.asval.crosshair = {}
+	self.asval.crosshair.standing = {}
+	self.asval.crosshair.crouching = {}
+	self.asval.crosshair.steelsight = {}
+	self.asval.crosshair.standing.offset = 0.16
+	self.asval.crosshair.standing.moving_offset = 0.8
+	self.asval.crosshair.standing.kick_offset = 0.6
+	self.asval.crosshair.crouching.offset = 0.08
+	self.asval.crosshair.crouching.moving_offset = 0.7
+	self.asval.crosshair.crouching.kick_offset = 0.4
+	self.asval.crosshair.steelsight.hidden = true
+	self.asval.crosshair.steelsight.offset = 0
+	self.asval.crosshair.steelsight.moving_offset = 0
+	self.asval.crosshair.steelsight.kick_offset = 0.1
+	self.asval.shake = {}
+	self.asval.shake.fire_multiplier = 1
+	self.asval.shake.fire_steelsight_multiplier = -1
+	self.asval.autohit = autohit_rifle_default
+	self.asval.aim_assist = aim_assist_rifle_default
+	self.asval.weapon_hold = "asval"
+	self.asval.animations = {}
+	self.asval.animations.equip_id = "asval_equip"
+	self.asval.animations.recoil_steelsight = true
+	self.asval.challenges = {}
+	self.asval.challenges.group = "rifle"
+	self.asval.challenges.weapon = "ak47"
+	self.asval.global_value = "character_pack_sokol"
+	self.asval.texture_bundle_folder = "character_pack_sokol"
+	self.asval.stats = {
+		damage = 16,
+		spread = 9,
+		recoil = 6,
+		spread_moving = 6,
+		zoom = 3,
+		concealment = 26,
+		suppression = 24,
+		alert_size = 12,
+		extra_ammo = 6,
+		total_ammo_mod = 21,
+		value = 1
+	}
+	self.sub2000 = {}
+	self.sub2000.category = "assault_rifle"
+	self.sub2000.damage_melee = damage_melee_default
+	self.sub2000.damage_melee_effect_mul = damage_melee_effect_multiplier_default
+	self.sub2000.sounds = {}
+	self.sub2000.sounds.fire = "sub2k_fire"
+	self.sub2000.sounds.fire_single = "sub2k_fire"
+	self.sub2000.sounds.dryfire = "primary_dryfire"
+	self.sub2000.sounds.enter_steelsight = "primary_steel_sight_enter"
+	self.sub2000.sounds.leave_steelsight = "primary_steel_sight_exit"
+	self.sub2000.timers = {}
+	self.sub2000.timers.reload_not_empty = 2.3
+	self.sub2000.timers.reload_empty = 3.3
+	self.sub2000.timers.unequip = 0.9
+	self.sub2000.timers.equip = 0.9
+	self.sub2000.name_id = "bm_w_sub2000"
+	self.sub2000.desc_id = "bm_w_sub2000_desc"
+	self.sub2000.description_id = "des_sub2000"
+	self.sub2000.muzzleflash = "effects/payday2/particles/weapons/9mm_auto_fps"
+	self.sub2000.shell_ejection = "effects/payday2/particles/weapons/shells/shell_9mm"
+	self.sub2000.use_data = {}
+	self.sub2000.use_data.selection_index = 2
+	self.sub2000.DAMAGE = 2
+	self.sub2000.CLIP_AMMO_MAX = 33
+	self.sub2000.NR_CLIPS_MAX = math.round(total_damage_primary / 4 / self.sub2000.CLIP_AMMO_MAX)
+	self.sub2000.AMMO_MAX = self.sub2000.CLIP_AMMO_MAX * self.sub2000.NR_CLIPS_MAX
+	self.sub2000.AMMO_PICKUP = self:_pickup_chance(self.sub2000.AMMO_MAX, 2)
+	self.sub2000.FIRE_MODE = "single"
+	self.sub2000.fire_mode_data = {}
+	self.sub2000.fire_mode_data.fire_rate = 0.085
+	self.sub2000.CAN_TOGGLE_FIREMODE = false
+	self.sub2000.single = {}
+	self.sub2000.single.fire_rate = 0.085
+	self.sub2000.spread = {}
+	self.sub2000.spread.standing = self.new_m4.spread.standing * 2
+	self.sub2000.spread.crouching = self.new_m4.spread.standing * 2
+	self.sub2000.spread.steelsight = self.new_m4.spread.steelsight
+	self.sub2000.spread.moving_standing = self.new_m4.spread.standing * 2.5
+	self.sub2000.spread.moving_crouching = self.new_m4.spread.standing * 2.5
+	self.sub2000.spread.moving_steelsight = self.new_m4.spread.moving_steelsight * 1.5
+	self.sub2000.kick = {}
+	self.sub2000.kick.standing = self.new_m4.kick.standing
+	self.sub2000.kick.crouching = self.sub2000.kick.standing
+	self.sub2000.kick.steelsight = self.sub2000.kick.standing
+	self.sub2000.crosshair = {}
+	self.sub2000.crosshair.standing = {}
+	self.sub2000.crosshair.crouching = {}
+	self.sub2000.crosshair.steelsight = {}
+	self.sub2000.crosshair.standing.offset = 0.16
+	self.sub2000.crosshair.standing.moving_offset = 0.8
+	self.sub2000.crosshair.standing.kick_offset = 0.6
+	self.sub2000.crosshair.crouching.offset = 0.08
+	self.sub2000.crosshair.crouching.moving_offset = 0.7
+	self.sub2000.crosshair.crouching.kick_offset = 0.4
+	self.sub2000.crosshair.steelsight.hidden = true
+	self.sub2000.crosshair.steelsight.offset = 0
+	self.sub2000.crosshair.steelsight.moving_offset = 0
+	self.sub2000.crosshair.steelsight.kick_offset = 0.1
+	self.sub2000.shake = {}
+	self.sub2000.shake.fire_multiplier = 1
+	self.sub2000.shake.fire_steelsight_multiplier = 1
+	self.sub2000.autohit = autohit_rifle_default
+	self.sub2000.aim_assist = aim_assist_rifle_default
+	self.sub2000.weapon_hold = "sub2000"
+	self.sub2000.animations = {}
+	self.sub2000.animations.equip_id = "sub2000_equip"
+	self.sub2000.animations.recoil_steelsight = true
+	self.sub2000.global_value = "kenaz"
+	self.sub2000.texture_bundle_folder = "kenaz"
+	self.sub2000.stats = {
+		damage = 28,
+		spread = 8,
+		recoil = 4,
+		spread_moving = 5,
+		zoom = 3,
+		concealment = 25,
+		suppression = 4,
+		alert_size = 7,
+		extra_ammo = 6,
+		total_ammo_mod = 21,
+		value = 1
+	}
 end
 function WeaponTweakData:_init_data_offhand_weapons()
 	self.b92fs_primary = deep_clone(self.b92fs)
@@ -9583,6 +9790,18 @@ function WeaponTweakData:_create_table_structure()
 		use_data = {},
 		auto = {}
 	}
+	self.asval_npc = {
+		usage = "ak47",
+		sounds = {},
+		use_data = {},
+		auto = {}
+	}
+	self.sub2000_npc = {
+		usage = "ak47",
+		sounds = {},
+		use_data = {},
+		auto = {}
+	}
 end
 function WeaponTweakData:_precalculate_values_wip()
 end
@@ -9675,4 +9894,6 @@ function WeaponTweakData:_precalculate_values()
 	self.winchester1874_npc.AMMO_MAX = self.winchester1874_npc.CLIP_AMMO_MAX * self.winchester1874_npc.NR_CLIPS_MAX
 	self.plainsrider_npc.AMMO_MAX = self.plainsrider_npc.CLIP_AMMO_MAX * self.plainsrider_npc.NR_CLIPS_MAX
 	self.mateba_npc.AMMO_MAX = self.mateba_npc.CLIP_AMMO_MAX * self.mateba_npc.NR_CLIPS_MAX
+	self.asval_npc.AMMO_MAX = self.asval_npc.CLIP_AMMO_MAX * self.asval_npc.NR_CLIPS_MAX
+	self.sub2000_npc.AMMO_MAX = self.sub2000_npc.CLIP_AMMO_MAX * self.sub2000_npc.NR_CLIPS_MAX
 end

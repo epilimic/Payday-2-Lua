@@ -766,7 +766,6 @@ end
 function HUDManager:remove_waypoint(id)
 	self._hud.stored_waypoints[id] = nil
 	if not self._hud.waypoints[id] then
-		Application:error("Trying to remove waypoint that hasn't been added! Id: " .. id .. ".")
 		return
 	end
 	local hud = managers.hud:script(PlayerBase.PLAYER_INFO_HUD_PD2)

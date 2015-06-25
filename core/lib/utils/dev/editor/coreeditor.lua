@@ -86,7 +86,7 @@ function CoreEditor:init(game_state_machine, session_state)
 	self._WORKING_ON_CONTINENTS = true
 	self._skipped_freeflight_frames = 1
 	self._editor_name = "Bringer of Worlds"
-	self._max_id = 0
+	self._max_id = 1
 	self._STEP_ID = 1
 	self._unit_ids = {}
 	self._gui_id = 0
@@ -837,9 +837,9 @@ function CoreEditor:clear_layers()
 	self._layers.Instances:clear()
 end
 function CoreEditor:recreate_layers()
+	self._layers.Ai:load(self._world_holder, Vector3(0, 0, 0))
 	self._layers.Portals:load(self._world_holder, Vector3(0, 0, 0))
 	self._layers.Statics:load(self._world_holder, Vector3(0, 0, 0))
-	self._layers.Ai:load(self._world_holder, Vector3(0, 0, 0))
 	self._layers.Instances:load(self._world_holder, Vector3(0, 0, 0))
 end
 function CoreEditor:reset_layers()
@@ -1752,9 +1752,13 @@ end
 function CoreEditor:register_unit_id(unit)
 	if unit:unit_data().continent then
 		unit:unit_data().continent:register_unit_id(unit)
-		return
+		return true
+	end
+	if self._unit_ids[unit:unit_data().unit_id] then
+		return false
 	end
 	self._unit_ids[unit:unit_data().unit_id] = unit
+	return true
 end
 function CoreEditor:remove_unit_id(unit)
 	if unit:unit_data().continent then
@@ -2006,7 +2010,11 @@ function CoreEditor:update_ruler(t, dt)
 	end
 	local pos = self._ruler_points[1]
 	Application:draw_sphere(pos, 10, 1, 1, 1)
-	local ray = self:select_unit_by_raycast(managers.slot:get_mask("all"), "body editor")
+	local ray = self:unit_by_raycast({
+		mask = managers.slot:get_mask("all"),
+		sample = true,
+		ray_type = "body editor"
+	})
 	if not ray or not ray.position then
 		return
 	end
@@ -2829,10 +2837,21 @@ function CoreEditor:load_level(dir, path)
 		file_type = "world",
 		file_path = managers.database:entry_path(path)
 	})
-	if self._world_holder:is_ok() then
+	local status = self._world_holder:status()
+	if status == "ok" then
 		self:set_open_file_and_dir(path, dir)
 		self:do_load()
 		self:save_editor_settings(path, dir)
+	elseif status == "missing" then
+		local msg = [[
+Can't open world file:
+
+]] .. path .. [[
+
+
+Path is invalid.]]
+		EWS:message_box(Global.frame_panel, msg, self._editor_name, "OK,ICON_ERROR", Vector3(-1, -1, 0))
+		self:output(msg)
 	else
 		self:output("Wrong file format!")
 	end
@@ -2841,8 +2860,6 @@ end
 function CoreEditor:do_load()
 	self._loading = true
 	self:clear_all()
-	self._max_id = self._world_holder:get_max_id("world")
-	self._max_id = math.ceil(self._max_id / 10) * 10
 	local offset = Vector3(0, 0, 0)
 	self:load_markers(self._world_holder, offset)
 	self:load_continents(self._world_holder, offset)
@@ -2853,6 +2870,9 @@ function CoreEditor:do_load()
 		progress_i = progress_i + 50 / layers_amount
 		self:update_load_progress(progress_i, "Create Layer: " .. name)
 		layer:load(self._world_holder, offset)
+	end
+	for name, layer in pairs(self._layers) do
+		layer:post_load()
 	end
 	self._groups:load(self._world_holder, offset)
 	for _, continent in pairs(self._continents) do
@@ -2873,7 +2893,6 @@ function CoreEditor:clear_all()
 		self._camera_controller:set_camera_pos(Vector3(0, 0, 0))
 		self._camera_controller:set_camera_rot(Rotation())
 	end
-	self._max_id = 0
 	self._continents = {}
 	self._continents_panel:destroy_all_continents()
 	self:create_continent("world", {})
@@ -3231,7 +3250,11 @@ function CoreEditor:set_ruler_points()
 	if not self._ruler_points then
 		self._ruler_points = {}
 	end
-	local ray = self:select_unit_by_raycast(managers.slot:get_mask("all"), "body editor")
+	local ray = self:unit_by_raycast({
+		mask = managers.slot:get_mask("all"),
+		sample = true,
+		ray_type = "body editor"
+	})
 	if not ray or not ray.position then
 		return
 	end

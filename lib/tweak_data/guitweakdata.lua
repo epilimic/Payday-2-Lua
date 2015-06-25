@@ -369,6 +369,22 @@ function GuiTweakData:init()
 		store = 366660,
 		image = "guis/dlcs/dlc_arena/textures/pd2/content_updates/arena"
 	}
+	local character_pack_sokol = {
+		id = "character_pack_sokol",
+		name_id = "menu_content_character_pack_sokol",
+		desc_id = "menu_content_character_pack_sokol_desc",
+		date_id = "menu_content_character_pack_sokol_date",
+		store = 374301,
+		image = "guis/dlcs/character_pack_sokol/textures/pd2/content_updates/sokol"
+	}
+	local kenaz = {
+		id = "kenaz",
+		name_id = "menu_content_kenaz",
+		desc_id = "menu_content_kenaz_desc",
+		date_id = "menu_content_kenaz_date",
+		store = 374300,
+		image = "guis/dlcs/kenaz/textures/pd2/content_updates/kenaz"
+	}
 	self.content_updates = {
 		title_id = "menu_content_updates",
 		choice_id = "menu_content_updates_previous",
@@ -416,11 +432,13 @@ function GuiTweakData:init()
 			hlm2_deluxe,
 			springbreak,
 			bbq,
-			springcleaning,
 			west,
+			springcleaning,
 			bsides,
 			shoutout,
-			arena
+			arena,
+			kenaz,
+			character_pack_sokol
 		}
 	elseif SystemInfo:platform() == Idstring("PS3") then
 		self.content_updates.item_list = {
@@ -1734,6 +1752,15 @@ function GuiTweakData:init()
 					desc_id = "menu_bonnie_desc_codex",
 					videos = {"bonnie1"},
 					post_event = "pln_contact_bonnie"
+				}
+			},
+			{
+				id = "sokol",
+				name_id = "menu_sokol",
+				{
+					desc_id = "menu_sokol_desc_codex",
+					videos = {"sokol1"},
+					post_event = "pln_contact_sokol"
 				}
 			}
 		}

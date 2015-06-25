@@ -1,10 +1,9 @@
 require("lib/setups/GameSetup")
 require("lib/network/base/NetworkManager")
-require("lib/network/NetworkGame")
 NetworkGameSetup = NetworkGameSetup or class(GameSetup)
 function NetworkGameSetup:init_managers(managers)
 	GameSetup.init_managers(self, managers)
-	managers.network = NetworkManager:new("NetworkGame")
+	managers.network = NetworkManager:new()
 end
 function NetworkGameSetup:init_finalize()
 	GameSetup.init_finalize(self)

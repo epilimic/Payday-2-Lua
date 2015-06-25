@@ -38,6 +38,7 @@ function CharacterTweakData:init(tweak_data)
 	self:_init_dragan(presets)
 	self:_init_jacket(presets)
 	self:_init_bonnie(presets)
+	self:_init_sokol(presets)
 	self:_init_old_hoxton_mission(presets)
 end
 function CharacterTweakData:_init_security(presets)
@@ -1535,6 +1536,26 @@ function CharacterTweakData:_init_bonnie(presets)
 	self.bonnie.weapon_voice = "3"
 	self.bonnie.access = "teamAI1"
 	self.bonnie.arrest = {
+		timeout = 240,
+		aggression_timeout = 6,
+		arrest_timeout = 240
+	}
+end
+function CharacterTweakData:_init_sokol(presets)
+	self.sokol = {}
+	self.sokol.damage = presets.gang_member_damage
+	self.sokol.weapon = deep_clone(presets.weapon.gang_member)
+	self.sokol.weapon.weapons_of_choice = {
+		primary = Idstring("units/payday2/weapons/wpn_npc_m4/wpn_npc_m4"),
+		secondary = Idstring("units/payday2/weapons/wpn_npc_mac11/wpn_npc_mac11")
+	}
+	self.sokol.detection = presets.detection.gang_member
+	self.sokol.move_speed = presets.move_speed.fast
+	self.sokol.crouch_move = false
+	self.sokol.speech_prefix = "rb11"
+	self.sokol.weapon_voice = "3"
+	self.sokol.access = "teamAI1"
+	self.sokol.arrest = {
 		timeout = 240,
 		aggression_timeout = 6,
 		arrest_timeout = 240
@@ -6414,6 +6435,23 @@ function CharacterTweakData:character_map()
 				"civ_male_fastfood_1",
 				"ene_guard_security_heavy_2",
 				"ene_guard_security_heavy_1"
+			}
+		},
+		kenaz = {
+			path = "units/pd2_dlc_casino/characters/",
+			list = {
+				"civ_male_casino_1",
+				"civ_male_casino_2",
+				"civ_male_casino_3",
+				"civ_male_casino_4",
+				"ene_secret_service_1_casino",
+				"civ_male_business_casino_1",
+				"civ_male_business_casino_2",
+				"civ_male_impersonator",
+				"civ_female_casino_1",
+				"civ_female_casino_2",
+				"civ_female_casino_3",
+				"civ_male_casino_pitboss"
 			}
 		}
 	}

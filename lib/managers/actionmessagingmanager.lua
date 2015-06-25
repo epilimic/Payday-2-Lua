@@ -76,7 +76,7 @@ function ActionMessagingManager:_show_message(id, instigator)
 	end
 end
 function ActionMessagingManager:sync_show_message(id, instigator)
-	if alive(instigator) and managers.network:game():member_from_unit(instigator) then
+	if alive(instigator) and managers.network:session():peer_by_unit(instigator) then
 		self:_show_message(id, instigator)
 	end
 end

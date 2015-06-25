@@ -3421,13 +3421,13 @@ function BlackMarketGui:_get_stats(name, category, slot)
 		equipped_mods = deep_clone(blueprint)
 		local factory_id = managers.weapon_factory:get_factory_id_by_weapon_id(name)
 		local default_blueprint = managers.weapon_factory:get_default_blueprint_by_factory_id(factory_id)
-		for _, default_part in ipairs(default_blueprint) do
-			table.delete(equipped_mods, default_part)
-		end
 		if equipped_mods then
 			silencer = managers.weapon_factory:has_perk("silencer", factory_id, equipped_mods)
 			single_mod = managers.weapon_factory:has_perk("fire_mode_single", factory_id, equipped_mods)
 			auto_mod = managers.weapon_factory:has_perk("fire_mode_auto", factory_id, equipped_mods)
+		end
+		for _, default_part in ipairs(default_blueprint) do
+			table.delete(equipped_mods, default_part)
 		end
 	end
 	local base_stats = self:_get_base_stats(name)
@@ -4253,7 +4253,7 @@ function BlackMarketGui:update_info_text()
 			if not slot_data.unlocked then
 				local skill_based = slot_data.skill_based
 				local level_based = slot_data.level and 0 < slot_data.level
-				local dlc_based = tweak_data.lootdrop.global_values[slot_data.global_value] and tweak_data.lootdrop.global_values[slot_data.global_value].dlc and not tweak_data.dlc[slot_data.global_value].free and not managers.dlc:has_dlc(slot_data.global_value)
+				local dlc_based = tweak_data.lootdrop.global_values[slot_data.global_value] and tweak_data.lootdrop.global_values[slot_data.global_value].dlc and not managers.dlc:is_dlc_unlocked(slot_data.global_value)
 				local skill_text_id = skill_based and (slot_data.skill_name or "bm_menu_skilltree_locked") or false
 				local level_text_id = level_based and "bm_menu_level_req" or false
 				local dlc_text_id = dlc_based and slot_data.dlc_locked or false
@@ -4320,7 +4320,7 @@ function BlackMarketGui:update_info_text()
 		if not slot_data.unlocked then
 			local skill_based = slot_data.skill_based
 			local level_based = slot_data.level and 0 < slot_data.level
-			local dlc_based = not slot_data.dlc_based and tweak_data.lootdrop.global_values[slot_data.global_value] and tweak_data.lootdrop.global_values[slot_data.global_value].dlc and not tweak_data.dlc[slot_data.global_value].free and not managers.dlc:has_dlc(slot_data.global_value)
+			local dlc_based = not slot_data.dlc_based and tweak_data.lootdrop.global_values[slot_data.global_value] and tweak_data.lootdrop.global_values[slot_data.global_value].dlc and not managers.dlc:is_dlc_unlocked(slot_data.global_value)
 			local skill_text_id = skill_based and (slot_data.skill_name or "bm_menu_skilltree_locked") or false
 			local level_text_id = level_based and "bm_menu_level_req" or false
 			local dlc_text_id = dlc_based and slot_data.dlc_locked or false
@@ -4351,7 +4351,7 @@ function BlackMarketGui:update_info_text()
 		if not slot_data.unlocked then
 			local skill_based = slot_data.skill_based
 			local level_based = slot_data.level and 0 < slot_data.level
-			local dlc_based = not slot_data.dlc_based and tweak_data.lootdrop.global_values[slot_data.global_value] and tweak_data.lootdrop.global_values[slot_data.global_value].dlc and not tweak_data.dlc[slot_data.global_value].free and not managers.dlc:has_dlc(slot_data.global_value)
+			local dlc_based = not slot_data.dlc_based and tweak_data.lootdrop.global_values[slot_data.global_value] and tweak_data.lootdrop.global_values[slot_data.global_value].dlc and not managers.dlc:is_dlc_unlocked(slot_data.global_value)
 			local skill_text_id = skill_based and (slot_data.skill_name or "bm_menu_skilltree_locked") or false
 			local level_text_id = level_based and "bm_menu_level_req" or false
 			local dlc_text_id = dlc_based and slot_data.dlc_locked or false
@@ -5887,7 +5887,7 @@ function BlackMarketGui:populate_grenades(data)
 		new_data.equipped = grenades_data[2].equipped
 		new_data.level = grenades_data[2].level
 		new_data.stream = true
-		new_data.global_value = m_tweak_data.dlc or "normal"
+		new_data.global_value = tweak_data.lootdrop.global_values[m_tweak_data.dlc] and m_tweak_data.dlc or "normal"
 		new_data.skill_based = grenades_data[2].skill_based
 		new_data.skill_name = "bm_menu_skill_locked_" .. new_data.name
 		new_data.equipped_text = not new_data.unlocked and new_data.equipped and " "
@@ -6002,7 +6002,7 @@ function BlackMarketGui:populate_melee_weapons(data)
 		new_data.equipped = melee_weapon_data[2].equipped
 		new_data.level = melee_weapon_data[2].level
 		new_data.stream = true
-		new_data.global_value = m_tweak_data.dlc or "normal"
+		new_data.global_value = tweak_data.lootdrop.global_values[m_tweak_data.dlc] and m_tweak_data.dlc or "normal"
 		new_data.skill_based = melee_weapon_data[2].skill_based
 		new_data.skill_name = "bm_menu_skill_locked_" .. new_data.name
 		if m_tweak_data and m_tweak_data.locks then
@@ -6203,7 +6203,7 @@ function BlackMarketGui:populate_masks(data)
 			}
 			local default_blueprint = tweak_data.blackmarket.masks[crafted.mask_id] and tweak_data.blackmarket.masks[crafted.mask_id].default_blueprint or {}
 			for type, part in pairs(crafted.blueprint) do
-				if default_blueprint[type] ~= part.id and default_blueprint[name_converter[type]] ~= part.id and tweak_data.lootdrop.global_values[part.global_value] and tweak_data.lootdrop.global_values[part.global_value].dlc and not tweak_data.dlc[part.global_value].free and not managers.dlc:has_dlc(part.global_value) then
+				if default_blueprint[type] ~= part.id and default_blueprint[name_converter[type]] ~= part.id and tweak_data.lootdrop.global_values[part.global_value] and tweak_data.lootdrop.global_values[part.global_value].dlc and not managers.dlc:is_dlc_unlocked(part.global_value) then
 					locked_parts[type] = part.global_value
 					is_locked = true
 					locked_global_value = part.global_value or locked_global_value
@@ -6623,7 +6623,7 @@ function BlackMarketGui:populate_mods(data)
 		new_data.is_internal = tweak_data.weapon.factory:is_part_internal(new_data.name)
 		new_data.free_of_charge = tweak_data.blackmarket.weapon_mods[mod_name] and tweak_data.blackmarket.weapon_mods[mod_name].is_a_unlockable
 		new_data.unlock_tracker = achievement_tracker[new_data.name] or false
-		if tweak_data.lootdrop.global_values[mod_global_value] and tweak_data.lootdrop.global_values[mod_global_value].dlc and not tweak_data.dlc[mod_global_value].free and not managers.dlc:has_dlc(mod_global_value) then
+		if tweak_data.lootdrop.global_values[mod_global_value] and tweak_data.lootdrop.global_values[mod_global_value].dlc and not managers.dlc:is_dlc_unlocked(mod_global_value) then
 			new_data.unlocked = -math.abs(new_data.unlocked)
 			new_data.unlocked = new_data.unlocked ~= 0 and new_data.unlocked or false
 			new_data.lock_texture = self:get_lock_icon(new_data)
@@ -6978,7 +6978,7 @@ function BlackMarketGui:populate_buy_mask(data)
 		if not new_data.global_value then
 			Application:debug("BlackMarketGui:populate_buy_mask( data ) Missing global value on mask", new_data.name)
 		end
-		if tweak_data.lootdrop.global_values[new_data.global_value] and tweak_data.lootdrop.global_values[new_data.global_value].dlc and not tweak_data.dlc[new_data.global_value].free and not managers.dlc:has_dlc(new_data.global_value) then
+		if tweak_data.lootdrop.global_values[new_data.global_value] and tweak_data.lootdrop.global_values[new_data.global_value].dlc and not managers.dlc:is_dlc_unlocked(new_data.global_value) then
 			new_data.unlocked = -math.abs(new_data.unlocked)
 			new_data.lock_texture = self:get_lock_icon(new_data)
 			new_data.dlc_locked = tweak_data.lootdrop.global_values[new_data.global_value].unlock_id or "bm_menu_dlc_locked"
@@ -7184,7 +7184,7 @@ function BlackMarketGui:populate_choose_mask_mod(data)
 		new_data.stream = data.category ~= "colors"
 		new_data.global_value = mods.global_value
 		local is_locked = false
-		if new_data.unlocked and type_func(new_data.unlocked) == "number" and tweak_data.lootdrop.global_values[new_data.global_value] and tweak_data.lootdrop.global_values[new_data.global_value].dlc and not tweak_data.dlc[new_data.global_value].free and not managers.dlc:has_dlc(new_data.global_value) then
+		if new_data.unlocked and type_func(new_data.unlocked) == "number" and tweak_data.lootdrop.global_values[new_data.global_value] and tweak_data.lootdrop.global_values[new_data.global_value].dlc and not managers.dlc:is_dlc_unlocked(new_data.global_value) then
 			new_data.unlocked = -math.abs(new_data.unlocked)
 			new_data.lock_texture = self:get_lock_icon(new_data)
 			new_data.dlc_locked = tweak_data.lootdrop.global_values[new_data.global_value].unlock_id or "bm_menu_dlc_locked"
@@ -7858,7 +7858,7 @@ function BlackMarketGui:choose_mask_buy_callback(data)
 	local items = {}
 	local itemids = {}
 	local function func_add_item(global_value, item_id, item)
-		if not masks_data[item_id] or masks_data[item_id].inaccessible then
+		if not masks_data[item_id] or masks_data[item_id].inaccessible or not tweak_data.lootdrop.global_values[global_value] then
 			return
 		end
 		local category = tweak_data.lootdrop.global_values[global_value].category
@@ -7892,7 +7892,7 @@ function BlackMarketGui:choose_mask_buy_callback(data)
 					global_value = mask.global_value or dlc
 					dlc_tweak = tweak_data.dlc[dlc] or {}
 					global_value_tweak = tweak_data.lootdrop.global_values[global_value] or {}
-					add_dlc = not global_value_tweak.hide_unavailable or dlc_tweak.free or managers.dlc:has_dlc(dlc)
+					add_dlc = not global_value_tweak.hide_unavailable or managers.dlc:is_dlc_unlocked(dlc)
 					if add_dlc then
 						table.insert(global_values, global_value)
 						if mask.global_value then

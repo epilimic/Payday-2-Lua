@@ -95,14 +95,17 @@ SpawnCivilianUnitElement._options = {
 	"units/pd2_dlc1/characters/civ_male_bank_manager_2/civ_male_bank_manager_2",
 	"units/pd2_dlc2/characters/civ_female_bank_assistant_1/civ_female_bank_assistant_1",
 	"units/pd2_dlc2/characters/civ_female_bank_assistant_2/civ_female_bank_assistant_2",
-	"units/pd2_dlc3/characters/civ_female_casino_1/civ_female_casino_1",
-	"units/pd2_dlc3/characters/civ_female_casino_2/civ_female_casino_2",
-	"units/pd2_dlc3/characters/civ_female_casino_3/civ_female_casino_3",
+	"units/pd2_dlc_casino/characters/civ_female_casino_1/civ_female_casino_1",
+	"units/pd2_dlc_casino/characters/civ_female_casino_2/civ_female_casino_2",
+	"units/pd2_dlc_casino/characters/civ_female_casino_3/civ_female_casino_3",
 	"units/pd2_dlc_casino/characters/civ_male_casino_1/civ_male_casino_1",
 	"units/pd2_dlc_casino/characters/civ_male_casino_2/civ_male_casino_2",
 	"units/pd2_dlc_casino/characters/civ_male_casino_3/civ_male_casino_3",
 	"units/pd2_dlc_casino/characters/civ_male_casino_4/civ_male_casino_4",
 	"units/pd2_dlc_casino/characters/civ_male_impersonator/civ_male_impersonator",
+	"units/pd2_dlc_casino/characters/civ_male_business_casino_1/civ_male_business_casino_1",
+	"units/pd2_dlc_casino/characters/civ_male_business_casino_2/civ_male_business_casino_2",
+	"units/pd2_dlc_casino/characters/civ_male_casino_pitboss/civ_male_casino_pitboss",
 	"units/pd2_dlc_arena/characters/civ_female_fastfood_1/civ_female_fastfood_1",
 	"units/pd2_dlc_arena/characters/civ_male_fastfood_1/civ_male_fastfood_1",
 	"units/pd2_dlc_arena/characters/civ_male_fastfood_2/civ_male_fastfood_2",
@@ -114,7 +117,8 @@ SpawnCivilianUnitElement._options = {
 	"units/pd2_dlc_arena/characters/civ_female_party_alesso_6/civ_female_party_alesso_6",
 	"units/pd2_dlc_arena/characters/civ_male_party_alesso_1/civ_male_party_alesso_1",
 	"units/pd2_dlc_arena/characters/civ_male_party_alesso_2/civ_male_party_alesso_2",
-	"units/pd2_dlc_arena/characters/civ_male_alesso_booth/civ_male_alesso_booth"
+	"units/pd2_dlc_arena/characters/civ_male_alesso_booth/civ_male_alesso_booth",
+	"units/pd2_rain_1/characters/civ_male_escort_prisoner/civ_male_escort_prisoner"
 }
 function SpawnCivilianUnitElement:init(unit)
 	SpawnCivilianUnitElement.super.init(self, unit)

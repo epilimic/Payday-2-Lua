@@ -172,6 +172,11 @@ function MissionLayer:delete_unit(del_unit)
 		self._list_flow:on_unit_selected(self._selected_unit)
 	end
 end
+function MissionLayer:refresh_list_flow()
+	if self._list_flow and self._list_flow:visible() then
+		self._list_flow:on_unit_selected(self._selected_unit)
+	end
+end
 function MissionLayer:clone_edited_values(unit, source)
 	MissionLayer.super.clone_edited_values(self, unit, source)
 	if unit:name():s() ~= source:name():s() then

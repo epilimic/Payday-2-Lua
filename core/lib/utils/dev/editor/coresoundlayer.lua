@@ -20,16 +20,25 @@ function SoundLayer:load(world_holder, offset)
 	CoreEws.change_combobox_value(self._default_occasional, managers.sound_environment:default_occasional())
 	for _, area in ipairs(managers.sound_environment:areas()) do
 		local unit = SoundLayer.super.do_spawn_unit(self, self._environment_unit, area:position(), area:rotation())
+		if area:name() then
+			self:set_name_id(unit, area:name())
+		end
 		unit:sound_data().environment_area = area
 		unit:sound_data().environment_area:set_unit(unit)
 	end
 	for _, emitter in ipairs(managers.sound_environment:emitters()) do
 		local unit = SoundLayer.super.do_spawn_unit(self, self._emitter_unit, emitter:position(), emitter:rotation())
+		if emitter:name() then
+			self:set_name_id(unit, emitter:name())
+		end
 		unit:sound_data().emitter = emitter
 		unit:sound_data().emitter:set_unit(unit)
 	end
 	for _, emitter in ipairs(managers.sound_environment:area_emitters()) do
 		local unit = SoundLayer.super.do_spawn_unit(self, self._area_emitter_unit, emitter:position(), emitter:rotation())
+		if emitter:name() and emitter:name() ~= "" then
+			self:set_name_id(unit, emitter:name())
+		end
 		unit:sound_data().emitter = emitter
 		unit:sound_data().emitter:set_unit(unit)
 	end
@@ -77,7 +86,10 @@ function SoundLayer:save(save_params)
 			})
 		end
 		if unit:name() == Idstring(self._area_emitter_unit) then
-			table.insert(sound_area_emitters, unit:sound_data().emitter:save_level_data())
+			local area_emitter = unit:sound_data().emitter
+			local shape_table = area_emitter:save_level_data()
+			shape_table.name = area_emitter:name()
+			table.insert(sound_area_emitters, shape_table)
 			managers.editor:add_to_sound_package({
 				category = "soundbanks",
 				name = managers.sound_environment:emitter_soundbank(unit:sound_data().emitter:emitter_event())
@@ -86,23 +98,26 @@ function SoundLayer:save(save_params)
 	end
 	local default_ambience = managers.sound_environment:default_ambience()
 	local default_occasional = managers.sound_environment:default_occasional()
+	local ambience_enabled = managers.sound_environment:ambience_enabled()
 	local sound_data = {
 		default_environment = managers.sound_environment:default_environment(),
 		default_ambience = default_ambience,
-		ambience_enabled = managers.sound_environment:ambience_enabled(),
+		ambience_enabled = ambience_enabled,
 		default_occasional = default_occasional,
 		sound_environments = sound_environments,
 		sound_emitters = sound_emitters,
 		sound_area_emitters = sound_area_emitters
 	}
-	managers.editor:add_to_sound_package({
-		category = "soundbanks",
-		name = managers.sound_environment:ambience_soundbank(default_ambience)
-	})
-	managers.editor:add_to_sound_package({
-		category = "soundbanks",
-		name = managers.sound_environment:occasional_soundbank(default_occasional)
-	})
+	if ambience_enabled then
+		managers.editor:add_to_sound_package({
+			category = "soundbanks",
+			name = managers.sound_environment:ambience_soundbank(default_ambience)
+		})
+		managers.editor:add_to_sound_package({
+			category = "soundbanks",
+			name = managers.sound_environment:occasional_soundbank(default_occasional)
+		})
+	end
 	self:_add_project_save_data(sound_data)
 	local path = save_params.dir .. "\\" .. file_name .. ".world_sounds"
 	local file = managers.editor:_open_file(path)

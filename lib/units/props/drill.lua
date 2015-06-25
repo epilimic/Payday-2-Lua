@@ -145,8 +145,8 @@ function Drill:_change_num_jammed_drills(d)
 end
 function Drill:_drill_remind_clbk()
 	if not self.is_hacking_device and not managers.groupai:state():whisper_mode() then
-		local suffix = Drill.active_drills > 1 and "plu" or "sin"
-		if 1 >= self._jammed_count then
+		local suffix = "sin"
+		if self._jammed_count <= 1 then
 			managers.groupai:state():teammate_comment(nil, (self.is_saw and "d03_" or "d01x_") .. suffix, nil, false, nil, false)
 		else
 			managers.groupai:state():teammate_comment(nil, (self.is_saw and "d04_" or "d02x_") .. suffix, nil, false, nil, false)
@@ -574,6 +574,9 @@ function Drill:clbk_bain_report_sabotage()
 		managers.dialog:queue_dialog("Play_pln_csod_01", {})
 	end
 end
+function Drill:set_attention_state(state)
+	self:_set_attention_state(state)
+end
 function Drill:destroy()
 	if self._alert_clbk_id then
 		managers.enemy:remove_delayed_clbk(self._alert_clbk_id)
@@ -583,10 +586,7 @@ function Drill:destroy()
 		managers.groupai:state():remove_listener(self._ene_weap_hot_listen_id)
 		self._ene_weap_hot_listen_id = nil
 	end
-	if self._attention_handler then
-		self._attention_handler:set_attention(nil)
-		self._attention_handler = nil
-	end
+	self:_set_attention_state(false)
 	if self._autorepair_clbk_id then
 		managers.enemy:remove_delayed_clbk(self._autorepair_clbk_id)
 		self._autorepair_clbk_id = nil

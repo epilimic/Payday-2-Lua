@@ -33,7 +33,7 @@ function HostStateInGame:on_join_request_received(data, peer_name, client_prefer
 	elseif data.wants_to_load_level then
 		self:_send_request_denied(sender, 0, my_user_id)
 		return
-	elseif not Global.local_member then
+	elseif not managers.network:session():local_peer() then
 		self:_send_request_denied(sender, 0, my_user_id)
 		return
 	end
@@ -50,7 +50,7 @@ function HostStateInGame:on_join_request_received(data, peer_name, client_prefer
 		self:_send_request_denied(sender, 5, my_user_id)
 		return
 	end
-	local character = managers.network:game():check_peer_preferred_character(client_preferred_character)
+	local character = managers.network:session():check_peer_preferred_character(client_preferred_character)
 	local xnaddr = ""
 	if SystemInfo:platform() == Idstring("X360") or SystemInfo:platform() == Idstring("XB1") then
 		xnaddr = managers.network.matchmake:external_address(sender)

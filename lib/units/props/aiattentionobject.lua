@@ -132,19 +132,16 @@ function AIAttentionObject:get_attention(filter, min, max, team)
 	local access_f = nav_manager.check_access
 	local settings_match, relation
 	relation = not team or not self._team or team.foes[self._team.id] and "foe" or "friend"
-	local function _validity_f(id, settings)
-		if settings.reaction >= min and settings.reaction <= max and (not settings_match or settings.reaction > settings_match.reaction) and (not relation or not settings.relation or relation == settings.relation) and access_f(nav_manager, settings.filter, filter, 0) then
-			settings_match = settings
-		end
-	end
 	for id, settings in pairs(self._attention_data) do
-		if not self._overrides or not self._overrides[id] then
-			_validity_f(id, settings)
+		if (not self._overrides or not self._overrides[id]) and min <= settings.reaction and max >= settings.reaction and (not settings_match or settings.reaction > settings_match.reaction) and (not relation or not settings.relation or relation == settings.relation) and access_f(nav_manager, settings.filter, filter, 0) then
+			settings_match = settings
 		end
 	end
 	if self._overrides then
 		for id, settings in pairs(self._overrides) do
-			_validity_f(id, settings)
+			if min <= settings.reaction and max >= settings.reaction and (not settings_match or settings.reaction > settings_match.reaction) and (not relation or not settings.relation or relation == settings.relation) and access_f(nav_manager, settings.filter, filter, 0) then
+				settings_match = settings
+			end
 		end
 	end
 	return settings_match

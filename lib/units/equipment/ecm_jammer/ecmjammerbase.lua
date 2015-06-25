@@ -18,7 +18,7 @@ function ECMJammerBase.spawn(pos, rot, battery_life_upgrade_lvl, owner, peer_id)
 end
 function ECMJammerBase:set_server_information(peer_id)
 	self._server_information = {owner_peer_id = peer_id}
-	managers.network:game():member(peer_id):peer():set_used_deployable(true)
+	managers.network:session():peer(peer_id):set_used_deployable(true)
 end
 function ECMJammerBase:server_information()
 	return self._server_information
@@ -63,12 +63,20 @@ function ECMJammerBase:get_name_id()
 end
 function ECMJammerBase:set_owner(owner)
 	self._owner = owner
-	self._owner_id = owner and managers.network:game():member_from_unit(owner):peer():id()
+	if owner then
+		local peer = managers.network:session():peer_by_unit(owner)
+		if peer then
+			self._owner_id = peer:id()
+		end
+	end
 	self:contour_interaction()
 end
 function ECMJammerBase:owner()
-	if not alive(self._owner) and managers.network:game():member(self._owner_id) then
-		self._owner = managers.network:game():member(self._owner_id):unit()
+	if not alive(self._owner) then
+		local peer = managers.network:session():peer(self._owner_id)
+		if peer then
+			self._owner = peer:unit()
+		end
 	end
 	return self._owner
 end
@@ -104,7 +112,12 @@ function ECMJammerBase:setup(battery_life_upgrade_lvl, owner)
 	self._max_battery_life = tweak_data.upgrades.ecm_jammer_base_battery_life * battery_life_upgrade_lvl
 	self._battery_life = self._max_battery_life
 	self._owner = owner
-	self._owner_id = owner and managers.network:game():member_from_unit(owner):peer():id()
+	if owner then
+		local peer = managers.network:session():peer_by_unit(owner)
+		if peer then
+			self._owner_id = peer:id()
+		end
+	end
 end
 function ECMJammerBase:set_active(active)
 	active = active and true

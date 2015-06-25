@@ -269,14 +269,6 @@ function CriminalsManager:get_free_character_name()
 	local available = {}
 	for id, data in pairs(self._characters) do
 		local taken = data.taken
-		if not taken then
-			for _, member in pairs(managers.network:game():all_members()) do
-				if member._assigned_name == data.name then
-					taken = true
-				else
-				end
-			end
-		end
 		if not taken and not self:is_character_as_AI_level_blocked(data.name) then
 			table.insert(available, data.name)
 		end

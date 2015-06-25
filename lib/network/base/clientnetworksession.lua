@@ -82,7 +82,7 @@ function ClientNetworkSession:on_join_request_reply(reply, my_peer_id, my_charac
 		elseif SystemInfo:platform() == Idstring("PS4") then
 			managers.network.matchmake:on_peer_added(self._server_peer)
 		end
-		self._local_peer:set_id(my_peer_id)
+		self:register_local_peer(my_peer_id)
 		self._local_peer:set_character(my_character)
 		self._server_peer:set_id(1)
 		if not self._server_peer:begin_ticket_session(auth_ticket) then
@@ -254,7 +254,7 @@ function ClientNetworkSession:on_peer_synched(peer_id)
 	end
 	peer:set_loading(false)
 	peer:set_synched(true)
-	managers.network:game():on_peer_sync_complete(peer, peer_id)
+	self:on_peer_sync_complete(peer, peer_id)
 end
 function ClientNetworkSession:ok_to_load_level(load_counter)
 	print("[ClientNetworkSession:ok_to_load_level] load_counter", load_counter, "self._received_ok_to_load_level", self._received_ok_to_load_level)
@@ -371,9 +371,11 @@ end
 function ClientNetworkSession:load(data)
 	ClientNetworkSession.super.load(self, data)
 end
-function ClientNetworkSession:on_load_complete()
-	ClientNetworkSession.super.on_load_complete(self)
-	self._host_sanity_send_t = TimerManager:wall():time() + self.HOST_SANITY_CHECK_INTERVAL
+function ClientNetworkSession:on_load_complete(simulation)
+	ClientNetworkSession.super.on_load_complete(self, simulation)
+	if not simulation then
+		self._host_sanity_send_t = TimerManager:wall():time() + self.HOST_SANITY_CHECK_INTERVAL
+	end
 end
 function ClientNetworkSession:_get_join_attempt_identifier()
 	if not self._join_attempt_identifier then
@@ -415,8 +417,9 @@ function ClientNetworkSession:_chk_send_proactive_outfit_loaded()
 		self:send_to_host("set_member_ready", self._local_peer:id(), 0, 3, "proactive")
 	end
 end
-function ClientNetworkSession:on_set_member_ready(peer_id, ready, state_changed)
-	if ready then
+function ClientNetworkSession:on_set_member_ready(peer_id, ready, state_changed, from_network)
+	ClientNetworkSession.super.on_set_member_ready(self, peer_id, ready, state_changed, from_network)
+	if from_network and ready then
 		self:chk_send_outfit_loading_status()
 	end
 end

@@ -126,9 +126,6 @@ function ObjectivesManager:activate_objective(id, load_data, data)
 		Application:stack_dump_error("Bad id to activate objective, " .. tostring(id) .. ".")
 		return
 	end
-	if self._active_objectives[id] or self._completed_objectives[id] then
-		Application:error("Tried to activate objective " .. tostring(id) .. ". This objective is already active or completed")
-	end
 	local objective = self._objectives[id]
 	for _, sub_objective in pairs(objective.sub_objectives) do
 		sub_objective.completed = false
@@ -182,7 +179,6 @@ function ObjectivesManager:remove_objective(id, load_data)
 			return
 		end
 		if not self._active_objectives[id] then
-			Application:error("Tried to remove objective " .. tostring(id) .. ". This objective has never been given to the player.")
 			return
 		end
 	end

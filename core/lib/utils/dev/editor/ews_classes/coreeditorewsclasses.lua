@@ -448,29 +448,23 @@ function UnitList:thaw()
 end
 UnitTreeBrowser = UnitTreeBrowser or class(CoreEditorEwsDialog)
 function UnitTreeBrowser:init(...)
-	CoreEditorEwsDialog.init(self, nil, "Browse avalible units", "", Vector3(200, 100, 0), Vector3(600, 650, 0), "DEFAULT_DIALOG_STYLE,RESIZE_BORDER,STAY_ON_TOP", ...)
+	CoreEditorEwsDialog.init(self, nil, "Browse avalible units", "", Vector3(200, 100, 0), Vector3(400, 900, 0), "DEFAULT_DIALOG_STYLE,RESIZE_BORDER", ...)
 	self:create_panel("VERTICAL")
 	self._unit_names = {}
 	local horizontal_ctrlr_sizer = EWS:BoxSizer("HORIZONTAL")
-	self._unit_tree = EWS:TreeCtrl(self._panel, "", "TR_ROW_LINES")
-	self:create_image_list()
-	horizontal_ctrlr_sizer:add(self._unit_tree, 1, 0, "EXPAND")
-	local unit_info_sizer = EWS:BoxSizer("VERTICAL")
+	local vertical_tree_sizer = EWS:BoxSizer("VERTICAL")
+	horizontal_ctrlr_sizer:add(vertical_tree_sizer, 1, 0, "EXPAND")
 	local settings_sizer = EWS:BoxSizer("VERTICAL")
 	settings_sizer:add(EWS:StaticText(self._panel, "Filter", 0, ""), 0, 0, "ALIGN_CENTER_HORIZONTAL")
 	self._filter = EWS:TextCtrl(self._panel, "", "", "TE_CENTRE")
 	settings_sizer:add(self._filter, 0, 0, "EXPAND")
 	self._filter:connect("EVT_COMMAND_TEXT_UPDATED", callback(self, self, "update_tree"), nil)
 	self._filter:connect("EVT_KEY_DOWN", callback(self, self, "key_cancel"), "")
-	self._not_preview = EWS:CheckBox(self._panel, "Don't list units without preview", "", "ALIGN_LEFT")
-	self._not_preview:set_value(false)
-	self._not_preview:connect("EVT_COMMAND_CHECKBOX_CLICKED", callback(self, self, "update_tree"), nil)
-	self._not_preview:connect("EVT_KEY_DOWN", callback(self, self, "key_cancel"), "")
-	settings_sizer:add(self._not_preview, 0, 5, "TOP,BOTTOM,RIGHT")
-	unit_info_sizer:add(settings_sizer, 0, 0, "EXPAND")
-	self._preview_image = EWS:BitmapButton(self._panel, CoreEWS.image_path("error_32x32.png"), "", "NO_BORDER")
-	self._preview_image:set_tool_tip("No preview image availible for this unit.")
-	unit_info_sizer:add(self._preview_image, 1, 0, "EXPAND")
+	vertical_tree_sizer:add(settings_sizer, 0, 0, "EXPAND")
+	self._unit_tree = EWS:TreeCtrl(self._panel, "", "TR_ROW_LINES")
+	self:create_image_list()
+	vertical_tree_sizer:add(self._unit_tree, 1, 0, "EXPAND")
+	self._panel_sizer:add(horizontal_ctrlr_sizer, 1, 0, "EXPAND")
 	local button_sizer = EWS:BoxSizer("HORIZONTAL")
 	local expand_all_btn = EWS:Button(self._panel, "Expand All", "", "")
 	expand_all_btn:connect("EVT_COMMAND_BUTTON_CLICKED", callback(self, self, "on_expand_all"), "")
@@ -480,10 +474,6 @@ function UnitTreeBrowser:init(...)
 	collapse_all_btn:connect("EVT_COMMAND_BUTTON_CLICKED", callback(self, self, "on_collapse_all"), "")
 	collapse_all_btn:connect("EVT_KEY_DOWN", callback(self, self, "key_cancel"), "")
 	button_sizer:add(collapse_all_btn, 0, 2, "RIGHT,LEFT")
-	unit_info_sizer:add(button_sizer, 0, 0, "ALIGN_LEFT")
-	horizontal_ctrlr_sizer:add(unit_info_sizer, 1, 0, "EXPAND")
-	self._panel_sizer:add(horizontal_ctrlr_sizer, 1, 0, "EXPAND")
-	local button_sizer = EWS:BoxSizer("HORIZONTAL")
 	local cancel_btn = EWS:Button(self._panel, "Close", "", "")
 	button_sizer:add(cancel_btn, 0, 2, "RIGHT,LEFT")
 	cancel_btn:connect("EVT_COMMAND_BUTTON_CLICKED", callback(self, self, "on_cancel"), "")
@@ -523,6 +513,7 @@ function UnitTreeBrowser:_create_tree_data()
 		self._tree_data.layers[layer_name].total_layer_units = 0
 		self._tree_data.layers[layer_name].total_layer_units_preview = 0
 		self._tree_data.layers[layer_name].categories = {}
+		self._tree_data.layers[layer_name].path = {}
 		local c_map = layers[layer_name]:category_map()
 		if c_map then
 			local c_names = self:sorted_map(c_map)
@@ -534,26 +525,69 @@ function UnitTreeBrowser:_create_tree_data()
 				local unit_names = self:sorted_map(c_map[c_name])
 				for _, unit_name in ipairs(unit_names) do
 					if string.find(unit_name, filter, 1, true) then
-						local preview = self:has_preview(managers.editor:get_real_name(unit_name))
-						if self._not_preview:get_value() and preview or not self._not_preview:get_value() then
-							self._tree_data.layers[layer_name].categories[c_name].units[unit_name] = preview and true or false
-							self._tree_data.total_units = self._tree_data.total_units + 1
-							self._tree_data.total_units_preview = self._tree_data.total_units_preview + (preview and 1 or 0)
-							self._tree_data.layers[layer_name].total_layer_units = self._tree_data.layers[layer_name].total_layer_units + 1
-							self._tree_data.layers[layer_name].total_layer_units_preview = self._tree_data.layers[layer_name].total_layer_units_preview + (preview and 1 or 0)
-							self._tree_data.layers[layer_name].categories[c_name].total_units = self._tree_data.layers[layer_name].categories[c_name].total_units + 1
-							self._tree_data.layers[layer_name].categories[c_name].total_preview_units = self._tree_data.layers[layer_name].categories[c_name].total_preview_units + (preview and 1 or 0)
+						local split = string.split(unit_name, "/")
+						local path = self._tree_data.layers[layer_name].path
+						for ip, pname in ipairs(split) do
+							if ip == #split then
+								path[pname .. ".unit"] = unit_name
+							else
+								path[pname] = path[pname] or {}
+							end
+							path = path[pname]
 						end
+						local preview = self:has_preview(managers.editor:get_real_name(unit_name))
+						self._tree_data.layers[layer_name].categories[c_name].units[unit_name] = preview and true or false
+						self._tree_data.total_units = self._tree_data.total_units + 1
+						self._tree_data.total_units_preview = self._tree_data.total_units_preview + (preview and 1 or 0)
+						self._tree_data.layers[layer_name].total_layer_units = self._tree_data.layers[layer_name].total_layer_units + 1
+						self._tree_data.layers[layer_name].total_layer_units_preview = self._tree_data.layers[layer_name].total_layer_units_preview + (preview and 1 or 0)
+						self._tree_data.layers[layer_name].categories[c_name].total_units = self._tree_data.layers[layer_name].categories[c_name].total_units + 1
+						self._tree_data.layers[layer_name].categories[c_name].total_preview_units = self._tree_data.layers[layer_name].categories[c_name].total_preview_units + (preview and 1 or 0)
 					end
 				end
 			end
 		end
 	end
 end
+function UnitTreeBrowser:_populate_unit_paths(path, id)
+	local x_unit, y_unit
+	local function sort(x, y)
+		x_unit = string.find(x, ".unit", nil, true) and true or false
+		y_unit = string.find(y, ".unit", nil, true) and true or false
+		if x_unit ~= y_unit then
+			return y_unit
+		end
+		return x < y
+	end
+	local ip_keys = table.map_keys(path, sort)
+	local size = 0
+	for _, pname in ipairs(ip_keys) do
+		local data = path[pname]
+		size = size + (type(data) ~= "table" and 1 or 0)
+	end
+	local nsize = size
+	for _, pname in ipairs(ip_keys) do
+		local data = path[pname]
+		local new_name = string.gsub(pname, "%.unit", "")
+		local new_id = self._unit_tree:append(id, new_name)
+		if type(data) == "table" then
+			self._unit_tree:set_item_image(new_id, self._category_icon)
+			self._unit_tree:set_item_image(new_id, self._category_expand_icon, "EXPANDED")
+			nsize = self:_populate_unit_paths(data, new_id)
+			size = size + nsize
+			self._unit_tree:set_item_text(new_id, new_name .. " [" .. nsize .. "]")
+		else
+			self._unit_tree:set_item_image(new_id, self._unit_icon)
+			self._unit_names[new_id] = data
+		end
+	end
+	return size
+end
 function UnitTreeBrowser:_populate_tree()
+	self._unit_tree:freeze()
 	self._unit_tree:clear()
 	self._unit_names = {}
-	self._root = self._unit_tree:append_root("Units [" .. self._tree_data.total_units_preview .. "/" .. self._tree_data.total_units .. "]")
+	self._root = self._unit_tree:append_root("Units [" .. self._tree_data.total_units .. "]")
 	self._unit_tree:set_item_bold(self._root, true)
 	self._unit_tree:set_item_image(self._root, self._world_icon)
 	local layer_names = self:sorted_map(self._tree_data.layers)
@@ -562,31 +596,15 @@ function UnitTreeBrowser:_populate_tree()
 		local layer = self._tree_data.layers[layer_name]
 		local preview = layer.total_layer_units_preview
 		local total = layer.total_layer_units
-		if filter == "" and not self._not_preview:get_value() or total > 0 then
-			local layer_id = self._unit_tree:append(self._root, layer_name .. " [" .. preview .. "/" .. total .. "]")
+		if filter == "" or total > 0 then
+			local layer_id = self._unit_tree:append(self._root, layer_name .. " [" .. total .. "]")
 			self._unit_tree:set_item_image(layer_id, self._layer_icon)
 			self._unit_tree:set_item_image(layer_id, self._layer_expand_icon, "EXPANDED")
-			local categories = self:sorted_map(layer.categories)
-			for _, category_name in ipairs(categories) do
-				local category = layer.categories[category_name]
-				local preview = category.total_preview_units
-				local total = category.total_units
-				if total > 0 then
-					local category_id = self._unit_tree:append(layer_id, category_name .. " [" .. preview .. "/" .. total .. "]")
-					self._unit_tree:set_item_image(category_id, self._category_icon)
-					self._unit_tree:set_item_image(category_id, self._category_expand_icon, "EXPANDED")
-					local unit_names = self:sorted_map(category.units)
-					for _, unit_name in ipairs(unit_names) do
-						local preview = category.units[unit_name]
-						local name_id = self._unit_tree:append(category_id, unit_name)
-						self._unit_tree:set_item_image(name_id, preview and self._unit_icon or self._no_preview_icon)
-						self._unit_names[name_id] = unit_name
-					end
-				end
-			end
+			self:_populate_unit_paths(self._tree_data.layers[layer_name].path, layer_id)
 		end
 	end
 	self._unit_tree:expand(self._root)
+	self._unit_tree:thaw()
 end
 function UnitTreeBrowser:sorted_map(map)
 	local sorted = {}
@@ -601,14 +619,6 @@ function UnitTreeBrowser:on_select(a, event)
 	if self._unit_names[id] then
 		local item_text = self._unit_names[id]
 		local name = managers.editor:get_real_name(item_text)
-		if DB:has("preview_texture", name) then
-			local preview = managers.database:entry_expanded_path("preview_texture", name)
-			self._preview_image:set_label_bitmap(preview)
-			self._preview_image:set_tool_tip("Preview image for unit " .. name .. ".")
-		else
-			self._preview_image:set_label_bitmap(CoreEWS.image_path("error_32x32.png"))
-			self._preview_image:set_tool_tip("No preview image availible for unit " .. name .. ".")
-		end
 		managers.editor:select_unit_name(name)
 	end
 end
@@ -619,7 +629,9 @@ function UnitTreeBrowser:has_preview(name)
 	return nil
 end
 function UnitTreeBrowser:on_expand_all()
+	self._unit_tree:freeze()
 	self:expand_children(self._unit_tree:get_children(self._root))
+	self._unit_tree:thaw()
 end
 function UnitTreeBrowser:expand_children(children)
 	for _, child in ipairs(children) do
@@ -628,7 +640,9 @@ function UnitTreeBrowser:expand_children(children)
 	end
 end
 function UnitTreeBrowser:on_collapse_all()
+	self._unit_tree:freeze()
 	self:collapse_children(self._unit_tree:get_children(self._root))
+	self._unit_tree:thaw()
 end
 function UnitTreeBrowser:collapse_children(children)
 	for _, child in ipairs(children) do

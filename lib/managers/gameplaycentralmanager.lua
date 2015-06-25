@@ -496,8 +496,11 @@ function GamePlayCentralManager:stop_the_game()
 	managers.statistics:stop_session()
 	managers.savefile:save_progress()
 	managers.groupai:state():set_AI_enabled(false)
-	if Network:multiplayer() and managers.network:game() and Global.local_member then
-		Global.local_member:delete()
+	if Network:multiplayer() and managers.network:session() then
+		local peer = managers.network:session():local_peer()
+		if peer then
+			peer:unit_delete()
+		end
 	end
 end
 function GamePlayCentralManager:queue_fire_raycast(expire_t, weapon_unit, ...)

@@ -17,7 +17,7 @@ function ElementWaypoint:on_executed(instigator)
 	if not self._values.enabled then
 		return
 	end
-	if not self._values.only_in_clean or managers.player:current_state() == "clean" then
+	if not self._values.only_in_civilian or managers.player:current_state() == "civilian" then
 		local text = managers.localization:text(self._values.text_id)
 		managers.hud:add_waypoint(self._id, {
 			text = text,

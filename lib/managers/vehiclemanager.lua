@@ -123,10 +123,9 @@ function VehicleManager:sync_vehicle_data(vehicle_unit, state, occupant_driver, 
 		v_ext._seats.driver.occupant = occupant_driver
 		if occupant_driver then
 			vehicle_unit:link(Idstring(VehicleDrivingExt.SEAT_PREFIX .. v_ext._seats.driver.name), occupant_driver)
-			local member = managers.network:game():member_from_unit(occupant_driver)
-			if member then
-				local peer_id = managers.network:game():member_from_unit(occupant_driver):peer():id()
-				managers.player._global.synced_vehicle_data[peer_id] = {
+			local peer = managers.network:session():peer_by_unit(occupant_driver)
+			if peer then
+				managers.player._global.synced_vehicle_data[peer:id()] = {
 					vehicle_unit = vehicle_unit,
 					seat = v_ext._seats.driver.name
 				}
@@ -137,10 +136,9 @@ function VehicleManager:sync_vehicle_data(vehicle_unit, state, occupant_driver, 
 		v_ext._seats.passenger_front.occupant = occupant_left
 		if occupant_left then
 			vehicle_unit:link(Idstring(VehicleDrivingExt.SEAT_PREFIX .. v_ext._seats.passenger_front.name), occupant_left)
-			local member = managers.network:game():member_from_unit(occupant_left)
-			if member then
-				local peer_id = managers.network:game():member_from_unit(occupant_left):peer():id()
-				managers.player._global.synced_vehicle_data[peer_id] = {
+			local peer = managers.network:session():peer_by_unit(occupant_left)
+			if peer then
+				managers.player._global.synced_vehicle_data[peer:id()] = {
 					vehicle_unit = vehicle_unit,
 					seat = v_ext._seats.passenger_front.name
 				}
@@ -151,10 +149,9 @@ function VehicleManager:sync_vehicle_data(vehicle_unit, state, occupant_driver, 
 		v_ext._seats.passenger_back_left.occupant = occupant_back_left
 		if occupant_back_left then
 			vehicle_unit:link(Idstring(VehicleDrivingExt.SEAT_PREFIX .. v_ext._seats.passenger_back_left.name), occupant_back_left)
-			local member = managers.network:game():member_from_unit(occupant_back_left)
-			if member then
-				local peer_id = managers.network:game():member_from_unit(occupant_back_left):peer():id()
-				managers.player._global.synced_vehicle_data[peer_id] = {
+			local peer = managers.network:session():peer_by_unit(occupant_back_left)
+			if peer then
+				managers.player._global.synced_vehicle_data[peer:id()] = {
 					vehicle_unit = vehicle_unit,
 					seat = v_ext._seats.passenger_back_left.name
 				}
@@ -165,10 +162,9 @@ function VehicleManager:sync_vehicle_data(vehicle_unit, state, occupant_driver, 
 		v_ext._seats.passenger_back_right.occupant = occupant_back_right
 		if occupant_back_right then
 			vehicle_unit:link(Idstring(VehicleDrivingExt.SEAT_PREFIX .. v_ext._seats.passenger_back_right.name), occupant_back_right)
-			local member = managers.network:game():member_from_unit(occupant_back_right)
-			if member then
-				local peer_id = managers.network:game():member_from_unit(occupant_back_right):peer():id()
-				managers.player._global.synced_vehicle_data[peer_id] = {
+			local peer = managers.network:session():peer_by_unit(occupant_back_right)
+			if peer then
+				managers.player._global.synced_vehicle_data[peer:id()] = {
 					vehicle_unit = vehicle_unit,
 					seat = v_ext._seats.passenger_back_right.name
 				}

@@ -2097,7 +2097,7 @@ function GroupAIStateBase:spawn_one_teamAI(is_drop_in, char_name, spawn_on_unit)
 				end
 			end
 		else
-			local spawn_point = managers.network:game():get_next_spawn_point()
+			local spawn_point = managers.network:session():get_next_spawn_point()
 			spawn_pos = spawn_point.pos_rot[1]
 			spawn_rot = spawn_point.pos_rot[2]
 			objective.in_place = true
@@ -2519,7 +2519,7 @@ function GroupAIStateBase:on_AI_criminal_death(criminal_name, unit)
 end
 function GroupAIStateBase:on_player_criminal_death(peer_id)
 	managers.player:transfer_special_equipment(peer_id)
-	local unit = managers.network:game():unit_from_peer_id(peer_id)
+	local unit = managers.network:session():peer(peer_id):unit()
 	if not unit then
 		return
 	end
@@ -2754,7 +2754,7 @@ function GroupAIStateBase:on_occasional_event(event_type)
 	event_data.last_occurence_t = TimerManager:game():time()
 end
 function GroupAIStateBase:on_player_spawn_state_set(state_name)
-	if state_name ~= "clean" and state_name ~= "mask_off" and state_name ~= "dirty" then
+	if state_name ~= "clean" and state_name ~= "mask_off" and state_name ~= "civilian" then
 		self:on_player_weapons_hot()
 	end
 end
@@ -3431,12 +3431,12 @@ function GroupAIStateBase:convert_hostage_to_criminal(unit, peer_unit)
 	end
 	Application:debug("GroupAIStateBase:convert_hostage_to_criminal", "Player", player_unit, "Minions: ", table.size(minions) .. "/" .. max_minions)
 	if alive(self._converted_police[u_key]) or max_minions <= table.size(minions) then
-		local member = managers.network:game():member_from_unit(player_unit)
-		if member then
-			if member == Global.local_member then
+		local peer = managers.network:session():peer_by_unit(player_unit)
+		if peer then
+			if peer:id() == managers.network:session():local_peer():id() then
 				managers.hint:show_hint("convert_enemy_failed")
 			else
-				managers.network:session():send_to_peer(member:peer(), "sync_show_hint", "convert_enemy_failed")
+				managers.network:session():send_to_peer(peer, "sync_show_hint", "convert_enemy_failed")
 			end
 		end
 		return
@@ -3471,7 +3471,7 @@ function GroupAIStateBase:convert_hostage_to_criminal(unit, peer_unit)
 		convert_enemies_health_multiplier_level = managers.player:upgrade_level("player", "convert_enemies_health_multiplier")
 		passive_convert_enemies_health_multiplier_level = managers.player:upgrade_level("player", "passive_convert_enemies_health_multiplier")
 	end
-	local owner_peer_id = managers.network:game():member_from_unit(player_unit):peer():id()
+	local owner_peer_id = managers.network:session():peer_by_unit(player_unit):id()
 	managers.network:session():send_to_peers_synched("mark_minion", unit, owner_peer_id, convert_enemies_health_multiplier_level, passive_convert_enemies_health_multiplier_level)
 	if not peer_unit then
 		managers.player:count_up_player_minions()
@@ -3537,12 +3537,12 @@ function GroupAIStateBase:remove_minion(minion_key, player_key)
 	if not next(self._criminals[player_key].minions) then
 		self._criminals[player_key].minions = nil
 	end
-	local member = managers.network:game():member_from_unit_key(player_key)
-	if member then
-		if member == Global.local_member then
+	local peer = managers.network:session():peer_by_unit_key(player_key)
+	if peer then
+		if peer:id() == managers.network:session():local_peer():id() then
 			managers.player:count_down_player_minions()
 		else
-			managers.network:session():send_to_peer(member:peer(), "count_down_player_minions")
+			managers.network:session():send_to_peer(peer, "count_down_player_minions")
 		end
 	end
 end
@@ -4380,9 +4380,9 @@ function GroupAIStateBase:on_hostage_follow(owner, follower, state)
 			follower_data.hostage_following = owner
 		end
 		if Network:is_server() then
-			local owner_member = managers.network:game():member_from_unit(owner)
-			if owner_member and owner_member ~= Global.local_member then
-				owner_member:peer():send_queued_sync("sync_unit_event_id_16", follower, "base", 1)
+			local peer = managers.network:session():peer_by_unit(owner)
+			if peer and peer:id() ~= managers.network:session():local_peer():id() then
+				peer:send_queued_sync("sync_unit_event_id_16", follower, "base", 1)
 			end
 		end
 	else
@@ -4399,9 +4399,9 @@ function GroupAIStateBase:on_hostage_follow(owner, follower, state)
 			follower_data.hostage_following = nil
 		end
 		if owner and follower and Network:is_server() then
-			local owner_member = managers.network:game():member_from_unit(owner)
-			if owner_member and owner_member ~= Global.local_member then
-				owner_member:peer():send_queued_sync("sync_unit_event_id_16", follower, "base", 2)
+			local peer = managers.network:session():peer_by_unit(owner)
+			if peer and peer:id() ~= managers.network:session():local_peer():id() then
+				peer:send_queued_sync("sync_unit_event_id_16", follower, "base", 2)
 			end
 		end
 	end

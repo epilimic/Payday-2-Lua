@@ -47,6 +47,7 @@ function NewShotgunBase:get_damage_falloff(damage, col_ray, user_unit)
 	local distance = col_ray.distance or mvector3.distance(col_ray.unit:position(), user_unit:position())
 	return (1 - math.min(1, math.max(0, distance - self._damage_near) / self._damage_far)) * damage
 end
+local mvec_temp = Vector3()
 local mvec_to = Vector3()
 local mvec_direction = Vector3()
 local mvec_spread_direction = Vector3()
@@ -70,9 +71,9 @@ function NewShotgunBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul, s
 			end
 		else
 			local add_shoot_through_bullet = self._can_shoot_through_shield or self._can_shoot_through_wall
-			if add_shoot_through_bullet and not hit_objects[col_ray.unit:key()] then
-				NewShotgunBase.super._fire_raycast(self, user_unit, from_pos, col_ray.ray, dmg_mul, shoot_player, 0, autohit_mul, suppr_mul, shoot_through_data)
-				hit_objects[col_ray.unit:key()] = true
+			if add_shoot_through_bullet then
+				hit_objects[col_ray.unit:key()] = hit_objects[col_ray.unit:key()] or {}
+				table.insert(hit_objects[col_ray.unit:key()], col_ray)
 			else
 				self._bullet_class:on_collision(col_ray, self._unit, user_unit, damage)
 			end
@@ -82,7 +83,7 @@ function NewShotgunBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul, s
 	mvector3.set(mvec_direction, direction)
 	if spread then
 	end
-	for i = 1, self._rays do
+	for i = 1, shoot_through_data and 1 or self._rays do
 		mvector3.set(mvec_spread_direction, mvec_direction)
 		if spread then
 			mvector3.spread(mvec_spread_direction, spread * (spread_mul or 1))
@@ -90,7 +91,8 @@ function NewShotgunBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul, s
 		mvector3.set(mvec_to, mvec_spread_direction)
 		mvector3.multiply(mvec_to, 20000)
 		mvector3.add(mvec_to, from_pos)
-		local col_ray = World:raycast("ray", from_pos, mvec_to, "slot_mask", self._bullet_slotmask, "ignore_unit", self._setup.ignore_units)
+		local ray_from_unit = shoot_through_data and alive(shoot_through_data.ray_from_unit) and shoot_through_data.ray_from_unit or nil
+		local col_ray = ray_from_unit or World:raycast("ray", from_pos, mvec_to, "slot_mask", self._bullet_slotmask, "ignore_unit", self._setup.ignore_units)
 		if col_rays then
 			if col_ray then
 				table.insert(col_rays, col_ray)
@@ -126,6 +128,26 @@ function NewShotgunBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul, s
 			hit_something = true
 			hit_enemy(col_ray)
 		end
+	end
+	for _, col_rays in pairs(hit_objects) do
+		local center_ray = col_rays[1]
+		if #col_rays > 1 then
+			mvector3.set_static(mvec_temp, center_ray)
+			for _, col_ray in ipairs(col_rays) do
+				mvector3.add(mvec_temp, col_ray.position)
+			end
+			mvector3.divide(mvec_temp, #col_rays)
+			local closest_dist_sq = mvector3.distance_sq(mvec_temp, center_ray.position)
+			local dist_sq
+			for _, col_ray in ipairs(col_rays) do
+				dist_sq = mvector3.distance_sq(mvec_temp, col_ray.position)
+				if closest_dist_sq > dist_sq then
+					closest_dist_sq = dist_sq
+					center_ray = col_ray
+				end
+			end
+		end
+		NewShotgunBase.super._fire_raycast(self, user_unit, from_pos, center_ray.ray, dmg_mul, shoot_player, 0, autohit_mul, suppr_mul, shoot_through_data)
 	end
 	for _, col_ray in pairs(hit_enemies) do
 		local damage = self:get_damage_falloff(damage, col_ray, user_unit)

@@ -789,6 +789,32 @@ function LootDropTweakData:init(tweak_data)
 	self.global_values.arena.track = true
 	self.global_values.arena.sort_number = 103
 	self.global_values.arena.category = "dlc"
+	self.global_values.character_pack_sokol = {}
+	self.global_values.character_pack_sokol.name_id = "bm_global_value_character_pack_sokol"
+	self.global_values.character_pack_sokol.desc_id = "menu_l_global_value_character_pack_sokol"
+	self.global_values.character_pack_sokol.unlock_id = "bm_global_value_character_pack_sokol_unlock"
+	self.global_values.character_pack_sokol.color = Color(255, 255, 212, 0) / 255
+	self.global_values.character_pack_sokol.dlc = true
+	self.global_values.character_pack_sokol.chance = 1
+	self.global_values.character_pack_sokol.value_multiplier = tweak_data:get_value("money_manager", "global_value_multipliers", "character_pack_sokol")
+	self.global_values.character_pack_sokol.durability_multiplier = 1
+	self.global_values.character_pack_sokol.drops = true
+	self.global_values.character_pack_sokol.track = true
+	self.global_values.character_pack_sokol.sort_number = 104
+	self.global_values.character_pack_sokol.category = "dlc"
+	self.global_values.kenaz = {}
+	self.global_values.kenaz.name_id = "bm_global_value_kenaz"
+	self.global_values.kenaz.desc_id = "menu_l_global_value_kenaz"
+	self.global_values.kenaz.unlock_id = "bm_global_value_kenaz_unlock"
+	self.global_values.kenaz.color = Color(255, 255, 212, 0) / 255
+	self.global_values.kenaz.dlc = true
+	self.global_values.kenaz.chance = 1
+	self.global_values.kenaz.value_multiplier = tweak_data:get_value("money_manager", "global_value_multipliers", "kenaz")
+	self.global_values.kenaz.durability_multiplier = 1
+	self.global_values.kenaz.drops = true
+	self.global_values.kenaz.track = true
+	self.global_values.kenaz.sort_number = 105
+	self.global_values.kenaz.category = "dlc"
 	self.global_values.legendary = {}
 	self.global_values.legendary.name_id = "bm_global_value_legendary"
 	self.global_values.legendary.desc_id = "menu_l_global_value_legendary"
@@ -801,19 +827,27 @@ function LootDropTweakData:init(tweak_data)
 	self.global_values.legendary.track = false
 	self.global_values.legendary.sort_number = 201
 	self.global_values.legendary.category = nil
-	self.global_values.sweettooth = {}
-	self.global_values.sweettooth.name_id = "bm_global_value_sweettooth"
-	self.global_values.sweettooth.desc_id = "menu_l_global_value_sweettooth"
-	self.global_values.sweettooth.unlock_id = "bm_global_value_sweettooth_unlock"
-	self.global_values.sweettooth.color = Color(255, 59, 174, 254) / 255
-	self.global_values.sweettooth.dlc = true
-	self.global_values.sweettooth.chance = 1
-	self.global_values.sweettooth.value_multiplier = tweak_data:get_value("money_manager", "global_value_multipliers", "sweettooth")
-	self.global_values.sweettooth.durability_multiplier = 1
-	self.global_values.sweettooth.drops = true
-	self.global_values.sweettooth.track = true
-	self.global_values.sweettooth.sort_number = 200
-	self.global_values.sweettooth.category = nil
+	if SystemInfo:platform() == Idstring("PS3") then
+		self.global_values.sweettooth = {}
+		self.global_values.sweettooth.name_id = "bm_global_value_sweettooth"
+		self.global_values.sweettooth.desc_id = "menu_l_global_value_sweettooth"
+		self.global_values.sweettooth.unlock_id = "bm_global_value_sweettooth_unlock"
+		self.global_values.sweettooth.color = Color(255, 59, 174, 254) / 255
+		self.global_values.sweettooth.dlc = true
+		self.global_values.sweettooth.chance = 1
+		self.global_values.sweettooth.value_multiplier = tweak_data:get_value("money_manager", "global_value_multipliers", "sweettooth")
+		self.global_values.sweettooth.durability_multiplier = 1
+		self.global_values.sweettooth.drops = true
+		self.global_values.sweettooth.track = true
+		self.global_values.sweettooth.sort_number = 200
+		self.global_values.sweettooth.category = nil
+	elseif SystemInfo:platform() == Idstring("X360") then
+	elseif SystemInfo:platform() == Idstring("PS4") then
+	else
+		if SystemInfo:platform() == Idstring("XB1") then
+		else
+		end
+	end
 	self.global_value_list_index = {
 		"normal",
 		"infamous",
@@ -836,9 +870,12 @@ function LootDropTweakData:init(tweak_data)
 		"character_pack_clover",
 		"character_pack_dragan",
 		"hlm2_deluxe",
+		"butch_pack_free",
 		"bbq",
 		"west",
-		"arena"
+		"arena",
+		"character_pack_sokol",
+		"kenaz"
 	}
 	self:_create_global_value_list_map()
 end

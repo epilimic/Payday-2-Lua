@@ -44,6 +44,7 @@ function PlayerManager:init()
 		tased = "ingame_electrified",
 		incapacitated = "ingame_incapacitated",
 		clean = "ingame_clean",
+		civilian = "ingame_civilian",
 		carry = "ingame_standard",
 		bipod = "ingame_standard",
 		driving = "ingame_driving"
@@ -51,6 +52,7 @@ function PlayerManager:init()
 	self._DEFAULT_STATE = "mask_off"
 	self._current_state = self._DEFAULT_STATE
 	self._sync_states = {
+		"civilian",
 		"clean",
 		"mask_off",
 		"standard"
@@ -106,7 +108,9 @@ end
 function PlayerManager:aquire_default_upgrades()
 	local default_upgrades = tweak_data.skilltree.default_upgrades or {}
 	for _, upgrade in ipairs(default_upgrades) do
-		managers.upgrades:aquire_default(upgrade, UpgradesManager.AQUIRE_STRINGS[1])
+		if not managers.upgrades:aquired(upgrade, UpgradesManager.AQUIRE_STRINGS[1]) then
+			managers.upgrades:aquire_default(upgrade, UpgradesManager.AQUIRE_STRINGS[1])
+		end
 	end
 	for i = 1, PlayerManager.WEAPON_SLOTS do
 		if not managers.player:weapon_in_slot(i) then
@@ -241,7 +245,7 @@ function PlayerManager:spawn_dropin_penalty(dead, bleed_out, health, used_deploy
 	if dead or bleed_out then
 		print("[PlayerManager:spawn_dead] Killing")
 		player:network():send("sync_player_movement_state", "dead", player:character_damage():down_time(), player:id())
-		managers.groupai:state():on_player_criminal_death(Global.local_member:peer():id())
+		managers.groupai:state():on_player_criminal_death(managers.network:session():local_peer():id())
 		player:base():set_enabled(false)
 		game_state_machine:change_state_by_name("ingame_waiting_for_respawn")
 		player:character_damage():set_invulnerable(true)
@@ -304,11 +308,14 @@ function PlayerManager:set_player_state(state)
 	if state == self._current_state then
 		return
 	end
-	if state ~= "standard" and state ~= "carry" then
+	if state ~= "standard" and state ~= "carry" and state ~= "bipod" then
 		local unit = self:player_unit()
 		if unit then
 			unit:character_damage():disable_berserker()
 		end
+	end
+	if (state == "clean" or state == "mask_off" or state == "civilian") and self._current_state ~= "clean" and self._current_state ~= "mask_off" and self._current_state ~= "civilian" then
+		managers.groupai:state():calm_ai()
 	end
 	if not self._player_states[state] then
 		Application:error("State '" .. tostring(state) .. "' does not exist in list of available states.")
@@ -319,9 +326,6 @@ function PlayerManager:set_player_state(state)
 	end
 	self._current_state = state
 	self:_change_player_state()
-	if state == "clean" or state == "mask_off" then
-		managers.groupai:state():calm_ai()
-	end
 end
 function PlayerManager:spawn_players(position, rotation, state)
 	for var = 1, self._nr_players do
@@ -505,7 +509,6 @@ end
 function PlayerManager:_check_damage_to_hot(t, unit, damage_info)
 	local player_unit = self:player_unit()
 	if not self:has_category_upgrade("player", "damage_to_hot") then
-		do break end
 		return
 	end
 	if not alive(player_unit) or player_unit:character_damage():need_revive() or player_unit:character_damage():dead() then
@@ -533,7 +536,7 @@ function PlayerManager:_check_damage_to_hot(t, unit, damage_info)
 	if not add_stack_sources[damage_info.variant] then
 		return
 	end
-	local player_armor = managers.blackmarket:equipped_armor(data.works_with_armor_kit)
+	local player_armor = managers.blackmarket:equipped_armor(data.works_with_armor_kit, true)
 	if not table.contains(data.armors_allowed or {}, player_armor) then
 		return
 	end
@@ -733,7 +736,7 @@ function PlayerManager:has_category_upgrade(category, upgrade)
 	return true
 end
 function PlayerManager:body_armor_value(category, override_value, default)
-	local armor_data = tweak_data.blackmarket.armors[managers.blackmarket:equipped_armor(true)]
+	local armor_data = tweak_data.blackmarket.armors[managers.blackmarket:equipped_armor(true, true)]
 	return self:upgrade_value_by_level("player", "body_armor", category, {})[override_value or armor_data.upgrade_level] or default or 0
 end
 function PlayerManager:get_infamy_exp_multiplier()
@@ -872,7 +875,7 @@ function PlayerManager:body_armor_regen_multiplier(moving)
 end
 function PlayerManager:body_armor_skill_addend(override_armor)
 	local addend = 0
-	addend = addend + self:upgrade_value("player", tostring(override_armor or managers.blackmarket:equipped_armor(true)) .. "_armor_addend", 0)
+	addend = addend + self:upgrade_value("player", tostring(override_armor or managers.blackmarket:equipped_armor(true, true)) .. "_armor_addend", 0)
 	return addend
 end
 function PlayerManager:skill_dodge_chance(running, crouching, on_zipline, override_armor, detection_risk)
@@ -889,7 +892,7 @@ function PlayerManager:skill_dodge_chance(running, crouching, on_zipline, overri
 	end
 	local detection_risk_add_dodge_chance = managers.player:upgrade_value("player", "detection_risk_add_dodge_chance")
 	chance = chance + self:get_value_from_risk_upgrade(detection_risk_add_dodge_chance, detection_risk)
-	chance = chance + self:upgrade_value("player", tostring(override_armor or managers.blackmarket:equipped_armor(true)) .. "_dodge_addend", 0)
+	chance = chance + self:upgrade_value("player", tostring(override_armor or managers.blackmarket:equipped_armor(true, true)) .. "_dodge_addend", 0)
 	return chance
 end
 function PlayerManager:stamina_multiplier()
@@ -1095,11 +1098,12 @@ function PlayerManager:update_deployable_equipment_to_peer(peer)
 	end
 end
 function PlayerManager:update_deployable_equipment_amount_to_peers(equipment, amount)
-	local peer_id = managers.network:session():local_peer():id()
+	local peer = managers.network:session():local_peer()
 	managers.network:session():send_to_peers_synched("sync_deployable_equipment", equipment, amount)
-	self:set_synced_deployable_equipment(peer_id, equipment, amount)
+	self:set_synced_deployable_equipment(peer, equipment, amount)
 end
-function PlayerManager:set_synced_deployable_equipment(peer_id, deployable, amount)
+function PlayerManager:set_synced_deployable_equipment(peer, deployable, amount)
+	local peer_id = peer:id()
 	local only_update_amount = self._global.synced_deployables[peer_id] and self._global.synced_deployables[peer_id].deployable == deployable
 	self._global.synced_deployables[peer_id] = {deployable = deployable, amount = amount}
 	local character_data = managers.criminals:character_data_by_peer_id(peer_id)
@@ -1112,8 +1116,8 @@ function PlayerManager:set_synced_deployable_equipment(peer_id, deployable, amou
 		end
 	end
 	local local_peer_id = managers.network:session():local_peer():id()
-	if peer_id ~= local_peer_id and managers.network:game():member(peer_id) then
-		local unit = managers.network:game():member(peer_id):unit()
+	if peer_id ~= local_peer_id then
+		local unit = peer:unit()
 		if alive(unit) then
 			unit:movement():set_visual_deployable_equipment(deployable, amount)
 		end
@@ -1195,11 +1199,12 @@ function PlayerManager:update_carry_to_peer(peer)
 	end
 end
 function PlayerManager:update_synced_carry_to_peers(carry_id, multiplier, dye_initiated, has_dye_pack, dye_value_multiplier)
-	local peer_id = managers.network:session():local_peer():id()
+	local peer = managers.network:session():local_peer()
 	managers.network:session():send_to_peers_synched("sync_carry", carry_id, multiplier, dye_initiated, has_dye_pack, dye_value_multiplier)
-	self:set_synced_carry(peer_id, carry_id, multiplier, dye_initiated, has_dye_pack, dye_value_multiplier)
+	self:set_synced_carry(peer, carry_id, multiplier, dye_initiated, has_dye_pack, dye_value_multiplier)
 end
-function PlayerManager:set_synced_carry(peer_id, carry_id, multiplier, dye_initiated, has_dye_pack, dye_value_multiplier)
+function PlayerManager:set_synced_carry(peer, carry_id, multiplier, dye_initiated, has_dye_pack, dye_value_multiplier)
+	local peer_id = peer:id()
 	self._global.synced_carry[peer_id] = {
 		carry_id = carry_id,
 		multiplier = multiplier,
@@ -1213,8 +1218,8 @@ function PlayerManager:set_synced_carry(peer_id, carry_id, multiplier, dye_initi
 	end
 	managers.hud:set_name_label_carry_info(peer_id, carry_id, managers.loot:get_real_value(carry_id, multiplier))
 	local local_peer_id = managers.network:session():local_peer():id()
-	if peer_id ~= local_peer_id and managers.network:game():member(peer_id) then
-		local unit = managers.network:game():member(peer_id):unit()
+	if peer_id ~= local_peer_id then
+		local unit = peer:unit()
 		if alive(unit) then
 			unit:movement():set_visual_carry(carry_id)
 		end
@@ -1224,11 +1229,12 @@ function PlayerManager:set_carry_approved(peer)
 	self._global.synced_carry[peer:id()].approved = true
 end
 function PlayerManager:update_removed_synced_carry_to_peers()
-	local peer_id = managers.network:session():local_peer():id()
+	local peer = managers.network:session():local_peer()
 	managers.network:session():send_to_peers_synched("sync_remove_carry")
-	self:remove_synced_carry(peer_id)
+	self:remove_synced_carry(peer)
 end
-function PlayerManager:remove_synced_carry(peer_id)
+function PlayerManager:remove_synced_carry(peer)
+	local peer_id = peer:id()
 	if not self._global.synced_carry[peer_id] then
 		return
 	end
@@ -1239,8 +1245,8 @@ function PlayerManager:remove_synced_carry(peer_id)
 	end
 	managers.hud:remove_name_label_carry_info(peer_id)
 	local local_peer_id = managers.network:session():local_peer():id()
-	if peer_id ~= local_peer_id and managers.network:game():member(peer_id) then
-		local unit = managers.network:game():member(peer_id):unit()
+	if peer_id ~= local_peer_id then
+		local unit = peer:unit()
 		if alive(unit) then
 			unit:movement():set_visual_carry(nil)
 		end
@@ -1456,7 +1462,7 @@ function PlayerManager:peer_dropped_out(peer)
 			local dye_initiated = self._global.synced_carry[peer_id].dye_initiated
 			local has_dye_pack = self._global.synced_carry[peer_id].has_dye_pack
 			local dye_value_multiplier = self._global.synced_carry[peer_id].dye_value_multiplier
-			local peer_unit = managers.network:game():member(peer_id):unit()
+			local peer_unit = peer:unit()
 			local position = Vector3()
 			if alive(peer_unit) then
 				if peer_unit:movement():zipline_unit() then
@@ -1466,7 +1472,7 @@ function PlayerManager:peer_dropped_out(peer)
 				end
 			end
 			local dir = Vector3(0, 0, 0)
-			self:server_drop_carry(carry_id, carry_multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, position, Rotation(), dir, 0, nil, peer_id)
+			self:server_drop_carry(carry_id, carry_multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, position, Rotation(), dir, 0, nil, peer)
 		end
 	end
 	self._global.synced_equipment_possession[peer_id] = nil
@@ -1476,7 +1482,7 @@ function PlayerManager:peer_dropped_out(peer)
 	self._global.synced_ammo_info[peer_id] = nil
 	self._global.synced_carry[peer_id] = nil
 	self._global.synced_team_upgrades[peer_id] = nil
-	local peer_unit = managers.network:game():member(peer_id):unit()
+	local peer_unit = peer:unit()
 	managers.vehicle:remove_player_from_all_vehicles(peer_unit)
 end
 function PlayerManager:add_equipment(params)
@@ -1742,7 +1748,7 @@ function PlayerManager:verify_equipment(peer_id, equipment_id)
 		self._asset_equipment[id] = (self._asset_equipment[id] or 0) + 1
 		return true
 	end
-	local peer = managers.network:session():local_peer():id() == peer_id and managers.network:session():local_peer() or managers.network:session():peer(peer_id)
+	local peer = managers.network:session():peer(peer_id)
 	if not peer then
 		return false
 	end
@@ -1752,7 +1758,7 @@ function PlayerManager:verify_grenade(peer_id)
 	if not managers.network:session() then
 		return true
 	end
-	local peer = managers.network:session():local_peer():id() == peer_id and managers.network:session():local_peer() or managers.network:session():peer(peer_id)
+	local peer = managers.network:session():peer(peer_id)
 	if not peer then
 		return false
 	end
@@ -1762,17 +1768,17 @@ function PlayerManager:register_grenade(peer_id)
 	if not managers.network:session() then
 		return true
 	end
-	local peer = managers.network:session():local_peer():id() == peer_id and managers.network:session():local_peer() or managers.network:session():peer(peer_id)
+	local peer = managers.network:session():peer(peer_id)
 	if not peer then
 		return false
 	end
 	return peer:verify_grenade(-1)
 end
-function PlayerManager:verify_carry(peer_id, carry_id)
+function PlayerManager:verify_carry(peer, carry_id)
 	if Network:is_client() or not managers.network:session() then
 		return true
 	end
-	if peer_id == 0 then
+	if not peer then
 		if Network:is_server() then
 			return true
 		end
@@ -1785,19 +1791,16 @@ function PlayerManager:verify_carry(peer_id, carry_id)
 			return false
 		end
 	end
-	if not managers.network:game():member(peer_id) then
-		return false
-	end
-	return managers.network:game():member(peer_id):place_bag(carry_id, -1)
+	return peer:verify_bag(carry_id, -1)
 end
-function PlayerManager:register_carry(peer_id, carry_id)
+function PlayerManager:register_carry(peer, carry_id)
 	if Network:is_client() or not managers.network:session() then
 		return true
 	end
-	if not managers.network:game():member(peer_id) then
+	if not peer then
 		return false
 	end
-	return managers.network:game():member(peer_id):place_bag(carry_id, 1)
+	return peer:verify_bag(carry_id, 1)
 end
 function PlayerManager:add_special(params)
 	local name = params.equipment or params.name
@@ -2070,7 +2073,7 @@ function PlayerManager:drop_carry(zipline_unit)
 	if Network:is_client() then
 		managers.network:session():send_to_host("server_drop_carry", carry_data.carry_id, carry_data.multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, camera_ext:position(), camera_ext:rotation(), player:camera():forward(), throw_distance_multiplier_upgrade_level, zipline_unit)
 	else
-		self:server_drop_carry(carry_data.carry_id, carry_data.multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, camera_ext:position(), camera_ext:rotation(), player:camera():forward(), throw_distance_multiplier_upgrade_level, zipline_unit, managers.network:session():local_peer():id())
+		self:server_drop_carry(carry_data.carry_id, carry_data.multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, camera_ext:position(), camera_ext:rotation(), player:camera():forward(), throw_distance_multiplier_upgrade_level, zipline_unit, managers.network:session():local_peer())
 	end
 	managers.hud:remove_teammate_carry_info(HUDManager.PLAYER_PANEL)
 	managers.hud:temp_hide_carry_bag()
@@ -2079,13 +2082,13 @@ function PlayerManager:drop_carry(zipline_unit)
 		managers.player:set_player_state("standard")
 	end
 end
-function PlayerManager:server_drop_carry(carry_id, carry_multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, position, rotation, dir, throw_distance_multiplier_upgrade_level, zipline_unit, peer_id)
-	if not managers.player:verify_carry(peer_id, carry_id) then
+function PlayerManager:server_drop_carry(carry_id, carry_multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, position, rotation, dir, throw_distance_multiplier_upgrade_level, zipline_unit, peer)
+	if not self:verify_carry(peer, carry_id) then
 		return
 	end
 	local unit_name = tweak_data.carry[carry_id].unit or "units/payday2/pickups/gen_pku_lootbag/gen_pku_lootbag"
 	local unit = World:spawn_unit(Idstring(unit_name), position, rotation)
-	managers.network:session():send_to_peers_synched("sync_carry_data", unit, carry_id, carry_multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, position, dir, throw_distance_multiplier_upgrade_level, zipline_unit, peer_id or 0)
+	managers.network:session():send_to_peers_synched("sync_carry_data", unit, carry_id, carry_multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, position, dir, throw_distance_multiplier_upgrade_level, zipline_unit, peer and peer:id() or 0)
 	self:sync_carry_data(unit, carry_id, carry_multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, position, dir, throw_distance_multiplier_upgrade_level, zipline_unit)
 	return unit
 end
@@ -2121,7 +2124,7 @@ function PlayerManager:force_drop_carry()
 	if Network:is_client() then
 		managers.network:session():send_to_host("server_drop_carry", carry_data.carry_id, carry_data.multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, camera_ext:position(), camera_ext:rotation(), Vector3(0, 0, 0), 0, nil)
 	else
-		self:server_drop_carry(carry_data.carry_id, carry_data.multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, camera_ext:position(), camera_ext:rotation(), Vector3(0, 0, 0), 0, nil, managers.network:session():local_peer():id())
+		self:server_drop_carry(carry_data.carry_id, carry_data.multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, camera_ext:position(), camera_ext:rotation(), Vector3(0, 0, 0), 0, nil, managers.network:session():local_peer())
 	end
 	managers.hud:remove_teammate_carry_info(HUDManager.PLAYER_PANEL)
 	managers.hud:temp_hide_carry_bag()

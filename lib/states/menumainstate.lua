@@ -65,6 +65,12 @@ function MenuMainState:at_enter(old_state)
 		managers.savefile:save_progress("local_hdd")
 	end
 	managers.dyn_resource:set_file_streaming_chunk_size_mul(0.5, 3)
+	if Global.exe_argument_level then
+		MenuCallbackHandler:start_job({
+			job_id = Global.exe_argument_level,
+			difficulty = Global.exe_argument_difficulty
+		})
+	end
 end
 function MenuMainState:at_exit(new_state)
 	if new_state:name() ~= "freeflight" then

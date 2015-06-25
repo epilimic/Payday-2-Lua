@@ -21,9 +21,9 @@ function ProjectileBase:set_thrower_unit_by_peer_id(peer_id)
 	if not peer_id then
 		return
 	end
-	if managers.network:game() then
-		local member = managers.network:game():member(peer_id)
-		local thrower_unit = member and member:unit()
+	if managers.network:session() then
+		local peer = managers.network:session():peer(peer_id)
+		local thrower_unit = peer and peer:unit()
 		if alive(thrower_unit) then
 			self:set_thrower_unit(thrower_unit)
 		end
@@ -190,9 +190,9 @@ function ProjectileBase.throw_projectile(projectile_type, pos, dir, owner_peer_i
 	local tweak_entry = tweak_data.blackmarket.projectiles[projectile_entry]
 	local unit_name = Idstring(not Network:is_server() and tweak_entry.local_unit or tweak_entry.unit)
 	local unit = World:spawn_unit(unit_name, pos, Rotation(dir, math.UP))
-	if owner_peer_id and managers.network:game() then
-		local member = managers.network:game():member(owner_peer_id)
-		local thrower_unit = member and member:unit()
+	if owner_peer_id and managers.network:session() then
+		local peer = managers.network:session():peer(owner_peer_id)
+		local thrower_unit = peer and peer:unit()
 		if alive(thrower_unit) then
 			unit:base():set_thrower_unit(thrower_unit)
 			if not tweak_entry.throwable and thrower_unit:movement() and thrower_unit:movement():current_state() then

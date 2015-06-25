@@ -71,19 +71,21 @@ function HUDManager:show_local_player_gear()
 	self:show_player_gear(HUDManager.PLAYER_PANEL)
 end
 function HUDManager:hide_player_gear(panel_id)
-	if self._teammate_panels[panel_id] and self._teammate_panels[panel_id]:panel() then
-		self._teammate_panels[panel_id]:panel():child("player"):child("weapons_panel"):set_visible(false)
-		self._teammate_panels[panel_id]:panel():child("player"):child("deployable_equipment_panel"):set_visible(false)
-		self._teammate_panels[panel_id]:panel():child("player"):child("cable_ties_panel"):set_visible(false)
-		self._teammate_panels[panel_id]:panel():child("player"):child("grenades_panel"):set_visible(false)
+	if self._teammate_panels[panel_id] and self._teammate_panels[panel_id]:panel() and self._teammate_panels[panel_id]:panel():child("player") then
+		local player_panel = self._teammate_panels[panel_id]:panel():child("player")
+		player_panel:child("weapons_panel"):set_visible(false)
+		player_panel:child("deployable_equipment_panel"):set_visible(false)
+		player_panel:child("cable_ties_panel"):set_visible(false)
+		player_panel:child("grenades_panel"):set_visible(false)
 	end
 end
 function HUDManager:show_player_gear(panel_id)
-	if self._teammate_panels[panel_id] and self._teammate_panels[panel_id]:panel() then
-		self._teammate_panels[panel_id]:panel():child("player"):child("weapons_panel"):set_visible(true)
-		self._teammate_panels[panel_id]:panel():child("player"):child("deployable_equipment_panel"):set_visible(true)
-		self._teammate_panels[panel_id]:panel():child("player"):child("cable_ties_panel"):set_visible(true)
-		self._teammate_panels[panel_id]:panel():child("player"):child("grenades_panel"):set_visible(true)
+	if self._teammate_panels[panel_id] and self._teammate_panels[panel_id]:panel() and self._teammate_panels[panel_id]:panel():child("player") then
+		local player_panel = self._teammate_panels[panel_id]:panel():child("player")
+		player_panel:child("weapons_panel"):set_visible(true)
+		player_panel:child("deployable_equipment_panel"):set_visible(true)
+		player_panel:child("cable_ties_panel"):set_visible(true)
+		player_panel:child("grenades_panel"):set_visible(true)
 	end
 end
 function HUDManager:add_weapon(data)

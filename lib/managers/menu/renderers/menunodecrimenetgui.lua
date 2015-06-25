@@ -757,7 +757,7 @@ function MenuNodeCrimenetCasinoGui:set_offshore_text()
 end
 MenuNodeCrimenetContactInfoGui = MenuNodeCrimenetContactInfoGui or class(MenuNodeGui)
 MenuNodeCrimenetContactInfoGui.WIDTH = 600
-MenuNodeCrimenetContactInfoGui.HEIGHT = 465
+MenuNodeCrimenetContactInfoGui.HEIGHT = 490
 MenuNodeCrimenetContactInfoGui.MENU_WIDTH = 220
 MenuNodeCrimenetContactInfoGui.PADDING = 10
 MenuNodeCrimenetContactInfoGui.CODEX_TEXT_ID = "menu_contact_info_title"
@@ -803,6 +803,16 @@ function MenuNodeCrimenetContactInfoGui:init(node, layer, parameters)
 	if not managers.menu:is_pc_controller() then
 		managers.menu:active_menu().input:deactivate_controller_mouse()
 	end
+end
+function MenuNodeCrimenetContactInfoGui:_setup_item_panel_parent(safe_rect, shape)
+	local x = safe_rect.x + safe_rect.width / 2 - self.WIDTH / 2 + self.PADDING
+	local y = safe_rect.y + safe_rect.height / 2 - self.HEIGHT / 2 + self.PADDING
+	shape = shape or {}
+	shape.x = shape.x or x
+	shape.y = shape.y or y
+	shape.w = shape.w or self.MENU_WIDTH
+	shape.h = shape.h or self.HEIGHT - 2 * self.PADDING - tweak_data.menu.pd2_small_font_size
+	MenuNodeCrimenetContactInfoGui.super._setup_item_panel_parent(self, safe_rect, shape)
 end
 function MenuNodeCrimenetContactInfoGui:set_contact_info(id, name, files, override_file)
 	self._files = files
@@ -1044,6 +1054,12 @@ function MenuNodeCrimenetContactInfoGui:_setup_menu()
 	for _, child in ipairs(self.item_panel:children()) do
 		child:set_world_y(math.round(child:world_y()))
 	end
+	self._list_arrows.up:set_world_left(self._align_data.panel:world_left())
+	self._list_arrows.up:set_world_top(self._align_data.panel:world_top())
+	self._list_arrows.up:set_width(self._item_panel_parent:w())
+	self._list_arrows.down:set_world_left(self._align_data.panel:world_left())
+	self._list_arrows.down:set_world_bottom(self._align_data.panel:world_bottom())
+	self._list_arrows.down:set_width(self._item_panel_parent:w())
 end
 function MenuNodeCrimenetContactInfoGui:_fade_row_item(row_item)
 	MenuNodeCrimenetContactInfoGui.super._fade_row_item(self, row_item)

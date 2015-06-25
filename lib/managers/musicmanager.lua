@@ -253,6 +253,7 @@ function MusicManager:jukebox_default_tracks()
 		heist_framing_frame2 = "track_08",
 		heist_framing_frame3 = "track_03",
 		heist_roberts = "track_10",
+		heist_kenaz_full = "all",
 		heist_mia1 = "all",
 		heist_mia2 = "all",
 		heist_hox1 = "track_20",
@@ -304,6 +305,9 @@ function MusicManager:jukebox_default_tracks()
 		default_options.heist_crojob1 = "track_25"
 		default_options.heist_crojob2 = "track_25"
 	end
+	if managers.dlc:has_kenaz() or managers.dlc:has_soundtrack_or_cce() then
+		default_options.heist_kenaz_full = "track_29"
+	end
 	return default_options
 end
 function MusicManager:jukebox_music_tracks()
@@ -335,7 +339,8 @@ function MusicManager:jukebox_music_tracks()
 		"track_25",
 		"track_26",
 		"track_27",
-		"track_28"
+		"track_28",
+		"track_29"
 	}
 	local pdth_tracks = {
 		"track_pth_01",
@@ -359,6 +364,7 @@ function MusicManager:jukebox_music_tracks()
 	self:_jukebox_unlock_track(tracks_locked, "track_19", "miami", not managers.dlc or managers.dlc:has_hl_miami() or managers.dlc:has_soundtrack_or_cce())
 	self:_jukebox_unlock_track(tracks_locked, "track_24", "diamond", not managers.dlc or managers.dlc:has_hope_diamond() or managers.dlc:has_soundtrack_or_cce())
 	self:_jukebox_unlock_track(tracks_locked, "track_25", "thebomb", not managers.dlc or managers.dlc:has_the_bomb() or managers.dlc:has_soundtrack_or_cce())
+	self:_jukebox_unlock_track(tracks_locked, "track_29", "kenaz", not managers.dlc or managers.dlc:has_kenaz() or managers.dlc:has_soundtrack_or_cce())
 	if managers.dlc and not managers.dlc:has_pdth_soundtrack() then
 		for _, sound in ipairs(pdth_tracks) do
 			tracks_locked[sound] = "payday"

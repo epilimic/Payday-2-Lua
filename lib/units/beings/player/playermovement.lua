@@ -2,6 +2,7 @@ require("lib/units/beings/player/states/PlayerMovementState")
 require("lib/units/beings/player/states/PlayerEmpty")
 require("lib/units/beings/player/states/PlayerStandard")
 require("lib/units/beings/player/states/PlayerClean")
+require("lib/units/beings/player/states/PlayerCivilian")
 require("lib/units/beings/player/states/PlayerMaskOff")
 require("lib/units/beings/player/states/PlayerBleedOut")
 require("lib/units/beings/player/states/PlayerFatal")
@@ -93,6 +94,7 @@ function PlayerMovement:_setup_states()
 		tased = PlayerTased:new(unit),
 		incapacitated = PlayerIncapacitated:new(unit),
 		clean = PlayerClean:new(unit),
+		civilian = PlayerCivilian:new(unit),
 		carry = PlayerCarry:new(unit),
 		bipod = PlayerBipod:new(unit),
 		driving = PlayerDriving:new(unit)
@@ -279,14 +281,14 @@ function PlayerMovement:on_cuffed()
 	if self._unit:character_damage()._god_mode then
 		return
 	end
-	if self._current_state_name == "standard" or self._current_state_name == "bleed_out" or self._current_state_name == "carry" or self._current_state_name == "mask_off" or self._current_state_name == "clean" then
+	if self._current_state_name == "standard" or self._current_state_name == "bleed_out" or self._current_state_name == "carry" or self._current_state_name == "mask_off" or self._current_state_name == "clean" or self._current_state_name == "civilian" then
 		managers.player:set_player_state("arrested")
 	else
 		debug_pause("[PlayerMovement:on_cuffed] transition failed", self._current_state_name)
 	end
 end
 function PlayerMovement:on_uncovered(enemy_unit)
-	if self._current_state_name ~= "mask_off" and self._current_state_name ~= "clean" then
+	if self._current_state_name ~= "mask_off" and self._current_state_name ~= "clean" or self._current_state_name == "civilian" then
 		return
 	end
 	self._state_data.uncovered = true
@@ -468,10 +470,9 @@ function PlayerMovement:_calc_suspicion_ratio_and_sync(observer_unit, status)
 	end
 	if suspicion_sync ~= self._synced_suspicion then
 		self._synced_suspicion = suspicion_sync
-		local member = managers.network:game():member_from_unit(self._unit)
-		if member then
-			local member_id = member:peer():id()
-			managers.network:session():send_to_peers_synched("suspicion", member_id, suspicion_sync)
+		local peer = managers.network:session():peer_by_unit(self._unit)
+		if peer then
+			managers.network:session():send_to_peers_synched("suspicion", peer:id(), suspicion_sync)
 		end
 	end
 end
@@ -501,10 +502,9 @@ function PlayerMovement:clbk_enemy_weapons_hot()
 	self._suspicion = false
 	if Network:is_server() and self._synced_suspicion ~= 0 then
 		self._synced_suspicion = 0
-		local member = managers.network:game():member_from_unit(self._unit)
-		if member then
-			local member_id = member:peer():id()
-			managers.network:session():send_to_peers_synched("suspicion", member_id, 0)
+		local peer = managers.network:session():peer_by_unit(self._unit)
+		if peer then
+			managers.network:session():send_to_peers_synched("suspicion", peer:id(), 0)
 		end
 	end
 	self:_feed_suspicion_to_hud()
@@ -651,7 +651,7 @@ function PlayerMovement:friendly_fire(unit)
 	return self._friendly_fire and true or false
 end
 function PlayerMovement:save(data)
-	local peer_id = managers.network:game():member_from_unit(self._unit):peer():id()
+	local peer_id = managers.network:session():peer_by_unit(self._unit):id()
 	data.movement = {
 		state_name = self._current_state_name,
 		look_fwd = self._m_head_rot:y(),
@@ -661,7 +661,7 @@ function PlayerMovement:save(data)
 		outfit = managers.network:session():peer(peer_id):profile("outfit_string"),
 		outfit_version = managers.network:session():peer(peer_id):outfit_version()
 	}
-	if self._current_state_name == "clean" or self._current_state_name == "mask_off" then
+	if self._current_state_name == "clean" or self._current_state_name == "civilian" or self._current_state_name == "mask_off" then
 	elseif self._state_data.in_steelsight then
 		data.movement.stance = 3
 	else

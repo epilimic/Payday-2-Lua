@@ -3168,6 +3168,92 @@ function NarrativeTweakData:init()
 		40000,
 		80000
 	}
+	self.jobs.kenaz = {}
+	self.jobs.kenaz.name_id = "heist_kenaz_full"
+	self.jobs.kenaz.briefing_id = "heist_kenaz_crimenet"
+	self.jobs.kenaz.package = "packages/job_kenaz"
+	self.jobs.kenaz.contact = "the_dentist"
+	self.jobs.kenaz.jc = 70
+	self.jobs.kenaz.chain = {
+		{
+			level_id = "kenaz",
+			type_id = "heist_type_assault",
+			type = "e",
+			mission_filter = {1}
+		}
+	}
+	self.jobs.kenaz.briefing_event = "dentist_ca1_cbf_01"
+	self.jobs.kenaz.debrief_event = "kenaz_debrief"
+	self.jobs.kenaz.intro_event = {
+		"Play_pln_ca1_intro_01",
+		"Play_pln_ca1_intro_02"
+	}
+	self.jobs.kenaz.crimenet_callouts = {
+		"dentist_ca1_cnc_01_01",
+		"dentist_ca1_cnc_01_02",
+		"dentist_ca1_cnc_01_03"
+	}
+	self.jobs.kenaz.crimenet_videos = {
+		"cn_big1",
+		"cn_big1",
+		"cn_big1"
+	}
+	self.jobs.kenaz.payout = {
+		10000,
+		20000,
+		50000,
+		100000,
+		130000
+	}
+	self.jobs.kenaz.contract_cost = {
+		62000,
+		124000,
+		310000,
+		620000,
+		800000
+	}
+	self.jobs.kenaz.dlc = "kenaz"
+	self.jobs.kenaz.contract_visuals = {}
+	self.jobs.kenaz.contract_visuals.min_mission_xp = {
+		39250,
+		39250,
+		39250,
+		39250,
+		39250
+	}
+	self.jobs.kenaz.contract_visuals.max_mission_xp = {
+		67500,
+		67500,
+		67500,
+		67500,
+		67500
+	}
+	self.jobs.kenaz_prof = deep_clone(self.jobs.kenaz)
+	self.jobs.kenaz_prof.jc = 70
+	self.jobs.kenaz_prof.professional = true
+	self.jobs.kenaz_prof.region = "professional"
+	self.jobs.kenaz_prof.payout = {
+		25000,
+		35000,
+		50000,
+		65000,
+		100000
+	}
+	self.jobs.kenaz_prof.contract_cost = {
+		120000,
+		135000,
+		200000,
+		420000,
+		500000
+	}
+	self.jobs.kenaz_prof.heat = {this_job = -2, other_jobs = 2}
+	self.jobs.kenaz_prof.experience_mul = {
+		12.5,
+		12.5,
+		12.5,
+		12.5,
+		12.5
+	}
 	self._jobs_index = {
 		"jewelry_store",
 		"four_stores",
@@ -3219,7 +3305,8 @@ function NarrativeTweakData:init()
 		"crojob2_night",
 		"rat",
 		"shoutout_raid",
-		"arena"
+		"arena",
+		"kenaz"
 	}
 	if SystemInfo:platform() == Idstring("WIN32") then
 		table.insert(self._jobs_index, "roberts")

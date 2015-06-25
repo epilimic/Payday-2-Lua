@@ -176,7 +176,7 @@ function UpgradesManager:enable_weapon(id, identifier)
 		return
 	end
 	local upgrade = tweak_data.upgrades.definitions[id]
-	if upgrade.dlc and (tweak_data.dlc[upgrade.dlc] and tweak_data.dlc[upgrade.dlc].free or not managers.dlc:has_dlc(upgrade.dlc)) then
+	if upgrade.dlc and not managers.dlc:is_dlc_unlocked(upgrade.dlc) then
 		Application:error("Tried to aquire an upgrade locked to a dlc you do not have: " .. id .. " DLC: ", upgrade.dlc)
 		return
 	end

@@ -26,16 +26,7 @@ function UnitNetworkHandler:set_unit(unit, character_name, outfit_string, outfit
 	if peer ~= managers.network:session():local_peer() then
 		peer:set_outfit_string(outfit_string, outfit_version)
 	end
-	local member = managers.network:game():member_peer(peer)
-	if member then
-		member:set_unit(unit, character_name)
-	elseif unit then
-		if unit:base() and unit:base().set_slot then
-			unit:base():set_slot(unit, 0)
-		else
-			unit:set_slot(0)
-		end
-	end
+	peer:set_unit(unit, character_name)
 	self:_chk_flush_unit_too_early_packets(unit)
 end
 function UnitNetworkHandler:set_equipped_weapon(unit, item_index, blueprint_string, sender)
@@ -473,6 +464,18 @@ function UnitNetworkHandler:sync_interacted(unit, unit_id, tweak_setting, status
 		unit:interaction():sync_interacted(peer, nil, status)
 	end
 end
+function UnitNetworkHandler:sync_multiple_equipment_bag_interacted(unit, amount_wanted, sender)
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	local peer = self._verify_sender(sender)
+	if not peer then
+		return
+	end
+	if unit and alive(unit) and unit:interaction() then
+		unit:interaction():sync_interacted(peer, nil, amount_wanted)
+	end
+end
 function UnitNetworkHandler:sync_interaction_info_id(unit, info_id, sender)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then
 		return
@@ -662,7 +665,7 @@ function UnitNetworkHandler:remove_corpse_by_id(u_id, carry_bodybag, peer_id, se
 		return
 	end
 	if carry_bodybag and Network:is_client() then
-		managers.player:register_carry(peer_id, "person")
+		managers.player:register_carry(managers.network:session():peer(peer_id), "person")
 	end
 	managers.enemy:remove_corpse_by_id(u_id)
 end
@@ -944,7 +947,7 @@ function UnitNetworkHandler:request_place_ecm_jammer(pos, normal, battery_life_u
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not peer then
 		return
 	end
-	local owner_unit = managers.network:game():member(peer:id()):unit()
+	local owner_unit = peer:unit()
 	if not alive(owner_unit) or owner_unit:id() == -1 then
 		rpc:from_server_ecm_jammer_place_result(nil)
 		return
@@ -1018,15 +1021,16 @@ function UnitNetworkHandler:place_sentry_gun(pos, rot, ammo_multiplier, armor_mu
 	managers.network:session():send_to_peers_synched("from_server_sentry_gun_place_result", peer:id(), unit and equipment_selection_index or 0, unit, unit and unit:movement()._rot_speed_mul, unit and unit:weapon()._setup.spread_mul, unit and unit:base():has_shield() and true or false)
 end
 function UnitNetworkHandler:from_server_sentry_gun_place_result(owner_peer_id, equipment_selection_index, sentry_gun_unit, rot_speed_mul, spread_mul, shield, rpc)
+	local local_peer = managers.network:session():local_peer()
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not self._verify_sender(rpc) or not alive(sentry_gun_unit) or not managers.network:session():peer(owner_peer_id) then
-		if alive(Global.local_member:unit()) then
-			Global.local_member:unit():equipment():from_server_sentry_gun_place_result()
+		if alive(local_peer:unit()) then
+			local_peer:unit():equipment():from_server_sentry_gun_place_result()
 		end
 		return
 	end
 	sentry_gun_unit:base():set_owner_id(owner_peer_id)
-	if owner_peer_id == managers.network:session():local_peer():id() and alive(Global.local_member:unit()) then
-		managers.player:from_server_equipment_place_result(equipment_selection_index, Global.local_member:unit())
+	if owner_peer_id == local_peer:id() and alive(local_peer:unit()) then
+		managers.player:from_server_equipment_place_result(equipment_selection_index, local_peer:unit())
 	end
 	if shield then
 		sentry_gun_unit:base():enable_shield()
@@ -1244,7 +1248,8 @@ function UnitNetworkHandler:sync_player_movement_state(unit, state, down_time, u
 	if not alive(unit) then
 		return
 	end
-	if Global.local_member:unit() and unit:key() == Global.local_member:unit():key() then
+	local local_peer = managers.network:session():local_peer()
+	if local_peer:unit() and unit:key() == local_peer:unit():key() then
 		local valid_transitions = {
 			standard = {
 				bleed_out = true,
@@ -1279,6 +1284,14 @@ function UnitNetworkHandler:sync_player_movement_state(unit, state, down_time, u
 			},
 			incapacitated = {standard = true, carry = true},
 			clean = {
+				civilian = true,
+				mask_off = true,
+				standard = true,
+				carry = true,
+				arrested = true
+			},
+			civilian = {
+				clean = true,
 				mask_off = true,
 				standard = true,
 				carry = true,
@@ -1341,11 +1354,8 @@ function UnitNetworkHandler:suspect_uncovered(enemy_unit, sender)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then
 		return
 	end
-	local suspect_member = Global.local_member
-	if not suspect_member then
-		return
-	end
-	local suspect_unit = suspect_member:unit()
+	local suspect_member = managers.network:session():local_peer()
+	local suspect_unit = suspect_member and suspect_member:unit()
 	if not suspect_unit then
 		return
 	end
@@ -1364,7 +1374,7 @@ function UnitNetworkHandler:sync_deployable_equipment(deployable, amount, sender
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not peer then
 		return
 	end
-	managers.player:set_synced_deployable_equipment(peer:id(), deployable, amount)
+	managers.player:set_synced_deployable_equipment(peer, deployable, amount)
 end
 function UnitNetworkHandler:sync_cable_ties(amount, sender)
 	local peer = self._verify_sender(sender)
@@ -1392,27 +1402,27 @@ function UnitNetworkHandler:sync_carry(carry_id, multiplier, dye_initiated, has_
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not peer then
 		return
 	end
-	managers.player:set_synced_carry(peer:id(), carry_id, multiplier, dye_initiated, has_dye_pack, dye_value_multiplier)
+	managers.player:set_synced_carry(peer, carry_id, multiplier, dye_initiated, has_dye_pack, dye_value_multiplier)
 end
 function UnitNetworkHandler:sync_remove_carry(sender)
 	local peer = self._verify_sender(sender)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not peer then
 		return
 	end
-	managers.player:remove_synced_carry(peer:id())
+	managers.player:remove_synced_carry(peer)
 end
 function UnitNetworkHandler:server_drop_carry(carry_id, carry_multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, position, rotation, dir, throw_distance_multiplier_upgrade_level, zipline_unit, sender)
 	local peer = self._verify_sender(sender)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not peer then
 		return
 	end
-	managers.player:server_drop_carry(carry_id, carry_multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, position, rotation, dir, throw_distance_multiplier_upgrade_level, zipline_unit, peer:id())
+	managers.player:server_drop_carry(carry_id, carry_multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, position, rotation, dir, throw_distance_multiplier_upgrade_level, zipline_unit, peer)
 end
 function UnitNetworkHandler:sync_carry_data(unit, carry_id, carry_multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, position, dir, throw_distance_multiplier_upgrade_level, zipline_unit, peer_id, sender)
 	if not alive(unit) or not self._verify_gamestate(self._gamestate_filter.any_ingame) or not self._verify_sender(sender) then
 		return
 	end
-	managers.player:verify_carry(peer_id, carry_id)
+	managers.player:verify_carry(managers.network:session():peer(peer_id), carry_id)
 	managers.player:sync_carry_data(unit, carry_id, carry_multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, position, dir, throw_distance_multiplier_upgrade_level, zipline_unit)
 end
 function UnitNetworkHandler:request_throw_projectile(projectile_type, position, dir, sender)
@@ -1456,7 +1466,7 @@ function UnitNetworkHandler:sync_throw_projectile(unit, pos, dir, projectile_typ
 	if not no_cheat_count then
 		managers.player:verify_grenade(peer_id)
 	end
-	local member = managers.network:game():member(peer_id)
+	local member = managers.network:session():peer(peer_id)
 	local thrower_unit = member and member:unit()
 	unit:base():set_thrower_unit(thrower_unit)
 	if not tweak_entry.throwable and thrower_unit:movement() and thrower_unit:movement():current_state() then
@@ -1755,7 +1765,7 @@ function UnitNetworkHandler:send_statistics(total_kills, total_specials_kills, t
 	if not peer then
 		return
 	end
-	managers.network:game():on_statistics_recieved(peer:id(), total_kills, total_specials_kills, total_head_shots, accuracy, downs)
+	managers.network:session():on_statistics_recieved(peer:id(), total_kills, total_specials_kills, total_head_shots, accuracy, downs)
 end
 function UnitNetworkHandler:sync_statistics_result(...)
 	if game_state_machine:current_state().on_statistics_result then
@@ -1865,7 +1875,7 @@ function UnitNetworkHandler:suspicion(suspect_peer_id, susp_value, sender)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then
 		return
 	end
-	local suspect_member = managers.network:game():member(suspect_peer_id)
+	local suspect_member = managers.network:session():peer(suspect_peer_id)
 	if not suspect_member then
 		return
 	end
@@ -1938,7 +1948,7 @@ function UnitNetworkHandler:sync_upgrade(upgrade_category, upgrade_name, upgrade
 		return
 	end
 	local function _get_unit()
-		local unit = managers.network:game():member_peer(peer):unit()
+		local unit = peer:unit()
 		if not unit then
 			print("[UnitNetworkHandler:sync_upgrade] missing unit", upgrade_category, upgrade_name, upgrade_level, sender:ip_at_index(0))
 		end

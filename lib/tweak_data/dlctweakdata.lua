@@ -27,6 +27,8 @@ function DLCTweakData:init(tweak_data)
 		bbq = true,
 		west = true,
 		dlc_arena = true,
+		character_pack_sokol = true,
+		kenaz = true,
 		pd2_goty = 1,
 		pd2_hw_boxing = true,
 		hlm2 = true,
@@ -3558,6 +3560,134 @@ function DLCTweakData:init(tweak_data)
 		{
 			type_items = "textures",
 			item_entry = "smoke",
+			amount = 1
+		}
+	}
+	self.character_pack_sokol = {}
+	self.character_pack_sokol.dlc = "has_character_pack_sokol"
+	self.character_pack_sokol.content = {}
+	self.character_pack_sokol.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "sokol",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_ass_asval_b_proto",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_ass_asval_s_solid",
+			amount = 1
+		}
+	}
+	self.kenaz = {}
+	self.kenaz.dlc = "has_kenaz"
+	self.kenaz.content = {}
+	self.kenaz.content.loot_drops = {
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_ass_sub2000_fg_gen2",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_ass_sub2000_fg_railed",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_ass_sub2000_fg_suppressed",
+			amount = 1
+		}
+	}
+	self.ach_kenaz_2 = {}
+	self.ach_kenaz_2.dlc = "has_achievement"
+	self.ach_kenaz_2.achievement_id = "kenaz_2"
+	self.ach_kenaz_2.content = {}
+	self.ach_kenaz_2.content.loot_global_value = "kenaz"
+	self.ach_kenaz_2.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "croupier_hat",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "stars",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "chips",
+			amount = 1
+		}
+	}
+	self.ach_kenaz_3 = {}
+	self.ach_kenaz_3.dlc = "has_achievement"
+	self.ach_kenaz_3.achievement_id = "kenaz_3"
+	self.ach_kenaz_3.content = {}
+	self.ach_kenaz_3.content.loot_global_value = "kenaz"
+	self.ach_kenaz_3.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "gladiator_helmet",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "casino",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "royale",
+			amount = 1
+		}
+	}
+	self.ach_kenaz_4 = {}
+	self.ach_kenaz_4.dlc = "has_achievement"
+	self.ach_kenaz_4.achievement_id = "kenaz_4"
+	self.ach_kenaz_4.content = {}
+	self.ach_kenaz_4.content.loot_global_value = "kenaz"
+	self.ach_kenaz_4.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "the_king_mask",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "plush",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "cards",
+			amount = 1
+		}
+	}
+	self.ach_kenaz_5 = {}
+	self.ach_kenaz_5.dlc = "has_achievement"
+	self.ach_kenaz_5.achievement_id = "kenaz_5"
+	self.ach_kenaz_5.content = {}
+	self.ach_kenaz_5.content.loot_global_value = "kenaz"
+	self.ach_kenaz_5.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "sports_utility_mask",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "carpet",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "dices",
 			amount = 1
 		}
 	}

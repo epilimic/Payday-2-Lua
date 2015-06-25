@@ -139,7 +139,7 @@ function ConnectionNetworkHandler:spawn_dropin_penalty(dead, bleed_out, health, 
 		return
 	end
 	managers.player:spawn_dropin_penalty(dead, bleed_out, health, used_deployable, used_cable_ties, used_body_bags)
-	if not managers.groupai:state():whisper_mode() and (game_state_machine:last_queued_state_name() == "ingame_clean" or game_state_machine:last_queued_state_name() == "ingame_mask_off" or game_state_machine:last_queued_state_name() == "ingame_dirty") then
+	if not managers.groupai:state():whisper_mode() and (game_state_machine:last_queued_state_name() == "ingame_clean" or game_state_machine:last_queued_state_name() == "ingame_mask_off" or game_state_machine:last_queued_state_name() == "ingame_civilian") then
 		managers.player:set_player_state("standard")
 	end
 end
@@ -196,7 +196,7 @@ function ConnectionNetworkHandler:set_peer_entered_lobby(sender)
 	if not peer then
 		return
 	end
-	managers.network:game():on_peer_entered_lobby(peer:id())
+	managers.network:session():on_peer_entered_lobby(peer)
 end
 function ConnectionNetworkHandler:sync_game_settings(job_index, level_id_index, difficulty_index, sender)
 	local peer = self._verify_sender(sender)
@@ -337,7 +337,7 @@ function ConnectionNetworkHandler:warn_about_civilian_free(i)
 	managers.groupai:state():sync_warn_about_civilian_free(i)
 end
 function ConnectionNetworkHandler:request_drop_in_pause(peer_id, nickname, state, sender)
-	managers.network:game():on_drop_in_pause_request_received(peer_id, nickname, state)
+	managers.network:session():on_drop_in_pause_request_received(peer_id, nickname, state)
 end
 function ConnectionNetworkHandler:drop_in_pause_confirmation(dropin_peer_id, sender)
 	local sender_peer = self._verify_sender(sender)
@@ -390,7 +390,7 @@ function ConnectionNetworkHandler:dropin_progress(dropin_peer_id, progress_perce
 	if not dropin_peer or dropin_peer_id == session:local_peer():id() then
 		return
 	end
-	managers.network:game():on_dropin_progress_received(dropin_peer_id, progress_percentage)
+	session:on_dropin_progress_received(dropin_peer_id, progress_percentage)
 end
 function ConnectionNetworkHandler:set_member_ready(peer_id, ready, mode, outfit_versions_str, sender)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not self._verify_sender(sender) then
@@ -404,8 +404,7 @@ function ConnectionNetworkHandler:set_member_ready(peer_id, ready, mode, outfit_
 		ready = ready ~= 0 and true or false
 		local ready_state = peer:waiting_for_player_ready()
 		peer:set_waiting_for_player_ready(ready)
-		managers.network:game():on_set_member_ready(peer_id, ready, ready_state ~= ready)
-		managers.network:session():on_set_member_ready(peer_id, ready, ready_state ~= ready)
+		managers.network:session():on_set_member_ready(peer_id, ready, ready_state ~= ready, true)
 		if Network:is_server() then
 			managers.network:session():send_to_peers_loaded_except(peer_id, "set_member_ready", peer_id, ready and 1 or 0, 1, "")
 			if game_state_machine:current_state().start_game_intro then
@@ -415,7 +414,7 @@ function ConnectionNetworkHandler:set_member_ready(peer_id, ready, mode, outfit_
 		end
 	elseif mode == 2 then
 		peer:set_streaming_status(ready)
-		managers.network:game():on_streaming_progress_received(peer, ready)
+		managers.network:session():on_streaming_progress_received(peer, ready)
 	elseif mode == 3 then
 		if Network:is_server() then
 			managers.network:session():on_peer_finished_loading_outfit(peer, ready, outfit_versions_str)

@@ -319,9 +319,17 @@ function FPCameraPlayerBase:_update_rot(axis)
 	if self._camera_properties.current_tilt ~= 0 then
 		self._output_data.rotation = Rotation(self._output_data.rotation:yaw(), self._output_data.rotation:pitch(), self._output_data.rotation:roll() + self._camera_properties.current_tilt)
 	end
-	local bipod_pos = Vector3(new_shoulder_pos.x, new_shoulder_pos.y, new_shoulder_pos.z)
+	local equipped_weapon = self._parent_unit:inventory():equipped_unit()
+	local bipod_weapon_translation = Vector3(0, 0, 0)
+	if equipped_weapon and equipped_weapon:base() then
+		local weapon_tweak_data = equipped_weapon:base():weapon_tweak_data()
+		if weapon_tweak_data and weapon_tweak_data.bipod_weapon_translation then
+			bipod_weapon_translation = weapon_tweak_data.bipod_weapon_translation
+		end
+	end
+	local bipod_pos = Vector3(0, 0, 0)
 	local bipod_rot = new_shoulder_rot
-	mvector3.set(bipod_pos, Vector3(-12, 20, 0))
+	mvector3.set(bipod_pos, bipod_weapon_translation)
 	mvector3.rotate_with(bipod_pos, self._output_data.rotation)
 	mvector3.add(bipod_pos, new_head_pos)
 	mvector3.set(new_shoulder_pos, self._shoulder_stance.translation)
@@ -344,9 +352,10 @@ function FPCameraPlayerBase:_update_rot(axis)
 	if player_state == "bipod" and not self._parent_unit:movement()._current_state:in_steelsight() then
 		self:set_position(PlayerBipod._shoulder_pos or new_shoulder_pos)
 		self:set_rotation(bipod_rot)
+		self._parent_unit:camera():set_position(PlayerBipod._camera_pos or self._output_data.position)
 		self:set_fov_instant(40)
 	elseif not self._parent_unit:movement()._current_state:in_steelsight() then
-		PlayerBipod:set_shoulder_pos(bipod_pos)
+		PlayerBipod:set_camera_positions(bipod_pos, self._output_data.position)
 	end
 end
 function FPCameraPlayerBase:_set_camera_position_in_vehicle()
@@ -416,6 +425,7 @@ end
 function FPCameraPlayerBase:_vertical_recoil_kick(t, dt)
 	local player_state = managers.player:current_state()
 	if player_state == "bipod" then
+		self:break_recoil()
 		return 0
 	end
 	local r_value = 0
@@ -1081,6 +1091,22 @@ function FPCameraPlayerBase:anim_clbk_stop_weapon_reload()
 		if alive(weapon) then
 			weapon:base():tweak_data_anim_stop("reload")
 			weapon:base():tweak_data_anim_stop("reload_not_empty")
+		end
+	end
+end
+function FPCameraPlayerBase:anim_clbk_play_weapon_anim(unit, anim, speed)
+	if alive(self._parent_unit) then
+		local weapon = self._parent_unit:inventory():equipped_unit()
+		if alive(weapon) then
+			weapon:base():tweak_data_anim_play(anim, speed)
+		end
+	end
+end
+function FPCameraPlayerBase:anim_clbk_stop_weapon_anim(unit, anim)
+	if alive(self._parent_unit) then
+		local weapon = self._parent_unit:inventory():equipped_unit()
+		if alive(weapon) then
+			weapon:base():tweak_data_anim_stop(anim)
 		end
 	end
 end

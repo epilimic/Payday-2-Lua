@@ -264,7 +264,10 @@ function BlackMarketManager:equipped_mask_slot()
 		end
 	end
 end
-function BlackMarketManager:equipped_armor(chk_armor_kit)
+function BlackMarketManager:equipped_armor(chk_armor_kit, chk_player_state)
+	if chk_player_state and managers.player:current_state() == "civilian" then
+		return self._defaults.armor
+	end
 	if chk_armor_kit then
 		local equipped_deployable = Global.player_manager.kit.equipment_slots[1]
 		if equipped_deployable == "armor_kit" and (not managers.player:has_equipment(equipped_deployable) or managers.player:has_deployable_left(equipped_deployable)) then
@@ -648,6 +651,7 @@ function BlackMarketManager:unpack_outfit_from_string(outfit_string)
 	local armor_data = string.split(armor_string, "-")
 	outfit.armor = armor_data[1]
 	outfit.armor_current = armor_data[2] or outfit.armor
+	outfit.armor_current_state = armor_data[3] or outfit.armor_current
 	outfit.primary = {}
 	outfit.primary.factory_id = data[self:outfit_string_index("primary")] or "wpn_fps_ass_amcar"
 	local primary_blueprint_string = data[self:outfit_string_index("primary_blueprint")]
@@ -679,7 +683,8 @@ function BlackMarketManager:outfit_string()
 	s = s .. self:_outfit_string_mask()
 	local armor_id = tostring(self:equipped_armor(false))
 	local current_armor_id = tostring(self:equipped_armor(true))
-	s = s .. " " .. armor_id .. "-" .. current_armor_id
+	local current_state_armor_id = tostring(self:equipped_armor(true, true))
+	s = s .. " " .. armor_id .. "-" .. current_armor_id .. "-" .. current_state_armor_id
 	for character_id, data in pairs(tweak_data.blackmarket.characters) do
 		if Global.blackmarket_manager.characters[character_id].equipped then
 			s = s .. " " .. character_id
@@ -725,7 +730,7 @@ function BlackMarketManager:outfit_string_from_list(outfit)
 	s = s .. " " .. outfit.mask.blueprint.color.id
 	s = s .. " " .. outfit.mask.blueprint.pattern.id
 	s = s .. " " .. outfit.mask.blueprint.material.id
-	s = s .. " " .. outfit.armor .. "-" .. outfit.armor_current
+	s = s .. " " .. outfit.armor .. "-" .. outfit.armor_current .. "-" .. outfit.armor_current_state
 	s = s .. " " .. outfit.character
 	local primary_string = managers.weapon_factory:blueprint_to_string(outfit.primary.factory_id, outfit.primary.blueprint)
 	primary_string = string.gsub(primary_string, " ", "_")
@@ -832,7 +837,7 @@ function BlackMarketManager:create_preload_ws()
 	end
 	self._preload_ws = managers.gui_data:create_fullscreen_workspace()
 	local panel = self._preload_ws:panel()
-	panel:set_layer(10000)
+	panel:set_layer(tweak_data.gui.DIALOG_LAYER)
 	local new_script = {}
 	new_script.progress = 1
 	function new_script.step_progress()
@@ -996,7 +1001,8 @@ function BlackMarketManager:update(t, dt)
 	if #self._preloading_list > 0 then
 		if not self._preload_ws then
 			self:create_preload_ws()
-		else
+			self._streaming_preload = nil
+		elseif not self._streaming_preload then
 			self._preloading_index = self._preloading_index + 1
 			if self._preloading_index > #self._preloading_list then
 				self._preloading_list = {}
@@ -1018,7 +1024,11 @@ function BlackMarketManager:update(t, dt)
 					if next_in_line.package then
 						managers.weapon_factory:load_package(next_in_line.package)
 					else
-						managers.dyn_resource:load(Idstring("unit"), next_in_line.load_me.name, managers.dyn_resource.DYN_RESOURCES_PACKAGE, false)
+						local function f()
+							self._streaming_preload = nil
+						end
+						self._streaming_preload = true
+						managers.dyn_resource:load(Idstring("unit"), next_in_line.load_me.name, managers.dyn_resource.DYN_RESOURCES_PACKAGE, f)
 					end
 				elseif is_done_cb then
 					if self._preload_ws then
@@ -1643,7 +1653,7 @@ function BlackMarketManager:get_dropable_mods_by_weapon_id(weapon_id, weapon_dat
 					local is_dlc = #dlcs > 0
 					if is_dlc then
 						for _, dlc in ipairs(dlcs) do
-							local has_dlc = tweak_data.dlc[dlc] and tweak_data.dlc[dlc].free or managers.dlc:has_dlc(dlc)
+							local has_dlc = managers.dlc:is_dlc_unlocked(dlc)
 							if has_dlc then
 								global_value = dlc
 								part_dropable = true
@@ -2153,8 +2163,8 @@ function BlackMarketManager:on_sell_weapon(category, slot, skip_verification)
 		elseif category == "secondaries" then
 			self:_update_menu_scene_secondary()
 		end
+		MenuCallbackHandler:_update_outfit_information()
 	end
-	MenuCallbackHandler:_update_outfit_information()
 end
 function BlackMarketManager:_update_menu_scene_primary()
 	if not managers.menu_scene then
@@ -2328,7 +2338,7 @@ function BlackMarketManager:view_weapon_with_mod(category, slot, part_id, open_n
 	local blueprint = deep_clone(weapon.blueprint)
 	local texture_switches = self:get_weapon_texture_switches(category, slot, weapon)
 	managers.weapon_factory:change_part_blueprint_only(weapon.factory_id, part_id, blueprint)
-	self:preload_weapon_blueprint("preview", weapon.factory_id, weapon.blueprint)
+	self:preload_weapon_blueprint("preview", weapon.factory_id, blueprint)
 	table.insert(self._preloading_list, {
 		done_cb = function()
 			managers.menu_scene:spawn_item_weapon(weapon.factory_id, blueprint, texture_switches)
@@ -3656,18 +3666,18 @@ function BlackMarketManager:_cleanup_blackmarket()
 	local invalid_items = {}
 	local function add_invalid_global_value_func(global_value)
 		invalid_items[global_value] = true
-		Application:error("BlackMarketManager:_cleanup_blackmarket() Invalid inventory global_value detected", "global_value", global_value)
+		Application:warn("BlackMarketManager:_cleanup_blackmarket() Invalid inventory global_value detected", "global_value", global_value)
 	end
 	local function add_invalid_category_func(global_value, category)
 		invalid_items[global_value] = invalid_items[global_value] or {}
 		invalid_items[global_value][category] = true
-		Application:error("BlackMarketManager:_cleanup_blackmarket() Invalid inventory category detected", "global_value", global_value, "category", category)
+		Application:warn("BlackMarketManager:_cleanup_blackmarket() Invalid inventory category detected", "global_value", global_value, "category", category)
 	end
 	local function add_invalid_item_func(global_value, category, item)
 		invalid_items[global_value] = invalid_items[global_value] or {}
 		invalid_items[global_value][category] = invalid_items[global_value][category] or {}
 		invalid_items[global_value][category][item] = true
-		Application:error("BlackMarketManager:_cleanup_blackmarket() Invalid inventory item detected", "global_value", global_value, "category", category, "item", item)
+		Application:warn("BlackMarketManager:_cleanup_blackmarket() Invalid inventory item detected", "global_value", global_value, "category", category, "item", item)
 	end
 	for global_value, categories in pairs(self._global.inventory or {}) do
 		if not chk_global_value_func(global_value) then
@@ -3750,8 +3760,8 @@ function BlackMarketManager:_verify_dlc_items()
 	local owns_dlc
 	for package_id, data in pairs(tweak_data.dlc) do
 		if tweak_data.lootdrop.global_values[package_id] then
-			owns_dlc = tweak_data.lootdrop.global_values[package_id].dlc and (data.free or managers.dlc:has_dlc(package_id)) or false
-			print("owns_dlc", owns_dlc, "dlc", package_id, "not free", not data.free, "not has_dlc", not managers.dlc:has_dlc(package_id))
+			owns_dlc = not tweak_data.lootdrop.global_values[package_id].dlc or managers.dlc:is_dlc_unlocked(package_id) or false
+			print("owns_dlc", owns_dlc, "dlc", package_id, "is a dlc", tweak_data.lootdrop.global_values[package_id].dlc, "is free", data.free, "is_dlc_unlocked", managers.dlc:is_dlc_unlocked(package_id))
 			if owns_dlc then
 			elseif self._global.global_value_items[package_id] then
 				print("You do not own " .. package_id .. ", will lock all related items.")
@@ -3914,8 +3924,7 @@ function BlackMarketManager:_verfify_equipped_category(category)
 		local melee_weapon_id = self._defaults.melee_weapon
 		for melee_weapon, craft in pairs(Global.blackmarket_manager.melee_weapons) do
 			local melee_weapon_data = tweak_data.blackmarket.melee_weapons[melee_weapon] or {}
-			print(melee_weapon, inspect(craft))
-			if craft.equipped and craft.unlocked and (not melee_weapon_data.dlc or managers.dlc:has_dlc(melee_weapon_data.dlc)) then
+			if craft.equipped and craft.unlocked and (not melee_weapon_data.dlc or managers.dlc:is_dlc_unlocked(melee_weapon_data.dlc)) then
 				melee_weapon_id = melee_weapon
 			end
 		end
@@ -4104,26 +4113,26 @@ function BlackMarketManager:check_frog_1()
 	local is_correct_job = frog_1_memory ~= false and managers.job and managers.job:has_active_job() and (managers.job:current_real_job_id() == "hox" or managers.job:current_real_job_id() == "hox_prof") and (Global.game_settings.difficulty == "overkill_145" or Global.game_settings.difficulty == "overkill_290") and true or false
 	if is_correct_job then
 		local pass_skills, pass_primary, pass_secondary, pass_armor, peer, outfit
-		local all_members = managers.network:game() and managers.network:game():all_members() or {}
 		local all_passed = true
-		for id, member in pairs(all_members) do
-			peer = member:peer()
-			if all_passed and peer then
-				if peer:is_outfit_loaded() then
-					outfit = peer:blackmarket_outfit()
-					pass_skills = true
-					for tree, points in pairs(outfit.skills and outfit.skills.skills or {1}) do
-						if tonumber(points) > 0 then
-							pass_skills = false
-						else
+		if managers.network:session() then
+			for _, peer in pairs(managers.network:session():all_peers()) do
+				if all_passed and peer then
+					if peer:is_outfit_loaded() then
+						outfit = peer:blackmarket_outfit()
+						pass_skills = true
+						for tree, points in pairs(outfit.skills and outfit.skills.skills or {1}) do
+							if tonumber(points) > 0 then
+								pass_skills = false
+							else
+							end
 						end
+						pass_primary = outfit.primary.factory_id == "wpn_fps_ass_akm_gold"
+						pass_secondary = outfit.secondary.factory_id == "wpn_fps_smg_thompson"
+						pass_armor = outfit.armor == "level_1"
+						all_passed = pass_skills and pass_primary and pass_secondary and pass_armor and true or true
+					else
+						all_passed = false
 					end
-					pass_primary = outfit.primary.factory_id == "wpn_fps_ass_akm_gold"
-					pass_secondary = outfit.secondary.factory_id == "wpn_fps_smg_thompson"
-					pass_armor = outfit.armor == "level_1"
-					all_passed = pass_skills and pass_primary and pass_secondary and pass_armor and true or true
-				else
-					all_passed = false
 				end
 			end
 		end

@@ -1,6 +1,5 @@
 require("lib/setups/Setup")
 require("lib/network/base/NetworkManager")
-require("lib/network/NetworkGame")
 require("lib/managers/MoneyManager")
 require("lib/managers/StatisticsManager")
 require("lib/managers/MissionManager")
@@ -89,7 +88,7 @@ end
 function MenuSetup:init_game()
 	local gsm = Setup.init_game(self)
 	if not Application:editor() then
-		local event_id, checkpoint_index, level, level_class_name, mission, world_setting, intro_skipped
+		local event_id, checkpoint_index, level, level_class_name, mission, world_setting, difficulty, intro_skipped
 		if not Global.exe_arguments_parsed then
 			local arg_list = Application:argv()
 			for i = 1, #arg_list do
@@ -102,6 +101,11 @@ function MenuSetup:init_game()
 					i = i + 1
 				elseif arg == "-level" then
 					level = arg_list[i + 1]
+					Global.exe_argument_level = level
+					i = i + 1
+				elseif arg == "-difficulty" then
+					difficulty = arg_list[i + 1]
+					Global.exe_argument_difficulty = difficulty
 					i = i + 1
 				elseif arg == "-class" then
 					level_class_name = arg_list[i + 1]
@@ -117,20 +121,17 @@ function MenuSetup:init_game()
 					intro_skipped = true
 				elseif arg == "+connect_lobby" then
 					Global.boot_invite = arg_list[i + 1]
+				elseif arg == "-auto_enter_level" then
+					Global.exe_argument_auto_enter_level = true
+					i = i + 1
 				end
+			end
+			if Global.exe_argument_level and not Global.exe_argument_difficulty then
+				Global.exe_argument_difficulty = "normal"
 			end
 			Global.exe_arguments_parsed = true
 		end
-		if level then
-			local preferred_index = managers.controller:get_preferred_default_wrapper_index()
-			managers.user:set_index(preferred_index)
-			managers.controller:set_default_wrapper_index(preferred_index)
-			game_state_machine:set_boot_intro_done(true)
-			managers.user:set_active_user_state_change_quit(true)
-			managers.network:host_game()
-			local level_id = tweak_data.levels:get_level_name_from_world_name(level)
-			managers.network:session():load_level(level, mission, world_setting, level_class_name, level_id)
-		elseif game_state_machine:is_boot_intro_done() then
+		if game_state_machine:is_boot_intro_done() then
 			if game_state_machine:is_boot_from_sign_out() or intro_skipped then
 				game_state_machine:change_state_by_name("menu_titlescreen")
 			else
@@ -148,7 +149,7 @@ function MenuSetup:init_managers(managers)
 	managers.menu_scene = MenuSceneManager:new()
 	managers.money = MoneyManager:new()
 	managers.statistics = StatisticsManager:new()
-	managers.network = NetworkManager:new("NetworkGame")
+	managers.network = NetworkManager:new()
 end
 function MenuSetup:init_finalize()
 	Setup.init_finalize(self)

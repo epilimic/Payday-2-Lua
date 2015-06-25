@@ -27,7 +27,12 @@ function WorldHolder:init(params)
 		local reverse = string.reverse(file_path)
 		local i = string.find(reverse, "/")
 		self._world_dir = string.reverse(string.sub(reverse, i))
-		assert(DB:has(file_type, file_path), file_path .. "." .. file_type .. " is not in the database!")
+		if not DB:has(file_type, file_path) then
+			if not Application:editor() then
+				assert(false, file_path .. "." .. file_type .. " is not in the database!")
+			end
+			return
+		end
 		if self._worldfile_generation == "new" then
 			params.world_dir = self._world_dir
 			self._definition = CoreWorldDefinition.WorldDefinition:new(params)
@@ -64,6 +69,9 @@ function WorldHolder:_worldfile_generation(file_type, file_path)
 	end
 	local path = managers.database:entry_expanded_path(file_type, file_path)
 	local node = SystemFS:parse_xml(path)
+	if not node then
+		return "missing"
+	end
 	if node:name() == "worlds" then
 		return "old"
 	end
@@ -72,11 +80,11 @@ function WorldHolder:_worldfile_generation(file_type, file_path)
 	end
 	return "unknown"
 end
-function WorldHolder:is_ok()
+function WorldHolder:status()
 	if self._worldfile_generation == "new" then
-		return true
+		return "ok"
 	end
-	return table.size(self._worlds) > 0 and self._worlds.world
+	return self._worldfile_generation
 end
 function WorldHolder:create_world(world, layer, offset)
 	if self._definition then

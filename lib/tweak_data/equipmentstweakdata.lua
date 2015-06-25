@@ -268,7 +268,7 @@ function EquipmentsTweakData:init()
 		icon = "pd2_c4",
 		action_message = "c4_obtained",
 		quantity = 4,
-		transfer_quantity = 4,
+		transfer_quantity = 8,
 		sync_possession = true
 	}
 	self.specials.c4_x10 = {
@@ -431,6 +431,52 @@ function EquipmentsTweakData:init()
 		icon = "equipment_manifest",
 		sync_possession = true
 	}
+	self.specials.bottle = {
+		text_id = "hud_equipment_bottle",
+		icon = "equipment_bottle",
+		sync_possession = true
+	}
+	self.specials.hotel_room_key = {
+		text_id = "hud_equipment_hotel_room_keycard",
+		icon = "equipment_bank_manager_key",
+		sync_possession = true
+	}
+	self.specials.blueprints = {
+		text_id = "hud_equipment_blueprints",
+		icon = "equipment_files",
+		sync_possession = true
+	}
+	self.specials.cas_usb_key = {
+		text_id = "hud_equipment_usb_key",
+		icon = "equipment_usb_no_data",
+		sync_possession = true
+	}
+	self.specials.cas_data_usb_key = {
+		text_id = "hud_equipment_data_usb_key",
+		icon = "equipment_usb_with_data",
+		sync_possession = true
+	}
+	self.specials.cas_sleeping_gas = {
+		text_id = "hud_equipment_sleeping_gas",
+		icon = "equipment_sleeping_gas",
+		sync_possession = true
+	}
+	self.specials.cas_bfd_tool = {
+		text_id = "hud_equipment_bfd_tool",
+		icon = "equipment_bfd_tool",
+		sync_possession = true,
+		transfer_quantity = 4
+	}
+	self.specials.cas_elevator_key = {
+		text_id = "hud_equipment_elevator_key",
+		icon = "equipment_elevator_key",
+		sync_possession = true
+	}
+	self.specials.cas_winch_hook = {
+		text_id = "hud_equipment_winch_hook",
+		icon = "equipment_winch_hook",
+		sync_possession = true
+	}
 	self.max_amount = {
 		ammo_bag = 2,
 		doctor_bag = 2,
@@ -443,7 +489,8 @@ function EquipmentsTweakData:init()
 		asset_ammo_bag = 4,
 		asset_doctor_bag = 3,
 		asset_grenade_crate = 3,
-		asset_bodybags_bag = 3
+		asset_bodybags_bag = 3,
+		asset_sentry_gun = 4
 	}
 	self.class_name_to_deployable_id = {
 		AmmoBagBase = "ammo_bag",

@@ -90,6 +90,9 @@ end
 function RaycastWeaponBase:armor_piercing_chance()
 	return self:weapon_tweak_data().armor_piercing_chance or 0
 end
+function RaycastWeaponBase:got_silencer()
+	return false
+end
 function RaycastWeaponBase:_create_use_setups()
 	local sel_index = tweak_data.weapon[self._name_id].use_data.selection_index
 	local align_place = tweak_data.weapon[self._name_id].use_data.align_place or "right_hand"
@@ -377,7 +380,7 @@ function RaycastWeaponBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul
 										is_shield = col_ray.unit:in_slot(8) and alive(col_ray.unit:parent())
 										if not hit_unit and not is_shoot_through and not is_shield and not is_wall then
 										else
-											local ray_from_unit = hit_unit and col_ray.unit
+											local ray_from_unit = (hit_unit or is_shield) and col_ray.unit
 											if is_shield then
 												dmg_mul = (dmg_mul or 1) * 0.25
 											end
@@ -386,7 +389,7 @@ function RaycastWeaponBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul
 											self._shoot_through_data.ray_from_unit = ray_from_unit
 											self._shoot_through_data.ray_distance = ray_distance - col_ray.distance
 											mvector3.set(self._shoot_through_data.from, mvec_spread_direction)
-											mvector3.multiply(self._shoot_through_data.from, is_shield and 20 or 40)
+											mvector3.multiply(self._shoot_through_data.from, is_shield and 5 or 40)
 											mvector3.add(self._shoot_through_data.from, col_ray.position)
 											managers.game_play_central:queue_fire_raycast(Application:time() + 0.0125, self._unit, user_unit, self._shoot_through_data.from, mvec_spread_direction, dmg_mul, shoot_player, spread_mul, autohit_mul, suppr_mul, self._shoot_through_data)
 										end

@@ -28,7 +28,7 @@ function HuskPlayerBase:set_upgrade_value(category, upgrade, level)
 	self._upgrades[category][upgrade] = value
 	self._upgrade_levels[category][upgrade] = level
 	if upgrade == "passive_concealment_modifier" then
-		local con_mul, index = managers.blackmarket:get_concealment_of_peer(managers.network:game():member_from_unit(self._unit):peer())
+		local con_mul, index = managers.blackmarket:get_concealment_of_peer(managers.network:session():peer_by_unit(self._unit))
 		self:set_suspicion_multiplier("equipment", 1 / con_mul)
 		self:set_detection_multiplier("equipment", 1 / con_mul)
 	elseif upgrade == "suspicion_multiplier" then
@@ -45,17 +45,17 @@ function HuskPlayerBase:pre_destroy(unit)
 	self._unit:movement():pre_destroy(unit)
 	self._unit:inventory():pre_destroy(self._unit)
 	managers.groupai:state():unregister_criminal(self._unit)
-	if managers.network:game() then
-		local member = managers.network:game():member_from_unit(self._unit)
-		if member then
-			member:set_unit(nil)
+	if managers.network:session() then
+		local peer = managers.network:session():peer_by_unit(self._unit)
+		if peer then
+			peer:set_unit(nil)
 		end
 	end
 	UnitBase.pre_destroy(self, unit)
 end
 function HuskPlayerBase:nick_name()
-	local member = managers.network:game():member_from_unit(self._unit)
-	return member and member:peer():name() or ""
+	local peer = managers.network:session():peer_by_unit(self._unit)
+	return peer and peer:name() or ""
 end
 function HuskPlayerBase:on_death_exit()
 end

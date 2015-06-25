@@ -117,7 +117,7 @@ function IngameWaitingForRespawnState.request_player_spawn(peer_to_spawn)
 			local sp_id = "IngameWaitingForRespawnState"
 			local spawn_point = {position = spawn_pos, rotation = spawn_rot}
 			managers.network:register_spawn_point(sp_id, spawn_point)
-			managers.network:game():spawn_member_by_id(peer_id, sp_id, true)
+			managers.network:session():spawn_member_by_id(peer_id, sp_id, true)
 			managers.network:unregister_spawn_point(sp_id)
 		end
 	end

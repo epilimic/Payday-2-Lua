@@ -90,6 +90,9 @@ CopMovement._gadgets = {
 	},
 	clipboard_paper = {
 		Idstring("units/world/architecture/hospital/props/clipboard01/clipboard_paper")
+	},
+	wine_glass = {
+		Idstring("units/pd2_dlc_casino/props/cas_prop_int_dinning_set/cas_prop_int_dinning_set_table_glass_02_anim")
 	}
 }
 local action_variants = {

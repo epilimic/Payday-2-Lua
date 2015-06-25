@@ -180,6 +180,9 @@ function BootupState:at_enter()
 	self._clbk_game_has_music_control_callback = callback(self, self, "clbk_game_has_music_control")
 	managers.platform:add_event_callback("media_player_control", self._clbk_game_has_music_control_callback)
 	self:play_next()
+	if Global.exe_argument_level then
+		self:gsm():change_state_by_name("menu_titlescreen")
+	end
 end
 function BootupState:clbk_game_has_music_control(status)
 	if self._play_data and self._play_data.video then

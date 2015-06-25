@@ -969,7 +969,7 @@ function HUDLootScreen:fetch_local_lootdata()
 end
 function HUDLootScreen:create_stars_giving_animation()
 	local lootdrops = self:fetch_local_lootdata()
-	local human_players = managers.network:game() and managers.network:game():amount_of_alive_players() or 1
+	local human_players = managers.network:session() and managers.network:session():amount_of_alive_players() or 1
 	local all_humans = human_players == 4
 	if not lootdrops or not lootdrops[5] then
 		return

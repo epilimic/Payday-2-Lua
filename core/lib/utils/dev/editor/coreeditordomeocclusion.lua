@@ -30,7 +30,7 @@ function CoreEditor:_create_dome_occlusion(params)
 	self._layers[self._mission_layer_name]:set_enabled(false)
 	self._saved_show_center = self._show_center
 	self._show_center = false
-	self:on_hide_helper_units(false)
+	self:on_hide_helper_units({vis = false})
 	self._saved_hidden_object = {}
 	self._saved_hidden_units = {}
 	for name, layer in pairs(self._layers) do
@@ -135,7 +135,7 @@ function CoreEditor:dome_occlusion_done()
 	self:set_show_camera_info(true)
 	self._layers[self._mission_layer_name]:set_enabled(true)
 	self._show_center = self._saved_show_center
-	self:on_hide_helper_units(true)
+	self:on_hide_helper_units({vis = true})
 	for _, obj in ipairs(self._saved_hidden_object) do
 		obj:set_visibility(true)
 	end

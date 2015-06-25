@@ -97,6 +97,7 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.character_locked.dragan = "dragan"
 	self.masks.character_locked.jacket = "richard_returns"
 	self.masks.character_locked.bonnie = "bonnie"
+	self.masks.character_locked.sokol = "sokol"
 	self.masks.skull = {}
 	self.masks.skull.unit = "units/payday2/masks/msk_skull/msk_skull"
 	self.masks.skull.name_id = "bm_msk_skull"
@@ -1746,6 +1747,11 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.balaclava_john_wick.name_id = "bm_msk_cheat_error"
 	self.masks.balaclava_john_wick.type = "helmet"
 	self.masks.balaclava_john_wick.inaccessible = true
+	self.masks.balaclava_sokol = {}
+	self.masks.balaclava_sokol.unit = "units/pd2_dlc_character_sokol/masks/msk_balaclava_sokol/msk_balaclava_sokol"
+	self.masks.balaclava_sokol.name_id = "bm_msk_cheat_error"
+	self.masks.balaclava_sokol.type = "helmet"
+	self.masks.balaclava_sokol.inaccessible = true
 	self.masks.balaclava = {}
 	self.masks.balaclava.name_id = "bm_msk_balaclava"
 	self.masks.balaclava.global_value = "infamy"
@@ -1764,7 +1770,8 @@ function BlackMarketTweakData:_init_masks()
 		female_1 = "balaclava_clover",
 		dragan = "balaclava_dragan",
 		jacket = "balaclava_wolf",
-		bonnie = "balaclava_dallas"
+		bonnie = "balaclava_dallas",
+		sokol = "balaclava_sokol"
 	}
 	self.masks.the_overkill_mask = {}
 	self.masks.the_overkill_mask.unit = "units/pd2_dlc_overkill_pack/masks/msk_the_overkill_mask/msk_the_overkill_mask"
@@ -2086,6 +2093,62 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.card_joker.texture_bundle_folder = "humble_summer_2015"
 	self.masks.card_joker.value = 0
 	self.masks.card_joker.sort_number = 7
+	self.masks.sokol = {}
+	self.masks.sokol.unit = "units/pd2_dlc_character_sokol/masks/sokol/msk_sokol"
+	self.masks.sokol.name_id = "bm_msk_sokol"
+	self.masks.sokol.pcs = {}
+	self.masks.sokol.value = 0
+	self.masks.sokol.texture_bundle_folder = "character_pack_sokol"
+	self.masks.sokol.dlc = "character_pack_sokol"
+	self.masks.sokol.sort_number = 11
+	self.masks.sokol_begins = {}
+	self.masks.sokol_begins.unit = "units/pd2_dlc_character_sokol/masks/sokol_begins/msk_sokol_begins"
+	self.masks.sokol_begins.name_id = "bm_msk_sokol_begins"
+	self.masks.sokol_begins.pcs = {
+		10,
+		20,
+		30,
+		40
+	}
+	self.masks.sokol_begins.value = 0
+	self.masks.sokol_begins.texture_bundle_folder = "character_pack_sokol"
+	self.masks.sokol_begins.dlc = "character_pack_sokol"
+	self.masks.sokol_begins.sort_number = 11
+	self.masks.croupier_hat = {}
+	self.masks.croupier_hat.unit = "units/pd2_dlc_casino/masks/msk_croupier_hat/msk_croupier_hat"
+	self.masks.croupier_hat.name_id = "bm_msk_croupier_hat"
+	self.masks.croupier_hat.pcs = {}
+	self.masks.croupier_hat.value = 0
+	self.masks.croupier_hat.dlc = "kenaz"
+	self.masks.croupier_hat.texture_bundle_folder = "kenaz"
+	self.masks.croupier_hat.type = "glasses"
+	self.masks.croupier_hat.sort_number = 9
+	self.masks.gladiator_helmet = {}
+	self.masks.gladiator_helmet.unit = "units/pd2_dlc_casino/masks/msk_gladiator/msk_gladiator"
+	self.masks.gladiator_helmet.name_id = "bm_msk_gladiator_helmet"
+	self.masks.gladiator_helmet.pcs = {}
+	self.masks.gladiator_helmet.value = 0
+	self.masks.gladiator_helmet.dlc = "kenaz"
+	self.masks.gladiator_helmet.texture_bundle_folder = "kenaz"
+	self.masks.gladiator_helmet.type = "helmet"
+	self.masks.gladiator_helmet.sort_number = 9
+	self.masks.the_king_mask = {}
+	self.masks.the_king_mask.unit = "units/pd2_dlc_casino/masks/msk_the_king/msk_the_king"
+	self.masks.the_king_mask.name_id = "bm_msk_the_king_mask"
+	self.masks.the_king_mask.pcs = {}
+	self.masks.the_king_mask.value = 0
+	self.masks.the_king_mask.dlc = "kenaz"
+	self.masks.the_king_mask.texture_bundle_folder = "kenaz"
+	self.masks.the_king_mask.type = "helmet"
+	self.masks.the_king_mask.sort_number = 9
+	self.masks.sports_utility_mask = {}
+	self.masks.sports_utility_mask.unit = "units/pd2_dlc_casino/masks/msk_sports_utility/msk_sports_utility"
+	self.masks.sports_utility_mask.name_id = "bm_msk_sports_utility_mask"
+	self.masks.sports_utility_mask.pcs = {}
+	self.masks.sports_utility_mask.value = 0
+	self.masks.sports_utility_mask.dlc = "kenaz"
+	self.masks.sports_utility_mask.texture_bundle_folder = "kenaz"
+	self.masks.sports_utility_mask.sort_number = 9
 	self.masks.starvr = {}
 	self.masks.starvr.unit = "units/pd2_dlc_humble_summer15/masks/starvr/msk_starvr"
 	self.masks.starvr.name_id = "bm_msk_starvr"
@@ -2106,6 +2169,37 @@ function BlackMarketTweakData:_init_masks()
 		}
 		self.masks.sweettooth.dlc = "sweettooth"
 		self.masks.sweettooth.value = 1
+	elseif SystemInfo:platform() == Idstring("X360") then
+		self.masks.thespian = {}
+		self.masks.thespian.unit = "units/pd2_thespian_mask/msk_thespian"
+		self.masks.thespian.name_id = "bm_msk_thespian"
+		self.masks.thespian.pcs = {}
+		self.masks.thespian.value = 0
+		self.masks.thespian.type = "helmet"
+	elseif SystemInfo:platform() == Idstring("PS4") then
+		self.masks.finger = {}
+		self.masks.finger.unit = "units/pd2_nextgen/masks/finger/msk_finger"
+		self.masks.finger.name_id = "bm_msk_finger"
+		self.masks.finger.pcs = {
+			10,
+			20,
+			30,
+			40
+		}
+		self.masks.finger.dlc = "preorder"
+		self.masks.finger.value = 7
+	elseif SystemInfo:platform() == Idstring("XB1") then
+		self.masks.instinct = {}
+		self.masks.instinct.unit = "units/pd2_nextgen/masks/instinct/msk_instinct"
+		self.masks.instinct.name_id = "bm_msk_instinct"
+		self.masks.instinct.pcs = {
+			10,
+			20,
+			30,
+			40
+		}
+		self.masks.instinct.dlc = "preorder"
+		self.masks.instinct.value = 7
 	end
 	self:_add_desc_from_name_macro(self.masks)
 end
@@ -2147,6 +2241,13 @@ function BlackMarketTweakData:_init_characters()
 		sequence = "var_mtr_jacket",
 		texture_bundle_folder = "hlm2",
 		dlc = "hlm2_deluxe"
+	}
+	self.characters.locked.sokol = {
+		sequence = "var_mtr_sokol",
+		mask_on_sequence = "mask_on_sokol",
+		mask_off_sequence = "mask_off_sokol",
+		texture_bundle_folder = "character_pack_sokol",
+		dlc = "character_pack_sokol"
 	}
 	self.characters.female_1 = {}
 	self.characters.female_1.fps_unit = "units/payday2/characters/fps_mover/fps_female_1_mover"
@@ -2212,6 +2313,12 @@ function BlackMarketTweakData:_init_characters()
 	self.characters.ai_bonnie.mask_on_sequence = "bonnie_mask_on"
 	self.characters.ai_bonnie.mask_off_sequence = "bonnie_mask_off"
 	self.characters.ai_bonnie.name_id = "bm_character_ai_bonnie"
+	self.characters.ai_sokol = {}
+	self.characters.ai_sokol.npc_unit = "units/payday2/characters/npc_criminals_suit_1/sokol/npc_criminal_suit_sokol"
+	self.characters.ai_sokol.sequence = "var_mtr_sokol"
+	self.characters.ai_sokol.mask_on_sequence = "mask_on_sokol"
+	self.characters.ai_sokol.mask_off_sequence = "mask_off_sokol"
+	self.characters.ai_sokol.name_id = "bm_character_ai_sokol"
 end
 function BlackMarketTweakData:_init_colors()
 	self.colors = {}
@@ -4299,6 +4406,36 @@ function BlackMarketTweakData:_init_materials()
 	self.materials.dimblue.texture = "units/pd2_dlc_arena/masks/materials/matcap_dimblue_df"
 	self.materials.dimblue.dlc = "arena"
 	self.materials.dimblue.value = 0
+	self.materials.carpet = {}
+	self.materials.carpet.name_id = "bm_mtl_carpet"
+	self.materials.carpet.pcs = {}
+	self.materials.carpet.texture = "units/pd2_dlc_casino/matcaps/matcap_carpet_df"
+	self.materials.carpet.material_amount = 0
+	self.materials.carpet.value = 0
+	self.materials.carpet.dlc = "kenaz"
+	self.materials.carpet.texture_bundle_folder = "kenaz"
+	self.materials.casino = {}
+	self.materials.casino.name_id = "bm_mtl_casino"
+	self.materials.casino.pcs = {}
+	self.materials.casino.texture = "units/pd2_dlc_casino/matcaps/matcap_casino_df"
+	self.materials.casino.value = 0
+	self.materials.casino.dlc = "kenaz"
+	self.materials.casino.texture_bundle_folder = "kenaz"
+	self.materials.plush = {}
+	self.materials.plush.name_id = "bm_mtl_plush"
+	self.materials.plush.pcs = {}
+	self.materials.plush.texture = "units/pd2_dlc_casino/matcaps/matcap_plush_df"
+	self.materials.plush.material_amount = 0
+	self.materials.plush.value = 0
+	self.materials.plush.dlc = "kenaz"
+	self.materials.plush.texture_bundle_folder = "kenaz"
+	self.materials.stars = {}
+	self.materials.stars.name_id = "bm_mtl_stars"
+	self.materials.stars.pcs = {}
+	self.materials.stars.texture = "units/pd2_dlc_casino/matcaps/matcap_stars_df"
+	self.materials.stars.value = 0
+	self.materials.stars.dlc = "kenaz"
+	self.materials.stars.texture_bundle_folder = "kenaz"
 end
 function BlackMarketTweakData:_init_textures()
 	self.textures = {}
@@ -6075,6 +6212,34 @@ function BlackMarketTweakData:_init_textures()
 	self.textures.smoke.texture = "units/pd2_dlc_arena/masks/patterns/pattern_smoke_df"
 	self.textures.smoke.dlc = "arena"
 	self.textures.smoke.value = 0
+	self.textures.dices = {}
+	self.textures.dices.name_id = "bm_txt_dices"
+	self.textures.dices.pcs = {}
+	self.textures.dices.texture = "units/pd2_dlc_casino/masks/patterns/pattern_dices_df"
+	self.textures.dices.value = 0
+	self.textures.dices.dlc = "kenaz"
+	self.textures.dices.texture_bundle_folder = "kenaz"
+	self.textures.royale = {}
+	self.textures.royale.name_id = "bm_txt_royale"
+	self.textures.royale.pcs = {}
+	self.textures.royale.texture = "units/pd2_dlc_casino/masks/patterns/pattern_royale_df"
+	self.textures.royale.value = 0
+	self.textures.royale.dlc = "kenaz"
+	self.textures.royale.texture_bundle_folder = "kenaz"
+	self.textures.cards = {}
+	self.textures.cards.name_id = "bm_txt_cards"
+	self.textures.cards.pcs = {}
+	self.textures.cards.texture = "units/pd2_dlc_casino/masks/patterns/pattern_cards_df"
+	self.textures.cards.value = 0
+	self.textures.cards.dlc = "kenaz"
+	self.textures.cards.texture_bundle_folder = "kenaz"
+	self.textures.chips = {}
+	self.textures.chips.name_id = "bm_txt_chips"
+	self.textures.chips.pcs = {}
+	self.textures.chips.texture = "units/pd2_dlc_casino/masks/patterns/pattern_chips_df"
+	self.textures.chips.value = 0
+	self.textures.chips.dlc = "kenaz"
+	self.textures.chips.texture_bundle_folder = "kenaz"
 	self.textures.starvr = {}
 	self.textures.starvr.name_id = "bm_txt_starvr"
 	self.textures.starvr.pcs = {}
@@ -7615,5 +7780,142 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.oldbaton.sounds.hit_body = "copbaton_hit_body"
 	self.melee_weapons.oldbaton.sounds.charge = "copbaton_charge"
 	self.melee_weapons.oldbaton.stats.concealment = 27
+	self.melee_weapons.hockey = deep_clone(self.melee_weapons.kabar)
+	self.melee_weapons.hockey.name_id = "bm_melee_hockey"
+	self.melee_weapons.hockey.dlc = "character_pack_sokol"
+	self.melee_weapons.hockey.texture_bundle_folder = "character_pack_sokol"
+	self.melee_weapons.hockey.anim_global_param = "melee_pickaxe"
+	self.melee_weapons.hockey.type = "axe"
+	self.melee_weapons.hockey.align_objects = {
+		"a_weapon_left"
+	}
+	self.melee_weapons.hockey.unit = "units/pd2_dlc_character_sokol/weapons/wpn_fps_mel_hockey/wpn_fps_mel_hockey"
+	self.melee_weapons.hockey.third_unit = "units/pd2_dlc_character_sokol/weapons/wpn_third_mel_hockey/wpn_third_mel_hockey"
+	self.melee_weapons.hockey.stats.weapon_type = "sharp"
+	self.melee_weapons.hockey.stats.min_damage = 3.5
+	self.melee_weapons.hockey.stats.max_damage = 6
+	self.melee_weapons.hockey.stats.min_damage_effect = 4
+	self.melee_weapons.hockey.stats.max_damage_effect = 3.2
+	self.melee_weapons.hockey.stats.charge_time = 2.4
+	self.melee_weapons.hockey.stats.range = 250
+	self.melee_weapons.hockey.expire_t = 1.1
+	self.melee_weapons.hockey.repeat_expire_t = 0.8
+	self.melee_weapons.hockey.attack_allowed_expire_t = 0.1
+	self.melee_weapons.hockey.sounds = {}
+	self.melee_weapons.hockey.sounds.equip = "bat_equip"
+	self.melee_weapons.hockey.sounds.hit_air = "bat_hit_air"
+	self.melee_weapons.hockey.sounds.hit_gen = "hockeystick_hit_gen"
+	self.melee_weapons.hockey.sounds.hit_body = "hockeystick_hit_body"
+	self.melee_weapons.hockey.sounds.charge = "bat_charge"
+	self.melee_weapons.hockey.stats.concealment = 24
+	self.melee_weapons.switchblade = deep_clone(self.melee_weapons.kabar)
+	self.melee_weapons.switchblade.name_id = "bm_melee_switchblade"
+	self.melee_weapons.switchblade.anim_global_param = "melee_stab"
+	self.melee_weapons.switchblade.dlc = "kenaz"
+	self.melee_weapons.switchblade.texture_bundle_folder = "kenaz"
+	self.melee_weapons.switchblade.type = "knife"
+	self.melee_weapons.switchblade.align_objects = {
+		"a_weapon_right"
+	}
+	self.melee_weapons.switchblade.unit = "units/pd2_dlc_casino/weapons/wpn_fps_mel_switchblade/wpn_fps_mel_switchblade"
+	self.melee_weapons.switchblade.third_unit = "units/pd2_dlc_casino/weapons/wpn_third_mel_switchblade/wpn_third_mel_switchblade"
+	self.melee_weapons.switchblade.sounds = {}
+	self.melee_weapons.switchblade.sounds.equip = "toothbrush_equip"
+	self.melee_weapons.switchblade.sounds.hit_air = "toothbrush_hit_air"
+	self.melee_weapons.switchblade.sounds.hit_gen = "toothbrush_hit_gen"
+	self.melee_weapons.switchblade.sounds.hit_body = "toothbrush_hit_body"
+	self.melee_weapons.switchblade.sounds.charge = "toothbrush_charge"
+	self.melee_weapons.switchblade.stats.min_damage = 3
+	self.melee_weapons.switchblade.stats.max_damage = 5
+	self.melee_weapons.switchblade.stats.min_damage_effect = 0.2
+	self.melee_weapons.switchblade.stats.max_damage_effect = 1
+	self.melee_weapons.switchblade.stats.charge_time = 2
+	self.melee_weapons.switchblade.stats.range = 175
+	self.melee_weapons.switchblade.stats.concealment = 30
+	self.melee_weapons.switchblade.repeat_expire_t = 0.3
+	self.melee_weapons.switchblade.expire_t = 0.8
+	self.melee_weapons.switchblade.melee_damage_delay = 0.1
+	self.melee_weapons.taser = deep_clone(self.melee_weapons.kabar)
+	self.melee_weapons.taser.name_id = "bm_melee_taser"
+	self.melee_weapons.taser.anim_global_param = "melee_taser"
+	self.melee_weapons.taser.dlc = "kenaz"
+	self.melee_weapons.taser.texture_bundle_folder = "kenaz"
+	self.melee_weapons.taser.type = "knife"
+	self.melee_weapons.taser.special_weapon = "taser"
+	self.melee_weapons.taser.align_objects = {
+		"a_weapon_right"
+	}
+	self.melee_weapons.taser.unit = "units/pd2_dlc_casino/weapons/wpn_fps_mel_taser/wpn_fps_mel_taser"
+	self.melee_weapons.taser.third_unit = "units/pd2_dlc_casino/weapons/wpn_third_mel_taser/wpn_third_mel_taser"
+	self.melee_weapons.taser.sounds = {}
+	self.melee_weapons.taser.sounds.equip = "buzzer_detector_equip"
+	self.melee_weapons.taser.sounds.hit_air = "buzzer_detector_hit_air"
+	self.melee_weapons.taser.sounds.hit_gen = "buzzer_detector_hit_gen"
+	self.melee_weapons.taser.sounds.hit_body = "buzzer_detector_hit_body"
+	self.melee_weapons.taser.sounds.charge = "buzzer_charge"
+	self.melee_weapons.taser.stats.min_damage = 2
+	self.melee_weapons.taser.stats.max_damage = 2
+	self.melee_weapons.taser.stats.min_damage_effect = 1
+	self.melee_weapons.taser.stats.max_damage_effect = 1
+	self.melee_weapons.taser.stats.charge_time = 3.5
+	self.melee_weapons.taser.stats.range = 200
+	self.melee_weapons.taser.stats.concealment = 30
+	self.melee_weapons.taser.expire_t = 1
+	self.melee_weapons.taser.repeat_expire_t = 0.7
+	self.melee_weapons.taser.melee_damage_delay = 0.1
+	self.melee_weapons.slot_lever = deep_clone(self.melee_weapons.kabar)
+	self.melee_weapons.slot_lever.name_id = "bm_melee_slot_lever"
+	self.melee_weapons.slot_lever.anim_global_param = "melee_axe"
+	self.melee_weapons.slot_lever.dlc = "kenaz"
+	self.melee_weapons.slot_lever.texture_bundle_folder = "kenaz"
+	self.melee_weapons.slot_lever.type = "knife"
+	self.melee_weapons.slot_lever.align_objects = {
+		"a_weapon_right"
+	}
+	self.melee_weapons.slot_lever.unit = "units/pd2_dlc_casino/weapons/wpn_fps_mel_slot_lever/wpn_fps_mel_slot_lever"
+	self.melee_weapons.slot_lever.third_unit = "units/pd2_dlc_casino/weapons/wpn_third_mel_slot_lever/wpn_third_mel_slot_lever"
+	self.melee_weapons.slot_lever.sounds = {}
+	self.melee_weapons.slot_lever.sounds.equip = "slot_lever_equip"
+	self.melee_weapons.slot_lever.sounds.hit_air = "slot_lever_hit_air"
+	self.melee_weapons.slot_lever.sounds.hit_gen = "slot_lever_hit_gen"
+	self.melee_weapons.slot_lever.sounds.hit_body = "slot_lever_hit_body"
+	self.melee_weapons.slot_lever.sounds.charge = "slot_lever_charge"
+	self.melee_weapons.slot_lever.stats.min_damage = 3
+	self.melee_weapons.slot_lever.stats.max_damage = 6.1
+	self.melee_weapons.slot_lever.stats.min_damage_effect = 3.2
+	self.melee_weapons.slot_lever.stats.max_damage_effect = 1.6
+	self.melee_weapons.slot_lever.stats.charge_time = 2
+	self.melee_weapons.slot_lever.stats.range = 225
+	self.melee_weapons.slot_lever.stats.concealment = 20
+	self.melee_weapons.slot_lever.expire_t = 1
+	self.melee_weapons.slot_lever.repeat_expire_t = 0.7
+	self.melee_weapons.slot_lever.melee_damage_delay = 0.1
+	self.melee_weapons.croupier_rake = deep_clone(self.melee_weapons.kabar)
+	self.melee_weapons.croupier_rake.name_id = "bm_melee_croupier_rake"
+	self.melee_weapons.croupier_rake.anim_global_param = "melee_axe"
+	self.melee_weapons.croupier_rake.dlc = "kenaz"
+	self.melee_weapons.croupier_rake.texture_bundle_folder = "kenaz"
+	self.melee_weapons.croupier_rake.type = "knife"
+	self.melee_weapons.croupier_rake.align_objects = {
+		"a_weapon_right"
+	}
+	self.melee_weapons.croupier_rake.unit = "units/pd2_dlc_casino/weapons/wpn_fps_mel_croupier_rake/wpn_fps_mel_croupier_rake"
+	self.melee_weapons.croupier_rake.third_unit = "units/pd2_dlc_casino/weapons/wpn_third_mel_croupier_rake/wpn_third_mel_croupier_rake"
+	self.melee_weapons.croupier_rake.sounds = {}
+	self.melee_weapons.croupier_rake.sounds.equip = "croupier_stick_equip"
+	self.melee_weapons.croupier_rake.sounds.hit_air = "croupier_stick_hit_air"
+	self.melee_weapons.croupier_rake.sounds.hit_gen = "croupier_stick_hit_gen"
+	self.melee_weapons.croupier_rake.sounds.hit_body = "croupier_stick_hit_body"
+	self.melee_weapons.croupier_rake.sounds.charge = "croupier_stick_charge"
+	self.melee_weapons.croupier_rake.stats.min_damage = 0.68
+	self.melee_weapons.croupier_rake.stats.max_damage = 1.68
+	self.melee_weapons.croupier_rake.stats.min_damage_effect = 12
+	self.melee_weapons.croupier_rake.stats.max_damage_effect = 8.8
+	self.melee_weapons.croupier_rake.stats.charge_time = 2
+	self.melee_weapons.croupier_rake.stats.range = 250
+	self.melee_weapons.croupier_rake.stats.concealment = 28
+	self.melee_weapons.croupier_rake.expire_t = 1
+	self.melee_weapons.croupier_rake.repeat_expire_t = 0.7
+	self.melee_weapons.croupier_rake.melee_damage_delay = 0.1
 	self:_add_desc_from_name_macro(self.melee_weapons)
 end

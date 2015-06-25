@@ -26,7 +26,7 @@ function HostStateInLobby:on_join_request_received(data, peer_name, client_prefe
 		self:_send_request_denied(sender, 0, my_user_id)
 		return
 	end
-	if not Global.local_member then
+	if not managers.network:session():local_peer() then
 		self:_send_request_denied(sender, 0, my_user_id)
 		return
 	end
@@ -44,7 +44,7 @@ function HostStateInLobby:on_join_request_received(data, peer_name, client_prefe
 		return
 	end
 	print("[HostStateInLobby:on_join_request_received] new peer accepted", peer_name)
-	local character = managers.network:game():check_peer_preferred_character(client_preferred_character)
+	local character = managers.network:session():check_peer_preferred_character(client_preferred_character)
 	local xnaddr = ""
 	if SystemInfo:platform() == Idstring("X360") or SystemInfo:platform() == Idstring("XB1") then
 		xnaddr = managers.network.matchmake:external_address(sender)

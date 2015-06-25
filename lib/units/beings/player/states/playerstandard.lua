@@ -33,6 +33,7 @@ PlayerStandard.IDS_MELEE_EXIT_STATE = Idstring("fps/melee_exit")
 PlayerStandard.IDS_MELEE_ENTER = Idstring("melee_enter")
 PlayerStandard.IDS_CHARGE = Idstring("charge")
 PlayerStandard.IDS_BASE = Idstring("base")
+PlayerStandard.debug_bipod = nil
 function PlayerStandard:init(unit)
 	PlayerMovementState.init(self, unit)
 	self._tweak_data = tweak_data.player.movement_state.standard
@@ -203,6 +204,9 @@ function PlayerStandard:interaction_blocked()
 	return self:is_deploying() or self:_on_zipline()
 end
 function PlayerStandard:update(t, dt)
+	if self.debug_bipod then
+		self._equipped_unit:base():_debug_bipod()
+	end
 	PlayerMovementState.update(self, t, dt)
 	self:_calculate_standard_variables(t, dt)
 	self:_update_ground_ray()
@@ -561,7 +565,9 @@ function PlayerStandard:_update_movement(t, dt)
 	end
 end
 function PlayerStandard:_get_walk_headbob()
-	if self._state_data.in_steelsight then
+	if self._state_data.using_bipod then
+		return 0
+	elseif self._state_data.in_steelsight then
 		return 0
 	elseif self._state_data.in_air then
 		return 0
@@ -918,6 +924,10 @@ end
 function PlayerStandard:_start_action_equip(redirect, extra_time)
 	local tweak_data = self._equipped_unit:base():weapon_tweak_data()
 	self._equip_weapon_expire_t = managers.player:player_timer():time() + ((tweak_data.timers.equip or 0.7) + (extra_time or 0))
+	if redirect == self.IDS_EQUIP then
+		self._equipped_unit:base():tweak_data_anim_stop("unequip")
+		self._equipped_unit:base():tweak_data_anim_play("equip")
+	end
 	local result = self._ext_camera:play_redirect(redirect or self.IDS_EQUIP)
 end
 function PlayerStandard:_check_action_throw_grenade(t, input)
@@ -1008,6 +1018,7 @@ function PlayerStandard:_start_action_interact(t, input, timer, interact_object)
 		tweak_data = interact_object:interaction().tweak_data
 	}
 	self._ext_camera:play_redirect(self.IDS_UNEQUIP)
+	self._equipped_unit:base():tweak_data_anim_stop("equip")
 	self._equipped_unit:base():tweak_data_anim_play("unequip")
 	managers.hud:show_interaction_bar(0, timer)
 	managers.network:session():send_to_peers_synched("sync_teammate_progress", 1, true, self._interact_params.tweak_data, timer, false)
@@ -1027,6 +1038,7 @@ function PlayerStandard:_interupt_action_interact(t, input, complete)
 		local result = self._ext_camera:play_redirect(self.IDS_EQUIP)
 		managers.hud:hide_interaction_bar(complete)
 		self._equipped_unit:base():tweak_data_anim_stop("unequip")
+		self._equipped_unit:base():tweak_data_anim_play("equip")
 	end
 end
 function PlayerStandard:_end_action_interact()
@@ -1515,6 +1527,7 @@ function PlayerStandard:_start_action_use_item(t)
 	local deploy_timer = managers.player:selected_equipment_deploy_timer()
 	self._use_item_expire_t = t + deploy_timer
 	self._ext_camera:play_redirect(self.IDS_UNEQUIP)
+	self._equipped_unit:base():tweak_data_anim_stop("equip")
 	self._equipped_unit:base():tweak_data_anim_play("unequip")
 	managers.hud:show_progress_timer_bar(0, deploy_timer)
 	local text = managers.player:selected_equipment_deploying_text() or managers.localization:text("hud_deploying_equipment", {
@@ -2177,7 +2190,7 @@ function PlayerStandard:_on_zipline()
 	return self._state_data.on_zipline
 end
 function PlayerStandard:_update_omniscience(t, dt)
-	local action_forbidden = self._unit:base():stats_screen_visible() or not managers.player:has_category_upgrade("player", "standstill_omniscience") or self:_interacting() or self._ext_movement:has_carry_restriction() or self:is_deploying() or self:_changing_weapon() or self:_is_throwing_grenade() or self:_is_meleeing() or self:_on_zipline() or self._moving or self:running() or self:_is_reloading() or self:in_air() or self:in_steelsight() or self:is_equipping() or self:shooting() or not managers.groupai:state():whisper_mode() or not tweak_data.player.omniscience
+	local action_forbidden = not managers.player:has_category_upgrade("player", "standstill_omniscience") or managers.player:current_state() == "civilian" or self:_interacting() or self._ext_movement:has_carry_restriction() or self:is_deploying() or self:_changing_weapon() or self:_is_throwing_grenade() or self:_is_meleeing() or self:_on_zipline() or self._moving or self:running() or self:_is_reloading() or self:in_air() or self:in_steelsight() or self:is_equipping() or self:shooting() or not managers.groupai:state():whisper_mode() or not tweak_data.player.omniscience
 	if action_forbidden then
 		if self._state_data.omniscience_t then
 			self._state_data.omniscience_t = nil
@@ -2467,6 +2480,8 @@ function PlayerStandard:_check_action_primary_attack(t, input)
 						local shake_multiplier = weap_tweak_data.shake[self._state_data.in_steelsight and "fire_steelsight_multiplier" or "fire_multiplier"]
 						self._ext_camera:play_shaker("fire_weapon_rot", 1 * shake_multiplier)
 						self._ext_camera:play_shaker("fire_weapon_kick", 1 * shake_multiplier, 1, 0.15)
+						self._equipped_unit:base():tweak_data_anim_stop("unequip")
+						self._equipped_unit:base():tweak_data_anim_stop("equip")
 						if not self._state_data.in_steelsight or not weap_base:tweak_data_anim_play("fire_steelsight", weap_base:fire_rate_multiplier()) then
 							weap_base:tweak_data_anim_play("fire", weap_base:fire_rate_multiplier())
 						end
@@ -2644,6 +2659,7 @@ function PlayerStandard:_get_swap_speed_multiplier()
 end
 function PlayerStandard:_start_action_unequip_weapon(t, data)
 	local speed_multiplier = self:_get_swap_speed_multiplier()
+	self._equipped_unit:base():tweak_data_anim_stop("equip")
 	self._equipped_unit:base():tweak_data_anim_play("unequip", speed_multiplier)
 	local tweak_data = self._equipped_unit:base():weapon_tweak_data()
 	self._change_weapon_data = data
@@ -2663,6 +2679,8 @@ function PlayerStandard:_start_action_equip_weapon(t)
 		self._ext_inventory:equip_selection(self._change_weapon_data.selection_wanted, false)
 	end
 	local speed_multiplier = self:_get_swap_speed_multiplier()
+	self._equipped_unit:base():tweak_data_anim_stop("unequip")
+	self._equipped_unit:base():tweak_data_anim_play("equip", speed_multiplier)
 	local tweak_data = self._equipped_unit:base():weapon_tweak_data()
 	self._equip_weapon_expire_t = t + (tweak_data.timers.equip or 0.7) / speed_multiplier
 	self._ext_camera:play_redirect(self.IDS_EQUIP, speed_multiplier)

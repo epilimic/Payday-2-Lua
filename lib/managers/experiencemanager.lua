@@ -20,7 +20,7 @@ function ExperienceManager:_setup()
 end
 function ExperienceManager:_set_next_level_data(level)
 	if level > self._total_levels then
-		Application:error("Reached the level cap")
+		print("Reached the level cap")
 		if self._experience_progress_data then
 			table.insert(self._experience_progress_data, {
 				level = self._total_levels,

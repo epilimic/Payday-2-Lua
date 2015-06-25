@@ -896,6 +896,26 @@ function LevelsTweakData:init()
 	self.arena.cube = "cube_apply_heist_bank"
 	self.arena.max_bags = 25
 	self.arena.ghost_bonus = 0.1
+	self.kenaz = {}
+	self.kenaz.name_id = "heist_kenaz_hl"
+	self.kenaz.briefing_id = "heist_kenaz_briefing"
+	self.kenaz.briefing_dialog = "Play_pln_ca1_brf_01"
+	self.kenaz.world_name = "narratives/dentist/cas"
+	self.kenaz.intro_event = {
+		"Play_pln_ca1_intro_01",
+		"Play_pln_ca1_intro_02"
+	}
+	self.kenaz.outro_event = {
+		"butcher_cr1_debrief_01",
+		"butcher_cr1_debrief_02"
+	}
+	self.kenaz.music = "heist"
+	self.kenaz.package = {
+		"packages/kenaz"
+	}
+	self.kenaz.cube = "cube_apply_heist_bank"
+	self.kenaz.ghost_bonus = 0.1
+	self.kenaz.max_bags = 40
 	self._level_index = {
 		"welcome_to_the_jungle_1",
 		"welcome_to_the_jungle_1_night",
@@ -957,7 +977,8 @@ function LevelsTweakData:init()
 		"crojob3_night",
 		"rat",
 		"shoutout_raid",
-		"arena"
+		"arena",
+		"kenaz"
 	}
 	if SystemInfo:platform() == Idstring("WIN32") then
 		table.insert(self._level_index, "roberts")

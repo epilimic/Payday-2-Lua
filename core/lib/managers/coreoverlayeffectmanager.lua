@@ -74,6 +74,7 @@ function OverlayEffectManager:progress_effects(t, dt, paused)
 				new_alpha = 1 - (eff_t - sustain_end_t) / data.fade_out
 			else
 				self._ws:panel():remove(effect.rectangle)
+				self._ws:panel():remove(effect.text)
 				self._playing_effects[key] = nil
 			end
 			if new_alpha then
@@ -87,6 +88,7 @@ function OverlayEffectManager:progress_effects(t, dt, paused)
 				else
 					effect.rectangle:set_color(data.color:with_alpha(new_alpha))
 				end
+				effect.text:set_color(data.text_color or Color.white:with_alpha(new_alpha * (data.text_color and data.text_color.alpha or 1)))
 			end
 		end
 	end
@@ -100,6 +102,7 @@ function OverlayEffectManager:check_pause_state(paused)
 		if not paused then
 			for key, effect in pairs(self._playing_effects) do
 				effect.rectangle:show()
+				effect.text:show()
 			end
 			self._paused = nil
 		end
@@ -107,6 +110,7 @@ function OverlayEffectManager:check_pause_state(paused)
 		for _, effect in pairs(self._playing_effects) do
 			if not effect.data.play_paused then
 				effect.rectangle:hide()
+				effect.text:hide()
 			end
 		end
 		self._paused = true
@@ -138,8 +142,24 @@ function OverlayEffectManager:play_effect(data)
 		else
 			rectangle:hide()
 		end
+		local text = self._ws:panel():text({
+			text = data.text or "",
+			font = data.font or "core/fonts/system_font",
+			font_size = data.font_size or 21,
+			blend_mode = data.text_blend_mode or data.blend_mode or "normal",
+			color = data.text_color or Color.white:with_alpha(spawn_alpha * (data.text_color and data.text_color.alpha or 1)),
+			layer = self._default_layer + 1,
+			align = "center",
+			halign = "center",
+			valign = "center",
+			vertical = "center"
+		})
+		if data.text_to_upper then
+			text:set_text(utf8.to_upper(text:text()))
+		end
 		local effect = {
 			rectangle = rectangle,
+			text = text,
 			start_t = data.timer or TimerManager:game():time(),
 			data = {},
 			current_alpha = spawn_alpha,
@@ -162,11 +182,13 @@ function OverlayEffectManager:stop_effect(id)
 	if id then
 		if self._playing_effects[id] then
 			self._ws:panel():remove(self._playing_effects[id].rectangle)
+			self._ws:panel():remove(self._playing_effects[id].text)
 			self._playing_effects[id] = nil
 		end
 	else
 		for key, effect in pairs(self._playing_effects) do
 			self._ws:panel():remove(effect.rectangle)
+			self._ws:panel():remove(effect.text)
 			self._playing_effects[key] = nil
 		end
 	end

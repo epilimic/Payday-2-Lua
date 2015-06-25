@@ -51,6 +51,7 @@ function CarryTweakData:init(tweak_data)
 	self.small_loot.value_gold = tweak_data:get_value("money_manager", "small_loot", "value_gold")
 	self.small_loot.gen_atm = tweak_data:get_value("money_manager", "small_loot", "gen_atm")
 	self.small_loot.special_deposit_box = tweak_data:get_value("money_manager", "small_loot", "special_deposit_box")
+	self.small_loot.slot_machine_payout = tweak_data:get_value("money_manager", "small_loot", "slot_machine_payout")
 	self.small_loot.vault_loot_chest = tweak_data:get_value("money_manager", "small_loot", "vault_loot_chest")
 	self.small_loot.vault_loot_diamond_chest = tweak_data:get_value("money_manager", "small_loot", "vault_loot_diamond_chest")
 	self.small_loot.vault_loot_banknotes = tweak_data:get_value("money_manager", "small_loot", "vault_loot_banknotes")
@@ -305,6 +306,37 @@ function CarryTweakData:init(tweak_data)
 	self.warhead.bag_value = "warhead"
 	self.warhead.visual_object = "g_explosives_bag"
 	self.warhead.unit = "units/pd2_dlc1/pickups/gen_pku_explosivesbag/gen_pku_explosivesbag"
+	self.winch_part = {}
+	self.winch_part.type = "heavy"
+	self.winch_part.name_id = "hud_carry_winch_bag"
+	self.winch_part.skip_exit_secure = true
+	self.winch_part.visual_object = "g_toolsbag_large"
+	self.winch_part.unit = "units/payday2/pickups/gen_pku_toolbag_large/gen_pku_toolbag_large"
+	self.fireworks = {}
+	self.fireworks.type = "light"
+	self.fireworks.name_id = "hud_carry_fireworks_bag"
+	self.fireworks.skip_exit_secure = true
+	self.fireworks.visual_object = "g_cagebag"
+	self.fireworks.unit = "units/payday2/pickups/gen_pku_cage_bag/gen_pku_cage_bag"
+	self.watertank_empty = {}
+	self.watertank_empty.type = "light"
+	self.watertank_empty.name_id = "hud_carry_watertank_empty_bag"
+	self.watertank_empty.skip_exit_secure = true
+	self.watertank_empty.visual_object = "g_cagebag"
+	self.watertank_empty.unit = "units/payday2/pickups/gen_pku_cage_bag/gen_pku_cage_bag"
+	self.watertank_full = {}
+	self.watertank_full.type = "heavy"
+	self.watertank_full.name_id = "hud_carry_watertank_full_bag"
+	self.watertank_full.skip_exit_secure = true
+	self.watertank_full.visual_object = "g_cagebag"
+	self.watertank_full.unit = "units/payday2/pickups/gen_pku_cage_bag/gen_pku_cage_bag"
+	self.unknown = {}
+	self.unknown.type = "very_heavy"
+	self.unknown.name_id = "hud_carry_???"
+	self.unknown.skip_exit_secure = false
+	self.unknown.AI_carry = {SO_category = "enemies"}
+	self.unknown.visual_object = "g_cagebag"
+	self.unknown.unit = "units/payday2/pickups/gen_pku_cage_bag/gen_pku_cage_bag"
 end
 function CarryTweakData:get_carry_ids()
 	local t = {}

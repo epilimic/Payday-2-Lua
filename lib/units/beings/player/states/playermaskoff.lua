@@ -33,6 +33,7 @@ function PlayerMaskOff:_enter(enter_data)
 			"enemy_weapons_hot"
 		}, callback(self, self, "clbk_enemy_weapons_hot"))
 	end
+	MenuCallbackHandler:_update_outfit_information()
 	self._ext_network:send("set_stance", 1, false, false)
 	self._show_casing_t = Application:time() + 4
 end
@@ -47,6 +48,7 @@ function PlayerMaskOff:exit(state_data, new_state_name)
 	self._ext_movement:chk_play_mask_on_slow_mo(state_data)
 	if self._enemy_weapons_hot_listen_id then
 		managers.groupai:state():remove_listener(self._enemy_weapons_hot_listen_id)
+		self._enemy_weapons_hot_listen_id = nil
 	end
 	self:_interupt_action_start_standard()
 end
@@ -76,13 +78,14 @@ function PlayerMaskOff:_update_check_actions(t, dt)
 	end
 	self:_update_foley(t, input)
 	local new_action
+	new_action = new_action or self:_check_use_item(t, input)
+	new_action = new_action or self:_check_action_interact(t, input)
 	if not new_action and self._state_data.ducking then
 		self:_end_action_ducking(t)
 	end
-	new_action = new_action or self:_check_use_item(t, input)
-	new_action = new_action or self:_check_action_interact(t, input)
 	self:_check_action_jump(t, input)
 	self:_check_action_duck(t, input)
+	self:_check_action_run(t, input)
 end
 function PlayerMaskOff:_check_action_interact(t, input)
 	local new_action, timer, interact_object
@@ -250,10 +253,17 @@ function PlayerMaskOff:_check_action_duck(t, input)
 		managers.hint:show_hint("mask_off_block_interact")
 	end
 end
+function PlayerMaskOff:_check_action_run(t, input)
+	if input.btn_run_press then
+		managers.hint:show_hint("mask_off_block_interact")
+	end
+end
 function PlayerMaskOff:clbk_enemy_weapons_hot()
-	managers.groupai:state():remove_listener(self._enemy_weapons_hot_listen_id)
-	self._enemy_weapons_hot_listen_id = nil
-	managers.player:set_player_state("standard")
+	if self._enemy_weapons_hot_listen_id then
+		managers.groupai:state():remove_listener(self._enemy_weapons_hot_listen_id)
+		self._enemy_weapons_hot_listen_id = nil
+		managers.player:set_player_state("standard")
+	end
 end
 function PlayerMaskOff:interaction_blocked()
 	return false

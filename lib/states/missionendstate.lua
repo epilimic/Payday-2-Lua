@@ -157,7 +157,7 @@ function MissionEndState:at_enter(old_state, params)
 				stealth_pass = not achievement_data.stealth or managers.groupai and managers.groupai:state():whisper_mode()
 				loud_pass = not achievement_data.loud or managers.groupai and not managers.groupai:state():whisper_mode()
 				timer_pass = not achievement_data.timer or managers.game_play_central and managers.game_play_central:get_heist_timer() <= achievement_data.timer
-				num_players_pass = not achievement_data.num_players or achievement_data.num_players <= table.size(managers.network:game():all_members())
+				num_players_pass = not achievement_data.num_players or achievement_data.num_players <= managers.network:session():amount_of_players()
 				pass_skills = not achievement_data.num_skills
 				if not pass_skills then
 					num_skills = 0
@@ -200,11 +200,11 @@ function MissionEndState:at_enter(old_state, params)
 				end
 				equipped_team_pass = true
 				if achievement_data.equipped_team then
-					local pass_armor, pass_deployable, pass_mask, pass_melee_weapon, pass_primary, pass_secondary, pass_primaries, pass_secondaries, pass_primary_unmodded, pass_secondary_unmodded, timer_pass, pass_skills
+					local pass_armor, pass_deployable, pass_mask, pass_melee_weapon, pass_primary, pass_secondary, pass_primaries, pass_secondaries, pass_primary_unmodded, pass_secondary_unmodded, pass_skills
 					local ad = achievement_data.equipped_team
 					local oufit
-					for _, member in pairs(managers.network:game():all_members()) do
-						oufit = member:peer():blackmarket_outfit()
+					for _, peer in pairs(managers.network:session():all_peers()) do
+						oufit = peer:blackmarket_outfit()
 						pass_armor = not ad.armor or ad.armor == oufit.armor and ad.armor == oufit.armor_current
 						pass_deployable = not ad.deployable or ad.deployable == oufit.deployable
 						pass_mask = not ad.mask or ad.mask == oufit.mask.mask_id
@@ -232,7 +232,7 @@ function MissionEndState:at_enter(old_state, params)
 						end
 					end
 				end
-				all_pass = job_pass and jobs_pass and level_pass and levels_pass and contract_pass and diff_pass and mask_pass and no_shots_pass and stealth_pass and loud_pass and equipped_pass and equipped_team_pass and num_players_pass and pass_skills
+				all_pass = job_pass and jobs_pass and level_pass and levels_pass and contract_pass and diff_pass and mask_pass and no_shots_pass and stealth_pass and loud_pass and equipped_pass and equipped_team_pass and num_players_pass and pass_skills and timer_pass
 				if all_pass and achievement_data.need_full_job then
 					if not managers.job:interupt_stage() then
 						memory = managers.job:get_memory(achievement)
@@ -289,8 +289,8 @@ function MissionEndState:at_enter(old_state, params)
 			all_pass = masks_pass and level_pass and job_pass and jobs_pass and difficulty_pass and difficulties_pass
 			if all_pass then
 				local available_masks = deep_clone(achievement_data.masks)
-				for id, member in pairs(managers.network:game():all_members()) do
-					local current_mask = member:peer():mask_id()
+				for _, peer in pairs(managers.network:session():all_peers()) do
+					local current_mask = peer:mask_id()
 					for id, mask_id in ipairs(available_masks) do
 						if current_mask == mask_id then
 							table.remove(available_masks, id)
@@ -625,7 +625,7 @@ function MissionEndState:on_statistics_result(best_kills_peer_id, best_kills_sco
 	for achievement, achievement_data in pairs(tweak_data.achievement.complete_heist_statistics_achievements or {}) do
 		level_id = managers.job:has_active_job() and managers.job:current_level_id() or ""
 		diff_pass = not achievement_data.difficulty or table.contains(achievement_data.difficulty, Global.game_settings.difficulty)
-		num_players_pass = not achievement_data.num_players or achievement_data.num_players <= table.size(managers.network:game():all_members())
+		num_players_pass = not achievement_data.num_players or achievement_data.num_players <= managers.network:session():amount_of_players()
 		level_pass = not achievement_data.level_id or achievement_data.level_id == level_id
 		levels_pass = not achievement_data.levels or table.contains(achievement_data.levels, level_id)
 		total_kill_pass = not achievement_data.total_kills or total_kills >= achievement_data.total_kills

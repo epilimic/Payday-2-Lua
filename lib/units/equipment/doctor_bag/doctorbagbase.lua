@@ -8,7 +8,7 @@ function DoctorBagBase.spawn(pos, rot, amount_upgrade_lvl, peer_id)
 end
 function DoctorBagBase:set_server_information(peer_id)
 	self._server_information = {owner_peer_id = peer_id}
-	managers.network:game():member(peer_id):peer():set_used_deployable(true)
+	managers.network:session():peer(peer_id):set_used_deployable(true)
 end
 function DoctorBagBase:server_information()
 	return self._server_information

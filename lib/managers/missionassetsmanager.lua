@@ -4,6 +4,7 @@ function MissionAssetsManager:init()
 	self:_setup()
 end
 function MissionAssetsManager:_setup()
+	self._requested_textures = {}
 	self._asset_textures_in_loading = {}
 	self._asset_textures_loaded = {}
 	local assets = {}
@@ -400,16 +401,12 @@ function MissionAssetsManager:sync_load(data)
 	self:create_asset_textures()
 end
 function MissionAssetsManager:clear_asset_textures()
-	if self._asset_textures_loaded then
-		for texture_key, texture in pairs(self._asset_textures_loaded) do
-			TextureCache:unretrieve(texture)
+	if self._requested_textures then
+		for i, data in pairs(self._requested_textures) do
+			managers.menu_component:unretrieve_texture(data.texture, data.texture_count)
 		end
 	end
-	if self._asset_textures_in_loading then
-		for texture_key, texture_data in pairs(self._asset_textures_in_loading) do
-			TextureCache:unretrieve(Idstring(texture_data[2]))
-		end
-	end
+	self._requested_textures = {}
 	self._asset_textures_in_loading = {}
 	self._asset_textures_loaded = {}
 end
@@ -423,8 +420,18 @@ function MissionAssetsManager:create_asset_textures()
 	local texture
 	for _, asset_id in ipairs(all_visible_assets) do
 		texture = self._tweak_data[asset_id].texture
-		self._asset_textures_in_loading[Idstring(texture):key()] = {asset_id, texture}
-		TextureCache:request(texture, "NORMAL", texture_loaded_clbk, 100)
+		if not self._asset_textures_in_loading[Idstring(texture):key()] then
+			self._asset_textures_in_loading[Idstring(texture):key()] = {asset_id, texture}
+		else
+			Application:error("[MissionAssetsManager:create_asset_textures] Same asset texture used twice!", "texture", texture)
+		end
+	end
+	for _, data in pairs(self._asset_textures_in_loading) do
+		local texture_count = managers.menu_component:request_texture(data[2], texture_loaded_clbk)
+		table.insert(self._requested_textures, {
+			texture_count = texture_count,
+			texture = data[2]
+		})
 	end
 	self:check_all_textures_loaded()
 end
@@ -443,8 +450,7 @@ function MissionAssetsManager:texture_loaded_clbk(texture_idstring)
 	local asset_id = asset_texture_data[1]
 	local texture_path = asset_texture_data[2]
 	if self._asset_textures_loaded[asset_id] then
-		Application:debug("[MissionAssetsManager] texture_loaded_clbk() Asset already got texture loaded.")
-		TextureCache:unretrieve(texture_idstring)
+		Application:error("[MissionAssetsManager] texture_loaded_clbk() Asset already got texture loaded.")
 		return
 	end
 	self._asset_textures_loaded[asset_id] = texture_idstring

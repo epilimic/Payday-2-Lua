@@ -23,6 +23,7 @@ require("lib/network/base/handlers/BaseNetworkHandler")
 require("lib/network/base/handlers/DefaultNetworkHandler")
 require("lib/network/base/handlers/ConnectionNetworkHandler")
 require("lib/network/base/handlers/PacketNetworkHandler")
+require("lib/network/handlers/UnitNetworkHandler")
 require("lib/units/beings/player/PlayerDamage")
 require("lib/units/beings/player/PlayerMovement")
 NetworkManager = NetworkManager or class()
@@ -41,7 +42,7 @@ if SystemInfo:platform() == Idstring("X360") or SystemInfo:platform() == Idstrin
 else
 	NetworkManager.PROTOCOL_TYPE = "STEAM"
 end
-function NetworkManager:init(game_class)
+function NetworkManager:init()
 	self.OVERWRITEABLE_MSGS = {
 		set_look_dir = {
 			clbk = NetworkManager.clbk_msg_overwrite
@@ -90,7 +91,6 @@ function NetworkManager:init(game_class)
 		self.voice_chat = NetworkVoiceChatXBL:new()
 	end
 	self._started = false
-	self._game_class = game_class
 	managers.network = self
 	self:_create_lobby()
 	self:load()
@@ -98,8 +98,7 @@ end
 function NetworkManager:init_finalize()
 	print("NetworkManager:init_finalize()")
 	if Network:multiplayer() and not Application:editor() then
-		self._session:on_load_complete()
-		self._game:on_load_complete()
+		self._session:on_load_complete(false)
 		if self._session:is_client() and not self._session:server_peer() then
 			game_state_machine:current_state():on_server_left()
 		end
@@ -173,9 +172,6 @@ end
 function NetworkManager:session()
 	return self._session
 end
-function NetworkManager:game()
-	return self._game
-end
 function NetworkManager:shared_handler_data()
 	return self._shared_handler_data
 end
@@ -187,14 +183,12 @@ function NetworkManager:load()
 			if Global.network.session_host then
 				self._session = HostNetworkSession:new()
 				self._session:create_local_peer(false)
-				self._game:on_server_session_created()
 			else
 				self._session = ClientNetworkSession:new()
 				self._session:create_local_peer(false)
 			end
 		end
 		self._session:load(Global.network.session)
-		self._game:load(Global.network_game)
 		managers.network.matchmake:_load_globals()
 		managers.network.account:_load_globals()
 		if self._is_x360 then
@@ -202,7 +196,6 @@ function NetworkManager:load()
 		else
 			managers.network.voice_chat:_load_globals()
 		end
-		Global.network_game = nil
 		Global.network = nil
 		if self._is_win32 then
 			managers.network.voice_chat:open()
@@ -224,7 +217,6 @@ function NetworkManager:save()
 		managers.network.matchmake:_save_globals()
 		managers.network.account:_save_globals()
 		managers.network.voice_chat:_save_globals(true)
-		self._game:save()
 		if self._is_win32 then
 			managers.network.voice_chat:destroy_voice()
 		end
@@ -258,12 +250,9 @@ end
 function NetworkManager:start_network()
 	if not self._started then
 		Global.category_print.multiplayer_base = true
-		if self._game_class then
-			self._game = _G[self._game_class]:new()
-		end
 		self:register_handler("connection", ConnectionNetworkHandler)
 		self:register_handler("packet", PacketNetworkHandler)
-		self._game:on_network_started()
+		managers.network:register_handler("unit", UnitNetworkHandler)
 		Network:bind(self._network_bound and -1 or self.DEFAULT_PORT, DefaultNetworkHandler:new())
 		self._network_bound = true
 		self._started = true
@@ -289,7 +278,7 @@ function NetworkManager:prepare_stop_network(...)
 end
 function NetworkManager:stop_network(clean)
 	if self._started then
-		self._game:on_network_stopped()
+		self._session:on_network_stopped()
 		self._started = false
 		if clean and self._session then
 			local peers = self._session:peers()
@@ -305,7 +294,6 @@ function NetworkManager:stop_network(clean)
 		self._shared_handler_data = nil
 		self._session:destroy()
 		self._session = nil
-		self._game = nil
 		self._stop_network = nil
 		self._stop_next_frame = nil
 		self._network_bound = nil
@@ -393,7 +381,6 @@ function NetworkManager:host_game()
 	end
 	self._session = HostNetworkSession:new()
 	self._session:create_local_peer(true)
-	self._game:on_server_session_created()
 	if self.is_ps3 then
 		self._session:broadcast_server_up()
 	end
@@ -491,5 +478,22 @@ end
 function NetworkManager:set_packet_throttling_enabled(state)
 	if self._session and self._is_win32 then
 		self._session:set_packet_throttling_enabled(state)
+	end
+end
+function NetworkManager:on_peer_added(peer, peer_id)
+	cat_print("multiplayer_base", "NetworkManager:on_peer_added", peer, peer_id)
+	if managers.hud then
+		managers.menu:get_menu("kit_menu").renderer:set_slot_joining(peer, peer_id)
+	end
+	if Network:is_server() then
+		managers.network.matchmake:set_num_players(managers.network:session():amount_of_players())
+	end
+	if SystemInfo:platform() == Idstring("X360") or SystemInfo:platform() == Idstring("XB1") then
+		managers.network.matchmake:on_peer_added(peer)
+	end
+	if managers.chat then
+		managers.chat:feed_system_message(ChatManager.GAME, managers.localization:text("menu_chat_peer_added", {
+			name = peer:name()
+		}))
 	end
 end

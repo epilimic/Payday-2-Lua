@@ -122,6 +122,9 @@ function ContourExt:init(unit)
 	end
 end
 function ContourExt:add(type, sync, multiplier)
+	if Global.debug_contour_enabled then
+		return
+	end
 	local data = self._types[type]
 	local fadeout = data.fadeout
 	if data.fadeout_silent and self._unit:base():char_tweak().silent_priority_shout then
@@ -168,6 +171,9 @@ function ContourExt:add(type, sync, multiplier)
 	return setup
 end
 function ContourExt:change_color(type, color)
+	if not self._contour_list then
+		return
+	end
 	for i, setup in ipairs(self._contour_list) do
 		if setup.type == type then
 			setup.color = color
@@ -309,6 +315,9 @@ function ContourExt:update(unit, t, dt)
 end
 function ContourExt:_upd_opacity(opacity, is_retry)
 	if opacity == self._last_opacity then
+		return
+	end
+	if Global.debug_contour_enabled and opacity == 1 then
 		return
 	end
 	self._last_opacity = opacity

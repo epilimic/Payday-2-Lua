@@ -383,7 +383,8 @@ function TweakData:init()
 		"female_1",
 		"dragan",
 		"jacket",
-		"bonnie"
+		"bonnie",
+		"sokol"
 	}
 	self.criminals.characters = {
 		{
@@ -493,6 +494,17 @@ function TweakData:init()
 				color_id = 4,
 				voice = "rb10",
 				ai_mask_id = "bonnie",
+				mask_id = 4
+			}
+		},
+		{
+			name = "sokol",
+			static_data = {
+				ai_character_id = "ai_sokol",
+				ssuffix = "r",
+				color_id = 4,
+				voice = "rb11",
+				ai_mask_id = "sokol",
 				mask_id = 4
 			}
 		}
@@ -874,6 +886,25 @@ function TweakData:init()
 		fade_in = 0,
 		fade_out = 0.4,
 		color = Color(0.1, 1, 1, 1)
+	}
+	self.overlay_effects.fade_out_e3_demo = {
+		blend_mode = "normal",
+		sustain = 30,
+		fade_in = 3,
+		fade_out = 0,
+		color = Color(1, 0, 0, 0),
+		timer = TimerManager:main(),
+		play_paused = true,
+		text = [[
+Great job, gang!
+
+You've reached the end of our E3 demo.
+Play the full version soon to get your full PAYDAY!]],
+		text_color = Color(255, 255, 204, 0) / 255,
+		text_to_upper = true,
+		text_blend_mode = "add",
+		font = "fonts/font_large_mf",
+		font_size = 44
 	}
 	self.materials = {}
 	self.materials[Idstring("concrete"):key()] = "concrete"
@@ -2076,7 +2107,7 @@ function TweakData:init()
 			award = "ameno_6",
 			job = "gallery",
 			stealth = true,
-			timer = 120,
+			timer = 240,
 			equipped_team = {
 				armor = "level_7",
 				deployable = "armor_kit",
@@ -2190,6 +2221,23 @@ function TweakData:init()
 			},
 			job = "arena"
 		},
+		death_kenaz = {
+			award = "kenaz_1",
+			difficulty = {
+				"overkill_290"
+			},
+			jobs = {"kenaz"}
+		},
+		kenaz_silent = {
+			award = "kenaz_2",
+			jobs = {"kenaz"},
+			stealth = true
+		},
+		kenaz_timed = {
+			award = "kenaz_4",
+			jobs = {"kenaz"},
+			timer = 840
+		},
 		not_for_old_men = {
 			award = "gage4_11",
 			stealth = true,
@@ -2287,7 +2335,7 @@ function TweakData:init()
 		"firestarter",
 		"firestarter_prof"
 	}
-	self.achievement.job_list.elephant = {
+	self.achievement.job_list.the_elephant = {
 		"framing_frame",
 		"framing_frame_prof",
 		"welcome_to_the_jungle_wrapper_prof",
@@ -2313,14 +2361,15 @@ function TweakData:init()
 		"cage",
 		"arena"
 	}
-	self.achievement.job_list.dentist = {
+	self.achievement.job_list.the_dentist = {
 		"big",
 		"mia",
 		"mia_prof",
 		"hox",
 		"hox_prof",
 		"mus",
-		"hox_3"
+		"hox_3",
+		"kenaz"
 	}
 	self.achievement.job_list.the_butcher = {
 		"crojob_wrapper",
@@ -2328,6 +2377,32 @@ function TweakData:init()
 	}
 	if SystemInfo:platform() == Idstring("WIN32") then
 		table.insert(self.achievement.job_list.bain, "roberts")
+	end
+	local jobs = {}
+	local job_data
+	local available_jobs = {}
+	for _, job_id in ipairs(self.narrative:get_jobs_index()) do
+		if self.narrative:job_data(job_id).contact ~= "wip" then
+			jobs[job_id] = true
+			available_jobs[job_id] = self.narrative:job_data(job_id).contact
+		end
+	end
+	for _, list in pairs(self.achievement.job_list) do
+		for _, job_id in pairs(list) do
+			if self.narrative:has_job_wrapper(job_id) then
+				available_jobs[job_id] = nil
+				for _, job_id in ipairs(self.narrative:job_data(job_id).job_wrapper) do
+					available_jobs[job_id] = nil
+				end
+			elseif jobs[job_id] then
+				available_jobs[job_id] = nil
+			else
+				Application:debug("[TWEAKDATA:ACHIEVEMENTS] Job missing in narrative", job_id)
+			end
+		end
+	end
+	if table.size(available_jobs) > 0 then
+		Application:debug("[TWEAKDATA:ACHIEVEMENTS] Jobs not yet in achievement 'job_list':", inspect(available_jobs))
 	end
 	self.achievement.complete_heist_stats_achievements = {
 		death_vlad = {
@@ -2343,7 +2418,7 @@ function TweakData:init()
 		death_elephant = {
 			award = "death_12",
 			difficulty = "overkill_290",
-			contact = "elephant"
+			contact = "the_elephant"
 		},
 		death_bain = {
 			award = "death_26",
@@ -2861,6 +2936,9 @@ function TweakData:init()
 	}
 	self.pickups.keycard = {
 		unit = Idstring("units/payday2/pickups/gen_pku_keycard/gen_pku_keycard")
+	}
+	self.pickups.hotel_room_key = {
+		unit = Idstring("units/pd2_dlc_casino/props/cas_prop_keycard/cas_prop_keycard")
 	}
 	self.danger_zones = {
 		0.6,

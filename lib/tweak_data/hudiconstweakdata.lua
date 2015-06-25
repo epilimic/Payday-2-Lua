@@ -1203,6 +1203,87 @@ function HudIconsTweakData:init()
 			32
 		}
 	}
+	self.equipment_winch_hook = {
+		texture = "guis/textures/pd2/hud_pickups",
+		texture_rect = {
+			64,
+			160,
+			32,
+			32
+		}
+	}
+	self.equipment_bottle = {
+		texture = "guis/textures/pd2/hud_pickups",
+		texture_rect = {
+			96,
+			160,
+			32,
+			32
+		}
+	}
+	self.equipment_sleeping_gas = {
+		texture = "guis/textures/pd2/hud_pickups",
+		texture_rect = {
+			0,
+			192,
+			32,
+			32
+		}
+	}
+	self.equipment_usb_with_data = {
+		texture = "guis/textures/pd2/hud_pickups",
+		texture_rect = {
+			32,
+			192,
+			32,
+			32
+		}
+	}
+	self.equipment_usb_no_data = {
+		texture = "guis/textures/pd2/hud_pickups",
+		texture_rect = {
+			64,
+			192,
+			32,
+			32
+		}
+	}
+	self.equipment_empty_cooling_bottle = {
+		texture = "guis/textures/pd2/hud_pickups",
+		texture_rect = {
+			0,
+			160,
+			32,
+			32
+		}
+	}
+	self.equipment_cooling_bottle = {
+		texture = "guis/textures/pd2/hud_pickups",
+		texture_rect = {
+			0,
+			128,
+			32,
+			32
+		}
+	}
+	self.equipment_bfd_tool = {
+		texture = "guis/textures/pd2/hud_pickups",
+		texture_rect = {
+			0,
+			0,
+			32,
+			32
+		}
+	}
+	self.equipment_elevator_key = {
+		texture = "guis/textures/pd2/hud_pickups",
+		texture_rect = {
+			32,
+			64,
+			32,
+			32
+		}
+	}
 	self.interaction_free = {
 		texture = "guis/textures/hud_icons",
 		texture_rect = {

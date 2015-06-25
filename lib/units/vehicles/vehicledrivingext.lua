@@ -365,7 +365,7 @@ function VehicleDrivingExt:sync_give_vehicle_loot_to_player(carry_id, multiplier
 	if peer_id == managers.network:session():local_peer():id() then
 		managers.player:set_carry(carry_id, multiplier, true, false, 1)
 	end
-	managers.player:register_carry(peer_id, carry_id)
+	managers.player:register_carry(managers.network:session():peer(peer_id), carry_id)
 end
 function VehicleDrivingExt:drop_loot()
 	if not self:_should_drop_loot() then
@@ -381,7 +381,7 @@ function VehicleDrivingExt:drop_loot()
 		Application:debug("dropping loot    " .. inspect(self._unit:position()) .. "      " .. inspect(drop_point))
 		local rot = self._unit:rotation()
 		local dir = Vector3(0, 0, 0)
-		managers.player:server_drop_carry(loot.carry_id, loot.multiplier, true, false, 1, drop_point, rot, dir, 0, nil, 0)
+		managers.player:server_drop_carry(loot.carry_id, loot.multiplier, true, false, 1, drop_point, rot, dir, 0, nil, nil)
 	end
 end
 function VehicleDrivingExt:_should_drop_loot()

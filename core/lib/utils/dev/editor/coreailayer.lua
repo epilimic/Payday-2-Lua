@@ -386,11 +386,15 @@ function AiLayer:_build_motion_path_section()
 	self._motion_paths_list:connect("EVT_COMMAND_LISTBOX_SELECTED", callback(self, self, "_select_motion_path"), nil)
 	motion_paths_list_sizer:add(self._motion_paths_list, 1, 0, "EXPAND")
 	motion_paths_sizer:add(motion_paths_list_sizer, 1, 0, "EXPAND")
+	local mop_path_types = {"airborne", "ground"}
+	if managers.motion_path then
+		mop_path_types = managers.motion_path:get_path_types()
+	end
 	local mop_type = {
 		name = "Selected path type:",
 		panel = self._ews_panel,
 		sizer = motion_paths_sizer,
-		options = managers.motion_path:get_path_types(),
+		options = mop_path_types,
 		value = self._motion_path_settings.path_type,
 		tooltip = "Path is used for either ground or airborne units.",
 		name_proportions = 1,
@@ -451,6 +455,9 @@ end
 function AiLayer:_update_motion_paths_list()
 	self._motion_paths_list:clear()
 	self._motion_path_settings = {}
+	if not managers.motion_path then
+		return
+	end
 	for _, path in ipairs(managers.motion_path:get_all_paths()) do
 		self._motion_paths_list:append(path.id)
 		self._motion_path_settings[path.id] = {}
@@ -817,13 +824,18 @@ function AiLayer:_init_ai_settings()
 end
 function AiLayer:_init_mop_settings()
 	self._motion_path_settings = {}
-	local path_types = managers.motion_path:get_path_types()
-	if path_types then
-		self._motion_path_settings.path_type = path_types[1]
+	if managers.motion_path then
+		local path_types = managers.motion_path:get_path_types()
+		if path_types then
+			self._motion_path_settings.path_type = path_types[1]
+		end
 	end
 end
 function AiLayer:clear()
 	AiLayer.super.clear(self)
+	if managers.motion_path then
+		managers.motion_path:delete_paths()
+	end
 	self:_init_ai_settings()
 	self:_update_settings()
 	managers.ai_data:clear()
@@ -831,7 +843,6 @@ function AiLayer:clear()
 	self:_update_motion_paths_list()
 	self:_select_patrol_path()
 	managers.navigation:clear()
-	managers.motion_path:delete_paths()
 	self._ai_unit_settings_guis.locations.ctrlr:set_enabled(false)
 end
 function AiLayer:add_triggers()

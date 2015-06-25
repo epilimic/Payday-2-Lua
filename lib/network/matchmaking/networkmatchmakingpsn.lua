@@ -84,8 +84,8 @@ end
 function NetworkMatchMakingPSN:_on_disconnect_detected()
 	if managers.network:session() and managers.network:session():_local_peer_in_lobby() and not managers.network:session():closing() then
 		managers.menu:psn_disconnected()
-	elseif managers.network:game() then
-		managers.network:game():psn_disconnected()
+	elseif managers.network:session() then
+		managers.network:session():psn_disconnected()
 	elseif setup.IS_START_MENU then
 		managers.menu:ps3_disconnect(false)
 	end

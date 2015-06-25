@@ -403,7 +403,7 @@ function ZipLine:sync_net_event(event_id, peer)
 		self._request_unit = nil
 	elseif event_id == net_events.set_user then
 		print("! set user")
-		local unit = managers.network:game():member(peer:id()):unit()
+		local unit = peer:unit()
 		if alive(unit) then
 			self:sync_set_user(unit)
 		end

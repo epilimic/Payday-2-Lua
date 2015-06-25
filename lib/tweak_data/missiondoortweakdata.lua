@@ -541,6 +541,14 @@ function MissionDoorTweakData:init()
 			unit = Idstring("units/payday2/equipment/gen_equipment_shape_charge/gen_equipment_shape_charge")
 		}
 	}
+	self.single_shape_charge = {}
+	self.single_shape_charge.devices = {}
+	self.single_shape_charge.devices.c4 = {
+		{
+			align = "a_shp_charge",
+			unit = Idstring("units/payday2/equipment/gen_equipment_shape_charge/gen_equipment_shape_charge")
+		}
+	}
 	self.cas_safe_giga = {}
 	self.cas_safe_giga.devices = {}
 	self.cas_safe_giga.devices.drill = {
@@ -548,7 +556,7 @@ function MissionDoorTweakData:init()
 			align = "a_drill",
 			unit = Idstring("units/payday2/equipment/item_door_drill_small/item_door_drill_small"),
 			can_jam = false,
-			timer = 120
+			timer = 60
 		}
 	}
 	self.cas_safe_giga.devices.c4 = {
@@ -582,6 +590,16 @@ function MissionDoorTweakData:init()
 		}
 	}
 	self.cas_security_door.devices.drill = {
+		{
+			align = "a_drill",
+			unit = Idstring("units/payday2/equipment/item_door_drill_small/item_door_drill_small"),
+			can_jam = false,
+			timer = 60
+		}
+	}
+	self.cas_moneycounter_door = {}
+	self.cas_moneycounter_door.devices = {}
+	self.cas_moneycounter_door.devices.drill = {
 		{
 			align = "a_drill",
 			unit = Idstring("units/payday2/equipment/item_door_drill_small/item_door_drill_small"),

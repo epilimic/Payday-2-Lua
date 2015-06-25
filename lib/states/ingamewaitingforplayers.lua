@@ -46,6 +46,9 @@ function IngameWaitingForPlayersState:_start()
 	if not Network:is_server() then
 		return
 	end
+	if managers.preplanning:has_current_level_preplanning() then
+		managers.preplanning:execute_reserved_mission_elements()
+	end
 	local variant = managers.groupai:state():blackscreen_variant() or 0
 	self:sync_start(variant)
 	managers.network:session():send_to_peers_synched("sync_waiting_for_player_start", variant, Global.music_manager.current_track)
@@ -181,14 +184,15 @@ function IngameWaitingForPlayersState:update(t, dt)
 	end
 	if self._delay_spawn_t and t > self._delay_spawn_t then
 		self._delay_spawn_t = nil
-		if managers.network:game() then
-			managers.network:game():spawn_players()
-		end
+		managers.network:session():spawn_players()
 	end
 	local in_foucs = managers.menu:active_menu() == self._kit_menu
 	self:_chk_show_skip_prompt()
 	if self._skip_promt_shown and Network:is_server() then
-		if self._audio_started and not self._skipped then
+		if Global.exe_argument_auto_enter_level then
+			managers.hud:blackscreen_skip_circle_done()
+			self:_skip()
+		elseif self._audio_started and not self._skipped then
 			if self._controller then
 				local btn_skip_press = self._controller:get_input_bool("confirm")
 				if btn_skip_press and not self._skip_data then
@@ -270,6 +274,9 @@ function IngameWaitingForPlayersState:at_enter()
 		local rich_presence = is_safe_house and "SafeHousePlaying" or "SPPlaying"
 		managers.platform:set_rich_presence(rich_presence)
 	end
+	if Global.exe_argument_auto_enter_level then
+		game_state_machine:current_state():start_game_intro()
+	end
 end
 function IngameWaitingForPlayersState:clbk_file_streamer_status(workload)
 	if not managers.network:session() then
@@ -282,7 +289,7 @@ function IngameWaitingForPlayersState:clbk_file_streamer_status(workload)
 	progress = math.ceil(progress * 100)
 	local local_peer = managers.network:session():local_peer()
 	local_peer:set_streaming_status(progress)
-	managers.network:game():on_streaming_progress_received(local_peer, progress)
+	managers.network:session():on_streaming_progress_received(local_peer, progress)
 	managers.hud:set_blackscreen_loading_text_status(progress)
 	if self._last_sent_streaming_status ~= progress then
 		managers.network:session():send_to_peers_loaded("set_member_ready", managers.network:session():local_peer():id(), progress, 2, "")

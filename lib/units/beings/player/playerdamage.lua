@@ -970,7 +970,7 @@ function PlayerDamage:revive(helped_self)
 		return
 	end
 	local arrested = self:arrested()
-	managers.player:set_player_state(managers.player:current_sync_state())
+	managers.player:set_player_state("standard")
 	if not helped_self then
 		PlayerStandard.say_line(self, "s05x_sin")
 	end

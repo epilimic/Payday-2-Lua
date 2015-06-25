@@ -275,11 +275,13 @@ function CoreEditor:build_menubar()
 	hide_menu:append_separator()
 	hide_menu:append_item("HIDE HELPERS", "Hide Helpers\t" .. self:ctrl_menu_binding("hide_helpers"), "Hide Helpers")
 	hide_menu:append_item("UNHIDE HELPERS", "Unhide Helpers\t" .. self:ctrl_menu_binding("unhide_helpers"), "Unhide Helpers")
+	hide_menu:append_item("HIDE HELPERS EXCEPT LIGHTS", "Hide Helpers Except Lights\t" .. self:ctrl_menu_binding("hide_helpers_except_lights"), "Hide Helpers except lights")
 	hide_menu:append_separator()
 	hide_menu:append_check_item("RENDER_EFFECTS", "Render Effects", "Toggle rendering of effects on and off")
 	hide_menu:set_checked("RENDER_EFFECTS", true)
-	Global.frame:connect("HIDE HELPERS", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "on_hide_helper_units"), false)
-	Global.frame:connect("UNHIDE HELPERS", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "on_hide_helper_units"), true)
+	Global.frame:connect("HIDE HELPERS", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "on_hide_helper_units"), {vis = false})
+	Global.frame:connect("UNHIDE HELPERS", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "on_hide_helper_units"), {vis = true})
+	Global.frame:connect("HIDE HELPERS EXCEPT LIGHTS", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "on_hide_helper_units"), {vis = false, skip_lights = true})
 	Global.frame:connect("RENDER_EFFECTS", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "toggle_render_effects"), {
 		hide_menu,
 		"RENDER_EFFECTS"
@@ -737,14 +739,31 @@ end
 function CoreEditor:toggle_draw_occluders(data)
 	self._draw_occluders = data[1]:is_checked(data[2])
 end
-function CoreEditor:on_hide_helper_units(vis)
+local leveltools_ids = Idstring("leveltools")
+function CoreEditor:on_hide_helper_units(data)
+	local cache = {}
 	for name, layer in pairs(self._layers) do
 		for _, unit in ipairs(layer:created_units()) do
-			if unit:unit_data().only_visible_in_editor or unit:unit_data().only_exists_in_editor or unit:has_material_assigned(Idstring("leveltools")) then
-				self:set_unit_visible(unit, vis)
+			local u_key = unit:name():s()
+			if cache[u_key] then
+				if not cache[u_key].skip then
+					self:set_unit_visible(unit, cache[u_key].vis_state)
+				end
+			else
+				local vis_state, affected
+				if unit:unit_data().only_visible_in_editor or unit:unit_data().only_exists_in_editor or unit:has_material_assigned(leveltools_ids) then
+					vis_state = data.vis or data.skip_lights or CoreEditorUtils.has_editable_lights(unit)
+					affected = true
+					self:set_unit_visible(unit, vis_state)
+				end
+				cache[u_key] = {
+					vis_state = vis_state,
+					skip = not affected
+				}
 			end
 		end
 	end
+	cache = nil
 end
 function CoreEditor:toggle_render_effects(data)
 	World:effect_manager():set_rendering_enabled(data[1]:is_checked(data[2]))
@@ -754,7 +773,7 @@ function CoreEditor:toggle_show_markers(data)
 	self._ews_editor_frame:layout()
 end
 function CoreEditor:on_using_the_editor()
-	EWS:launch_url("http://serben01/wiki/index.php/Category:Level_Design")
+	EWS:launch_url("https://intranet.starbreeze.com/wiki/index.php?title=Category:Level_Design")
 end
 function CoreEditor:on_help()
 	EWS:launch_url("http://mondomonkey.com/MondoMonkeyWhiteB.jpg")

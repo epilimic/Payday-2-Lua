@@ -65,6 +65,7 @@ SpawnEnemyUnitElement._options = {
 	"units/payday2/characters/ene_prisonguard_male_1/ene_prisonguard_male_1",
 	"units/payday2/characters/ene_secret_service_1/ene_secret_service_1",
 	"units/payday2/characters/ene_secret_service_2/ene_secret_service_2",
+	"units/pd2_dlc_casino/characters/ene_secret_service_1_casino/ene_secret_service_1_casino",
 	"units/payday2/characters/ene_security_1/ene_security_1",
 	"units/payday2/characters/ene_security_2/ene_security_2",
 	"units/payday2/characters/ene_security_3/ene_security_3",
@@ -94,7 +95,9 @@ SpawnEnemyUnitElement._options = {
 	"units/pd2_mcmansion/characters/ene_male_hector_1/ene_male_hector_1",
 	"units/pd2_mcmansion/characters/ene_male_hector_2/ene_male_hector_2",
 	"units/pd2_mcmansion/characters/ene_hoxton_breakout_guard_1/ene_hoxton_breakout_guard_1",
-	"units/pd2_mcmansion/characters/ene_hoxton_breakout_guard_2/ene_hoxton_breakout_guard_2"
+	"units/pd2_mcmansion/characters/ene_hoxton_breakout_guard_2/ene_hoxton_breakout_guard_2",
+	"units/pd2_dlc_arena/characters/ene_guard_security_heavy_2/ene_guard_security_heavy_2",
+	"units/pd2_dlc_arena/characters/ene_guard_security_heavy_1/ene_guard_security_heavy_1"
 }
 function SpawnEnemyUnitElement:init(unit)
 	SpawnEnemyUnitElement.super.init(self, unit)

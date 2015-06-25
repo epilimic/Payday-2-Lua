@@ -187,16 +187,11 @@ function CopLogicArrest._upd_advance(data, my_data, attention_obj, arrest_data)
 			data.unit:brain():search_for_path_to_unit(my_data.path_search_id, attention_obj.unit)
 		elseif my_data.should_stand_close then
 			CopLogicArrest._say_scary_stuff_discovered(data)
-			local close_pos, need_pathing = CopLogicArrest._get_att_obj_close_pos(data, my_data)
-			if need_pathing then
+			local close_pos = CopLogicArrest._get_att_obj_close_pos(data, my_data)
+			if close_pos then
 				my_data.path_search_id = "stand_close" .. tostring(data.key)
 				my_data.processing_path = true
 				data.unit:brain():search_for_path(my_data.path_search_id, close_pos, 1, nil)
-			elseif close_pos then
-				my_data.advance_path = {
-					mvector3.copy(data.m_pos),
-					close_pos
-				}
 			else
 				my_data.in_position = true
 			end
@@ -586,59 +581,16 @@ function CopLogicArrest._get_att_obj_close_pos(data, my_data)
 		att_nav_tracker = nav_manager:create_nav_tracker(data.attention_obj.m_pos)
 	end
 	local att_obj_pos = att_nav_tracker:field_position()
-	local attention_dir = Vector3()
-	local my_dis = mvector3.direction(attention_dir, my_nav_tracker:field_position(), att_obj_pos)
-	local optimal_dis = 250 + math.random() * 150
+	local my_dis = mvector3.distance(data.m_pos, att_obj_pos)
+	local optimal_dis = 150 + math.random() * 150
 	if my_dis > optimal_dis * 0.8 and my_dis < optimal_dis * 1.2 then
-		if nav_manager:is_pos_free({
-			position = my_nav_tracker:field_position(),
-			radius = 40,
-			filter = data.pos_rsrv_id
-		}) then
-			if destroy_att_nav_tracker then
-				nav_manager:destroy_nav_tracker(att_nav_tracker)
-			end
-			return (not my_nav_tracker:lost() or not my_nav_tracker:field_position()) and false, false
+		if destroy_att_nav_tracker then
+			nav_manager:destroy_nav_tracker(att_nav_tracker)
 		end
-	end
-	local optimal_pos = att_obj_pos - optimal_dis * attention_dir
-	local ray_params = {
-		tracker_from = att_nav_tracker,
-		allow_entry = false,
-		pos_to = optimal_pos,
-		trace = true
-	}
-	local ray_res = nav_manager:raycast(ray_params)
-	if not ray_res then
-		if nav_manager:is_pos_free({
-			position = optimal_pos,
-			radius = 40,
-			filter = data.pos_rsrv_id
-		}) then
-			if destroy_att_nav_tracker then
-				nav_manager:destroy_nav_tracker(att_nav_tracker)
-			end
-			return optimal_pos, false
-		end
-	end
-	local hit_pos = ray_params.trace[1]
-	local hit_dis = mvector3.distance(hit_pos, att_obj_pos)
-	local hit_dis_error = math.abs(optimal_dis - hit_dis)
-	local my_error = math.abs(optimal_dis - my_dis)
-	if hit_dis_error < my_error then
-		if nav_manager:is_pos_free({
-			position = hit_pos,
-			radius = 40,
-			filter = data.pos_rsrv_id
-		}) then
-			if destroy_att_nav_tracker then
-				nav_manager:destroy_nav_tracker(att_nav_tracker)
-			end
-			return hit_pos, true
-		end
+		return false
 	end
 	local pos_on_wall = CopLogicTravel._get_pos_on_wall(att_obj_pos, optimal_dis, nil, false)
-	return pos_on_wall, true
+	return pos_on_wall
 end
 function CopLogicArrest._say_scary_stuff_discovered(data)
 	if not data.attention_obj then

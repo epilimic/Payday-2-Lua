@@ -726,6 +726,8 @@ function MenuSceneManager:set_character_mask_by_id(mask_id, blueprint, unit, pee
 	mask_id = managers.blackmarket:get_real_mask_id(mask_id, peer_id)
 	local unit_name = managers.blackmarket:mask_unit_name_by_mask_id(mask_id, peer_id)
 	self:set_character_mask(unit_name, unit, peer_id, mask_id, callback(self, self, "clbk_mask_loaded", blueprint))
+	local owner_unit = unit or self._character_unit
+	self:_check_character_mask_sequence(owner_unit, mask_id, peer_id)
 end
 function MenuSceneManager:clbk_mask_loaded(blueprint, mask_unit)
 	mask_unit:base():apply_blueprint(blueprint, function()
@@ -773,17 +775,6 @@ function MenuSceneManager:clbk_mask_unit_loaded(mask_data_param, status, asset_t
 	local mask_unit = self:_spawn_mask(mask_data.mask_name, false, mask_align:position(), mask_align:rotation(), mask_data.mask_id)
 	mask_data.mask_unit = mask_unit
 	mask_data.ready = true
-	if tweak_data.blackmarket.masks[mask_data.mask_id].skip_mask_on_sequence then
-		local mask_off_sequence = managers.blackmarket:character_mask_off_sequence_by_character_id(managers.blackmarket:equipped_character(), mask_data.peer_id)
-		if mask_off_sequence and mask_data.unit:damage():has_sequence(mask_off_sequence) then
-			mask_data.unit:damage():run_sequence_simple(mask_off_sequence)
-		end
-	else
-		local mask_on_sequence = managers.blackmarket:character_mask_on_sequence_by_character_id(managers.blackmarket:equipped_character(), mask_data.peer_id)
-		if mask_on_sequence and mask_data.unit:damage():has_sequence(mask_on_sequence) then
-			mask_data.unit:damage():run_sequence_simple(mask_on_sequence)
-		end
-	end
 	mask_data.unit:link(mask_align:name(), mask_unit, mask_unit:orientation_object():name())
 	self:_chk_character_visibility(mask_data.unit)
 	if mask_data.ready_clbk then
@@ -832,6 +823,19 @@ function MenuSceneManager:set_character_equipped_weapon(unit, factory_id, bluepr
 		managers.dyn_resource:load(ids_unit, ids_unit_name, DynamicResourceManager.DYN_RESOURCES_PACKAGE, clbk)
 	end
 	self:_chk_character_visibility(unit)
+end
+function MenuSceneManager:_check_character_mask_sequence(character_unit, mask_id, peer_id)
+	if tweak_data.blackmarket.masks[mask_id].skip_mask_on_sequence then
+		local mask_off_sequence = managers.blackmarket:character_mask_off_sequence_by_character_id(managers.blackmarket:equipped_character(), peer_id)
+		if mask_off_sequence and character_unit:damage():has_sequence(mask_off_sequence) then
+			character_unit:damage():run_sequence_simple(mask_off_sequence)
+		end
+	else
+		local mask_on_sequence = managers.blackmarket:character_mask_on_sequence_by_character_id(managers.blackmarket:equipped_character(), peer_id)
+		if mask_on_sequence and character_unit:damage():has_sequence(mask_on_sequence) then
+			character_unit:damage():run_sequence_simple(mask_on_sequence)
+		end
+	end
 end
 function MenuSceneManager:_chk_character_visibility(char_unit)
 	local char_key = char_unit:key()
@@ -1002,6 +1006,7 @@ function MenuSceneManager:on_set_preferred_character()
 	local equipped_mask = managers.blackmarket:equipped_mask()
 	if equipped_mask.mask_id then
 		self:set_character_mask_by_id(equipped_mask.mask_id, equipped_mask.blueprint)
+		self:_check_character_mask_sequence(self._character_unit, equipped_mask.mask_id, nil)
 	end
 end
 function MenuSceneManager:set_character(character_id)
@@ -1011,6 +1016,10 @@ function MenuSceneManager:set_character(character_id)
 	end
 	local sequence = managers.blackmarket:character_sequence_by_character_id(character_id)
 	self._character_unit:damage():run_sequence_simple(sequence)
+	local equipped_mask = managers.blackmarket:equipped_mask()
+	if equipped_mask.mask_id then
+		self:_check_character_mask_sequence(self._character_unit, equipped_mask.mask_id, nil)
+	end
 end
 function MenuSceneManager:_create_light(params)
 	local light = World:create_light("omni|specular")
@@ -1433,7 +1442,11 @@ function MenuSceneManager:spawn_item_weapon(factory_id, blueprint, texture_switc
 	if new_unit:base().AKIMBO then
 		second_unit = spawn_weapon(self._item_pos + self._item_rot:x() * -10 + self._item_rot:z() * -1, self._item_rot * Rotation(0, 12, -10))
 		new_unit:link(new_unit:orientation_object():name(), second_unit)
+		second_unit:base():tweak_data_anim_stop("unequip")
+		second_unit:base():tweak_data_anim_play("equip")
 	end
+	new_unit:base():tweak_data_anim_stop("unequip")
+	new_unit:base():tweak_data_anim_play("equip")
 	self:_set_item_unit(new_unit, nil, nil, nil, second_unit)
 	mrotation.set_yaw_pitch_roll(self._item_rot_mod, -90, 0, 0)
 	return new_unit

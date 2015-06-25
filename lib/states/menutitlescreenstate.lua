@@ -109,7 +109,11 @@ function MenuTitlescreenState:update(t, dt)
 	if managers.system_menu:is_active() then
 		self:reset_attract_video()
 	else
-		self._controller_index = self:get_start_pressed_controller_index()
+		if Global.exe_argument_level then
+			self._controller_index = 1
+		else
+			self._controller_index = self:get_start_pressed_controller_index()
+		end
 		if self._controller_index then
 			managers.controller:set_default_wrapper_index(self._controller_index)
 			managers.user:set_index(self._controller_index)

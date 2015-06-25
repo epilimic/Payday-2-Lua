@@ -2960,7 +2960,7 @@ function MissionBriefingGui:on_ready_pressed(ready)
 	end
 	managers.network:session():local_peer():set_waiting_for_player_ready(self._ready)
 	managers.network:session():chk_send_local_player_ready()
-	managers.network:game():on_set_member_ready(managers.network:session():local_peer():id(), self._ready, ready_changed)
+	managers.network:session():on_set_member_ready(managers.network:session():local_peer():id(), self._ready, ready_changed, false)
 	local ready_text = self:ready_text()
 	self._ready_button:set_text(ready_text)
 	self._fullscreen_panel:child("ready_big_text"):set_text(ready_text)

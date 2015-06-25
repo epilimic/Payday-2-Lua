@@ -146,6 +146,9 @@ function UpgradesTweakData:_init_pd2_values()
 	self.values.team.pistol.recoil_multiplier = {0.75}
 	self.values.team.akimbo.recoil_multiplier = self.values.team.pistol.recoil_multiplier
 	self.values.team.weapon.recoil_multiplier = {0.5}
+	self.values.team.pistol.suppression_recoil_multiplier = self.values.team.pistol.recoil_multiplier
+	self.values.team.akimbo.suppression_recoil_multiplier = self.values.team.akimbo.recoil_multiplier
+	self.values.team.weapon.suppression_recoil_multiplier = self.values.team.weapon.recoil_multiplier
 	self.values.player.assets_cost_multiplier = {0.5}
 	self.values.player.additional_assets = {true}
 	self.values.player.stamina_multiplier = {2}
@@ -621,6 +624,30 @@ function UpgradesTweakData:_init_pd2_values()
 		{true, 5}
 	}
 	self.values.player.loose_ammo_restore_health_give_team = {true}
+	self.damage_to_hot_data = {
+		armors_allowed = {"level_1", "level_2"},
+		works_with_armor_kit = true,
+		tick_time = 0.5,
+		total_ticks = 6,
+		max_stacks = false,
+		stacking_cooldown = 1,
+		add_stack_sources = {
+			bullet = true,
+			explosion = true,
+			melee = true,
+			fire = true,
+			swat_van = true,
+			civilian = false
+		}
+	}
+	self.values.player.damage_to_hot = {
+		0.2,
+		0.3,
+		0.4,
+		0.5
+	}
+	self.values.player.damage_to_hot_extra_ticks = {2}
+	self.values.player.armor_piercing_chance = {0.1, 0.3}
 	local editable_skill_descs = {
 		ammo_2x = {
 			{"2"},
@@ -741,7 +768,7 @@ function UpgradesTweakData:_init_pd2_values()
 		},
 		hitman = {
 			{"15%"},
-			{"15%", "15%"}
+			{"15%", "20%"}
 		},
 		inside_man = {
 			{"50%"},
@@ -885,7 +912,7 @@ function UpgradesTweakData:_init_pd2_values()
 		},
 		silence_expert = {
 			{"50%", "100%"},
-			{"50%", "15%"}
+			{"50%", "20%"}
 		},
 		silent_drilling = {
 			{"65%"},
@@ -1366,6 +1393,47 @@ function UpgradesTweakData:_init_pd2_values()
 			{"2"},
 			{"5%", "20%"},
 			{"2", "10%"}
+		},
+		{
+			{
+				"2",
+				"0.5",
+				"3",
+				"1.0"
+			},
+			{"25%"},
+			{
+				"3",
+				"0.5",
+				"3",
+				"20%"
+			},
+			{
+				"+1",
+				"15%",
+				"45%"
+			},
+			{
+				"4",
+				"0.5",
+				"3",
+				"10%"
+			},
+			{"135%"},
+			{
+				"5",
+				"0.5",
+				"3",
+				"20%"
+			},
+			{"5%", "20%"},
+			{
+				"5",
+				"0.5",
+				"4",
+				"20%",
+				"10%"
+			}
 		}
 	}
 	self.specialization_descs = {}
@@ -1450,7 +1518,8 @@ function UpgradesTweakData:init()
 		upgrades = {
 			"msr",
 			"benelli",
-			"plainsrider"
+			"plainsrider",
+			"sub2000"
 		}
 	}
 	self.level_tree[16] = {
@@ -1459,14 +1528,19 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[17] = {
 		name_id = "weapons",
-		upgrades = {"akm_gold", "baton"}
+		upgrades = {
+			"akm_gold",
+			"baton",
+			"slot_lever"
+		}
 	}
 	self.level_tree[18] = {
 		name_id = "weapons",
 		upgrades = {
 			"baseballbat",
 			"scorpion",
-			"oldbaton"
+			"oldbaton",
+			"hockey"
 		}
 	}
 	self.level_tree[19] = {
@@ -1492,7 +1566,8 @@ function UpgradesTweakData:init()
 			"g22c",
 			"ksg",
 			"branding_iron",
-			"detector"
+			"detector",
+			"croupier_rake"
 		}
 	}
 	self.level_tree[23] = {
@@ -1504,7 +1579,8 @@ function UpgradesTweakData:init()
 		upgrades = {
 			"model24",
 			"l85a2",
-			"scalper"
+			"scalper",
+			"switchblade"
 		}
 	}
 	self.level_tree[25] = {
@@ -1533,7 +1609,11 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[29] = {
 		name_id = "weapons",
-		upgrades = {"akmsu", "glock_18c"}
+		upgrades = {
+			"akmsu",
+			"glock_18c",
+			"asval"
+		}
 	}
 	self.level_tree[30] = {
 		name_id = "lvl_30",
@@ -1562,7 +1642,8 @@ function UpgradesTweakData:init()
 		upgrades = {
 			"galil",
 			"cleaver",
-			"mateba"
+			"mateba",
+			"taser"
 		}
 	}
 	self.level_tree[35] = {
@@ -1910,6 +1991,8 @@ function UpgradesTweakData:init()
 	self:_winchester1874_definitions()
 	self:_plainsrider_definitions()
 	self:_mateba_definitions()
+	self:_asval_definitions()
+	self:_sub2000_definitions()
 	self:_melee_weapon_definitions()
 	self:_grenades_definitions()
 	self:_carry_definitions()
@@ -2023,7 +2106,6 @@ function UpgradesTweakData:_init_values()
 	self.values.team.player = self.values.team.player or {}
 	self.values.team.pistol = self.values.team.pistol or {}
 	self.values.team.weapon = self.values.team.weapon or {}
-	self.values.team.weapon.suppression_recoil_multiplier = {0.75}
 	self.values.team.xp = self.values.team.xp or {}
 	self.values.team.armor = self.values.team.armor or {}
 	self.values.team.stamina = self.values.team.stamina or {}
@@ -2410,16 +2492,6 @@ function UpgradesTweakData:_player_definitions()
 			category = "player",
 			upgrade = "passive_dodge_chance",
 			value = 4
-		}
-	}
-	self.definitions.weapon_silencer_armor_piercing_chance_2 = {
-		category = "feature",
-		incremental = true,
-		name_id = "menu_weapon_silencer_armor_piercing_chance",
-		upgrade = {
-			category = "weapon",
-			upgrade = "armor_piercing_chance_silencer",
-			value = 1
 		}
 	}
 	self.definitions.team_passive_armor_multiplier = {
@@ -4525,6 +4597,69 @@ function UpgradesTweakData:_player_definitions()
 			value = 2
 		}
 	}
+	self.definitions.player_damage_to_hot_1 = {
+		category = "feature",
+		name_id = "menu_player_damage_to_hot",
+		upgrade = {
+			category = "player",
+			upgrade = "damage_to_hot",
+			value = 1
+		}
+	}
+	self.definitions.player_damage_to_hot_2 = {
+		category = "feature",
+		name_id = "menu_player_damage_to_hot",
+		upgrade = {
+			category = "player",
+			upgrade = "damage_to_hot",
+			value = 2
+		}
+	}
+	self.definitions.player_damage_to_hot_3 = {
+		category = "feature",
+		name_id = "menu_player_damage_to_hot",
+		upgrade = {
+			category = "player",
+			upgrade = "damage_to_hot",
+			value = 3
+		}
+	}
+	self.definitions.player_damage_to_hot_4 = {
+		category = "feature",
+		name_id = "menu_player_damage_to_hot",
+		upgrade = {
+			category = "player",
+			upgrade = "damage_to_hot",
+			value = 4
+		}
+	}
+	self.definitions.player_damage_to_hot_extra_ticks = {
+		category = "feature",
+		name_id = "menu_player_damage_to_hot_extra_ticks",
+		upgrade = {
+			category = "player",
+			upgrade = "damage_to_hot_extra_ticks",
+			value = 1
+		}
+	}
+	self.definitions.player_armor_piercing_chance_1 = {
+		category = "feature",
+		name_id = "menu_player_armor_piercing_chance",
+		upgrade = {
+			category = "player",
+			upgrade = "armor_piercing_chance",
+			value = 1
+		}
+	}
+	self.definitions.player_armor_piercing_chance_2 = {
+		category = "feature",
+		name_id = "menu_player_armor_piercing_chance",
+		upgrade = {
+			category = "player",
+			upgrade = "armor_piercing_chance",
+			value = 2
+		}
+	}
 	self.definitions.toolset = {
 		tree = 4,
 		step = 1,
@@ -6291,6 +6426,26 @@ function UpgradesTweakData:_melee_weapon_definitions()
 		category = "melee_weapon",
 		dlc = "arena"
 	}
+	self.definitions.switchblade = {
+		category = "melee_weapon",
+		dlc = "kenaz"
+	}
+	self.definitions.taser = {
+		category = "melee_weapon",
+		dlc = "kenaz"
+	}
+	self.definitions.slot_lever = {
+		category = "melee_weapon",
+		dlc = "kenaz"
+	}
+	self.definitions.croupier_rake = {
+		category = "melee_weapon",
+		dlc = "kenaz"
+	}
+	self.definitions.hockey = {
+		category = "melee_weapon",
+		dlc = "character_pack_sokol"
+	}
 end
 function UpgradesTweakData:_grenades_definitions()
 	self.definitions.molotov = {category = "grenade", dlc = "bbq"}
@@ -7003,6 +7158,15 @@ function UpgradesTweakData:_team_definitions()
 		name_id = "menu_team_pistol_suppression_recoil_multiplier",
 		upgrade = {
 			category = "pistol",
+			upgrade = "suppression_recoil_multiplier",
+			value = 1
+		}
+	}
+	self.definitions.team_akimbo_suppression_recoil_multiplier = {
+		category = "team",
+		name_id = "menu_team_akimbo_suppression_recoil_multiplier",
+		upgrade = {
+			category = "akimbo",
 			upgrade = "suppression_recoil_multiplier",
 			value = 1
 		}
@@ -8674,5 +8838,21 @@ function UpgradesTweakData:_mateba_definitions()
 		weapon_id = "mateba",
 		factory_id = "wpn_fps_pis_2006m",
 		dlc = "arena"
+	}
+end
+function UpgradesTweakData:_asval_definitions()
+	self.definitions.asval = {
+		category = "weapon",
+		weapon_id = "asval",
+		factory_id = "wpn_fps_ass_asval",
+		dlc = "character_pack_sokol"
+	}
+end
+function UpgradesTweakData:_sub2000_definitions()
+	self.definitions.sub2000 = {
+		category = "weapon",
+		weapon_id = "sub2000",
+		factory_id = "wpn_fps_ass_sub2000",
+		dlc = "kenaz"
 	}
 end

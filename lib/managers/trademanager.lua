@@ -659,7 +659,7 @@ function TradeManager:clbk_respawn_criminal(trading_unit)
 		}
 		managers.network:register_spawn_point(sp_id, spawn_point)
 		local peer_id = managers.criminals:character_peer_id_by_name(respawn_criminal.id)
-		spawned_unit = managers.network:game():spawn_member_by_id(peer_id, sp_id, true)
+		spawned_unit = managers.network:session():spawn_member_by_id(peer_id, sp_id, true)
 		managers.network:unregister_spawn_point(sp_id)
 	end
 	if alive(spawned_unit) and alive(trading_unit) then
@@ -670,10 +670,6 @@ end
 function TradeManager:sync_teammate_helped_hint(helped_unit, helping_unit, hint)
 	if not alive(helped_unit) or not alive(helping_unit) then
 		return
-	end
-	local peer_id = managers.network:session():local_peer():id()
-	if not managers.network:game():member(peer_id) then
-		debug_pause("[TradeManager:sync_teammate_helped_hint] Couldn't get local unit! ", peer_id)
 	end
 	local local_unit = managers.criminals:character_unit_by_name(managers.criminals:local_character_name())
 	local hint_id = "teammate"

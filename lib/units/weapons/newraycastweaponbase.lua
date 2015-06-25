@@ -451,7 +451,7 @@ function NewRaycastWeaponBase:tweak_data_anim_stop(anim)
 		self._unit:anim_stop(Idstring(anim_name))
 	end
 	for part_id, data in pairs(self._parts) do
-		if data.animations and data.animations[anim] then
+		if data.unit and data.animations and data.animations[anim] then
 			local anim_name = data.animations[anim]
 			data.unit:anim_stop(Idstring(anim_name))
 		end
@@ -460,8 +460,19 @@ function NewRaycastWeaponBase:tweak_data_anim_stop(anim)
 end
 function NewRaycastWeaponBase:_set_parts_enabled(enabled)
 	if self._parts then
+		local anim_groups
+		local empty_s = Idstring("")
 		for part_id, data in pairs(self._parts) do
 			if alive(data.unit) then
+				if not enabled then
+					anim_groups = data.unit:anim_groups()
+					for _, anim in ipairs(anim_groups) do
+						if anim ~= empty_s then
+							data.unit:anim_play_to(anim, 0)
+							data.unit:anim_stop()
+						end
+					end
+				end
 				data.unit:set_enabled(enabled)
 				if data.unit:digital_gui() then
 					data.unit:digital_gui():set_visible(enabled)
@@ -579,6 +590,13 @@ function NewRaycastWeaponBase:set_gadget_on(gadget_on, ignore_enable, gadgets, i
 					local is_bipod = ignore_bipod and gadget.unit:base():is_bipod()
 					if not is_bipod then
 						gadget.unit:base():set_state(self._gadget_on == i, self._sound_fire)
+					end
+					if gadget.unit:base():is_bipod() then
+						if gadget.unit:base():bipod_state() then
+							self._gadget_on = i
+						else
+							self._gadget_on = 0
+						end
 					end
 				end
 			end
@@ -757,6 +775,36 @@ function NewRaycastWeaponBase:reload_speed_multiplier()
 		end
 	end
 	return self:_convert_add_to_mul(multiplier)
+end
+function NewRaycastWeaponBase:_debug_bipod()
+	local gadgets = managers.weapon_factory:get_parts_from_weapon_by_type_or_perk("gadget", self._factory_id, self._blueprint)
+	if gadgets then
+		do
+			local xd, yd
+			local part_factory = tweak_data.weapon.factory.parts
+			table.sort(gadgets, function(x, y)
+				xd = self._parts[x]
+				yd = self._parts[y]
+				if not xd then
+					return false
+				end
+				if not yd then
+					return true
+				end
+				return xd.unit:base().GADGET_TYPE > yd.unit:base().GADGET_TYPE
+			end)
+			local gadget
+			for i, id in ipairs(gadgets) do
+				gadget = self._parts[id]
+				if gadget then
+					local is_bipod = gadget.unit:base():is_bipod()
+					if is_bipod then
+						gadget.unit:base():_shoot_bipod_rays(true)
+					end
+				end
+			end
+		end
+	end
 end
 function NewRaycastWeaponBase:reload_expire_t()
 	if self._use_shotgun_reload then

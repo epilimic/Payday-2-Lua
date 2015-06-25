@@ -31,9 +31,9 @@ function HuskTeamAIBase:load(data)
 	if character_name then
 		local old_unit = managers.criminals:character_unit_by_name(character_name)
 		if old_unit then
-			local member = managers.network:game():member_from_unit(old_unit)
-			if member then
-				managers.network:session():on_peer_lost(member:peer(), member:peer():id())
+			local peer = managers.network:session():peer_by_unit(old_unit)
+			if peer then
+				managers.network:session():on_peer_lost(peer, peer:id())
 			end
 		end
 		managers.criminals:add_character(character_name, self._unit, nil, true)

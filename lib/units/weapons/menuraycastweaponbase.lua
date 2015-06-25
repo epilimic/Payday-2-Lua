@@ -61,7 +61,6 @@ function NewRaycastWeaponBase:apply_texture_switches()
 					material_ids = Idstring(texture_switch.material)
 					material_config = unit:get_objects_by_type(Idstring("material"))
 					for _, material in ipairs(material_config) do
-						print(material:name())
 						if material:name() == material_ids then
 							switch_material = material
 						else
@@ -178,7 +177,7 @@ function NewRaycastWeaponBase:tweak_data_anim_play(anim, speed_multiplier)
 		local length = self._unit:anim_length(Idstring(anim_name))
 		speed_multiplier = speed_multiplier or 1
 		self._unit:anim_stop(Idstring(anim_name))
-		self._unit:anim_play_to(Idstring(anim_name), length, speed_multiplier)
+		self._unit:anim_set_time(Idstring(anim_name), length)
 	end
 	for part_id, data in pairs(self._parts) do
 		if data.animations and data.animations[anim] then
@@ -186,7 +185,7 @@ function NewRaycastWeaponBase:tweak_data_anim_play(anim, speed_multiplier)
 			local length = data.unit:anim_length(Idstring(anim_name))
 			speed_multiplier = speed_multiplier or 1
 			data.unit:anim_stop(Idstring(anim_name))
-			data.unit:anim_play_to(Idstring(anim_name), length, speed_multiplier)
+			data.unit:anim_set_time(Idstring(anim_name), length)
 		end
 	end
 	return true
@@ -198,7 +197,7 @@ function NewRaycastWeaponBase:tweak_data_anim_stop(anim)
 		self._unit:anim_stop(Idstring(anim_name))
 	end
 	for part_id, data in pairs(self._parts) do
-		if data.animations and data.animations[anim] then
+		if data.unit and data.animations and data.animations[anim] then
 			local anim_name = data.animations[anim]
 			data.unit:anim_stop(Idstring(anim_name))
 		end

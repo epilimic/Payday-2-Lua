@@ -612,7 +612,7 @@ function MenuNodeUpdatesGui:open(content_update)
 		end
 	elseif SystemInfo:platform() == Idstring("PS3") then
 		do break end
-		if not managers.dlc:has_dlc(content_update.id) then
+		if not managers.dlc:is_dlc_unlocked(content_update.id) then
 			managers.dlc:buy_product(content_update.id)
 		else
 			play_sound = false

@@ -32,10 +32,11 @@ function MenuManager:on_enter_lobby()
 	managers.menu:active_menu().logic:select_node("lobby", true, {})
 	managers.platform:set_rich_presence("MPLobby")
 	managers.menu_component:pre_set_game_chat_leftbottom(0, 50)
-	local is_server = Network:is_server()
-	local local_peer = managers.network:session():local_peer()
-	managers.network:game():on_entered_lobby()
+	managers.network:session():on_entered_lobby()
 	self:setup_local_lobby_character()
+	if Global.exe_argument_level then
+		MenuCallbackHandler:start_the_game()
+	end
 end
 function MenuManager:on_leave_active_job()
 	managers.statistics:stop_session({quit = true})

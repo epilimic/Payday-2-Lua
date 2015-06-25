@@ -117,14 +117,14 @@ function CoreMissionElement:build_default_gui(panel, sizer)
 	self:_build_value_number(panel, sizer, "trigger_times", {floats = 0, min = 0}, "Specifies how many time this element can be executed (0 mean unlimited times)")
 	local base_delay_sizer = EWS:BoxSizer("HORIZONTAL")
 	sizer:add(base_delay_sizer, 0, 0, "EXPAND,LEFT")
-	self:_build_value_number(panel, base_delay_sizer, "base_delay", {
+	local base_delay_ctrlr = self:_build_value_number(panel, base_delay_sizer, "base_delay", {
 		floats = 2,
 		min = 0,
 		name_proportions = 1,
 		ctrlr_proportions = 1,
 		sizer_proportions = 2
 	}, "Specifies a base delay that is added to each on executed delay")
-	self:_build_value_number(panel, base_delay_sizer, "base_delay_rand", {
+	local base_delay_rand_ctrlr = self:_build_value_number(panel, base_delay_sizer, "base_delay_rand", {
 		floats = 2,
 		min = 0,
 		name_proportions = 0,
@@ -219,6 +219,17 @@ function CoreMissionElement:build_default_gui(panel, sizer)
 	sizer:add(EWS:StaticLine(panel, "", "LI_HORIZONTAL"), 0, 5, "EXPAND,TOP,BOTTOM")
 	self:append_elements_sorted()
 	self:set_on_executed_element()
+	local refresh_list_flow_cbk = function(ctrlr)
+		local f = function()
+			managers.editor:layer("Mission"):refresh_list_flow()
+		end
+		ctrlr:connect("EVT_COMMAND_TEXT_ENTER", f, nil)
+		ctrlr:connect("EVT_KILL_FOCUS", f, nil)
+	end
+	refresh_list_flow_cbk(base_delay_ctrlr)
+	refresh_list_flow_cbk(base_delay_rand_ctrlr)
+	refresh_list_flow_cbk(element_delay)
+	refresh_list_flow_cbk(element_delay_rand)
 end
 function CoreMissionElement:_build_point_orientation(panel)
 	local sizer = EWS:StaticBoxSizer(panel, "HORIZONTAL", "Point orientation")
@@ -389,9 +400,11 @@ function CoreMissionElement:set_element_data(data)
 	if data.value then
 		self._hed[data.value] = data.ctrlr:get_value()
 		self._hed[data.value] = tonumber(self._hed[data.value]) or self._hed[data.value]
+		if data.value == "base_delay_rand" then
+			self._hed[data.value] = self._hed[data.value] > 0 and self._hed[data.value] or nil
+		end
 		if EWS:get_key_state("K_CONTROL") then
-			local value = data.ctrlr:get_value()
-			value = tonumber(self._hed[data.value]) or self._hed[data.value]
+			local value = tonumber(self._hed[data.value]) or self._hed[data.value]
 			for _, unit in ipairs(managers.editor:layer("Mission"):selected_units()) do
 				if unit ~= self._unit and unit:mission_element_data() then
 					unit:mission_element_data()[data.value] = value
@@ -678,13 +691,7 @@ function CoreMissionElement:draw_link_on_executed(t, dt, selected_unit)
 			local offset = math.min(50, vec_len)
 			mvector3.multiply(dir, offset)
 			if self._distance_to_camera < 1000000 then
-				local delay = self._hed.base_delay + self:_get_on_executed(unit:unit_data().unit_id).delay
-				local text = string.format("%.2f", delay)
-				if self._hed.base_delay_rand or self:_get_on_executed(unit:unit_data().unit_id).delay_rand then
-					local delay_max = delay + (self:_get_on_executed(unit:unit_data().unit_id).delay_rand or 0)
-					delay_max = delay_max + (self._hed.base_delay_rand and self._hed.base_delay_rand or 0)
-					text = text .. "-" .. string.format("%.2f", delay_max) .. ""
-				end
+				local text = self:_get_delay_string(unit:unit_data().unit_id)
 				local alternative = self:_get_on_executed(unit:unit_data().unit_id).alternative
 				if alternative then
 					text = text .. " - " .. alternative .. ""
@@ -701,6 +708,16 @@ function CoreMissionElement:draw_link_on_executed(t, dt, selected_unit)
 			})
 		end
 	end
+end
+function CoreMissionElement:_get_delay_string(unit_id)
+	local delay = self._hed.base_delay + self:_get_on_executed(unit_id).delay
+	local text = string.format("%.2f", delay)
+	if self._hed.base_delay_rand or self:_get_on_executed(unit_id).delay_rand then
+		local delay_max = delay + (self:_get_on_executed(unit_id).delay_rand or 0)
+		delay_max = delay_max + (self._hed.base_delay_rand and self._hed.base_delay_rand or 0)
+		text = text .. "-" .. string.format("%.2f", delay_max) .. ""
+	end
+	return text
 end
 function CoreMissionElement:add_on_executed(unit)
 	if self:remove_on_execute(unit) then
@@ -945,17 +962,24 @@ function CoreMissionElement:get_links_to_unit(to_unit, links, all_units)
 	if to_unit == self._unit then
 		for _, data in ipairs(self._hed.on_executed) do
 			local on_executed_unit = all_units[data.id]
+			local delay = self:_get_delay_string(on_executed_unit:unit_data().unit_id)
 			local type = "on_executed" .. (data.alternative and " " .. data.alternative or "")
-			table.insert(links.on_executed, {unit = on_executed_unit, alternative = type})
+			table.insert(links.on_executed, {
+				unit = on_executed_unit,
+				alternative = type,
+				delay = delay
+			})
 		end
 	end
 	for _, data in ipairs(self._hed.on_executed) do
 		local unit = all_units[data.id]
 		if unit == to_unit then
+			local delay = self:_get_delay_string(unit:unit_data().unit_id)
 			local type = "on_executed" .. (data.alternative and " " .. data.alternative or "")
 			table.insert(links.executers, {
 				unit = self._unit,
-				alternative = type
+				alternative = type,
+				delay = delay
 			})
 		end
 	end

@@ -13,25 +13,13 @@ function AttentionTweakData:init()
 	self:_post_init()
 end
 function AttentionTweakData:_init_player()
-	self.settings.pl_clean = {
+	self.settings.pl_civilian = {
 		reaction = "REACT_IDLE",
 		filter = "none",
 		max_range = 1,
 		notice_delay_mul = 1,
 		verification_interval = 4,
 		release_delay = 1,
-		notice_requires_FOV = true
-	}
-	self.settings.pl_dirty = {
-		reaction = "REACT_ARREST",
-		filter = "combatant",
-		relation = "foe",
-		max_range = 1000,
-		notice_delay_mul = 1,
-		verification_interval = 4,
-		release_delay = 3,
-		duration = {2, 5},
-		pause = {15, 25},
 		notice_requires_FOV = true
 	}
 	self.settings.pl_mask_off_friend_combatant = {

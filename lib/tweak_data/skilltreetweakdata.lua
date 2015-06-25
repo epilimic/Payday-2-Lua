@@ -262,13 +262,16 @@ function SkillTreeTweakData:init()
 		[1] = {
 			upgrades = {
 				"team_pistol_recoil_multiplier",
-				"team_akimbo_recoil_multiplier"
+				"team_akimbo_recoil_multiplier",
+				"team_pistol_suppression_recoil_multiplier",
+				"team_akimbo_suppression_recoil_multiplier"
 			},
 			cost = self.costs.default
 		},
 		[2] = {
 			upgrades = {
-				"team_weapon_recoil_multiplier"
+				"team_weapon_recoil_multiplier",
+				"team_weapon_suppression_recoil_multiplier"
 			},
 			cost = self.costs.pro
 		}
@@ -3044,6 +3047,101 @@ function SkillTreeTweakData:init()
 				icon_xy = {0, 6},
 				name_id = "menu_deck10_9",
 				desc_id = "menu_deck10_9_desc"
+			}
+		},
+		{
+			name_id = "menu_st_spec_11",
+			desc_id = "menu_st_spec_11_desc",
+			dlc = "character_pack_sokol",
+			{
+				upgrades = {
+					"player_damage_to_hot_1"
+				},
+				cost = 200,
+				icon_xy = {1, 6},
+				name_id = "menu_deck11_1",
+				desc_id = "menu_deck11_1_desc"
+			},
+			{
+				upgrades = {
+					"weapon_passive_headshot_damage_multiplier"
+				},
+				cost = 300,
+				icon_xy = {1, 0},
+				name_id = "menu_deck11_2",
+				desc_id = "menu_deck11_2_desc"
+			},
+			{
+				upgrades = {
+					"player_damage_to_hot_2",
+					"player_passive_health_multiplier_2"
+				},
+				cost = 400,
+				icon_xy = {2, 6},
+				name_id = "menu_deck11_3",
+				desc_id = "menu_deck11_3_desc"
+			},
+			{
+				upgrades = {
+					"passive_player_xp_multiplier",
+					"player_passive_suspicion_bonus",
+					"player_passive_armor_movement_penalty_multiplier"
+				},
+				cost = 600,
+				icon_xy = {3, 0},
+				name_id = "menu_deck11_4",
+				desc_id = "menu_deck11_4_desc"
+			},
+			{
+				upgrades = {
+					"player_damage_to_hot_3",
+					"player_armor_piercing_chance_1"
+				},
+				cost = 1000,
+				icon_xy = {3, 6},
+				name_id = "menu_deck11_5",
+				desc_id = "menu_deck11_5_desc"
+			},
+			{
+				upgrades = {
+					"armor_kit",
+					"player_pick_up_ammo_multiplier"
+				},
+				cost = 1600,
+				icon_xy = {5, 0},
+				name_id = "menu_deck11_6",
+				desc_id = "menu_deck11_6_desc"
+			},
+			{
+				upgrades = {
+					"player_damage_to_hot_4",
+					"player_passive_health_multiplier_3"
+				},
+				cost = 2400,
+				icon_xy = {4, 6},
+				name_id = "menu_deck11_7",
+				desc_id = "menu_deck11_7_desc"
+			},
+			{
+				upgrades = {
+					"weapon_passive_damage_multiplier",
+					"passive_doctor_bag_interaction_speed_multiplier"
+				},
+				cost = 3200,
+				icon_xy = {7, 0},
+				name_id = "menu_deck11_8",
+				desc_id = "menu_deck11_8_desc"
+			},
+			{
+				upgrades = {
+					"player_damage_to_hot_extra_ticks",
+					"player_armor_piercing_chance_2",
+					"player_passive_loot_drop_multiplier"
+				},
+				cost = 4000,
+				icon_xy = {5, 6},
+				name_id = "menu_deck11_9",
+				desc_id = "menu_deck11_9_desc"
 			}
 		}
 	}

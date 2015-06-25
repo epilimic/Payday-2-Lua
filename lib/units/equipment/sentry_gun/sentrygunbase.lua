@@ -89,6 +89,26 @@ function SentryGunBase.spawn(owner, pos, rot, ammo_multiplier, armor_multiplier,
 	SentryGunBase.deployed = (SentryGunBase.deployed or 0) + 1
 	return unit
 end
+function SentryGunBase:spawn_from_sequence(align_obj_name, module_id)
+	if not Network:is_server() then
+		return
+	end
+	local align_obj = self._unit:get_object(Idstring(align_obj_name))
+	local pos = align_obj:position()
+	local rot = align_obj:rotation()
+	local attached_data = SentryGunBase._attach(pos, rot)
+	if not attached_data then
+		return
+	end
+	local unit
+	unit = World:spawn_unit(Idstring("units/payday2/equipment/gen_equipment_sentry/gen_equipment_sentry"), pos, rot)
+	unit:base():setup(managers.player:player_unit(), 1, 1, 1, 1, 1, false, attached_data)
+	managers.network:session():send_to_peers_synched("sync_equipment_setup", unit, 0, 0)
+	managers.network:session():send_to_peers_synched("from_server_sentry_gun_place_result", managers.network:session():local_peer():id(), 0, unit, unit:movement()._rot_speed_mul, unit:weapon()._setup.spread_mul, false)
+	local team = managers.groupai:state():team_data(tweak_data.levels:get_default_team_ID("player"))
+	unit:movement():set_team(team)
+	unit:brain():set_active(true)
+end
 function SentryGunBase:activate_as_module(team_type, tweak_table_id)
 	self._tweak_table_id = tweak_table_id
 	local team_id = tweak_data.levels:get_default_team_ID(team_type)
@@ -123,7 +143,7 @@ function SentryGunBase:get_name_id()
 end
 function SentryGunBase:set_server_information(peer_id)
 	self._server_information = {owner_peer_id = peer_id}
-	managers.network:game():member(peer_id):peer():set_used_deployable(true)
+	managers.network:session():peer(peer_id):set_used_deployable(true)
 end
 function SentryGunBase:server_information()
 	return self._server_information
@@ -147,7 +167,12 @@ function SentryGunBase:setup(owner, ammo_multiplier, armor_multiplier, damage_mu
 	local armor_amount = tweak_data.upgrades.sentry_gun_base_armor * armor_multiplier
 	self._unit:character_damage():set_health(armor_amount, 0)
 	self._owner = owner
-	self._owner_id = owner and managers.network:game():member_from_unit(owner):peer():id()
+	if owner then
+		local peer = managers.network:session():peer_by_unit(owner)
+		if peer then
+			self._owner_id = peer:id()
+		end
+	end
 	self._unit:movement():setup(rot_speed_multiplier)
 	self._unit:brain():setup(1 / rot_speed_multiplier)
 	self:register()
@@ -326,7 +351,7 @@ function SentryGunBase:add_string_macros(macroes)
 end
 function SentryGunBase:sync_net_event(event_id, peer)
 	print("SentryGunBase:sync_net_event", event_id, inspect(peer), Network:is_server())
-	local player = managers.network:game():member(peer:id()):unit()
+	local player = peer:unit()
 	local ammo_ratio = refill_ratios[event_id]
 	self:refill(ammo_ratio)
 	if alive(player) and alive(managers.player:local_player()) and player:key() == managers.player:local_player():key() then

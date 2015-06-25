@@ -13,20 +13,15 @@ function NetworkBaseExtension:send_to_host(func, ...)
 	end
 end
 function NetworkBaseExtension:send_to_unit(params)
-	if managers.network:game() then
-		local member = managers.network:game():member_from_unit(self._unit)
-		if not member then
-			return
+	if managers.network:session() then
+		local peer = managers.network:session():peer_by_unit(self._unit)
+		if peer then
+			managers.network:session():send_to_peer(peer, unpack(params))
 		end
-		managers.network:session():send_to_peer(member:peer(), unpack(params))
 	end
 end
-function NetworkBaseExtension:member()
-	return managers.network:game():member_from_unit(self._unit)
-end
 function NetworkBaseExtension:peer()
-	if managers.network:game() then
-		local member = managers.network:game():member_from_unit(self._unit)
-		return member and member:peer()
+	if managers.network:session() then
+		return managers.network:session():peer_by_unit(self._unit)
 	end
 end

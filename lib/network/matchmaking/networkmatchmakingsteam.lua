@@ -1,6 +1,6 @@
 NetworkMatchMakingSTEAM = NetworkMatchMakingSTEAM or class()
 NetworkMatchMakingSTEAM.OPEN_SLOTS = 4
-NetworkMatchMakingSTEAM._BUILD_SEARCH_INTEREST_KEY = "payday2_v1.34.4"
+NetworkMatchMakingSTEAM._BUILD_SEARCH_INTEREST_KEY = "payday2_v1.35.0"
 function NetworkMatchMakingSTEAM:init()
 	cat_print("lobby", "matchmake = NetworkMatchMakingSTEAM")
 	self._callback_map = {}
@@ -421,7 +421,7 @@ function NetworkMatchMakingSTEAM:join_server(room_id, skip_showing_dialog)
 				elseif res == "JOINED_GAME" then
 					local level_id = tweak_data.levels:get_level_name_from_index(level_index)
 					Global.game_settings.level_id = level_id
-					managers.network:game():on_game_joined()
+					managers.network:session():local_peer():set_in_lobby(false)
 				elseif res == "KICKED" then
 					managers.network.matchmake:leave_game()
 					managers.network.voice_chat:destroy_voice()

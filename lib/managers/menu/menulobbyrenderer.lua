@@ -88,9 +88,7 @@ function MenuLobbyRenderer:set_bottom_text(...)
 	MenuRenderer.set_bottom_text(self, ...)
 end
 function MenuLobbyRenderer:_entered_menu()
-	local is_server = Network:is_server()
-	local local_peer = managers.network:session():local_peer()
-	managers.network:game():on_entered_lobby()
+	managers.network:session():on_entered_lobby()
 	self:on_request_lobby_slot_reply()
 end
 function MenuLobbyRenderer:close(...)

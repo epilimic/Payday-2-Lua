@@ -274,7 +274,7 @@ function NetworkAccountSTEAM._on_ipc_fail(lobby_id, friend_id)
 end
 function NetworkAccountSTEAM._on_join_request(lobby_id, friend_id)
 	print("[NetworkAccountSTEAM._on_join_request]")
-	if managers.network:session() and (managers.network:session():_local_peer_in_lobby() or managers.network:game()) then
+	if managers.network:session() and managers.network:session():_local_peer_in_lobby() then
 		managers.menu:show_cant_join_from_game_dialog()
 	else
 		if not Global.user_manager.user_index or not Global.user_manager.active_user_state_change_quit then
