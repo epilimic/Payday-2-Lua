@@ -1906,18 +1906,18 @@ function NarrativeTweakData:init()
 	self.jobs.arm_for.dlc = "armored_transport"
 	self.jobs.arm_for.contract_visuals = {}
 	self.jobs.arm_for.contract_visuals.min_mission_xp = {
-		8000,
-		8000,
-		8000,
-		8000,
-		8000
+		16000,
+		16000,
+		16000,
+		16000,
+		16000
 	}
 	self.jobs.arm_for.contract_visuals.max_mission_xp = {
-		8000,
-		8000,
-		8000,
-		8000,
-		8000
+		36000,
+		36000,
+		36000,
+		36000,
+		36000
 	}
 	self.jobs.arm_for_prof = deep_clone(self.jobs.arm_for)
 	self.jobs.arm_for_prof.jc = 70

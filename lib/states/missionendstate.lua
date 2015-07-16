@@ -143,7 +143,11 @@ function MissionEndState:at_enter(old_state, params)
 					managers.achievment:award(shotgun_one_o_one.award)
 				end
 			end
-			local mask_pass, diff_pass, no_shots_pass, contract_pass, job_pass, jobs_pass, level_pass, levels_pass, stealth_pass, loud_pass, equipped_pass, equipped_team_pass, timer_pass, num_players_pass, pass_skills, all_pass, weapon_data, memory, level_id, stage, num_skills
+			local mask_pass, diff_pass, no_shots_pass, contract_pass, job_pass, jobs_pass, level_pass, levels_pass, stealth_pass, loud_pass, equipped_pass, equipped_team_pass, timer_pass, num_players_pass, pass_skills, killed_by_weapons_pass, killed_by_melee_pass, killed_by_grenade_pass, civilians_killed_pass, complete_job_pass, all_pass, weapon_data, memory, level_id, stage, num_skills
+			local killed_by_weapons = managers.statistics:session_killed_by_weapons()
+			local killed_by_melee = managers.statistics:session_killed_by_melee()
+			local killed_by_grenade = managers.statistics:session_killed_by_grenade()
+			local civilians_killed = managers.statistics:session_total_civilian_kills()
 			for achievement, achievement_data in pairs(tweak_data.achievement.complete_heist_achievements) do
 				level_id = managers.job:has_active_job() and managers.job:current_level_id() or ""
 				diff_pass = not achievement_data.difficulty or table.contains(achievement_data.difficulty, Global.game_settings.difficulty)
@@ -153,11 +157,44 @@ function MissionEndState:at_enter(old_state, params)
 				level_pass = not achievement_data.level_id or achievement_data.level_id == level_id
 				levels_pass = not achievement_data.levels or table.contains(achievement_data.levels, level_id)
 				contract_pass = not achievement_data.contract or managers.job:current_contact_id() == achievement_data.contract
+				complete_job_pass = not achievement_data.complete_job or managers.statistics:started_session_from_beginning() and managers.job:on_last_stage()
 				no_shots_pass = not achievement_data.no_shots or managers.statistics:session_total_shots(achievement_data.no_shots) == 0
 				stealth_pass = not achievement_data.stealth or managers.groupai and managers.groupai:state():whisper_mode()
 				loud_pass = not achievement_data.loud or managers.groupai and not managers.groupai:state():whisper_mode()
 				timer_pass = not achievement_data.timer or managers.game_play_central and managers.game_play_central:get_heist_timer() <= achievement_data.timer
 				num_players_pass = not achievement_data.num_players or achievement_data.num_players <= managers.network:session():amount_of_players()
+				killed_by_weapons_pass = not achievement_data.killed_by_weapons
+				if achievement_data.killed_by_weapons then
+					if achievement_data.killed_by_weapons == 0 then
+						killed_by_weapons_pass = killed_by_weapons == 0
+					else
+						killed_by_weapons_pass = killed_by_weapons >= achievement_data.killed_by_weapons
+					end
+				end
+				killed_by_melee_pass = not achievement_data.killed_by_melee
+				if achievement_data.killed_by_melee then
+					if achievement_data.killed_by_melee == 0 then
+						killed_by_melee_pass = killed_by_melee == 0
+					else
+						killed_by_melee_pass = killed_by_melee >= achievement_data.killed_by_melee
+					end
+				end
+				killed_by_grenade_pass = not achievement_data.killed_by_grenade
+				if achievement_data.killed_by_grenade then
+					if achievement_data.killed_by_grenade == 0 then
+						killed_by_grenade_pass = killed_by_grenade == 0
+					else
+						killed_by_grenade_pass = killed_by_grenade >= achievement_data.killed_by_grenade
+					end
+				end
+				civilians_killed_pass = not achievement_data.civilians_killed
+				if achievement_data.civilians_killed then
+					if achievement_data.civilians_killed == 0 then
+						civilians_killed_pass = civilians_killed == 0
+					else
+						civilians_killed_pass = civilians_killed >= achievement_data.civilians_killed
+					end
+				end
 				pass_skills = not achievement_data.num_skills
 				if not pass_skills then
 					num_skills = 0
@@ -171,7 +208,9 @@ function MissionEndState:at_enter(old_state, params)
 				if achievement_data.equipped then
 					for category, data in pairs(achievement_data.equipped) do
 						weapon_data = managers.blackmarket:equipped_item(category)
-						if data.weapon_id and weapon_data and weapon_data.weapon_id and data.weapon_id == weapon_data.weapon_id then
+						if category == "grenades" and data == weapon_data then
+							equipped_pass = true
+						elseif data.weapon_id and weapon_data and weapon_data.weapon_id and data.weapon_id == weapon_data.weapon_id then
 							equipped_pass = true
 							if data.blueprint and weapon_data.blueprint then
 								for _, part_or_parts in ipairs(data.blueprint) do
@@ -200,7 +239,7 @@ function MissionEndState:at_enter(old_state, params)
 				end
 				equipped_team_pass = true
 				if achievement_data.equipped_team then
-					local pass_armor, pass_deployable, pass_mask, pass_melee_weapon, pass_primary, pass_secondary, pass_primaries, pass_secondaries, pass_primary_unmodded, pass_secondary_unmodded, pass_skills
+					local pass_armor, pass_deployable, pass_mask, pass_melee_weapon, pass_primary, pass_secondary, pass_primaries, pass_secondaries, pass_primary_unmodded, pass_secondary_unmodded, pass_skills, pass_melee_weapons
 					local ad = achievement_data.equipped_team
 					local oufit
 					for _, peer in pairs(managers.network:session():all_peers()) do
@@ -209,6 +248,7 @@ function MissionEndState:at_enter(old_state, params)
 						pass_deployable = not ad.deployable or ad.deployable == oufit.deployable
 						pass_mask = not ad.mask or ad.mask == oufit.mask.mask_id
 						pass_melee_weapon = not ad.melee_weapon or ad.melee_weapon == oufit.melee_weapon
+						pass_melee_weapons = not ad.melee_weapons or table.contains(ad.melee_weapons, oufit.melee_weapon)
 						pass_primary = not ad.primary or ad.primary == oufit.primary.factory_id
 						pass_secondary = not ad.secondary or ad.secondary == oufit.secondary.factory_id
 						pass_primaries = not ad.primaries or table.contains(ad.primaries, oufit.primary.factory_id)
@@ -226,14 +266,14 @@ function MissionEndState:at_enter(old_state, params)
 						if ad.reverse_deployable then
 							pass_deployable = not pass_deployable
 						end
-						if not pass_armor or not pass_deployable or not pass_mask or not pass_melee_weapon or not pass_primary or not pass_secondary or not pass_primaries or not pass_secondaries or not pass_primary_unmodded or not pass_secondary_unmodded or not pass_skills then
+						if not pass_armor or not pass_deployable or not pass_mask or not pass_melee_weapon or not pass_primary or not pass_secondary or not pass_primaries or not pass_secondaries or not pass_primary_unmodded or not pass_secondary_unmodded or not pass_skills or not pass_melee_weapons then
 							equipped_team_pass = false
 						else
 						end
 					end
 				end
-				all_pass = job_pass and jobs_pass and level_pass and levels_pass and contract_pass and diff_pass and mask_pass and no_shots_pass and stealth_pass and loud_pass and equipped_pass and equipped_team_pass and num_players_pass and pass_skills and timer_pass
-				if all_pass and achievement_data.need_full_job then
+				all_pass = job_pass and jobs_pass and level_pass and levels_pass and contract_pass and diff_pass and mask_pass and no_shots_pass and stealth_pass and loud_pass and equipped_pass and equipped_team_pass and num_players_pass and pass_skills and timer_pass and killed_by_weapons_pass and killed_by_melee_pass and killed_by_grenade_pass and complete_job_pass
+				if all_pass and achievement_data.need_full_job and managers.job:has_active_job() then
 					if not managers.job:interupt_stage() then
 						memory = managers.job:get_memory(achievement)
 						if not memory then

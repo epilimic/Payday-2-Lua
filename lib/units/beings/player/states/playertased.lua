@@ -23,7 +23,12 @@ function PlayerTased:enter(state_data, enter_data)
 		self:_register_revive_SO()
 	end
 	self._equipped_unit:base():on_reload()
-	self:_interupt_action_throw_grenade()
+	local projectile_entry = managers.blackmarket:equipped_projectile()
+	if tweak_data.blackmarket.projectiles[projectile_entry].is_a_grenade then
+		self:_interupt_action_throw_grenade()
+	else
+		self:_interupt_action_throw_projectile()
+	end
 	self:_interupt_action_reload()
 	self:_interupt_action_steelsight()
 	self:_interupt_action_melee(managers.player:player_timer():time())

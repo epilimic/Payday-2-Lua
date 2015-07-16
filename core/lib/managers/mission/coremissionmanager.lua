@@ -15,17 +15,24 @@ function MissionManager:init()
 	self._area_instigator_categories = {}
 	self:add_area_instigator_categories("none")
 	self:set_default_area_instigator("none")
-	self._workspace = Overlay:newgui():create_screen_workspace()
+	self._global_event_listener = rawget(_G, "EventListenerHolder"):new()
+	self._global_event_list = {}
+end
+function MissionManager:post_init()
+	self._workspace = managers.gui_data:create_saferect_workspace()
+	managers.gui_data:layout_corner_saferect_workspace(self._workspace)
 	self._workspace:set_timer(TimerManager:main())
 	self._fading_debug_output = self._workspace:panel():gui(Idstring("core/guis/core_fading_debug_output"))
 	self._fading_debug_output:set_leftbottom(0, self._workspace:height() / 3)
-	self._fading_debug_output:script().configure({font_size = 20, max_rows = 20})
+	self._fading_debug_output:script().configure({font_size = 18, max_rows = 20})
 	self._persistent_debug_output = self._workspace:panel():gui(Idstring("core/guis/core_persistent_debug_output"))
 	self._persistent_debug_output:set_righttop(self._workspace:width(), 0)
 	self:set_persistent_debug_enabled(false)
 	self:set_fading_debug_enabled(true)
-	self._global_event_listener = rawget(_G, "EventListenerHolder"):new()
-	self._global_event_list = {}
+	managers.viewport:add_resolution_changed_func(callback(self, self, "_resolution_changed"))
+end
+function MissionManager:_resolution_changed()
+	managers.gui_data:layout_corner_saferect_workspace(self._workspace)
 end
 function MissionManager:parse(params, stage_name, offset, file_type)
 	local file_path, activate_mission
@@ -222,7 +229,7 @@ end
 function MissionManager:_show_debug_subtitle(debug, color)
 	self._debug_subtitle_text = self._debug_subtitle_text or self._workspace:panel():text({
 		font = "core/fonts/diesel",
-		font_size = 24,
+		font_size = 20,
 		text = debug,
 		word_wrap = true,
 		wrap = true,
@@ -231,13 +238,13 @@ function MissionManager:_show_debug_subtitle(debug, color)
 		valign = "center",
 		color = color or Color.white
 	})
-	self._debug_subtitle_text:set_size(self._workspace:panel():w() / 2, 24)
+	self._debug_subtitle_text:set_w(self._workspace:panel():w() / 2)
 	self._debug_subtitle_text:set_text(debug)
 	local subtitle_time = math.max(4, utf8.len(debug) * 0.04)
 	local _, _, w, h = self._debug_subtitle_text:text_rect()
-	self._debug_subtitle_text:set_size(w, h)
+	self._debug_subtitle_text:set_h(h)
 	self._debug_subtitle_text:set_center_x(self._workspace:panel():w() / 2)
-	self._debug_subtitle_text:set_bottom(self._workspace:panel():h() / 1.4)
+	self._debug_subtitle_text:set_top(self._workspace:panel():h() / 1.4)
 	self._debug_subtitle_text:set_color(color or Color.white)
 	self._debug_subtitle_text:set_alpha(1)
 	self._debug_subtitle_text:stop()

@@ -973,7 +973,7 @@ function PrePlanningTweakData:init(tweak_data)
 	self.types.kenaz_loud_entry_with_c4.category = "entry_plan"
 	self.types.kenaz_loud_entry_with_c4.icon = 95
 	self.types.kenaz_loud_entry_with_c4.cost = 0
-	self.types.kenaz_loud_entry_with_c4.budget_cost = 10
+	self.types.kenaz_loud_entry_with_c4.budget_cost = 6
 	self.types.kenaz_loud_entry_with_c4.post_event = ""
 	self.types.kenaz_loud_entry_with_c4.prio = 3
 	self.types.kenaz_limo_escape = {}
@@ -1030,9 +1030,9 @@ function PrePlanningTweakData:init(tweak_data)
 	self.types.sentry_gun.icon = 75
 	self.types.sentry_gun.category = "dead_drop"
 	self.types.sentry_gun.total = 2
-	self.types.sentry_gun.cost = 0
-	self.types.sentry_gun.budget_cost = 2
-	self.types.sentry_gun.post_event = "gus_preplan_05"
+	self.types.sentry_gun.cost = tweak_data:get_value("money_manager", "preplaning_asset_cost_deaddropbag")
+	self.types.sentry_gun.budget_cost = 1
+	self.types.sentry_gun.post_event = ""
 	self.types.sentry_gun.prio = 5
 	self.types.kenaz_drill_better_plasma_cutter = {}
 	self.types.kenaz_drill_better_plasma_cutter.name_id = "menu_pp_asset_kenaz_drill_better_plasma_cutter"
@@ -1081,8 +1081,8 @@ function PrePlanningTweakData:init(tweak_data)
 	self.types.kenaz_drill_sentry.category = "BFD_attachments"
 	self.types.kenaz_drill_sentry.icon = 75
 	self.types.kenaz_drill_sentry.total = 2
-	self.types.kenaz_drill_sentry.cost = 0
-	self.types.kenaz_drill_sentry.budget_cost = 3
+	self.types.kenaz_drill_sentry.cost = tweak_data:get_value("money_manager", "preplaning_asset_cost_deaddropbag")
+	self.types.kenaz_drill_sentry.budget_cost = 1
 	self.types.kenaz_drill_sentry.post_event = ""
 	self.types.kenaz_drill_sentry.prio = 3
 	self.types.kenaz_drill_extra_battery = {}
@@ -2278,8 +2278,7 @@ function PrePlanningTweakData:_create_locations(tweak_data)
 			y1 = -14450,
 			x2 = 4975,
 			y2 = 7850,
-			rotation = 0,
-			custom_points = {}
+			rotation = 0
 		},
 		start_location = {
 			group = "b",
@@ -2382,8 +2381,7 @@ function PrePlanningTweakData:_create_locations(tweak_data)
 			y1 = -400,
 			x2 = 200,
 			y2 = 400,
-			rotation = 0,
-			custom_points = {}
+			rotation = 0
 		}
 	}
 end

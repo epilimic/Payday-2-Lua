@@ -74,7 +74,9 @@ function StatisticsTweakData:statistics_table()
 		"rat",
 		"cage",
 		"hox_3",
-		"shoutout_raid"
+		"shoutout_raid",
+		"arena",
+		"kenaz"
 	}
 	local job_list = {
 		"jewelry_store",
@@ -124,7 +126,9 @@ function StatisticsTweakData:statistics_table()
 		"arm_for",
 		"cage",
 		"hox_3",
-		"shoutout_raid"
+		"shoutout_raid",
+		"arena",
+		"kenaz"
 	}
 	local mask_list = {
 		"character_locked",
@@ -317,7 +321,26 @@ function StatisticsTweakData:statistics_table()
 		"bullskull",
 		"kangee",
 		"lone",
-		"grendel"
+		"grendel",
+		"concert_male",
+		"concert_female",
+		"boombox",
+		"cantus",
+		"titan",
+		"pokachu",
+		"moon",
+		"borsuk",
+		"card_jack",
+		"card_queen",
+		"card_king",
+		"card_joker",
+		"sokol",
+		"sokol_begins",
+		"croupier_hat",
+		"gladiator_helmet",
+		"the_king_mask",
+		"sports_utility_mask",
+		"starvr"
 	}
 	local weapon_list = {
 		"ak5",
@@ -391,12 +414,18 @@ function StatisticsTweakData:statistics_table()
 		"rpg7",
 		"cobray",
 		"b682",
+		"x_g22c",
+		"x_g17",
+		"x_usp",
 		"flamethrower_mk2",
 		"m32",
 		"aa12",
 		"peacemaker",
 		"winchester1874",
-		"plainsrider"
+		"plainsrider",
+		"mateba",
+		"asval",
+		"sub2000"
 	}
 	local melee_list = {
 		"weapon",
@@ -441,7 +470,16 @@ function StatisticsTweakData:statistics_table()
 		"scalper",
 		"mining_pick",
 		"branding_iron",
-		"bowie"
+		"bowie",
+		"microphone",
+		"detector",
+		"micstand",
+		"oldbaton",
+		"hockey",
+		"switchblade",
+		"taser",
+		"slot_lever",
+		"croupier_rake"
 	}
 	local grenade_list = {
 		"frag",
@@ -492,7 +530,8 @@ function StatisticsTweakData:statistics_table()
 		"female_1",
 		"dragan",
 		"jacket",
-		"bonnie"
+		"bonnie",
+		"sokol"
 	}
 	return level_list, job_list, mask_list, weapon_list, melee_list, grenade_list, enemy_list, armor_list, character_list
 end

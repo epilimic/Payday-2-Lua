@@ -89,7 +89,12 @@ function PlayerCarry:_update_check_actions(t, dt)
 	local input = self:_get_input()
 	self:_determine_move_direction()
 	self:_update_interaction_timers(t)
-	self:_update_throw_grenade_timers(t, input)
+	local projectile_entry = managers.blackmarket:equipped_projectile()
+	if tweak_data.blackmarket.projectiles[projectile_entry].is_a_grenade then
+		self:_update_throw_grenade_timers(t, input)
+	else
+		self:_update_throw_projectile_timers(t, input)
+	end
 	self:_update_reload_timers(t, dt, input)
 	self:_update_melee_timers(t, input)
 	self:_update_equip_weapon_timers(t, input)
@@ -113,7 +118,14 @@ function PlayerCarry:_update_check_actions(t, dt)
 		new_action = self:_check_action_primary_attack(t, input)
 		self._shooting = new_action
 	end
-	new_action = new_action or self:_check_action_throw_grenade(t, input)
+	if not new_action then
+		local projectile_entry = managers.blackmarket:equipped_projectile()
+		if tweak_data.blackmarket.projectiles[projectile_entry].is_a_grenade then
+			new_action = self:_check_action_throw_grenade(t, input)
+		else
+			new_action = self:_check_action_throw_projectile(t, input)
+		end
+	end
 	self:_check_action_interact(t, input)
 	self:_check_action_jump(t, input)
 	self:_check_action_run(t, input)
@@ -133,7 +145,7 @@ function PlayerCarry:_check_use_item(t, input)
 	local new_action
 	local action_wanted = input.btn_use_item_press
 	if action_wanted then
-		local action_forbidden = self._use_item_expire_t or self:_changing_weapon() or self:_interacting() or self._ext_movement:has_carry_restriction() or self:_is_throwing_grenade() or self:_on_zipline()
+		local action_forbidden = self._use_item_expire_t or self:_changing_weapon() or self:_interacting() or self._ext_movement:has_carry_restriction() or self:_is_throwing_projectile() or self:_on_zipline()
 		if not action_forbidden then
 			managers.player:drop_carry()
 			new_action = true

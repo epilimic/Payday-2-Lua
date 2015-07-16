@@ -223,7 +223,7 @@ function CopActionTase:update(t)
 						self._machine:set_parameter(redir_res, "hvy", 0)
 					end
 					self._shoot_t = nil
-					if managers.player:has_category_upgrade("player", "taser_malfunction") then
+					if managers.player:has_category_upgrade("player", "taser_malfunction") and not managers.groupai:state():all_AI_criminals()[self._attention.unit:key()] then
 						self._malfunction_clbk_id = "tase_malf" .. tostring(self._unit:key())
 						local delay = math.rand(tweak_data.upgrades.taser_malfunction_min or 1, tweak_data.upgrades.taser_malfunction_max or 3)
 						managers.enemy:add_delayed_clbk(self._malfunction_clbk_id, callback(self, self, "clbk_malfunction"), t + delay)

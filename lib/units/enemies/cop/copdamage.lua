@@ -19,13 +19,15 @@ CopDamage._HEALTH_GRANULARITY = 512
 CopDamage.WEAPON_TYPE_GRANADE = 1
 CopDamage.WEAPON_TYPE_BULLET = 2
 CopDamage.WEAPON_TYPE_FLAMER = 3
+CopDamage.DEBUG_HP = CopDamage.DEBUG_HP or false
 CopDamage._hurt_severities = {
 	none = false,
 	light = "light_hurt",
 	moderate = "hurt",
 	heavy = "heavy_hurt",
 	explode = "expl_hurt",
-	fire = "fire_hurt"
+	fire = "fire_hurt",
+	poison = "poison_hurt"
 }
 CopDamage._impact_bones = {}
 local impact_bones_tmp = {
@@ -86,6 +88,9 @@ function CopDamage:init(unit)
 	self._last_time_unit_got_fire_effect = nil
 	self._temp_flame_redir_res = nil
 	self._active_fire_bone_effects = {}
+	if CopDamage.DEBUG_HP then
+		self:_create_debug_ws()
+	end
 end
 function CopDamage:get_last_time_unit_got_fire_damage()
 	return self._last_time_unit_got_fire_damage
@@ -142,12 +147,14 @@ function CopDamage:damage_bullet(attack_data)
 	if self._has_plate and attack_data.col_ray.body and attack_data.col_ray.body:name() == self._ids_plate_name then
 		local armor_pierce_roll = math.rand(1)
 		local armor_pierce_value = 0
-		if attack_data.attacker_unit == managers.player:player_unit() then
+		if attack_data.attacker_unit == managers.player:player_unit() and not attack_data.weapon_unit:base().thrower_unit then
 			armor_pierce_value = armor_pierce_value + attack_data.weapon_unit:base():armor_piercing_chance()
 			armor_pierce_value = armor_pierce_value + managers.player:upgrade_value("player", "armor_piercing_chance", 0)
 			armor_pierce_value = armor_pierce_value + managers.player:upgrade_value("weapon", "armor_piercing_chance", 0)
 			armor_pierce_value = armor_pierce_value + managers.player:upgrade_value("weapon", "armor_piercing_chance_2", 0)
-			armor_pierce_value = armor_pierce_value + managers.player:upgrade_value("weapon", "armor_piercing_chance_silencer", 0)
+			if attack_data.weapon_unit:base():got_silencer() then
+				armor_pierce_value = armor_pierce_value + managers.player:upgrade_value("weapon", "armor_piercing_chance_silencer", 0)
+			end
 			local weapon_category = attack_data.weapon_unit:base():weapon_tweak_data().category
 			if weapon_category == "saw" then
 				armor_pierce_value = armor_pierce_value + managers.player:upgrade_value("saw", "armor_piercing_chance", 0)
@@ -252,7 +259,7 @@ function CopDamage:damage_bullet(attack_data)
 			managers.statistics:killed(data)
 			if attack_data.attacker_unit:character_damage():bleed_out() and not CopDamage.is_civilian(self._unit:base()._tweak_table) then
 				local messiah_revive = false
-				if managers.player:has_category_upgrade("player", "pistol_revive_from_bleed_out") then
+				if managers.player:has_category_upgrade("player", "pistol_revive_from_bleed_out") and not data.weapon_unit:base().thrower_unit then
 					local weapon_category = data.weapon_unit:base():weapon_tweak_data().category
 					if (weapon_category == "pistol" or weapon_category == "akimbo") and attack_data.attacker_unit:character_damage():consume_messiah_charge() then
 						messiah_revive = true
@@ -263,7 +270,7 @@ function CopDamage:damage_bullet(attack_data)
 				end
 			end
 			self:_check_damage_achievements(attack_data, head)
-			if not CopDamage.is_civilian(self._unit:base()._tweak_table) and managers.player:has_category_upgrade("temporary", "overkill_damage_multiplier") then
+			if not CopDamage.is_civilian(self._unit:base()._tweak_table) and managers.player:has_category_upgrade("temporary", "overkill_damage_multiplier") and not attack_data.weapon_unit:base().thrower_unit then
 				local weapon_category = attack_data.weapon_unit:base():weapon_tweak_data().category
 				if weapon_category == "shotgun" or weapon_category == "saw" then
 					managers.player:activate_temporary_upgrade("temporary", "overkill_damage_multiplier")
@@ -310,11 +317,14 @@ function CopDamage:_check_damage_achievements(attack_data, head)
 		local unit_anim = self._unit.anim_data and self._unit:anim_data()
 		local achievements = tweak_data.achievement.enemy_kill_achievements or {}
 		local current_mask_id = managers.blackmarket:equipped_mask().mask_id
-		local weapons_pass, weapon_pass, fire_mode_pass, ammo_pass, enemy_pass, enemy_weapon_pass, mask_pass, hiding_pass, head_pass, steelsight_pass, distance_pass, zipline_pass, rope_pass, one_shot_pass, weapon_type_pass, level_pass, part_pass, parts_pass, timer_pass, cop_pass, gangster_pass, civilian_pass, all_pass, memory
+		local weapons_pass, weapon_pass, fire_mode_pass, ammo_pass, enemy_pass, enemy_weapon_pass, mask_pass, hiding_pass, head_pass, steelsight_pass, distance_pass, zipline_pass, rope_pass, one_shot_pass, weapon_type_pass, level_pass, part_pass, parts_pass, timer_pass, cop_pass, gangster_pass, civilian_pass, count_no_reload_pass, count_pass, all_pass, memory
+		local kill_count_no_reload = managers.job:get_memory("kill_count_no_reload_" .. tostring(attack_weapon:base()._name_id), true)
+		kill_count_no_reload = (kill_count_no_reload or 0) + 1
+		managers.job:set_memory("kill_count_no_reload_" .. tostring(attack_weapon:base()._name_id), kill_count_no_reload, true)
 		local is_cop = CopDamage.is_cop(self._unit:base()._tweak_table)
 		for achievement, achievement_data in pairs(achievements) do
 			weapon_type_pass = not achievement_data.weapon_type or attack_weapon:base():weapon_tweak_data().category == achievement_data.weapon_type
-			weapons_pass = not achievement_data.weapons or table.contains(achievement_data.weapons, attack_weapon:base().name_id)
+			weapons_pass = not achievement_data.weapons or table.contains(achievement_data.weapons, attack_weapon:base()._name_id)
 			weapon_pass = not achievement_data.weapon or attack_weapon:base().name_id == achievement_data.weapon
 			fire_mode_pass = not achievement_data.fire_mode or attack_weapon:base():fire_mode() == achievement_data.fire_mode
 			ammo_pass = not achievement_data.total_ammo or attack_weapon:base():get_ammo_total() == achievement_data.total_ammo
@@ -331,6 +341,8 @@ function CopDamage:_check_damage_achievements(attack_data, head)
 				level_pass = (managers.job:current_level_id() or "") == achievement_data.level_id
 			end
 			steelsight_pass = achievement_data.in_steelsight == nil or attack_data.attacker_unit and attack_data.attacker_unit:movement() and not not attack_data.attacker_unit:movement():current_state():in_steelsight() == not not achievement_data.in_steelsight
+			count_no_reload_pass = not achievement_data.count_no_reload or kill_count_no_reload >= achievement_data.count_no_reload
+			count_pass = not achievement_data.kill_count or achievement_data.weapon and managers.statistics:session_killed_by_weapon(achievement_data.weapon) == achievement_data.kill_count
 			cop_pass = not achievement_data.is_cop or is_cop
 			part_pass = not achievement_data.part_id or attack_weapon:base():has_part(achievement_data.part_id)
 			parts_pass = not achievement_data.parts
@@ -342,10 +354,10 @@ function CopDamage:_check_damage_achievements(attack_data, head)
 					end
 				end
 			end
-			all_pass = weapon_type_pass and weapons_pass and weapon_pass and fire_mode_pass and ammo_pass and one_shot_pass and enemy_pass and enemy_weapon_pass and mask_pass and hiding_pass and head_pass and distance_pass and zipline_pass and rope_pass and level_pass and part_pass and steelsight_pass and cop_pass
+			all_pass = weapon_type_pass and weapons_pass and weapon_pass and fire_mode_pass and ammo_pass and one_shot_pass and enemy_pass and enemy_weapon_pass and mask_pass and hiding_pass and head_pass and distance_pass and zipline_pass and rope_pass and level_pass and part_pass and steelsight_pass and cop_pass and count_no_reload_pass and count_pass
 			timer_pass = not achievement_data.timer
 			if all_pass and achievement_data.timer then
-				memory = managers.job:get_memory(achievement)
+				memory = managers.job:get_memory(achievement, true)
 				local t = TimerManager:game():time()
 				if memory then
 					table.insert(memory, t)
@@ -355,9 +367,9 @@ function CopDamage:_check_damage_achievements(attack_data, head)
 						end
 					end
 					timer_pass = #memory >= achievement_data.count
-					managers.job:set_memory(achievement, memory)
+					managers.job:set_memory(achievement, memory, true)
 				else
-					managers.job:set_memory(achievement, {t})
+					managers.job:set_memory(achievement, {t}, true)
 				end
 			end
 			all_pass = all_pass and timer_pass
@@ -564,6 +576,65 @@ function CopDamage:damage_fire(attack_data)
 	else
 	end
 	self:_send_fire_attack_result(attack_data, attacker, damage_percent, attack_data.is_fire_dot_damage, attack_data.col_ray.ray)
+	self:_on_damage_received(attack_data)
+end
+function CopDamage:damage_dot(attack_data)
+	if self._dead or self._invulnerable then
+		return
+	end
+	local result
+	local damage = attack_data.damage
+	damage = math.clamp(damage, 0, self._HEALTH_INIT)
+	local damage_percent = math.ceil(damage / self._HEALTH_INIT_PRECENT)
+	damage = damage_percent * self._HEALTH_INIT_PRECENT
+	if damage >= self._health then
+		attack_data.damage = self._health
+		result = {
+			type = "death",
+			variant = attack_data.variant
+		}
+		self:die(attack_data.variant)
+		self:chk_killshot(attack_data.attacker_unit, attack_data.variant)
+	else
+		attack_data.damage = damage
+		local result_type = attack_data.hurt_animation and self:get_damage_type(damage_percent, attack_data.variant) or "dmg_rcv"
+		result = {
+			type = result_type,
+			variant = attack_data.variant
+		}
+		self._health = self._health - damage
+		self._health_ratio = self._health / self._HEALTH_INIT
+	end
+	attack_data.result = result
+	attack_data.pos = attack_data.col_ray.position
+	local head = self._head_body_name and attack_data.col_ray.body and attack_data.col_ray.body:name() == self._ids_head_body_name
+	local attacker = attack_data.attacker_unit
+	if not attacker or attacker:id() == -1 then
+		attacker = self._unit
+	end
+	local attacker_unit = attack_data.attacker_unit
+	if result.type == "death" then
+		local data = {
+			name = self._unit:base()._tweak_table,
+			owner = attack_data.owner,
+			weapon_unit = attack_data.weapon_unit,
+			variant = attack_data.variant,
+			head_shot = head
+		}
+		managers.statistics:killed_by_anyone(data)
+		if attacker_unit == managers.player:player_unit() then
+			if alive(attacker_unit) then
+				self:_comment_death(attacker_unit, self._unit:base()._tweak_table)
+			end
+			self:_show_death_hint(self._unit:base()._tweak_table)
+			managers.statistics:killed(data)
+			if CopDamage.is_civilian(self._unit:base()._tweak_table) then
+				managers.money:civilian_killed()
+			end
+			self:_check_damage_achievements(attack_data, false)
+		end
+	end
+	self:_send_dot_attack_result(attack_data, attacker, damage_percent, attack_data.variant, attack_data.col_ray.ray)
 	self:_on_damage_received(attack_data)
 end
 function CopDamage:damage_explosion(attack_data)
@@ -917,7 +988,6 @@ function CopDamage:get_impact_segment(position)
 			closest_dist_sq = bone_dist_sq
 		end
 	end
-	print("CopDamage:get_impact_segment(): closest_bone is:", closest_bone and closest_bone:name())
 	local parent_bone, child_bone, closest_child
 	closest_dist_sq = nil
 	for _, bone_obj in ipairs(closest_bone:children()) do
@@ -929,7 +999,6 @@ function CopDamage:get_impact_segment(position)
 			end
 		end
 	end
-	print("CopDamage:get_impact_segment(): closest_child is:", closest_child and closest_child:name())
 	local bone_obj = closest_bone:parent()
 	if bone_obj and self._impact_bones[bone_obj:name():key()] then
 		local bone_dist_sq = mvector3.distance_sq(position, bone_obj:position())
@@ -942,7 +1011,6 @@ function CopDamage:get_impact_segment(position)
 		parent_bone = closest_bone
 		child_bone = closest_child
 	end
-	print("CopDamage:get_impact_segment(): parent, child:", parent_bone and parent_bone:name(), child_bone and child_bone:name())
 	return parent_bone, child_bone
 end
 function CopDamage:_spawn_head_gadget(params)
@@ -975,7 +1043,15 @@ end
 function CopDamage:dead()
 	return self._dead
 end
+function CopDamage:_remove_debug_gui()
+	if alive(self._gui) and alive(self._ws) then
+		self._gui:destroy_workspace(self._ws)
+		self._ws = nil
+		self._gui = nil
+	end
+end
 function CopDamage:die(variant)
+	self:_remove_debug_gui()
 	self._unit:base():set_slot(self._unit, 17)
 	if alive(managers.interaction:active_unit()) then
 		managers.interaction:active_unit():interaction():selected()
@@ -1298,6 +1374,38 @@ function CopDamage:sync_damage_fire(attacker_unit, damage_percent, start_dot_dan
 	self:_send_sync_fire_attack_result(attack_data)
 	self:_on_damage_received(attack_data)
 end
+function CopDamage:sync_damage_dot(attacker_unit, damage_percent, death, variant, hurt_animation)
+	if self._dead then
+		return
+	end
+	local damage = damage_percent * self._HEALTH_INIT_PRECENT
+	local attack_data = {variant = variant}
+	local result
+	if death then
+		result = {type = "death", variant = variant}
+		self:die(attack_data.variant)
+		self:chk_killshot(attacker_unit, attack_data.variant)
+		local data = {
+			name = self._unit:base()._tweak_table,
+			head_shot = false,
+			weapon_unit = attacker_unit and attacker_unit:inventory() and attacker_unit:inventory():equipped_unit(),
+			variant = attack_data.variant
+		}
+		if data.weapon_unit then
+			managers.statistics:killed_by_anyone(data)
+		end
+	else
+		local result_type = hurt_animation and self:get_damage_type(damage_percent, variant) or "dmg_rcv"
+		result = {type = result_type, variant = variant}
+		self._health = self._health - damage
+		self._health_ratio = self._health / self._HEALTH_INIT
+	end
+	attack_data.variant = variant
+	attack_data.attacker_unit = attacker_unit
+	attack_data.result = result
+	attack_data.damage = damage
+	self:_on_damage_received(attack_data)
+end
 function CopDamage:sync_damage_melee(attacker_unit, damage_percent, damage_effect_percent, i_body, hit_offset_height, variant, death)
 	if self._dead then
 		return
@@ -1370,6 +1478,9 @@ function CopDamage:_send_fire_attack_result(attack_data, attacker, damage_percen
 	local start_dot_dance_antimation = attack_data.fire_dot_data and attack_data.fire_dot_data.start_dot_dance_antimation
 	self._unit:network():send("damage_fire", attacker, damage_percent, start_dot_dance_antimation, self._dead and true or false, direction, weapon_type, weapon_unit)
 end
+function CopDamage:_send_dot_attack_result(attack_data, attacker, damage_percent, variant, direction)
+	self._unit:network():send("damage_dot", attacker, damage_percent, self._dead and true or false, variant, attack_data.hurt_animation)
+end
 function CopDamage:_send_melee_attack_result(attack_data, damage_percent, damage_effect_percent, hit_offset_height, variant)
 	self._unit:network():send("damage_melee", attack_data.attacker_unit, damage_percent, damage_effect_percent, 1, hit_offset_height, variant, self._dead and true or false)
 end
@@ -1407,6 +1518,7 @@ function CopDamage:_on_damage_received(damage_info)
 	if attacker_unit == managers.player:player_unit() and damage_info then
 		managers.player:on_damage_dealt(self._unit, damage_info)
 	end
+	self:_update_debug_ws(damage_info)
 end
 function CopDamage:_call_listeners(damage_info)
 	self._listener_holder:call(damage_info.result.type, self._unit, damage_info)
@@ -1557,6 +1669,112 @@ function CopDamage:_get_attack_variant_index(variant)
 	debug_pause("variant not found!", variant, inspect(self._ATTACK_VARIANTS))
 	return 1
 end
+function CopDamage:_create_debug_ws()
+	self._gui = World:newgui()
+	local obj = self._unit:get_object(Idstring("Head"))
+	self._ws = self._gui:create_linked_workspace(100, 100, obj, obj:position() + obj:rotation():y() * 25, obj:rotation():x() * 50, obj:rotation():y() * 50)
+	self._ws:set_billboard(self._ws.BILLBOARD_BOTH)
+	self._ws:panel():text({
+		name = "health",
+		text = "" .. self._health,
+		y = 0,
+		font = "fonts/font_medium_shadow_mf",
+		align = "left",
+		vertical = "top",
+		font_size = 30,
+		layer = 1,
+		visible = true,
+		color = Color.white,
+		render_template = "OverlayVertexColorTextured"
+	})
+	self._ws:panel():text({
+		name = "ld",
+		text = "",
+		y = 30,
+		font = "fonts/font_medium_shadow_mf",
+		align = "left",
+		vertical = "top",
+		font_size = 30,
+		layer = 1,
+		visible = true,
+		color = Color.white,
+		render_template = "OverlayVertexColorTextured"
+	})
+	self._ws:panel():text({
+		name = "variant",
+		text = "",
+		y = 60,
+		font = "fonts/font_medium_shadow_mf",
+		align = "left",
+		vertical = "top",
+		font_size = 30,
+		layer = 1,
+		visible = true,
+		color = Color.white,
+		render_template = "OverlayVertexColorTextured"
+	})
+	self:_update_debug_ws()
+end
+function CopDamage:_update_debug_ws(damage_info)
+	if alive(self._ws) then
+		local str = string.format("HP: %.2f", self._health)
+		self._ws:panel():child("health"):set_text(str)
+		self._ws:panel():child("ld"):set_text(string.format("LD: %.2f", damage_info and damage_info.damage or 0))
+		self._ws:panel():child("variant"):set_text("V: " .. (damage_info and damage_info.variant or "N/A"))
+		local vc = Color.white
+		vc = not damage_info or not damage_info.variant or damage_info.variant == "fire" and Color.red or damage_info.variant == "melee" and Color.yellow or Color.white
+		self._ws:panel():child("variant"):set_color(vc)
+		local func = function(o)
+			local mt = 0.25
+			local t = mt
+			while t >= 0 do
+				local dt = coroutine.yield()
+				t = math.clamp(t - dt, 0, mt)
+				local v = t / mt
+				local a = 1
+				local r = 1
+				local g = 0.25 + 0.75 * (1 - v)
+				local b = 0.25 + 0.75 * (1 - v)
+				o:set_color(Color(a, r, g, b))
+			end
+		end
+		self._ws:panel():child("ld"):animate(func)
+		if damage_info and damage_info.damage > 0 then
+			do
+				local text = self._ws:panel():text({
+					rotation = 360,
+					text = string.format("%.2f", damage_info.damage),
+					y = -20,
+					h = 40,
+					w = 40,
+					font = "fonts/font_medium_shadow_mf",
+					align = "center",
+					vertical = "center",
+					font_size = 20,
+					layer = 1,
+					visible = true,
+					color = Color.white,
+					render_template = "OverlayVertexColorTextured"
+				})
+				local function func2(o, dir)
+					local mt = 8
+					local t = mt
+					while t > 0 do
+						local dt = coroutine.yield()
+						t = math.clamp(t - dt, 0, mt)
+						local speed = dt * 100
+						o:move(dir * speed, (1 - math.abs(dir)) * -speed)
+						text:set_alpha(t / mt)
+					end
+					self._ws:panel():remove(o)
+				end
+				local dir = math.sin(Application:time() * 1000)
+				text:set_rotation(dir * 90)
+				text:animate(func2, dir)
+			end
+		end
+	end
+end
 function CopDamage:save(data)
 	if self._health ~= self._HEALTH_INIT then
 		data.char_dmg = data.char_dmg or {}
@@ -1587,4 +1805,7 @@ function CopDamage:load(data)
 		managers.groupai:state():sync_converted_enemy(self._unit)
 		self._unit:contour():add("friendly", false)
 	end
+end
+function CopDamage:destroy(...)
+	self:_remove_debug_gui()
 end

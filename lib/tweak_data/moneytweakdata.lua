@@ -76,6 +76,7 @@ function MoneyTweakData:init(tweak_data)
 	self.bag_values.vehicle_falcogini = 4000
 	self.bag_values.warhead = 4600
 	self.bag_values.unknown = 5000
+	self.bag_values.counterfeit_money = 1100
 	self.bag_value_multiplier = self._create_value_table(self.cut_lootbag_bonus / 5 / self.offshore_rate / self.bag_values.default, self.cut_lootbag_bonus / self.offshore_rate / self.bag_values.default, 7, true, 0.85)
 	self.stage_completion = self._create_value_table(self.cut_stage_complete / 7 / self.offshore_rate, self.cut_stage_complete / self.offshore_rate, 7, true, 1)
 	self.job_completion = self._create_value_table(self.cut_job_complete / 7 / self.offshore_rate, self.cut_job_complete / self.offshore_rate, 7, true, 1)
@@ -181,6 +182,7 @@ function MoneyTweakData:init(tweak_data)
 	self.global_value_multipliers.arena = 1
 	self.global_value_multipliers.character_pack_sokol = 1
 	self.global_value_multipliers.kenaz = 1
+	self.global_value_multipliers.turtles = 1
 	self.global_value_bonus_multiplier = {}
 	self.global_value_bonus_multiplier.normal = 0
 	self.global_value_bonus_multiplier.superior = 0.1
@@ -236,6 +238,7 @@ function MoneyTweakData:init(tweak_data)
 	self.global_value_bonus_multiplier.arena = 0.2
 	self.global_value_bonus_multiplier.character_pack_sokol = 0.2
 	self.global_value_bonus_multiplier.kenaz = 0.2
+	self.global_value_bonus_multiplier.turtles = 0.2
 	local smallest_cashout = (self.stage_completion[1] + self.job_completion[1]) * self.offshore_rate
 	local biggest_mask_cost = self.biggest_cashout * 40
 	local biggest_mask_cost_deinfamous = math.round(biggest_mask_cost / self.global_value_multipliers.infamous)

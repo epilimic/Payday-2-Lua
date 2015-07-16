@@ -1058,6 +1058,7 @@ function InteractionTweakData:init()
 	self.stash_server_pickup.start_active = false
 	self.stash_server_pickup.axis = "z"
 	self.stash_server_pickup.special_equipment_block = "server"
+	self.stash_server_pickup.interact_distance = 250
 	self.shelf_sliding_suburbia = {}
 	self.shelf_sliding_suburbia.icon = "develop"
 	self.shelf_sliding_suburbia.text_id = "debug_interact_move_bookshelf"
@@ -1121,8 +1122,7 @@ function InteractionTweakData:init()
 	self.temp_interact_box2.timer = 20
 	self.printing_plates = {}
 	self.printing_plates.icon = "develop"
-	self.printing_plates.text_id = "debug_interact_printing_plates"
-	self.printing_plates.timer = 0.25
+	self.printing_plates.text_id = "hud_int_printing_plates"
 	self.c4 = {}
 	self.c4.icon = "equipment_c4"
 	self.c4.text_id = "debug_interact_c4"
@@ -1842,6 +1842,9 @@ function InteractionTweakData:init()
 	self.push_button = {}
 	self.push_button.text_id = "hud_int_push_button"
 	self.push_button.axis = "z"
+	self.use_chute = {}
+	self.use_chute.text_id = "hud_int_use_chute"
+	self.use_chute.axis = "z"
 	self.breach_door = {}
 	self.breach_door.text_id = "debug_interact_crowbar"
 	self.breach_door.action_text_id = "hud_action_breaching_door"
@@ -2832,7 +2835,7 @@ function InteractionTweakData:init()
 	self.cas_open_powerbox.action_text_id = "hud_action_cas_opening_powerbox"
 	self.cas_open_powerbox.start_active = false
 	self.cas_open_powerbox.interact_distance = 100
-	self.cas_open_powerbox.timer = 5
+	self.cas_open_powerbox.timer = 2
 	self.cas_take_fireworks_bag = {}
 	self.cas_take_fireworks_bag.text_id = "hud_cas_take_fireworks_bag"
 	self.cas_take_fireworks_bag.action_text_id = "hud_action_cas_taking_fireworks_bag"
@@ -2978,6 +2981,7 @@ function InteractionTweakData:init()
 	self.cas_take_gear = {}
 	self.cas_take_gear.text_id = "hud_cas_take_gear"
 	self.cas_take_gear.action_text_id = "hud_action_cas_taking_gear"
+	self.cas_take_gear.contour = "deployable"
 	self.cas_take_gear.timer = 3
 	self.cas_take_gear.interact_distance = 300
 	self.cas_take_gear.start_active = false
@@ -2985,7 +2989,7 @@ function InteractionTweakData:init()
 	self.cas_security_door = {}
 	self.cas_security_door.text_id = "hud_cas_security_door"
 	self.cas_security_door.action_text_id = "hud_action_cas_security_door"
-	self.cas_security_door.timer = 20
+	self.cas_security_door.timer = 10
 	self.cas_security_door.interact_distance = 150
 	self.cas_security_door.start_active = false
 	self.cas_security_door.axis = "y"

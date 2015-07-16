@@ -532,4 +532,13 @@ function TweakData:_init_pd2()
 			32
 		}
 	}
+	self.hud_icons.four_projectile = {
+		texture = "guis/textures/pd2/equipment",
+		texture_rect = {
+			0,
+			96,
+			32,
+			32
+		}
+	}
 end

@@ -9,6 +9,10 @@ function ElementCarry:on_executed(instigator)
 	end
 	if self._values.type_filter and self._values.type_filter ~= "none" then
 		local carry_ext = instigator:carry_data()
+		if not carry_ext then
+			debug_pause_unit(instigator, "[ElementCarry:on_executed] instigator missing carry_data extension", instigator)
+			return
+		end
 		local carry_id = carry_ext:carry_id()
 		if carry_id ~= self._values.type_filter then
 			return

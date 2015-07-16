@@ -1228,7 +1228,7 @@ function CrimeNetGui:init(ws, fullscreeen_ws, node)
 			global_bonuses_panel:animate(global_bonuses_anim)
 		end
 	end
-	if not no_servers then
+	if not no_servers and not is_xb1 then
 		local id = is_x360 and "menu_cn_friends" or "menu_cn_filter"
 		local filter_button = self._panel:text({
 			name = "filter_button",
@@ -2620,6 +2620,7 @@ function CrimeNetGui:special_btn_pressed(button)
 		managers.menu_component:post_event("menu_enter")
 		if is_x360 then
 			XboxLive:show_friends_ui(managers.user:get_platform_id())
+		elseif is_xb1 then
 		else
 			managers.menu:open_node("crimenet_filters", {})
 		end

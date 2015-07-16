@@ -424,6 +424,9 @@ end
 function GenericDLCManager:has_kenaz()
 	return Global.dlc_manager.all_dlc_data.kenaz and Global.dlc_manager.all_dlc_data.kenaz.verified
 end
+function GenericDLCManager:has_turtles()
+	return Global.dlc_manager.all_dlc_data.turtles and Global.dlc_manager.all_dlc_data.turtles.verified
+end
 function GenericDLCManager:has_xmas_soundtrack()
 	return Global.dlc_manager.all_dlc_data.xmas_soundtrack and Global.dlc_manager.all_dlc_data.xmas_soundtrack.verified
 end
@@ -1204,6 +1207,7 @@ function WINDLCManager:init()
 			west = {app_id = "349830", no_install = true},
 			arena = {app_id = "366660", no_install = true},
 			kenaz = {app_id = "374300", no_install = true},
+			turtles = {app_id = "384021", no_install = true},
 			xmas_soundtrack = {app_id = "267381", no_install = true},
 			bsides_soundtrack = {app_id = "368870", no_install = true},
 			twitch_pack = {app_id = "306110", no_install = true},

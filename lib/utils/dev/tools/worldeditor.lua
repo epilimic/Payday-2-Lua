@@ -189,6 +189,7 @@ function WorldEditor:project_stop_simulation()
 	managers.preplanning:on_simulation_ended()
 	managers.motion_path:on_simulation_ended()
 	managers.fire:on_simulation_ended()
+	managers.dot:on_simulation_ended()
 end
 function WorldEditor:project_clear_units()
 	managers.groupai:state():set_AI_enabled(false)

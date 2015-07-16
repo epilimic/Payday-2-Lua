@@ -757,7 +757,7 @@ function MenuNodeCrimenetCasinoGui:set_offshore_text()
 end
 MenuNodeCrimenetContactInfoGui = MenuNodeCrimenetContactInfoGui or class(MenuNodeGui)
 MenuNodeCrimenetContactInfoGui.WIDTH = 600
-MenuNodeCrimenetContactInfoGui.HEIGHT = 490
+MenuNodeCrimenetContactInfoGui.HEIGHT = 465
 MenuNodeCrimenetContactInfoGui.MENU_WIDTH = 220
 MenuNodeCrimenetContactInfoGui.PADDING = 10
 MenuNodeCrimenetContactInfoGui.CODEX_TEXT_ID = "menu_contact_info_title"
@@ -1055,10 +1055,10 @@ function MenuNodeCrimenetContactInfoGui:_setup_menu()
 		child:set_world_y(math.round(child:world_y()))
 	end
 	self._list_arrows.up:set_world_left(self._align_data.panel:world_left())
-	self._list_arrows.up:set_world_top(self._align_data.panel:world_top())
+	self._list_arrows.up:set_world_top(self._align_data.panel:world_top() - 1)
 	self._list_arrows.up:set_width(self._item_panel_parent:w())
 	self._list_arrows.down:set_world_left(self._align_data.panel:world_left())
-	self._list_arrows.down:set_world_bottom(self._align_data.panel:world_bottom())
+	self._list_arrows.down:set_world_bottom(self._align_data.panel:world_bottom() + 1)
 	self._list_arrows.down:set_width(self._item_panel_parent:w())
 end
 function MenuNodeCrimenetContactInfoGui:_fade_row_item(row_item)

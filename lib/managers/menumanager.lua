@@ -1103,6 +1103,10 @@ function MenuCallbackHandler:dlc_buy_kenaz_pc()
 	print("[MenuCallbackHandler:dlc_buy_kenaz_pc]")
 	Steam:overlay_activate("store", 374300)
 end
+function MenuCallbackHandler:dlc_buy_turtles_pc()
+	print("[MenuCallbackHandler:dlc_buy_turtles_pc]")
+	Steam:overlay_activate("store", 384021)
+end
 function MenuCallbackHandler:dlc_buy_ps3()
 	print("[MenuCallbackHandler:dlc_buy_ps3]")
 	managers.dlc:buy_product("dlc1")
@@ -1140,6 +1144,7 @@ function MenuCallbackHandler:show_game_is_installing_menu()
 end
 function MenuCallbackHandler:is_dlc_latest_locked(check_dlc)
 	local dlcs = {
+		"turtles",
 		"character_pack_sokol",
 		"kenaz",
 		"arena",
@@ -1249,6 +1254,9 @@ function MenuCallbackHandler:visible_callback_character_pack_sokol()
 end
 function MenuCallbackHandler:visible_callback_kenaz()
 	return self:is_dlc_latest_locked("kenaz")
+end
+function MenuCallbackHandler:visible_callback_turtles()
+	return self:is_dlc_latest_locked("turtles")
 end
 function MenuCallbackHandler:not_has_all_dlcs()
 	return not self:has_all_dlcs()
@@ -6831,7 +6839,7 @@ function MenuChooseWeaponRewardInitiator:modify_node(original_node, data)
 	local category, loot_table, data
 	for i, category_data in ipairs({primaries, secondaries}) do
 		for _, weapon_data in ipairs(category_data) do
-			if chk_unlocked_func(weapon_data) and chk_dlc_func(weapon_data) then
+			if chk_dlc_func(weapon_data) then
 				loot_table = managers.blackmarket:get_lootdropable_mods_by_weapon_id(weapon_data.weapon_id)
 				if #loot_table > 0 then
 					data = deep_clone(weapon_data)

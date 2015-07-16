@@ -401,7 +401,7 @@ function FPCameraPlayerBase:_set_camera_position_in_vehicle()
 		mrotation.multiply(shoulder_rot, self._vel_overshot.rotation)
 		mvector3.set(shoulder_pos, self._shoulder_stance.translation)
 		mvector3.add(shoulder_pos, self._vel_overshot.translation)
-		mvector3.rotate_with(shoulder_pos, shoulder_rot)
+		mvector3.rotate_with(shoulder_pos, camera_rot)
 		mvector3.add(shoulder_pos, pos)
 		self:set_position(shoulder_pos)
 		self:set_rotation(shoulder_rot)
@@ -876,6 +876,12 @@ function FPCameraPlayerBase:set_limits(spin, pitch)
 end
 function FPCameraPlayerBase:remove_limits()
 	self._limits = nil
+end
+function FPCameraPlayerBase:throw_projectile(unit)
+	self:unspawn_grenade()
+	if alive(self._parent_unit) then
+		self._parent_unit:equipment():throw_projectile()
+	end
 end
 function FPCameraPlayerBase:throw_grenade(unit)
 	self:unspawn_grenade()

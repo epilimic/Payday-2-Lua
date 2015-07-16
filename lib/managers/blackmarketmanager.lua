@@ -283,6 +283,9 @@ function BlackMarketManager:equipped_armor(chk_armor_kit, chk_player_state)
 	end
 	return self._defaults.armor
 end
+function BlackMarketManager:equipped_projectile()
+	return self:equipped_grenade()
+end
 function BlackMarketManager:equipped_grenade()
 	local grenade
 	for grenade_id, data in pairs(tweak_data.blackmarket.projectiles) do
@@ -787,6 +790,11 @@ function BlackMarketManager:preload_weapon_blueprint(category, factory_id, bluep
 	Application:debug("[BlackMarketManager] preload_weapon_blueprint():", "category", category, "factory_id", factory_id, "blueprint", inspect(blueprint))
 	local parts = managers.weapon_factory:preload_blueprint(factory_id, blueprint, false, function()
 	end, true)
+	local factory_weapon = tweak_data.weapon.factory[factory_id]
+	local ids_unit_name = Idstring(factory_weapon.unit)
+	table.insert(self._preloading_list, {
+		load_me = {name = ids_unit_name}
+	})
 	for part_id, part in pairs(parts) do
 		local new_loading = {}
 		if part.package then
@@ -3502,6 +3510,7 @@ function BlackMarketManager:verify_dlc_items()
 	end
 	self:_verify_dlc_items()
 	self:_load_done()
+	managers.dlc:give_missing_package()
 end
 function BlackMarketManager:_cleanup_blackmarket()
 	Application:debug("[BlackMarketManager:_cleanup_blackmarket] STARTING BLACKMARKET CLEANUP")

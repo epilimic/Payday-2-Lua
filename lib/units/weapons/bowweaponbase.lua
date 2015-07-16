@@ -132,3 +132,11 @@ end
 function BowWeaponBase:charge_max_t()
 	return self:weapon_tweak_data().charge_data.max_t
 end
+CrossbowWeaponBase = CrossbowWeaponBase or class(ProjectileWeaponBase)
+function CrossbowWeaponBase:init(unit)
+	CrossbowWeaponBase.super.init(self, unit)
+	self._client_authoritative = true
+end
+function CrossbowWeaponBase:charge_fail()
+	return false
+end

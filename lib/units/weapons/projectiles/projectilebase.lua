@@ -49,6 +49,9 @@ end
 function ProjectileBase:projectile_entry()
 	return self._projectile_entry or tweak_data.blackmarket:get_projectile_name_from_index(1)
 end
+function ProjectileBase:get_name_id()
+	return alive(self._weapon_unit) and self._weapon_unit:base():get_name_id() or self._projectile_entry
+end
 function ProjectileBase:set_active(active)
 	self._active = active
 	self._unit:set_extension_update_enabled(Idstring("base"), self._active)
@@ -87,11 +90,15 @@ function ProjectileBase:throw(params)
 		self._velocity = velocity
 	end
 	if params.projectile_entry and tweak_data.blackmarket.projectiles[params.projectile_entry] then
-		local physic_effect = tweak_data.blackmarket.projectiles[params.projectile_entry].physic_effect
+		local tweak_entry = tweak_data.blackmarket.projectiles[params.projectile_entry]
+		local physic_effect = tweak_entry.physic_effect
 		if physic_effect then
 			World:play_physic_effect(physic_effect, self._unit)
 		end
-		local unit_name = tweak_data.blackmarket.projectiles[params.projectile_entry].sprint_unit
+		if tweak_entry.throwable and tweak_entry.add_trail_effect then
+			self:add_trail_effect(tweak_entry.add_trail_effect)
+		end
+		local unit_name = tweak_entry.sprint_unit
 		if unit_name then
 			local sprint = World:spawn_unit(Idstring(unit_name), self._unit:position(), self._unit:rotation())
 			local rot = Rotation(params.dir, math.UP)
@@ -210,6 +217,8 @@ function ProjectileBase.throw_projectile(projectile_type, pos, dir, owner_peer_i
 		unit:base():create_sweep_data()
 	end
 	return unit
+end
+function ProjectileBase:add_trail_effect()
 end
 function ProjectileBase.check_time_cheat(projectile_type, owner_peer_id)
 	if not owner_peer_id then

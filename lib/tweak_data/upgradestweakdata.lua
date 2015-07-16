@@ -345,7 +345,7 @@ function UpgradesTweakData:_init_pd2_values()
 		0.2,
 		0.3
 	}
-	self.values.weapon.passive_swap_speed_multiplier = {1.2, 2}
+	self.values.weapon.passive_swap_speed_multiplier = {5, 2}
 	self.values.player.passive_concealment_modifier = {1}
 	self.values.player.passive_armor_movement_penalty_multiplier = {0.75}
 	self.values.player.passive_loot_drop_multiplier = {1.1}
@@ -1486,7 +1486,11 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[8] = {
 		name_id = "weapons",
-		upgrades = {"r870", "aug"}
+		upgrades = {
+			"r870",
+			"aug",
+			"fight"
+		}
 	}
 	self.level_tree[10] = {
 		name_id = "lvl_10",
@@ -1524,7 +1528,11 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[16] = {
 		name_id = "weapons",
-		upgrades = {"akm", "g36"}
+		upgrades = {
+			"akm",
+			"g36",
+			"hunter"
+		}
 	}
 	self.level_tree[17] = {
 		name_id = "weapons",
@@ -1587,7 +1595,8 @@ function UpgradesTweakData:init()
 		name_id = "weapons",
 		upgrades = {
 			"boxing_gloves",
-			"meat_cleaver"
+			"meat_cleaver",
+			"wpn_prj_four"
 		}
 	}
 	self.level_tree[26] = {
@@ -1596,7 +1605,11 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[27] = {
 		name_id = "weapons",
-		upgrades = {"famas", "g26"}
+		upgrades = {
+			"famas",
+			"g26",
+			"twins"
+		}
 	}
 	self.level_tree[28] = {
 		name_id = "weapons",
@@ -1631,11 +1644,19 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[32] = {
 		name_id = "weapons",
-		upgrades = {"x46", "tec9"}
+		upgrades = {
+			"x46",
+			"tec9",
+			"tiger"
+		}
 	}
 	self.level_tree[33] = {
 		name_id = "weapons",
-		upgrades = {"ak5", "striker"}
+		upgrades = {
+			"ak5",
+			"striker",
+			"wa2000"
+		}
 	}
 	self.level_tree[34] = {
 		name_id = "weapons",
@@ -1672,7 +1693,11 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[39] = {
 		name_id = "weapons",
-		upgrades = {"m16", "huntsman"}
+		upgrades = {
+			"m16",
+			"huntsman",
+			"polymer"
+		}
 	}
 	self.level_tree[40] = {
 		name_id = "lvl_40",
@@ -1731,7 +1756,11 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[54] = {
 		name_id = "weapons",
-		upgrades = {"becker", "mosin"}
+		upgrades = {
+			"becker",
+			"mosin",
+			"cqc"
+		}
 	}
 	self.level_tree[55] = {
 		name_id = "weapons",
@@ -1993,6 +2022,9 @@ function UpgradesTweakData:init()
 	self:_mateba_definitions()
 	self:_asval_definitions()
 	self:_sub2000_definitions()
+	self:_wa2000_definitions()
+	self:_polymer_definitions()
+	self:_hunter_definitions()
 	self:_melee_weapon_definitions()
 	self:_grenades_definitions()
 	self:_carry_definitions()
@@ -6446,11 +6478,28 @@ function UpgradesTweakData:_melee_weapon_definitions()
 		category = "melee_weapon",
 		dlc = "character_pack_sokol"
 	}
+	self.definitions.twins = {
+		category = "melee_weapon",
+		dlc = "turtles"
+	}
+	self.definitions.cqc = {
+		category = "melee_weapon",
+		dlc = "turtles"
+	}
+	self.definitions.tiger = {
+		category = "melee_weapon",
+		dlc = "turtles"
+	}
+	self.definitions.fight = {
+		category = "melee_weapon",
+		dlc = "turtles"
+	}
 end
 function UpgradesTweakData:_grenades_definitions()
 	self.definitions.molotov = {category = "grenade", dlc = "bbq"}
 	self.definitions.frag = {category = "grenade", dlc = "gage_pack"}
 	self.definitions.dynamite = {category = "grenade", dlc = "west"}
+	self.definitions.wpn_prj_four = {category = "grenade", dlc = "turtles"}
 end
 function UpgradesTweakData:_weapon_definitions()
 	self.definitions.weapon_modded_damage_multiplier = {
@@ -8854,5 +8903,29 @@ function UpgradesTweakData:_sub2000_definitions()
 		weapon_id = "sub2000",
 		factory_id = "wpn_fps_ass_sub2000",
 		dlc = "kenaz"
+	}
+end
+function UpgradesTweakData:_wa2000_definitions()
+	self.definitions.wa2000 = {
+		category = "weapon",
+		weapon_id = "wa2000",
+		factory_id = "wpn_fps_snp_wa2000",
+		dlc = "turtles"
+	}
+end
+function UpgradesTweakData:_polymer_definitions()
+	self.definitions.polymer = {
+		category = "weapon",
+		weapon_id = "polymer",
+		factory_id = "wpn_fps_smg_polymer",
+		dlc = "turtles"
+	}
+end
+function UpgradesTweakData:_hunter_definitions()
+	self.definitions.hunter = {
+		category = "weapon",
+		weapon_id = "hunter",
+		factory_id = "wpn_fps_bow_hunter",
+		dlc = "turtles"
 	}
 end

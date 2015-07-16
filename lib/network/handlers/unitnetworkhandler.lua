@@ -204,6 +204,15 @@ function UnitNetworkHandler:damage_fire(subject_unit, attacker_unit, damage, sta
 	end
 	subject_unit:character_damage():sync_damage_fire(attacker_unit, damage, start_dot_dance_antimation, death, direction, weapon_type, weapon_unit)
 end
+function UnitNetworkHandler:damage_dot(subject_unit, attacker_unit, damage, death, variant, hurt_animation, sender)
+	if not self._verify_character_and_sender(subject_unit, sender) or not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	if not alive(attacker_unit) or attacker_unit:key() == subject_unit:key() then
+		attacker_unit = nil
+	end
+	subject_unit:character_damage():sync_damage_dot(attacker_unit, damage, death, variant, hurt_animation)
+end
 function UnitNetworkHandler:damage_melee(subject_unit, attacker_unit, damage, damage_effect, i_body, height_offset, variant, death, sender)
 	if not self._verify_character_and_sender(subject_unit, sender) or not self._verify_gamestate(self._gamestate_filter.any_ingame) then
 		return

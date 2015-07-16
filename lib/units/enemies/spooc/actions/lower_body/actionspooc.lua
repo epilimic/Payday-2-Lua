@@ -997,7 +997,7 @@ function ActionSpooc:_upd_flying_strike_first_frame(t)
 	}
 	local speed_mul = math.lerp(3, 1, math.min(1, self._flying_strike_data.travel_dis_scaling_xy))
 	self._machine:set_speed(redir_result, speed_mul)
-	if self._target_unit:base().is_local_player then
+	if alive(self._target_unit) and self._target_unit:base().is_local_player then
 		local enemy_vec = mvector3.copy(self._common_data.pos)
 		mvector3.subtract(enemy_vec, self._target_unit:movement():m_pos())
 		mvector3.set_z(enemy_vec, 0)

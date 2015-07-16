@@ -1034,12 +1034,12 @@ function MenuNodeGui:_text_item_part(row_item, panel, align_x, text_align)
 end
 function MenuNodeGui:scroll_update(dt)
 	local scrolled = MenuNodeGui.super.scroll_update(self, dt)
-	if math.round(self.item_panel:world_y()) - math.round(self._item_panel_parent:world_y()) > 4 then
-		self._list_arrows.up:set_color(self._list_arrows.up:color():with_alpha(1))
-	else
+	if math.round(self.item_panel:world_y()) - math.round(self._item_panel_parent:world_y()) > -4 then
 		self._list_arrows.up:set_color(self._list_arrows.up:color():with_alpha(0))
+	else
+		self._list_arrows.up:set_color(self._list_arrows.up:color():with_alpha(1))
 	end
-	if 4 > math.round(self.item_panel:world_bottom()) - math.round(self._item_panel_parent:world_bottom()) then
+	if math.round(self.item_panel:world_bottom()) - math.round(self._item_panel_parent:world_bottom()) < 4 then
 		self._list_arrows.down:set_color(self._list_arrows.down:color():with_alpha(0))
 	else
 		self._list_arrows.down:set_color(self._list_arrows.down:color():with_alpha(1))

@@ -862,6 +862,7 @@ function NewRaycastWeaponBase:update_reloading(t, dt, time_left)
 		local speed_multiplier = self:reload_speed_multiplier()
 		self._next_shell_reloded_t = self._next_shell_reloded_t + self:reload_shell_expire_t() / speed_multiplier
 		self:set_ammo_remaining_in_clip(math.min(self:get_ammo_max_per_clip(), self:get_ammo_remaining_in_clip() + 1))
+		managers.job:set_memory("kill_count_no_reload_" .. tostring(self._name_id), nil, true)
 		return true
 	end
 end

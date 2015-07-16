@@ -29,6 +29,7 @@ function DLCTweakData:init(tweak_data)
 		dlc_arena = true,
 		character_pack_sokol = true,
 		kenaz = true,
+		turtles = true,
 		pd2_goty = 1,
 		pd2_hw_boxing = true,
 		hlm2 = true,
@@ -3688,6 +3689,140 @@ function DLCTweakData:init(tweak_data)
 		{
 			type_items = "textures",
 			item_entry = "dices",
+			amount = 1
+		}
+	}
+	self.turtles = {}
+	self.turtles.dlc = "has_turtles"
+	self.turtles.content = {}
+	self.turtles.content.loot_drops = {
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_bow_hunter_b_carbon",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_bow_hunter_b_skeletal",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_bow_hunter_g_camo",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_bow_hunter_g_walnut",
+			amount = 1
+		}
+	}
+	self.turtles_free = {}
+	self.turtles_free.free = true
+	self.turtles_free.content = {}
+	self.turtles_free.content.loot_global_value = "normal"
+	self.turtles_free.content.loot_drops = {
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_upg_a_bow_poison",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_upg_a_crossbow_poison",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_upg_a_crossbow_explosion",
+			amount = 1
+		}
+	}
+	self.ach_turtles_1 = {}
+	self.ach_turtles_1.dlc = "has_achievement"
+	self.ach_turtles_1.achievement_id = "turtles_1"
+	self.ach_turtles_1.content = {}
+	self.ach_turtles_1.content.loot_global_value = "turtles"
+	self.ach_turtles_1.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "slicer",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "still_waters",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "youkai",
+			amount = 1
+		}
+	}
+	self.ach_turtles_2 = {}
+	self.ach_turtles_2.dlc = "has_achievement"
+	self.ach_turtles_2.achievement_id = "turtles_2"
+	self.ach_turtles_2.content = {}
+	self.ach_turtles_2.content.loot_global_value = "turtles"
+	self.ach_turtles_2.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "kage",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "sakura",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "oni",
+			amount = 1
+		}
+	}
+	self.ach_turtles_3 = {}
+	self.ach_turtles_3.dlc = "has_achievement"
+	self.ach_turtles_3.achievement_id = "turtles_3"
+	self.ach_turtles_3.content = {}
+	self.ach_turtles_3.content.loot_global_value = "turtles"
+	self.ach_turtles_3.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "ninja_hood",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "bamboo",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "koi",
+			amount = 1
+		}
+	}
+	self.ach_turtles_4 = {}
+	self.ach_turtles_4.dlc = "has_achievement"
+	self.ach_turtles_4.achievement_id = "turtles_4"
+	self.ach_turtles_4.content = {}
+	self.ach_turtles_4.content.loot_global_value = "turtles"
+	self.ach_turtles_4.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "shirai",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "origami",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "origami",
 			amount = 1
 		}
 	}

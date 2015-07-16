@@ -377,6 +377,9 @@ function UpgradesManager:_aquire_rep_upgrade(upgrade, id)
 end
 function UpgradesManager:get_value(upgrade_id, ...)
 	local upgrade = tweak_data.upgrades.definitions[upgrade_id]
+	if not upgrade then
+		Application:error("[UpgradesManager:get_value] Missing Upgrade ID: ", upgrade_id)
+	end
 	local u = upgrade.upgrade
 	if upgrade.category == "feature" then
 		return tweak_data.upgrades.values[u.category][u.upgrade][u.value]

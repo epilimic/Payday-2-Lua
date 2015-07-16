@@ -221,10 +221,6 @@ function AchievmentManager:get_stat(stat)
 end
 function AchievmentManager:award_steam(id)
 	Application:debug("[AchievmentManager:award_steam] Awarded Steam achievment", id)
-	if not self.handler:initialized() then
-		print("[AchievmentManager:award_steam] Achievments are not initialized. Cannot award achievment:", id)
-		return
-	end
 	self.handler:achievement_store_callback(AchievmentManager.steam_unlock_result)
 	self.handler:set_achievement(self:get_info(id).id)
 	self.handler:store_data()

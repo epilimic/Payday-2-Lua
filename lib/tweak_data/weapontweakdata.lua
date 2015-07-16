@@ -94,6 +94,9 @@ function WeaponTweakData:init(tweak_data)
 	self:_init_data_mateba_npc()
 	self:_init_data_asval_npc()
 	self:_init_data_sub2000_npc()
+	self:_init_data_wa2000_npc()
+	self:_init_data_polymer_npc()
+	self:_init_data_hunter_npc()
 	self:_precalculate_values()
 end
 function WeaponTweakData:_set_easy()
@@ -1495,6 +1498,48 @@ function WeaponTweakData:_init_data_sub2000_npc()
 	self.sub2000_npc.hold = "rifle"
 	self.sub2000_npc.alert_size = 5000
 	self.sub2000_npc.suppression = 1
+end
+function WeaponTweakData:_init_data_wa2000_npc()
+	self.wa2000_npc.sounds.prefix = "lakner_npc"
+	self.wa2000_npc.use_data.selection_index = 1
+	self.wa2000_npc.DAMAGE = 2
+	self.wa2000_npc.muzzleflash = "effects/payday2/particles/weapons/9mm_auto"
+	self.wa2000_npc.muzzleflash_silenced = "effects/payday2/particles/weapons/9mm_auto_silence"
+	self.wa2000_npc.shell_ejection = "effects/payday2/particles/weapons/shells/shell_9mm"
+	self.wa2000_npc.CLIP_AMMO_MAX = 30
+	self.wa2000_npc.NR_CLIPS_MAX = 5
+	self.wa2000_npc.auto.fire_rate = 20
+	self.wa2000_npc.hold = "rifle"
+	self.wa2000_npc.alert_size = 5000
+	self.wa2000_npc.suppression = 1
+end
+function WeaponTweakData:_init_data_polymer_npc()
+	self.polymer_npc.sounds.prefix = "polymer_npc"
+	self.polymer_npc.use_data.selection_index = 1
+	self.polymer_npc.DAMAGE = 2
+	self.polymer_npc.muzzleflash = "effects/payday2/particles/weapons/9mm_auto"
+	self.polymer_npc.muzzleflash_silenced = "effects/payday2/particles/weapons/9mm_auto_silence"
+	self.polymer_npc.shell_ejection = "effects/payday2/particles/weapons/shells/shell_9mm"
+	self.polymer_npc.CLIP_AMMO_MAX = 30
+	self.polymer_npc.NR_CLIPS_MAX = 5
+	self.polymer_npc.auto.fire_rate = 20
+	self.polymer_npc.hold = "pistol"
+	self.polymer_npc.alert_size = 5000
+	self.polymer_npc.suppression = 1
+end
+function WeaponTweakData:_init_data_hunter_npc()
+	self.hunter_npc.sounds.prefix = "hunter_npc"
+	self.hunter_npc.use_data.selection_index = 1
+	self.hunter_npc.DAMAGE = 2
+	self.hunter_npc.muzzleflash = "effects/payday2/particles/weapons/9mm_auto"
+	self.hunter_npc.muzzleflash_silenced = "effects/payday2/particles/weapons/9mm_auto_silence"
+	self.hunter_npc.shell_ejection = "effects/payday2/particles/weapons/shells/shell_empty"
+	self.hunter_npc.CLIP_AMMO_MAX = 30
+	self.hunter_npc.NR_CLIPS_MAX = 5
+	self.hunter_npc.auto.fire_rate = 20
+	self.hunter_npc.hold = "pistol"
+	self.hunter_npc.alert_size = 5000
+	self.hunter_npc.suppression = 1
 end
 function WeaponTweakData:_init_data_player_weapons(tweak_data)
 	local autohit_rifle_default, autohit_pistol_default, autohit_shotgun_default, autohit_lmg_default, autohit_snp_default, autohit_smg_default, autohit_minigun_default, aim_assist_rifle_default, aim_assist_pistol_default, aim_assist_shotgun_default, aim_assist_lmg_default, aim_assist_snp_default, aim_assist_smg_default, aim_assist_minigun_default
@@ -9163,6 +9208,295 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 		total_ammo_mod = 21,
 		value = 1
 	}
+	self.wa2000 = {}
+	self.wa2000.category = "snp"
+	self.wa2000.upgrade_blocks = {
+		weapon = {
+			"clip_ammo_increase"
+		}
+	}
+	self.wa2000.damage_melee = damage_melee_default
+	self.wa2000.damage_melee_effect_mul = damage_melee_effect_multiplier_default
+	self.wa2000.sounds = {}
+	self.wa2000.sounds.fire = "lakner_fire"
+	self.wa2000.sounds.dryfire = "primary_dryfire"
+	self.wa2000.sounds.enter_steelsight = "primary_steel_sight_enter"
+	self.wa2000.sounds.leave_steelsight = "primary_steel_sight_exit"
+	self.wa2000.timers = {}
+	self.wa2000.timers.reload_not_empty = 4.64
+	self.wa2000.timers.reload_empty = 6.2
+	self.wa2000.timers.unequip = 0.9
+	self.wa2000.timers.equip = 0.9
+	self.wa2000.name_id = "bm_w_wa2000"
+	self.wa2000.desc_id = "bm_w_wa2000_desc"
+	self.wa2000.description_id = "des_wa2000"
+	self.wa2000.muzzleflash = "effects/payday2/particles/weapons/big_762_auto_fps"
+	self.wa2000.shell_ejection = "effects/payday2/particles/weapons/shells/shell_556"
+	self.wa2000.use_data = {}
+	self.wa2000.use_data.selection_index = 2
+	self.wa2000.DAMAGE = 1
+	self.wa2000.CLIP_AMMO_MAX = 10
+	self.wa2000.NR_CLIPS_MAX = 5
+	self.wa2000.AMMO_MAX = self.wa2000.CLIP_AMMO_MAX * self.wa2000.NR_CLIPS_MAX
+	self.wa2000.AMMO_PICKUP = self:_pickup_chance(self.wa2000.AMMO_MAX, 1)
+	self.wa2000.FIRE_MODE = "single"
+	self.wa2000.fire_mode_data = {}
+	self.wa2000.fire_mode_data.fire_rate = 0.5
+	self.wa2000.CAN_TOGGLE_FIREMODE = false
+	self.wa2000.single = {}
+	self.wa2000.single.fire_rate = 0.4
+	self.wa2000.spread = {}
+	self.wa2000.spread.standing = 20
+	self.wa2000.spread.crouching = 20
+	self.wa2000.spread.steelsight = 0
+	self.wa2000.spread.moving_standing = 20
+	self.wa2000.spread.moving_crouching = 20
+	self.wa2000.spread.moving_steelsight = 0.2
+	self.wa2000.kick = {}
+	self.wa2000.kick.standing = {
+		3,
+		4.8,
+		-0.3,
+		0.3
+	}
+	self.wa2000.kick.crouching = self.wa2000.kick.standing
+	self.wa2000.kick.steelsight = self.wa2000.kick.standing
+	self.wa2000.crosshair = {}
+	self.wa2000.crosshair.standing = {}
+	self.wa2000.crosshair.crouching = {}
+	self.wa2000.crosshair.steelsight = {}
+	self.wa2000.crosshair.standing.offset = 1.14
+	self.wa2000.crosshair.standing.moving_offset = 1.8
+	self.wa2000.crosshair.standing.kick_offset = 1.6
+	self.wa2000.crosshair.crouching.offset = 1.1
+	self.wa2000.crosshair.crouching.moving_offset = 1.6
+	self.wa2000.crosshair.crouching.kick_offset = 1.4
+	self.wa2000.crosshair.steelsight.hidden = true
+	self.wa2000.crosshair.steelsight.offset = 1
+	self.wa2000.crosshair.steelsight.moving_offset = 1
+	self.wa2000.crosshair.steelsight.kick_offset = 1.14
+	self.wa2000.shake = {}
+	self.wa2000.shake.fire_multiplier = 1.5
+	self.wa2000.shake.fire_steelsight_multiplier = -1.5
+	self.wa2000.autohit = autohit_snp_default
+	self.wa2000.aim_assist = aim_assist_snp_default
+	self.wa2000.weapon_hold = "wa2000"
+	self.wa2000.animations = {}
+	self.wa2000.animations.equip_id = "equip_wa2000"
+	self.wa2000.animations.recoil_steelsight = true
+	self.wa2000.panic_suppression_chance = 0.1
+	self.wa2000.global_value = "turtles"
+	self.wa2000.texture_bundle_folder = "turtles"
+	self.wa2000.can_shoot_through_enemy = true
+	self.wa2000.can_shoot_through_shield = true
+	self.wa2000.can_shoot_through_wall = true
+	self.wa2000.stats = {
+		damage = 21,
+		spread = 8,
+		recoil = 7,
+		spread_moving = 6,
+		zoom = 1,
+		concealment = 16,
+		suppression = 12,
+		alert_size = 8,
+		extra_ammo = 6,
+		total_ammo_mod = 21,
+		value = 9
+	}
+	self.wa2000.armor_piercing_chance = 1
+	self.wa2000.stats_modifiers = {
+		damage = 3.5,
+		suppression = 3,
+		spread = 0.6
+	}
+	self.polymer = {}
+	self.polymer.category = "smg"
+	self.polymer.damage_melee = damage_melee_default
+	self.polymer.damage_melee_effect_mul = damage_melee_effect_multiplier_default
+	self.polymer.sounds = {}
+	self.polymer.sounds.fire = "polymer_fire_single"
+	self.polymer.sounds.fire_single = "polymer_fire_single"
+	self.polymer.sounds.fire_auto = "polymer_fire"
+	self.polymer.sounds.stop_fire = "polymer_stop"
+	self.polymer.sounds.dryfire = "secondary_dryfire"
+	self.polymer.sounds.enter_steelsight = "secondary_steel_sight_enter"
+	self.polymer.sounds.leave_steelsight = "secondary_steel_sight_exit"
+	self.polymer.timers = {}
+	self.polymer.timers.reload_not_empty = 2
+	self.polymer.timers.reload_empty = 2.5
+	self.polymer.timers.unequip = 0.7
+	self.polymer.timers.equip = 0.5
+	self.polymer.name_id = "bm_w_polymer"
+	self.polymer.desc_id = "bm_w_polymer_desc"
+	self.polymer.description_id = "des_polymer"
+	self.polymer.muzzleflash = "effects/payday2/particles/weapons/9mm_auto_fps"
+	self.polymer.muzzleflash_silenced = "effects/payday2/particles/weapons/9mm_auto_silence_fps"
+	self.polymer.shell_ejection = "effects/payday2/particles/weapons/shells/shell_9mm"
+	self.polymer.use_data = {}
+	self.polymer.use_data.selection_index = 1
+	self.polymer.DAMAGE = 1
+	self.polymer.CLIP_AMMO_MAX = 30
+	self.polymer.NR_CLIPS_MAX = 4
+	self.polymer.AMMO_MAX = self.polymer.CLIP_AMMO_MAX * self.polymer.NR_CLIPS_MAX
+	self.polymer.AMMO_PICKUP = self:_pickup_chance(self.polymer.AMMO_MAX, 1)
+	self.polymer.FIRE_MODE = "auto"
+	self.polymer.fire_mode_data = {}
+	self.polymer.fire_mode_data.fire_rate = 0.05
+	self.polymer.CAN_TOGGLE_FIREMODE = true
+	self.polymer.auto = {}
+	self.polymer.auto.fire_rate = 0.05
+	self.polymer.spread = {}
+	self.polymer.spread.standing = self.new_m4.spread.standing * 0.7
+	self.polymer.spread.crouching = self.new_m4.spread.standing * 0.7
+	self.polymer.spread.steelsight = self.new_m4.spread.steelsight
+	self.polymer.spread.moving_standing = self.new_m4.spread.standing * 0.7
+	self.polymer.spread.moving_crouching = self.new_m4.spread.standing * 0.7
+	self.polymer.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
+	self.polymer.kick = {}
+	self.polymer.kick.standing = {
+		-0.2,
+		0.4,
+		-1,
+		1
+	}
+	self.polymer.kick.crouching = self.polymer.kick.standing
+	self.polymer.kick.steelsight = self.polymer.kick.standing
+	self.polymer.crosshair = {}
+	self.polymer.crosshair.standing = {}
+	self.polymer.crosshair.crouching = {}
+	self.polymer.crosshair.steelsight = {}
+	self.polymer.crosshair.standing.offset = 0.4
+	self.polymer.crosshair.standing.moving_offset = 0.7
+	self.polymer.crosshair.standing.kick_offset = 0.6
+	self.polymer.crosshair.crouching.offset = 0.3
+	self.polymer.crosshair.crouching.moving_offset = 0.6
+	self.polymer.crosshair.crouching.kick_offset = 0.4
+	self.polymer.crosshair.steelsight.hidden = true
+	self.polymer.crosshair.steelsight.offset = 0
+	self.polymer.crosshair.steelsight.moving_offset = 0
+	self.polymer.crosshair.steelsight.kick_offset = 0.4
+	self.polymer.shake = {}
+	self.polymer.shake.fire_multiplier = 1
+	self.polymer.shake.fire_steelsight_multiplier = -1
+	self.polymer.autohit = autohit_smg_default
+	self.polymer.aim_assist = aim_assist_smg_default
+	self.polymer.weapon_hold = "polymer"
+	self.polymer.animations = {}
+	self.polymer.animations.equip_id = "equip_polymer"
+	self.polymer.animations.recoil_steelsight = true
+	self.polymer.global_value = "turtles"
+	self.polymer.texture_bundle_folder = "turtles"
+	self.polymer.panic_suppression_chance = 0.05
+	self.polymer.stats = {
+		damage = 12,
+		spread = 5,
+		recoil = 9,
+		spread_moving = 8,
+		zoom = 3,
+		concealment = 20,
+		suppression = 14,
+		alert_size = 7,
+		extra_ammo = 6,
+		total_ammo_mod = 21,
+		value = 1
+	}
+	self.hunter = {}
+	self.hunter.category = "crossbow"
+	self.hunter.projectile_type_index = 11
+	self.hunter.upgrade_blocks = {
+		weapon = {
+			"clip_ammo_increase"
+		}
+	}
+	self.hunter.damage_melee = damage_melee_default
+	self.hunter.damage_melee_effect_mul = damage_melee_effect_multiplier_default
+	self.hunter.sounds = {}
+	self.hunter.sounds.fire = "hunter_fire"
+	self.hunter.sounds.fire_single = "hunter_fire"
+	self.hunter.sounds.fire_auto = "hunter_fire"
+	self.hunter.sounds.dryfire = "secondary_dryfire"
+	self.hunter.sounds.enter_steelsight = "secondary_steel_sight_enter"
+	self.hunter.sounds.leave_steelsight = "secondary_steel_sight_exit"
+	self.hunter.timers = {}
+	self.hunter.timers.reload_not_empty = 1.8
+	self.hunter.timers.reload_empty = 1.2
+	self.hunter.timers.unequip = 0.7
+	self.hunter.timers.equip = 0.5
+	self.hunter.name_id = "bm_w_hunter"
+	self.hunter.desc_id = "bm_w_hunter_desc"
+	self.hunter.description_id = "des_hunter"
+	self.hunter.muzzleflash = "effects/payday2/particles/weapons/shells/shell_empty"
+	self.hunter.shell_ejection = "effects/payday2/particles/weapons/shells/shell_empty"
+	self.hunter.use_data = {}
+	self.hunter.use_data.selection_index = 1
+	self.hunter.DAMAGE = 1
+	self.hunter.CLIP_AMMO_MAX = 1
+	self.hunter.NR_CLIPS_MAX = 25
+	self.hunter.AMMO_MAX = self.hunter.CLIP_AMMO_MAX * self.hunter.NR_CLIPS_MAX
+	self.hunter.AMMO_PICKUP = self:_pickup_chance(0, 1)
+	self.hunter.FIRE_MODE = "auto"
+	self.hunter.fire_mode_data = {}
+	self.hunter.fire_mode_data.fire_rate = 1.2
+	self.hunter.CAN_TOGGLE_FIREMODE = false
+	self.hunter.single = {}
+	self.hunter.single.fire_rate = 0.05
+	self.hunter.spread = {}
+	self.hunter.spread.standing = self.new_m4.spread.standing * 0.7
+	self.hunter.spread.crouching = self.new_m4.spread.standing * 0.7
+	self.hunter.spread.steelsight = self.new_m4.spread.steelsight
+	self.hunter.spread.moving_standing = self.new_m4.spread.standing * 0.7
+	self.hunter.spread.moving_crouching = self.new_m4.spread.standing * 0.7
+	self.hunter.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
+	self.hunter.kick = {}
+	self.hunter.kick.standing = {
+		-0.2,
+		0.4,
+		-1,
+		1
+	}
+	self.hunter.kick.crouching = self.hunter.kick.standing
+	self.hunter.kick.steelsight = self.hunter.kick.standing
+	self.hunter.crosshair = {}
+	self.hunter.crosshair.standing = {}
+	self.hunter.crosshair.crouching = {}
+	self.hunter.crosshair.steelsight = {}
+	self.hunter.crosshair.standing.offset = 0.4
+	self.hunter.crosshair.standing.moving_offset = 0.7
+	self.hunter.crosshair.standing.kick_offset = 0.6
+	self.hunter.crosshair.crouching.offset = 0.3
+	self.hunter.crosshair.crouching.moving_offset = 0.6
+	self.hunter.crosshair.crouching.kick_offset = 0.4
+	self.hunter.crosshair.steelsight.hidden = true
+	self.hunter.crosshair.steelsight.offset = 0
+	self.hunter.crosshair.steelsight.moving_offset = 0
+	self.hunter.crosshair.steelsight.kick_offset = 0.4
+	self.hunter.shake = {}
+	self.hunter.shake.fire_multiplier = 1
+	self.hunter.shake.fire_steelsight_multiplier = -1
+	self.hunter.autohit = autohit_smg_default
+	self.hunter.aim_assist = aim_assist_smg_default
+	self.hunter.weapon_hold = "hunter"
+	self.hunter.animations = {}
+	self.hunter.animations.equip_id = "equip_hunter"
+	self.hunter.animations.recoil_steelsight = true
+	self.hunter.global_value = "turtles"
+	self.hunter.texture_bundle_folder = "turtles"
+	self.hunter.panic_suppression_chance = 0.05
+	self.hunter.ignore_damage_upgrades = true
+	self.hunter.stats = {
+		damage = 21,
+		spread = 10,
+		recoil = 8,
+		spread_moving = 8,
+		zoom = 3,
+		concealment = 26,
+		suppression = 14,
+		alert_size = 7,
+		extra_ammo = 6,
+		total_ammo_mod = 21,
+		value = 1
+	}
+	self.hunter.stats_modifiers = {damage = 2}
 end
 function WeaponTweakData:_init_data_offhand_weapons()
 	self.b92fs_primary = deep_clone(self.b92fs)
@@ -9802,6 +10136,24 @@ function WeaponTweakData:_create_table_structure()
 		use_data = {},
 		auto = {}
 	}
+	self.wa2000_npc = {
+		usage = "rifle",
+		sounds = {},
+		use_data = {},
+		auto = {}
+	}
+	self.polymer_npc = {
+		usage = "mp5",
+		sounds = {},
+		use_data = {},
+		auto = {}
+	}
+	self.hunter_npc = {
+		usage = "mp5",
+		sounds = {},
+		use_data = {},
+		auto = {}
+	}
 end
 function WeaponTweakData:_precalculate_values_wip()
 end
@@ -9896,4 +10248,7 @@ function WeaponTweakData:_precalculate_values()
 	self.mateba_npc.AMMO_MAX = self.mateba_npc.CLIP_AMMO_MAX * self.mateba_npc.NR_CLIPS_MAX
 	self.asval_npc.AMMO_MAX = self.asval_npc.CLIP_AMMO_MAX * self.asval_npc.NR_CLIPS_MAX
 	self.sub2000_npc.AMMO_MAX = self.sub2000_npc.CLIP_AMMO_MAX * self.sub2000_npc.NR_CLIPS_MAX
+	self.wa2000_npc.AMMO_MAX = self.wa2000_npc.CLIP_AMMO_MAX * self.wa2000_npc.NR_CLIPS_MAX
+	self.polymer_npc.AMMO_MAX = self.polymer_npc.CLIP_AMMO_MAX * self.polymer_npc.NR_CLIPS_MAX
+	self.hunter_npc.AMMO_MAX = self.hunter_npc.CLIP_AMMO_MAX * self.hunter_npc.NR_CLIPS_MAX
 end

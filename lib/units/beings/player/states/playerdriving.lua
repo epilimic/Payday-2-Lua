@@ -62,7 +62,12 @@ function PlayerDriving:exit(state_data, new_state_name)
 	PlayerDriving.super.exit(self, state_data, new_state_name)
 	self:_interupt_action_exit_vehicle()
 	self:_interupt_action_steelsight()
-	self:_interupt_action_throw_grenade()
+	local projectile_entry = managers.blackmarket:equipped_projectile()
+	if tweak_data.blackmarket.projectiles[projectile_entry].is_a_grenade then
+		self:_interupt_action_throw_grenade()
+	else
+		self:_interupt_action_throw_projectile()
+	end
 	self:_interupt_action_reload()
 	self:_interupt_action_charging_weapon()
 	self:_interupt_action_melee()
@@ -114,6 +119,9 @@ function PlayerDriving:update(t, dt)
 	end
 	self:_update_input(dt)
 	local input = self:_get_input()
+	self:_calculate_standard_variables(t, dt)
+	self:_update_ground_ray()
+	self:_update_fwd_ray()
 	self:_update_hud(t, input)
 	self:_update_action_timers(t, input)
 	self:_check_action_exit_vehicle(t, input)
@@ -188,7 +196,12 @@ function PlayerDriving:_exit_shooting_stance()
 	if not self._seat.allow_shooting then
 		local t = managers.player:player_timer():time()
 		self:_interupt_action_steelsight()
-		self:_interupt_action_throw_grenade(t)
+		local projectile_entry = managers.blackmarket:equipped_projectile()
+		if tweak_data.blackmarket.projectiles[projectile_entry].is_a_grenade then
+			self:_interupt_action_throw_grenade(t)
+		else
+			self:_interupt_action_throw_projectile(t)
+		end
 		self:_interupt_action_reload(t)
 		self:_interupt_action_charging_weapon(t)
 		self:_interupt_action_melee(t)

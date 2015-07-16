@@ -1264,7 +1264,6 @@ function GroupAIStateBase:check_gameover_conditions()
 		return false
 	end
 	if game_state_machine:current_state().game_ended and game_state_machine:current_state():game_ended() then
-		print("GroupAIStateBase:check_gameover_conditions()", "game_state_machine:current_state().game_ended")
 		return false
 	end
 	if Global.load_start_menu or Application:editor() then
@@ -1272,10 +1271,8 @@ function GroupAIStateBase:check_gameover_conditions()
 	end
 	local plrs_alive = false
 	local plrs_disabled = true
-	print("GroupAIStateBase:check_gameover_conditions._player_criminals", inspect(self._player_criminals))
 	for u_key, u_data in pairs(self._player_criminals) do
 		plrs_alive = true
-		print(u_key, inspect(u_data))
 		if u_data.status ~= "dead" and u_data.status ~= "disabled" then
 			plrs_disabled = false
 		else
@@ -1298,7 +1295,6 @@ function GroupAIStateBase:check_gameover_conditions()
 	elseif plrs_disabled and ai_disabled then
 		gameover = true
 	end
-	print("GroupAIStateBase:check_gameover_conditions", "gameover", gameover, "plrs_alive", plrs_alive, "plrs_disabled", plrs_disabled, "ai_alive", ai_alive, "ai_disabled", ai_disabled)
 	if gameover then
 		if not self._gameover_clbk then
 			self._gameover_clbk = callback(self, self, "_gameover_clbk_func")

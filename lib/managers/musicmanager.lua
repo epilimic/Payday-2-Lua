@@ -123,6 +123,13 @@ function MusicManager:load_profile(data)
 		Global.music_manager.loadout_selection = state.loadout_selection
 	end
 end
+function MusicManager:current_track_string()
+	local level_data = Global.level_data.level_id and tweak_data.levels[Global.level_data.level_id]
+	if level_data and level_data.music == "no_music" then
+		return utf8.to_upper(managers.localization:text("menu_jukebox_track_" .. Global.level_data.level_id))
+	end
+	return utf8.to_upper(managers.localization:text("menu_jukebox_" .. Global.music_manager.current_track))
+end
 function MusicManager:jukebox_random_all()
 	local switches = {}
 	local track_list, track_locked = self:jukebox_music_tracks()
@@ -201,17 +208,6 @@ function MusicManager:_set_default_values()
 			Global.music_manager.track_attachment[name] = track
 		end
 	end
-end
-function MusicManager:_jukebox_unlock_track(locked_list, track_id, unlock_id, unlock_reason)
-	if self:track_unlocked(track_id) then
-		return
-	end
-	if unlock_reason then
-		self:unlock_track(track_id)
-		self:playlist_add(track_id)
-		return
-	end
-	locked_list[track_id] = unlock_id
 end
 function MusicManager:jukebox_menu_track(name)
 	local track = self:track_attachment(name)
@@ -311,169 +307,51 @@ function MusicManager:jukebox_default_tracks()
 	return default_options
 end
 function MusicManager:jukebox_music_tracks()
-	local tracks = {
-		"track_01",
-		"track_02",
-		"track_03",
-		"track_04",
-		"track_05",
-		"track_06",
-		"track_07",
-		"track_08",
-		"track_09",
-		"track_10",
-		"track_11",
-		"track_12",
-		"track_13",
-		"track_14",
-		"track_15",
-		"track_16",
-		"track_17",
-		"track_18",
-		"track_19",
-		"track_20",
-		"track_21",
-		"track_22",
-		"track_23",
-		"track_24",
-		"track_25",
-		"track_26",
-		"track_27",
-		"track_28",
-		"track_29"
-	}
-	local pdth_tracks = {
-		"track_pth_01",
-		"track_pth_02",
-		"track_pth_03",
-		"track_pth_04",
-		"track_pth_05",
-		"track_pth_06",
-		"track_pth_07",
-		"track_pth_08",
-		"track_pth_09"
-	}
-	tracks = table.list_add(tracks, pdth_tracks)
+	local tracks = {}
 	local tracks_locked = {}
-	self:_jukebox_unlock_track(tracks_locked, "track_09", "armored", not managers.dlc or managers.dlc:has_armored_transport() or managers.dlc:has_soundtrack_or_cce())
-	self:_jukebox_unlock_track(tracks_locked, "track_11", "infamy", managers.experience and managers.experience:current_rank() > 0)
-	self:_jukebox_unlock_track(tracks_locked, "track_12", "deathwish", managers.experience and (managers.experience:current_rank() > 0 or managers.experience:current_level() >= tweak_data.difficulty_level_locks[tweak_data:difficulty_to_index("overkill_290")]))
-	self:_jukebox_unlock_track(tracks_locked, "track_14", "bigbank", not managers.dlc or managers.dlc:has_big_bank() or managers.dlc:has_soundtrack_or_cce())
-	self:_jukebox_unlock_track(tracks_locked, "track_17", "assault", not managers.dlc or managers.dlc:has_gage_pack_assault() or managers.dlc:has_soundtrack_or_cce())
-	self:_jukebox_unlock_track(tracks_locked, "track_18", "miami", not managers.dlc or managers.dlc:has_hl_miami() or managers.dlc:has_soundtrack_or_cce())
-	self:_jukebox_unlock_track(tracks_locked, "track_19", "miami", not managers.dlc or managers.dlc:has_hl_miami() or managers.dlc:has_soundtrack_or_cce())
-	self:_jukebox_unlock_track(tracks_locked, "track_24", "diamond", not managers.dlc or managers.dlc:has_hope_diamond() or managers.dlc:has_soundtrack_or_cce())
-	self:_jukebox_unlock_track(tracks_locked, "track_25", "thebomb", not managers.dlc or managers.dlc:has_the_bomb() or managers.dlc:has_soundtrack_or_cce())
-	self:_jukebox_unlock_track(tracks_locked, "track_29", "kenaz", not managers.dlc or managers.dlc:has_kenaz() or managers.dlc:has_soundtrack_or_cce())
-	if managers.dlc and not managers.dlc:has_pdth_soundtrack() then
-		for _, sound in ipairs(pdth_tracks) do
-			tracks_locked[sound] = "payday"
+	local lock_data = {
+		armored = not managers.dlc or managers.dlc:has_armored_transport() or managers.dlc:has_soundtrack_or_cce(),
+		infamy = managers.experience and managers.experience:current_rank() > 0,
+		deathwish = managers.experience and (managers.experience:current_rank() > 0 or managers.experience:current_level() >= tweak_data.difficulty_level_locks[tweak_data:difficulty_to_index("overkill_290")]),
+		bigbank = not managers.dlc or managers.dlc:has_big_bank() or managers.dlc:has_soundtrack_or_cce(),
+		assault = not managers.dlc or managers.dlc:has_gage_pack_assault() or managers.dlc:has_soundtrack_or_cce(),
+		miami = not managers.dlc or managers.dlc:has_hl_miami() or managers.dlc:has_soundtrack_or_cce(),
+		diamond = not managers.dlc or managers.dlc:has_hope_diamond() or managers.dlc:has_soundtrack_or_cce(),
+		thebomb = not managers.dlc or managers.dlc:has_the_bomb() or managers.dlc:has_soundtrack_or_cce(),
+		kenaz = not managers.dlc or managers.dlc:has_kenaz() or managers.dlc:has_soundtrack_or_cce(),
+		payday = managers.dlc and managers.dlc:has_pdth_soundtrack()
+	}
+	for _, data in ipairs(tweak_data.music.track_list) do
+		table.insert(tracks, data.track)
+		if data.lock and not self:track_unlocked(data.track) then
+			if lock_data[data.lock] then
+				self:unlock_track(data.track)
+				self:playlist_add(data.track)
+			else
+				tracks_locked[data.track] = data.lock
+			end
 		end
 	end
 	return tracks, tracks_locked
 end
 function MusicManager:jukebox_menu_tracks()
-	local tracks = {
-		"menu_music",
-		"loadout_music",
-		"music_loot_drop",
-		"resultscreen_win",
-		"resultscreen_lose",
-		"preplanning_music",
-		"preplanning_music_old",
-		"lets_go_shopping_menu",
-		"this_is_our_time",
-		"criminals_ambition"
-	}
-	local pd2_tracks = {
-		"criminals_ambition_instrumental",
-		"release_trailer_track",
-		"ode_all_avidita",
-		"ode_all_avidita_instrumental",
-		"drifting",
-		"im_a_wild_one"
-	}
-	local new_tracks = {
-		"the_flames_of_love",
-		"alesso_payday"
-	}
-	local bsides_tracks = {
-		"bsides_04_double_lmgs",
-		"bsides_11_meat_and_machine_guns",
-		"bsides_05_rule_britannia",
-		"bsides_07_an_unexpected_call",
-		"bsides_13_infamy_2_0",
-		"bsides_12_the_enforcer",
-		"bsides_03_showdown",
-		"bsides_15_duel",
-		"bsides_02_swat_attack",
-		"bsides_08_this_is_goodbye",
-		"bsides_10_zagrebacka",
-		"bsides_16_pilgrim",
-		"bsides_14_collide",
-		"bsides_01_enter_the_hallway",
-		"bsides_06_hur_jag_trivs"
-	}
-	local pdth_tracks = {
-		"pth_i_will_give_you_my_all",
-		"pth_breaking_news",
-		"pth_breaking_news_instrumental",
-		"pth_criminal_intent",
-		"pth_busted",
-		"pth_busted_instrumental",
-		"pth_see_you_at_the_safe_house",
-		"pth_preparations"
-	}
-	local xmas_tracks = {
-		"xmas13_a_merry_payday_christmas",
-		"xmas13_a_heist_not_attempted_before",
-		"xmas13_if_it_has_to_be_christmas",
-		"xmas13_ive_been_a_bad_boy",
-		"xmas13_christmas_in_prison",
-		"xmas13_deck_the_safe_house",
-		"xmas13_if_it_has_to_be_christmas_american_version",
-		"xmas13_a_merry_payday_christmas_instrumental",
-		"xmas13_a_heist_not_attempted_before_instrumental",
-		"xmas13_if_it_has_to_be_christmas_instrumental",
-		"xmas13_ive_been_a_bad_boy_instrumental",
-		"xmas13_christmas_in_prison_instrumental",
-		"xmas13_deck_the_safe_house_instrumental"
-	}
-	tracks = table.list_add(tracks, pd2_tracks)
-	tracks = table.list_add(tracks, new_tracks)
-	tracks = table.list_add(tracks, bsides_tracks)
-	tracks = table.list_add(tracks, pdth_tracks)
-	tracks = table.list_add(tracks, xmas_tracks)
+	local tracks = {}
 	local tracks_locked = {}
-	if not managers.dlc:has_soundtrack_or_cce() then
-		for _, sound in ipairs(pd2_tracks) do
-			tracks_locked[sound] = "soundtrack"
+	local lock_data = {
+		soundtrack = managers.dlc and managers.dlc:has_soundtrack_or_cce(),
+		bsides = managers.dlc and managers.dlc:has_bsides_soundtrack(),
+		payday = managers.dlc and managers.dlc:has_pdth_soundtrack(),
+		xmas = managers.dlc and managers.dlc:has_xmas_soundtrack(),
+		alesso = managers.dlc and managers.dlc:has_arena()
+	}
+	for _, data in ipairs(tweak_data.music.track_menu_list) do
+		table.insert(tracks, data.track)
+		if data.lock and not lock_data[data.lock] then
+			tracks_locked[data.track] = data.lock
 		end
-	end
-	if not managers.dlc:has_bsides_soundtrack() then
-		for _, sound in ipairs(bsides_tracks) do
-			tracks_locked[sound] = "bsides"
-		end
-	end
-	if not managers.dlc:has_pdth_soundtrack() then
-		for _, sound in ipairs(pdth_tracks) do
-			tracks_locked[sound] = "payday"
-		end
-	end
-	if not managers.dlc:has_xmas_soundtrack() then
-		for _, sound in ipairs(xmas_tracks) do
-			tracks_locked[sound] = "xmas"
-		end
-	end
-	if not managers.dlc:has_arena() then
-		tracks_locked.alesso_payday = "alesso"
 	end
 	return tracks, tracks_locked
 end
 function MusicManager:music_tracks()
-	local tracks = {
-		"soundbanks/music",
-		"soundbanks/music_alesso"
-	}
-	return tracks
+	return tweak_data.music.soundbank_list
 end

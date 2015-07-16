@@ -1684,7 +1684,7 @@ function SkillTreeGui:update_spec_descriptions()
 		Application:error("SkillTreeGui: Non even amount of ##'s in Perk description string!", #start_ci, #end_ci)
 	else
 		for i = 1, #start_ci do
-			self._spec_description_text:set_range_color(start_ci[i], end_ci[i], tweak_data.screen_colors.resource)
+			self._spec_description_text:set_range_color(start_ci[i], end_ci[i], item:desc_custom_color() or tweak_data.screen_colors.resource)
 		end
 	end
 	local dlc = tweak_data:get_raw_value("skilltree", "specializations", item:tree(), "dlc")
@@ -2976,6 +2976,13 @@ function SpecializationTabItem:init(spec_tabs_panel, tree, data, w, x)
 	})
 	self._name_string = data.name_id and managers.localization:text(data.name_id) or "NO_NAME_" .. tostring(tree)
 	self._desc_string = data.desc_id and managers.localization:text(data.desc_id) or "NO_DESC_" .. tostring(tree)
+	if data and data.dlc and tweak_data.lootdrop.global_values[data.dlc] then
+		self._desc_string = self._desc_string .. [[
+
+
+]] .. "##" .. managers.localization:to_upper_text(tweak_data.lootdrop.global_values[data.dlc].desc_id) .. "##"
+		self._desc_custom_color = tweak_data.lootdrop.global_values[data.dlc].color
+	end
 	self._spec_tab:text({
 		name = "spec_tab_name",
 		text = utf8.to_upper(self._name_string),
@@ -3011,6 +3018,9 @@ function SpecializationTabItem:name_string()
 end
 function SpecializationTabItem:desc_string()
 	return self._desc_string
+end
+function SpecializationTabItem:desc_custom_color()
+	return self._desc_custom_color
 end
 function SpecializationTabItem:tree()
 	return self._tree
@@ -3374,6 +3384,9 @@ function SpecializationTierItem:name_string()
 end
 function SpecializationTierItem:desc_string()
 	return self._desc_string
+end
+function SpecializationTierItem:desc_custom_color()
+	return nil
 end
 function SpecializationTierItem:tier()
 	return self._tier

@@ -102,9 +102,9 @@ function GrenadeBase:_check_achievements(unit, is_dead, damage_percent, hit_coun
 					end
 				end
 				timer_pass = #memory >= achievement_data.kill_count
-				managers.job:set_memory(achievement, memory)
+				managers.job:set_memory(achievement, memory, true)
 			else
-				managers.job:set_memory(achievement, {t})
+				managers.job:set_memory(achievement, {t}, true)
 			end
 		end
 		all_pass = count_pass and grenade_type_pass and kill_pass and distance_pass and enemy_pass and flying_strike_pass and timer_pass

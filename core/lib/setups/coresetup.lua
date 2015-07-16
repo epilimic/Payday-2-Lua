@@ -89,6 +89,7 @@ end
 function CoreSetup:init_game()
 end
 function CoreSetup:init_finalize()
+	managers.mission:post_init()
 end
 function CoreSetup:start_loading_screen()
 end

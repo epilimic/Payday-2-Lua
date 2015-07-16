@@ -8,7 +8,12 @@ function PlayerFatal:enter(state_data, enter_data)
 	self:_interupt_action_steelsight()
 	self:_interupt_action_melee(managers.player:player_timer():time())
 	self:_interupt_action_ladder(managers.player:player_timer():time())
-	self:_interupt_action_throw_grenade(managers.player:player_timer():time())
+	local projectile_entry = managers.blackmarket:equipped_projectile()
+	if tweak_data.blackmarket.projectiles[projectile_entry].is_a_grenade then
+		self:_interupt_action_throw_grenade(managers.player:player_timer():time())
+	else
+		self:_interupt_action_throw_projectile(managers.player:player_timer():time())
+	end
 	self:_interupt_action_charging_weapon(managers.player:player_timer():time())
 	self:_start_action_dead(managers.player:player_timer():time())
 	self:_start_action_unequip_weapon(managers.player:player_timer():time(), {selection_wanted = 1})

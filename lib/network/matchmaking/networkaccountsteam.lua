@@ -195,10 +195,6 @@ function NetworkAccountSTEAM:publish_statistics(stats, force_store)
 	end
 	local handler = Steam:sa_handler()
 	print("[NetworkAccountSTEAM:publish_statistics] Publishing statistics to Steam!")
-	if not handler:initialized() then
-		print("[NetworkAccountSTEAM:publish_statistics] Error, SA handler not initialized! Not sending stats.")
-		return
-	end
 	if Application:production_build() then
 		local err = false
 		for key, _ in pairs(stats) do
@@ -274,8 +270,20 @@ function NetworkAccountSTEAM._on_ipc_fail(lobby_id, friend_id)
 end
 function NetworkAccountSTEAM._on_join_request(lobby_id, friend_id)
 	print("[NetworkAccountSTEAM._on_join_request]")
+	if managers.network.matchmake.lobby_handler and managers.network.matchmake.lobby_handler:id() == lobby_id then
+		return
+	end
 	if managers.network:session() and managers.network:session():_local_peer_in_lobby() then
-		managers.menu:show_cant_join_from_game_dialog()
+		Global.game_settings.single_player = false
+		MenuCallbackHandler:_dialog_leave_lobby_yes()
+		managers.network.matchmake:set_join_invite_pending(lobby_id)
+		return
+	elseif game_state_machine:current_state_name() ~= "menu_main" then
+		print("INGAME INVITE")
+		Global.game_settings.single_player = false
+		Global.boot_invite = lobby_id
+		MenuCallbackHandler:_dialog_end_game_yes()
+		return
 	else
 		if not Global.user_manager.user_index or not Global.user_manager.active_user_state_change_quit then
 			print("BOOT UP INVITE")

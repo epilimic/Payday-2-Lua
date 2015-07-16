@@ -203,10 +203,13 @@ function PlayerDamage:_regenerate_armor()
 	self:_send_set_armor()
 end
 function PlayerDamage:restore_health(health_restored, is_static)
-	local max_health = self:_max_health()
+	if managers.player:is_damage_health_ratio_active(self:health_ratio()) then
+		return
+	end
 	if is_static then
 		self:change_health(health_restored)
 	else
+		local max_health = self:_max_health()
 		self:change_health(max_health * health_restored)
 	end
 end
@@ -1047,7 +1050,7 @@ function PlayerDamage:add_damage_to_hot()
 	end)
 end
 function PlayerDamage:set_regenerate_timer_to_max()
-	local mul = managers.player:body_armor_regen_multiplier(alive(self._unit) and self._unit:movement():current_state()._moving)
+	local mul = managers.player:body_armor_regen_multiplier(alive(self._unit) and self._unit:movement():current_state()._moving, self:health_ratio())
 	self._regenerate_timer = tweak_data.player.damage.REGENERATE_TIME * mul
 end
 function PlayerDamage:_send_set_health()
@@ -1200,7 +1203,7 @@ function PlayerDamage:_upd_health_regen(t, dt)
 		local regen_rate = managers.player:health_regen()
 		local max_health = self:_max_health()
 		if regen_rate > 0 and max_health > self:get_real_health() then
-			self:change_health(max_health * regen_rate)
+			self:restore_health(regen_rate, false)
 			self._health_regen_update_timer = 5
 		end
 	end
@@ -1210,7 +1213,7 @@ function PlayerDamage:_upd_health_regen(t, dt)
 			local done = not next_doh or next_doh.next_tick > TimerManager:game():time()
 			if not done then
 				local regen_rate = managers.player:upgrade_value("player", "damage_to_hot", 0)
-				self:change_health(regen_rate)
+				self:restore_health(regen_rate, true)
 				next_doh.ticks_left = next_doh.ticks_left - 1
 				if next_doh.ticks_left == 0 then
 					table.remove(self._damage_to_hot_stack, 1)

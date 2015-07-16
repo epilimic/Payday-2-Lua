@@ -1504,7 +1504,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.butcher.pcs = {}
 	self.masks.butcher.value = 0
 	self.masks.butcher.dlc = "the_bomb"
-	self.masks.butcher.sort_number = 8
 	self.masks.butcher.texture_bundle_folder = "the_bomb"
 	self.masks.doctor = {}
 	self.masks.doctor.unit = "units/pd2_dlc_cro/masks/msk_doctor/msk_doctor"
@@ -1515,7 +1514,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.doctor.type = "helmet"
 	self.masks.doctor.texture_bundle_folder = "the_bomb"
 	self.masks.doctor.skip_mask_on_sequence = true
-	self.masks.doctor.sort_number = 8
 	self.masks.tech_lion = {}
 	self.masks.tech_lion.unit = "units/pd2_dlc_cro/masks/msk_tech_lion/msk_tech_lion"
 	self.masks.tech_lion.name_id = "bm_msk_tech_lion"
@@ -1523,7 +1521,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.tech_lion.value = 0
 	self.masks.tech_lion.dlc = "the_bomb"
 	self.masks.tech_lion.texture_bundle_folder = "the_bomb"
-	self.masks.tech_lion.sort_number = 8
 	self.masks.lady_butcher = {}
 	self.masks.lady_butcher.unit = "units/pd2_dlc_cro/masks/msk_butcher/msk_butcher"
 	self.masks.lady_butcher.name_id = "bm_msk_lady_butcher"
@@ -1531,7 +1528,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.lady_butcher.value = 0
 	self.masks.lady_butcher.dlc = "the_bomb"
 	self.masks.lady_butcher.texture_bundle_folder = "the_bomb"
-	self.masks.lady_butcher.sort_number = 8
 	self.masks.nun_town = {}
 	self.masks.nun_town.unit = "units/pd2_dlc_goty/masks/nun_town/msk_nun_town"
 	self.masks.nun_town.name_id = "bm_msk_nun_town"
@@ -1595,7 +1591,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.carnotaurus.value = 0
 	self.masks.carnotaurus.texture_bundle_folder = "dlc_akm4"
 	self.masks.carnotaurus.dlc = "akm4_pack"
-	self.masks.carnotaurus.sort_number = 9
 	self.masks.triceratops = {}
 	self.masks.triceratops.unit = "units/pd2_dlc_akm4_modpack/masks/triceratops/msk_triceratops"
 	self.masks.triceratops.name_id = "bm_msk_triceratops"
@@ -1603,7 +1598,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.triceratops.value = 0
 	self.masks.triceratops.texture_bundle_folder = "dlc_akm4"
 	self.masks.triceratops.dlc = "akm4_pack"
-	self.masks.triceratops.sort_number = 9
 	self.masks.pachy = {}
 	self.masks.pachy.unit = "units/pd2_dlc_akm4_modpack/masks/pachy/msk_pachy"
 	self.masks.pachy.name_id = "bm_msk_pachy"
@@ -1611,7 +1605,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.pachy.value = 0
 	self.masks.pachy.texture_bundle_folder = "dlc_akm4"
 	self.masks.pachy.dlc = "akm4_pack"
-	self.masks.pachy.sort_number = 9
 	self.masks.velociraptor = {}
 	self.masks.velociraptor.unit = "units/pd2_dlc_akm4_modpack/masks/velociraptor/msk_velociraptor"
 	self.masks.velociraptor.name_id = "bm_msk_velociraptor"
@@ -1619,7 +1612,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.velociraptor.value = 0
 	self.masks.velociraptor.texture_bundle_folder = "dlc_akm4"
 	self.masks.velociraptor.dlc = "akm4_pack"
-	self.masks.velociraptor.sort_number = 9
 	self.masks.champion_dallas = {}
 	self.masks.champion_dallas.unit = "units/pd2_hw_boxing/masks/champion_dallas/msk_champion_dallas"
 	self.masks.champion_dallas.name_id = "bm_msk_champion_dallas"
@@ -1937,7 +1929,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.firedemon.value = 0
 	self.masks.firedemon.dlc = "bbq"
 	self.masks.firedemon.texture_bundle_folder = "bbq"
-	self.masks.firedemon.sort_number = 8
 	self.masks.gasmask = {}
 	self.masks.gasmask.unit = "units/pd2_dlc_bbq/masks/msk_gasmask/msk_gasmask"
 	self.masks.gasmask.name_id = "bm_msk_gasmask"
@@ -1945,7 +1936,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.gasmask.value = 0
 	self.masks.gasmask.dlc = "bbq"
 	self.masks.gasmask.texture_bundle_folder = "bbq"
-	self.masks.gasmask.sort_number = 8
 	self.masks.firemask = {}
 	self.masks.firemask.unit = "units/pd2_dlc_bbq/masks/msk_firemask/msk_firemask"
 	self.masks.firemask.name_id = "bm_msk_firemask"
@@ -1953,7 +1943,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.firemask.value = 0
 	self.masks.firemask.dlc = "bbq"
 	self.masks.firemask.texture_bundle_folder = "bbq"
-	self.masks.firemask.sort_number = 8
 	self.masks.chef_hat = {}
 	self.masks.chef_hat.unit = "units/pd2_dlc_bbq/masks/msk_chef_hat/msk_chef_hat"
 	self.masks.chef_hat.name_id = "bm_msk_chef_hat"
@@ -1961,7 +1950,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.chef_hat.value = 0
 	self.masks.chef_hat.dlc = "bbq"
 	self.masks.chef_hat.texture_bundle_folder = "bbq"
-	self.masks.chef_hat.sort_number = 8
 	self.masks.chef_hat.type = "helmet"
 	self.masks.bandit = {}
 	self.masks.bandit.unit = "units/pd2_dlc_west/masks/msk_bandit/msk_bandit"
@@ -2100,7 +2088,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.sokol.value = 0
 	self.masks.sokol.texture_bundle_folder = "character_pack_sokol"
 	self.masks.sokol.dlc = "character_pack_sokol"
-	self.masks.sokol.sort_number = 11
 	self.masks.sokol_begins = {}
 	self.masks.sokol_begins.unit = "units/pd2_dlc_character_sokol/masks/sokol_begins/msk_sokol_begins"
 	self.masks.sokol_begins.name_id = "bm_msk_sokol_begins"
@@ -2113,7 +2100,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.sokol_begins.value = 0
 	self.masks.sokol_begins.texture_bundle_folder = "character_pack_sokol"
 	self.masks.sokol_begins.dlc = "character_pack_sokol"
-	self.masks.sokol_begins.sort_number = 11
 	self.masks.croupier_hat = {}
 	self.masks.croupier_hat.unit = "units/pd2_dlc_casino/masks/msk_croupier_hat/msk_croupier_hat"
 	self.masks.croupier_hat.name_id = "bm_msk_croupier_hat"
@@ -2122,7 +2108,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.croupier_hat.dlc = "kenaz"
 	self.masks.croupier_hat.texture_bundle_folder = "kenaz"
 	self.masks.croupier_hat.type = "glasses"
-	self.masks.croupier_hat.sort_number = 9
 	self.masks.gladiator_helmet = {}
 	self.masks.gladiator_helmet.unit = "units/pd2_dlc_casino/masks/msk_gladiator/msk_gladiator"
 	self.masks.gladiator_helmet.name_id = "bm_msk_gladiator_helmet"
@@ -2131,7 +2116,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.gladiator_helmet.dlc = "kenaz"
 	self.masks.gladiator_helmet.texture_bundle_folder = "kenaz"
 	self.masks.gladiator_helmet.type = "helmet"
-	self.masks.gladiator_helmet.sort_number = 9
 	self.masks.the_king_mask = {}
 	self.masks.the_king_mask.unit = "units/pd2_dlc_casino/masks/msk_the_king/msk_the_king"
 	self.masks.the_king_mask.name_id = "bm_msk_the_king_mask"
@@ -2140,7 +2124,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.the_king_mask.dlc = "kenaz"
 	self.masks.the_king_mask.texture_bundle_folder = "kenaz"
 	self.masks.the_king_mask.type = "helmet"
-	self.masks.the_king_mask.sort_number = 9
 	self.masks.sports_utility_mask = {}
 	self.masks.sports_utility_mask.unit = "units/pd2_dlc_casino/masks/msk_sports_utility/msk_sports_utility"
 	self.masks.sports_utility_mask.name_id = "bm_msk_sports_utility_mask"
@@ -2148,7 +2131,6 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.sports_utility_mask.value = 0
 	self.masks.sports_utility_mask.dlc = "kenaz"
 	self.masks.sports_utility_mask.texture_bundle_folder = "kenaz"
-	self.masks.sports_utility_mask.sort_number = 9
 	self.masks.starvr = {}
 	self.masks.starvr.unit = "units/pd2_dlc_humble_summer15/masks/starvr/msk_starvr"
 	self.masks.starvr.name_id = "bm_msk_starvr"
@@ -2157,6 +2139,37 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.starvr.infamous = true
 	self.masks.starvr.texture_bundle_folder = "humble_summer_2015"
 	self.masks.starvr.type = "helmet"
+	self.masks.slicer = {}
+	self.masks.slicer.unit = "units/pd2_dlc_turtles/masks/slicer/msk_slicer"
+	self.masks.slicer.name_id = "bm_msk_slicer"
+	self.masks.slicer.pcs = {}
+	self.masks.slicer.value = 0
+	self.masks.slicer.texture_bundle_folder = "turtles"
+	self.masks.slicer.dlc = "turtles"
+	self.masks.kage = {}
+	self.masks.kage.unit = "units/pd2_dlc_turtles/masks/kage/msk_kage"
+	self.masks.kage.name_id = "bm_msk_kage"
+	self.masks.kage.pcs = {}
+	self.masks.kage.value = 0
+	self.masks.kage.texture_bundle_folder = "turtles"
+	self.masks.kage.dlc = "turtles"
+	self.masks.ninja_hood = {}
+	self.masks.ninja_hood.unit = "units/pd2_dlc_turtles/masks/ninja_hood/msk_ninja_hood"
+	self.masks.ninja_hood.name_id = "bm_msk_ninja_hood"
+	self.masks.ninja_hood.pcs = {}
+	self.masks.ninja_hood.value = 0
+	self.masks.ninja_hood.type = "helmet"
+	self.masks.ninja_hood.texture_bundle_folder = "turtles"
+	self.masks.ninja_hood.dlc = "turtles"
+	self.masks.shirai = {}
+	self.masks.shirai.unit = "units/pd2_dlc_turtles/masks/shirai/msk_shirai"
+	self.masks.shirai.name_id = "bm_msk_shirai"
+	self.masks.shirai.pcs = {}
+	self.masks.shirai.value = 0
+	self.masks.shirai.type = "helmet"
+	self.masks.shirai.skip_mask_on_sequence = true
+	self.masks.shirai.texture_bundle_folder = "turtles"
+	self.masks.shirai.dlc = "turtles"
 	if SystemInfo:platform() == Idstring("PS3") then
 		self.masks.sweettooth = {}
 		self.masks.sweettooth.unit = "units/payday2/masks/msk_sweettooth/msk_sweettooth"
@@ -4436,6 +4449,32 @@ function BlackMarketTweakData:_init_materials()
 	self.materials.stars.value = 0
 	self.materials.stars.dlc = "kenaz"
 	self.materials.stars.texture_bundle_folder = "kenaz"
+	self.materials.still_waters = {}
+	self.materials.still_waters.name_id = "bm_mtl_still_waters"
+	self.materials.still_waters.pcs = {}
+	self.materials.still_waters.texture = "units/pd2_dlc_turtles/masks/materials/matcap_still_waters_df"
+	self.materials.still_waters.value = 0
+	self.materials.still_waters.dlc = "turtles"
+	self.materials.sakura = {}
+	self.materials.sakura.name_id = "bm_mtl_sakura"
+	self.materials.sakura.pcs = {}
+	self.materials.sakura.texture = "units/pd2_dlc_turtles/masks/materials/matcap_sakura_df"
+	self.materials.sakura.value = 0
+	self.materials.sakura.dlc = "turtles"
+	self.materials.bamboo = {}
+	self.materials.bamboo.name_id = "bm_mtl_bamboo"
+	self.materials.bamboo.pcs = {}
+	self.materials.bamboo.texture = "units/pd2_dlc_turtles/masks/materials/matcap_bamboo_df"
+	self.materials.bamboo.material_amount = 0
+	self.materials.bamboo.value = 0
+	self.materials.bamboo.dlc = "turtles"
+	self.materials.origami = {}
+	self.materials.origami.name_id = "bm_mtl_origami"
+	self.materials.origami.pcs = {}
+	self.materials.origami.texture = "units/pd2_dlc_turtles/masks/materials/matcap_origami_df"
+	self.materials.origami.material_amount = 0
+	self.materials.origami.value = 0
+	self.materials.origami.dlc = "turtles"
 end
 function BlackMarketTweakData:_init_textures()
 	self.textures = {}
@@ -6246,6 +6285,34 @@ function BlackMarketTweakData:_init_textures()
 	self.textures.starvr.texture = "units/pd2_dlc_humble_summer15/masks/patterns/pattern_starvr_df"
 	self.textures.starvr.value = 0
 	self.textures.starvr.infamous = true
+	self.textures.youkai = {}
+	self.textures.youkai.name_id = "bm_txt_youkai"
+	self.textures.youkai.pcs = {}
+	self.textures.youkai.texture = "units/pd2_dlc_turtles/masks/patterns/pattern_youkai_df"
+	self.textures.youkai.value = 0
+	self.textures.youkai.dlc = "turtles"
+	self.textures.youkai.texture_bundle_folder = "turtles"
+	self.textures.origami = {}
+	self.textures.origami.name_id = "bm_txt_origami"
+	self.textures.origami.pcs = {}
+	self.textures.origami.texture = "units/pd2_dlc_turtles/masks/patterns/pattern_origami_df"
+	self.textures.origami.value = 0
+	self.textures.origami.dlc = "turtles"
+	self.textures.origami.texture_bundle_folder = "turtles"
+	self.textures.oni = {}
+	self.textures.oni.name_id = "bm_txt_oni"
+	self.textures.oni.pcs = {}
+	self.textures.oni.texture = "units/pd2_dlc_turtles/masks/patterns/pattern_oni_df"
+	self.textures.oni.value = 0
+	self.textures.oni.dlc = "turtles"
+	self.textures.oni.texture_bundle_folder = "turtles"
+	self.textures.koi = {}
+	self.textures.koi.name_id = "bm_txt_koi"
+	self.textures.koi.pcs = {}
+	self.textures.koi.texture = "units/pd2_dlc_turtles/masks/patterns/pattern_koi_df"
+	self.textures.koi.value = 0
+	self.textures.koi.dlc = "turtles"
+	self.textures.koi.texture_bundle_folder = "turtles"
 end
 function BlackMarketTweakData:_init_cash()
 	self.cash = {}
@@ -6477,6 +6544,62 @@ function BlackMarketTweakData:_init_projectiles()
 	self.projectiles.frag.dlc = "gage_pack"
 	self.projectiles.frag.throwable = true
 	self.projectiles.frag.max_amount = 3
+	self.projectiles.frag.anim_global_param = "projectile_frag"
+	self.projectiles.frag.throw_allowed_expire_t = 0.1
+	self.projectiles.frag.expire_t = 1.1
+	self.projectiles.frag.repeat_expire_t = 1.5
+	self.projectiles.frag.is_a_grenade = true
+	self.projectiles.molotov = {}
+	self.projectiles.molotov.name_id = "bm_grenade_molotov"
+	self.projectiles.molotov.unit = "units/pd2_dlc_bbq/weapons/molotov_cocktail/wpn_molotov_third"
+	self.projectiles.molotov.unit_dummy = "units/pd2_dlc_bbq/weapons/molotov_cocktail/wpn_molotov_husk"
+	self.projectiles.molotov.icon = "molotov_grenade"
+	self.projectiles.molotov.dlc = "bbq"
+	self.projectiles.molotov.no_cheat_count = true
+	self.projectiles.molotov.impact_detonation = true
+	self.projectiles.molotov.time_cheat = 1
+	self.projectiles.molotov.throwable = true
+	self.projectiles.molotov.max_amount = 3
+	self.projectiles.molotov.texture_bundle_folder = "bbq"
+	self.projectiles.molotov.physic_effect = Idstring("physic_effects/molotov_throw")
+	self.projectiles.molotov.anim_global_param = "projectile_molotov"
+	self.projectiles.molotov.throw_allowed_expire_t = 0.1
+	self.projectiles.molotov.expire_t = 1.1
+	self.projectiles.molotov.repeat_expire_t = 1.5
+	self.projectiles.molotov.is_a_grenade = true
+	self.projectiles.dynamite = {}
+	self.projectiles.dynamite.name_id = "bm_dynamite"
+	self.projectiles.dynamite.unit = "units/pd2_dlc_west/weapons/wpn_gre_dynamite/wpn_gre_dynamite"
+	self.projectiles.dynamite.unit_dummy = "units/pd2_dlc_west/weapons/wpn_gre_dynamite/wpn_gre_dynamite_husk"
+	self.projectiles.dynamite.icon = "dynamite_grenade"
+	self.projectiles.dynamite.dlc = "west"
+	self.projectiles.dynamite.texture_bundle_folder = "west"
+	self.projectiles.dynamite.max_amount = 3
+	self.projectiles.dynamite.throwable = true
+	self.projectiles.dynamite.anim_global_param = "projectile_molotov"
+	self.projectiles.dynamite.throw_allowed_expire_t = 0.1
+	self.projectiles.dynamite.expire_t = 1.1
+	self.projectiles.dynamite.repeat_expire_t = 1.5
+	self.projectiles.dynamite.is_a_grenade = true
+	self.projectiles.wpn_prj_four = {}
+	self.projectiles.wpn_prj_four.name_id = "bm_wpn_prj_four"
+	self.projectiles.wpn_prj_four.unit = "units/pd2_dlc_turtles/weapons/wpn_prj_four/wpn_prj_four"
+	self.projectiles.wpn_prj_four.unit_dummy = "units/pd2_dlc_turtles/weapons/wpn_prj_four/wpn_prj_four_husk"
+	self.projectiles.wpn_prj_four.local_unit = "units/pd2_dlc_turtles/weapons/wpn_prj_four/wpn_prj_four_local"
+	self.projectiles.wpn_prj_four.icon = "four_projectile"
+	self.projectiles.wpn_prj_four.throw_shout = true
+	self.projectiles.wpn_prj_four.no_cheat_count = true
+	self.projectiles.wpn_prj_four.impact_detonation = true
+	self.projectiles.wpn_prj_four.client_authoritative = true
+	self.projectiles.wpn_prj_four.add_trail_effect = true
+	self.projectiles.wpn_prj_four.throwable = true
+	self.projectiles.wpn_prj_four.texture_bundle_folder = "turtles"
+	self.projectiles.wpn_prj_four.dlc = "turtles"
+	self.projectiles.wpn_prj_four.max_amount = 10
+	self.projectiles.wpn_prj_four.anim_global_param = "projectile_four"
+	self.projectiles.wpn_prj_four.throw_allowed_expire_t = 0.15
+	self.projectiles.wpn_prj_four.expire_t = 1.1
+	self.projectiles.wpn_prj_four.repeat_expire_t = 0.5
 	self.projectiles.launcher_frag = {}
 	self.projectiles.launcher_frag.name_id = "bm_launcher_frag"
 	self.projectiles.launcher_frag.unit = "units/pd2_dlc_gage_assault/weapons/wpn_launcher_frag_grenade/wpn_launcher_frag_grenade"
@@ -6493,19 +6616,6 @@ function BlackMarketTweakData:_init_projectiles()
 	self.projectiles.rocket_frag.time_cheat = 1
 	self.projectiles.rocket_frag.physic_effect = Idstring("physic_effects/anti_gravitate")
 	self.projectiles.rocket_frag.adjust_z = 0
-	self.projectiles.molotov = {}
-	self.projectiles.molotov.name_id = "bm_grenade_molotov"
-	self.projectiles.molotov.unit = "units/pd2_dlc_bbq/weapons/molotov_cocktail/wpn_molotov_third"
-	self.projectiles.molotov.unit_dummy = "units/pd2_dlc_bbq/weapons/molotov_cocktail/wpn_molotov_husk"
-	self.projectiles.molotov.icon = "molotov_grenade"
-	self.projectiles.molotov.dlc = "bbq"
-	self.projectiles.molotov.no_cheat_count = true
-	self.projectiles.molotov.impact_detonation = true
-	self.projectiles.molotov.time_cheat = 1
-	self.projectiles.molotov.throwable = true
-	self.projectiles.molotov.max_amount = 3
-	self.projectiles.molotov.texture_bundle_folder = "bbq"
-	self.projectiles.molotov.physic_effect = Idstring("physic_effects/molotov_throw")
 	self.projectiles.launcher_incendiary = {}
 	self.projectiles.launcher_incendiary.name_id = "bm_launcher_incendiary"
 	self.projectiles.launcher_incendiary.unit = "units/pd2_dlc_bbq/weapons/wpn_launcher_incendiary_grenade/wpn_launcher_incendiary_grenade"
@@ -6531,40 +6641,34 @@ function BlackMarketTweakData:_init_projectiles()
 	self.projectiles.west_arrow_exp.no_cheat_count = true
 	self.projectiles.west_arrow_exp.impact_detonation = true
 	self.projectiles.west_arrow_exp.client_authoritative = true
-	self.projectiles.dynamite = {}
-	self.projectiles.dynamite.name_id = "bm_dynamite"
-	self.projectiles.dynamite.unit = "units/pd2_dlc_west/weapons/wpn_gre_dynamite/wpn_gre_dynamite"
-	self.projectiles.dynamite.unit_dummy = "units/pd2_dlc_west/weapons/wpn_gre_dynamite/wpn_gre_dynamite_husk"
-	self.projectiles.dynamite.icon = "dynamite_grenade"
-	self.projectiles.dynamite.dlc = "west"
-	self.projectiles.dynamite.texture_bundle_folder = "west"
-	self.projectiles.dynamite.throwable = true
-	self.projectiles.dynamite.max_amount = 3
-	self.projectiles.west_arrow = {}
-	self.projectiles.west_arrow.name_id = "bm_launcher_frag"
-	self.projectiles.west_arrow.unit = "units/pd2_dlc_west/weapons/wpn_prj_west_arrow/wpn_prj_west_arrow"
-	self.projectiles.west_arrow.local_unit = "units/pd2_dlc_west/weapons/wpn_prj_west_arrow/wpn_prj_west_arrow_local"
-	self.projectiles.west_arrow.weapon_id = "plainsrider"
-	self.projectiles.west_arrow.no_cheat_count = true
-	self.projectiles.west_arrow.impact_detonation = true
-	self.projectiles.west_arrow.client_authoritative = true
-	self.projectiles.west_arrow_exp = {}
-	self.projectiles.west_arrow_exp.name_id = "bm_launcher_frag"
-	self.projectiles.west_arrow_exp.unit = "units/pd2_dlc_west/weapons/wpn_prj_west_arrow/wpn_prj_west_arrow_exp"
-	self.projectiles.west_arrow_exp.local_unit = "units/pd2_dlc_west/weapons/wpn_prj_west_arrow/wpn_prj_west_arrow_exp_local"
-	self.projectiles.west_arrow_exp.weapon_id = "plainsrider"
-	self.projectiles.west_arrow_exp.no_cheat_count = true
-	self.projectiles.west_arrow_exp.impact_detonation = true
-	self.projectiles.west_arrow_exp.client_authoritative = true
-	self.projectiles.dynamite = {}
-	self.projectiles.dynamite.name_id = "bm_dynamite"
-	self.projectiles.dynamite.unit = "units/pd2_dlc_west/weapons/wpn_gre_dynamite/wpn_gre_dynamite"
-	self.projectiles.dynamite.unit_dummy = "units/pd2_dlc_west/weapons/wpn_gre_dynamite/wpn_gre_dynamite_husk"
-	self.projectiles.dynamite.icon = "dynamite_grenade"
-	self.projectiles.dynamite.dlc = "west"
-	self.projectiles.dynamite.texture_bundle_folder = "west"
-	self.projectiles.dynamite.throwable = true
-	self.projectiles.dynamite.max_amount = 3
+	self.projectiles.bow_poison_arrow = {}
+	self.projectiles.bow_poison_arrow.unit = "units/pd2_dlc_turtles/weapons/wpn_prj_bow_poison_arrow/wpn_prj_bow_poison_arrow"
+	self.projectiles.bow_poison_arrow.local_unit = "units/pd2_dlc_turtles/weapons/wpn_prj_bow_poison_arrow/wpn_prj_bow_poison_arrow_local"
+	self.projectiles.bow_poison_arrow.weapon_id = "plainsrider"
+	self.projectiles.bow_poison_arrow.no_cheat_count = true
+	self.projectiles.bow_poison_arrow.impact_detonation = true
+	self.projectiles.bow_poison_arrow.client_authoritative = true
+	self.projectiles.crossbow_arrow = {}
+	self.projectiles.crossbow_arrow.unit = "units/pd2_dlc_turtles/weapons/wpn_prj_crossbow_arrow/wpn_prj_crossbow_arrow"
+	self.projectiles.crossbow_arrow.local_unit = "units/pd2_dlc_turtles/weapons/wpn_prj_crossbow_arrow/wpn_prj_crossbow_arrow_local"
+	self.projectiles.crossbow_arrow.weapon_id = "hunter"
+	self.projectiles.crossbow_arrow.no_cheat_count = true
+	self.projectiles.crossbow_arrow.impact_detonation = true
+	self.projectiles.crossbow_arrow.client_authoritative = true
+	self.projectiles.crossbow_poison_arrow = {}
+	self.projectiles.crossbow_poison_arrow.unit = "units/pd2_dlc_turtles/weapons/wpn_prj_crossbow_poison_arrow/wpn_prj_crossbow_poison_arrow"
+	self.projectiles.crossbow_poison_arrow.local_unit = "units/pd2_dlc_turtles/weapons/wpn_prj_crossbow_poison_arrow/wpn_prj_crossbow_poison_arrow_local"
+	self.projectiles.crossbow_poison_arrow.weapon_id = "hunter"
+	self.projectiles.crossbow_poison_arrow.no_cheat_count = true
+	self.projectiles.crossbow_poison_arrow.impact_detonation = true
+	self.projectiles.crossbow_poison_arrow.client_authoritative = true
+	self.projectiles.crossbow_arrow_exp = {}
+	self.projectiles.crossbow_arrow_exp.unit = "units/pd2_dlc_turtles/weapons/wpn_prj_crossbow_arrow_exp/wpn_prj_crossbow_arrow_exp"
+	self.projectiles.crossbow_arrow_exp.local_unit = "units/pd2_dlc_turtles/weapons/wpn_prj_crossbow_arrow_exp/wpn_prj_crossbow_arrow_exp_local"
+	self.projectiles.crossbow_arrow_exp.weapon_id = "hunter"
+	self.projectiles.crossbow_arrow_exp.no_cheat_count = true
+	self.projectiles.crossbow_arrow_exp.impact_detonation = true
+	self.projectiles.crossbow_arrow_exp.client_authoritative = true
 	self._projectiles_index = {
 		"frag",
 		"launcher_frag",
@@ -6574,7 +6678,12 @@ function BlackMarketTweakData:_init_projectiles()
 		"launcher_frag_m32",
 		"west_arrow",
 		"west_arrow_exp",
-		"dynamite"
+		"dynamite",
+		"bow_poison_arrow",
+		"crossbow_arrow",
+		"crossbow_poison_arrow",
+		"crossbow_arrow_exp",
+		"wpn_prj_four"
 	}
 	self:_add_desc_from_name_macro(self.projectiles)
 end
@@ -7837,6 +7946,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.switchblade.melee_damage_delay = 0.1
 	self.melee_weapons.taser = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.taser.name_id = "bm_melee_taser"
+	self.melee_weapons.taser.info_id = "bm_melee_taser_info"
 	self.melee_weapons.taser.anim_global_param = "melee_taser"
 	self.melee_weapons.taser.dlc = "kenaz"
 	self.melee_weapons.taser.texture_bundle_folder = "kenaz"
@@ -7917,5 +8027,128 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.croupier_rake.expire_t = 1
 	self.melee_weapons.croupier_rake.repeat_expire_t = 0.7
 	self.melee_weapons.croupier_rake.melee_damage_delay = 0.1
+	self.melee_weapons.fight = {}
+	self.melee_weapons.fight.name_id = "bm_melee_fight"
+	self.melee_weapons.fight.type = "fists"
+	self.melee_weapons.fight.unit = "units/pd2_dlc_turtles/weapons/wpn_fps_mel_fight/wpn_fps_mel_fight"
+	self.melee_weapons.fight.third_unit = "units/pd2_dlc_turtles/weapons/wpn_fps_mel_fight/wpn_fps_mel_fight"
+	self.melee_weapons.fight.no_inventory_preview = true
+	self.melee_weapons.fight.free = nil
+	self.melee_weapons.fight.dlc = "turtles"
+	self.melee_weapons.fight.texture_bundle_folder = "turtles"
+	self.melee_weapons.fight.stats = {}
+	self.melee_weapons.fight.stats.min_damage = 1.5
+	self.melee_weapons.fight.stats.max_damage = 3
+	self.melee_weapons.fight.stats.min_damage_effect = 3
+	self.melee_weapons.fight.stats.max_damage_effect = 3
+	self.melee_weapons.fight.stats.charge_time = 1
+	self.melee_weapons.fight.stats.range = 150
+	self.melee_weapons.fight.stats.remove_weapon_movement_penalty = true
+	self.melee_weapons.fight.stats.weapon_type = "blunt"
+	self.melee_weapons.fight.anim_global_param = "melee_fight"
+	self.melee_weapons.fight.anim_attack_vars = {
+		"var1",
+		"var2",
+		"var3",
+		"var4",
+		"var5"
+	}
+	self.melee_weapons.fight.expire_t = 1
+	self.melee_weapons.fight.repeat_expire_t = 0.55
+	self.melee_weapons.fight.melee_damage_delay = 0.1
+	self.melee_weapons.fight.melee_charge_shaker = "player_melee_charge_fist"
+	self.melee_weapons.fight.sounds = {}
+	self.melee_weapons.fight.sounds.equip = "fight_equip"
+	self.melee_weapons.fight.sounds.hit_air = "fight_hit_air"
+	self.melee_weapons.fight.sounds.hit_gen = "fight_hit_gen"
+	self.melee_weapons.fight.sounds.hit_body = "fight_hit_body"
+	self.melee_weapons.fight.sounds.charge = "fight_charge"
+	self.melee_weapons.fight.stats.concealment = 30
+	self.melee_weapons.tiger = deep_clone(self.melee_weapons.fists)
+	self.melee_weapons.tiger.name_id = "bm_melee_tiger"
+	self.melee_weapons.tiger.free = nil
+	self.melee_weapons.tiger.type = "fists"
+	self.melee_weapons.tiger.dlc = "turtles"
+	self.melee_weapons.tiger.texture_bundle_folder = "turtles"
+	self.melee_weapons.tiger.align_objects = {
+		"a_weapon_left",
+		"a_weapon_right"
+	}
+	self.melee_weapons.tiger.unit = "units/pd2_dlc_turtles/weapons/wpn_fps_mel_tiger/wpn_fps_mel_tiger"
+	self.melee_weapons.tiger.third_unit = "units/pd2_dlc_turtles/weapons/wpn_fps_mel_tiger/wpn_third_mel_tiger"
+	self.melee_weapons.tiger.anim_global_param = "melee_tiger"
+	self.melee_weapons.tiger.stats.min_damage = 3.5
+	self.melee_weapons.tiger.stats.max_damage = 5
+	self.melee_weapons.tiger.stats.min_damage_effect = 0.3
+	self.melee_weapons.tiger.stats.max_damage_effect = 0.3
+	self.melee_weapons.tiger.stats.charge_time = 2
+	self.melee_weapons.tiger.stats.range = 150
+	self.melee_weapons.tiger.melee_damage_delay = 0.1
+	self.melee_weapons.tiger.sounds.equip = "tiger_equip"
+	self.melee_weapons.tiger.sounds.hit_air = "tiger_hit_air"
+	self.melee_weapons.tiger.sounds.hit_gen = "tiger_hit_gen"
+	self.melee_weapons.tiger.sounds.hit_body = "tiger_hit_body"
+	self.melee_weapons.tiger.sounds.charge = "tiger_charge"
+	self.melee_weapons.tiger.stats.concealment = 27
+	self.melee_weapons.cqc = deep_clone(self.melee_weapons.kabar)
+	self.melee_weapons.cqc.name_id = "bm_melee_cqc"
+	self.melee_weapons.cqc.info_id = "bm_melee_cqc_info"
+	self.melee_weapons.cqc.dlc = "turtles"
+	self.melee_weapons.cqc.texture_bundle_folder = "turtles"
+	self.melee_weapons.cqc.free = nil
+	self.melee_weapons.cqc.anim_global_param = "melee_stab"
+	self.melee_weapons.cqc.type = "knife"
+	self.melee_weapons.cqc.align_objects = {
+		"a_weapon_right"
+	}
+	self.melee_weapons.cqc.unit = "units/pd2_dlc_turtles/weapons/wpn_fps_mel_cqc/wpn_fps_mel_cqc"
+	self.melee_weapons.cqc.third_unit = "units/pd2_dlc_turtles/weapons/wpn_fps_mel_cqc/wpn_third_mel_cqc"
+	self.melee_weapons.cqc.dot_data = {
+		type = "poison",
+		custom_data = {dot_length = 1, hurt_animation_chance = 0.7}
+	}
+	self.melee_weapons.cqc.stats.weapon_type = "sharp"
+	self.melee_weapons.cqc.stats.min_damage = 2
+	self.melee_weapons.cqc.stats.max_damage = 4
+	self.melee_weapons.cqc.stats.min_damage_effect = 0.5
+	self.melee_weapons.cqc.stats.max_damage_effect = 0.5
+	self.melee_weapons.cqc.stats.charge_time = 1
+	self.melee_weapons.cqc.stats.range = 150
+	self.melee_weapons.cqc.sounds = {}
+	self.melee_weapons.cqc.sounds.equip = "cqc_equip"
+	self.melee_weapons.cqc.sounds.hit_air = "cqc_hit_air"
+	self.melee_weapons.cqc.sounds.hit_gen = "cqc_hit_gen"
+	self.melee_weapons.cqc.sounds.hit_body = "cqc_hit_body"
+	self.melee_weapons.cqc.sounds.charge = "cqc_charge"
+	self.melee_weapons.cqc.repeat_expire_t = 0.3
+	self.melee_weapons.cqc.stats.concealment = 30
+	self.melee_weapons.twins = deep_clone(self.melee_weapons.kabar)
+	self.melee_weapons.twins.name_id = "bm_melee_twins"
+	self.melee_weapons.twins.dlc = "turtles"
+	self.melee_weapons.twins.texture_bundle_folder = "turtles"
+	self.melee_weapons.twins.free = nil
+	self.melee_weapons.twins.anim_global_param = "melee_twins"
+	self.melee_weapons.twins.type = "knife"
+	self.melee_weapons.twins.align_objects = {
+		"a_weapon_right",
+		"a_weapon_left"
+	}
+	self.melee_weapons.twins.unit = "units/pd2_dlc_turtles/weapons/wpn_fps_mel_twin/wpn_fps_mel_twin"
+	self.melee_weapons.twins.third_unit = "units/pd2_dlc_turtles/weapons/wpn_fps_mel_twin/wpn_third_mel_twin"
+	self.melee_weapons.twins.stats.weapon_type = "sharp"
+	self.melee_weapons.twins.stats.min_damage = 3
+	self.melee_weapons.twins.stats.max_damage = 4
+	self.melee_weapons.twins.stats.min_damage_effect = 0.5
+	self.melee_weapons.twins.stats.max_damage_effect = 0.5
+	self.melee_weapons.twins.stats.charge_time = 1
+	self.melee_weapons.twins.stats.range = 200
+	self.melee_weapons.twins.sounds = {}
+	self.melee_weapons.twins.sounds.equip = "twin_equip"
+	self.melee_weapons.twins.sounds.hit_air = "twin_hit_air"
+	self.melee_weapons.twins.sounds.hit_gen = "twin_hit_gen"
+	self.melee_weapons.twins.sounds.hit_body = "twin_hit_body"
+	self.melee_weapons.twins.sounds.charge = "twin_charge"
+	self.melee_weapons.twins.repeat_expire_t = 0.6
+	self.melee_weapons.twins.stats.concealment = 28
 	self:_add_desc_from_name_macro(self.melee_weapons)
 end

@@ -25,6 +25,12 @@ function ArrowBase:set_weapon_unit(weapon_unit)
 	self._weapon_charge_value = weapon_unit and weapon_unit:base().projectile_charge_value and weapon_unit:base():projectile_charge_value() or 1
 	self._weapon_speed_mult = weapon_unit and weapon_unit:base().projectile_speed_multiplier and weapon_unit:base():projectile_speed_multiplier() or 1
 	self._weapon_charge_fail = weapon_unit and weapon_unit:base():charge_fail() or false
+	if not self._weapon_charge_fail then
+		self:add_trail_effect()
+	end
+end
+function ArrowBase:add_trail_effect()
+	managers.game_play_central:add_projectile_trail(self._unit, self._unit:orientation_object())
 end
 function ArrowBase:_on_collision(col_ray)
 	local damage_mult = self._weapon_damage_mult or 1
@@ -32,7 +38,7 @@ function ArrowBase:_on_collision(col_ray)
 	if not loose_shoot then
 		local client_damage = self._damage_class_string == "InstantExplosiveBulletBase" or alive(col_ray.unit) and col_ray.unit:id() ~= -1
 		if Network:is_server() or client_damage then
-			self._damage_class:on_collision(col_ray, self._weapon_unit, self._thrower_unit, self._damage * damage_mult, false)
+			self._damage_class:on_collision(col_ray, self._weapon_unit or self._unit, self._thrower_unit, self._damage * damage_mult, false, false)
 		end
 	end
 	if not loose_shoot and tweak_data.projectiles[self._tweak_projectile_entry].remove_on_impact then
@@ -47,6 +53,7 @@ function ArrowBase:clbk_impact(tag, unit, body, other_unit, other_body, position
 	if not self._is_pickup and not self._sweep_data then
 		self._unit:set_enabled(false)
 		self:_check_stop_flyby_sound()
+		self:_kill_trail()
 		if tweak_data.projectiles[self._tweak_projectile_entry].remove_on_impact then
 			self._unit:set_slot(0)
 			return
@@ -54,7 +61,7 @@ function ArrowBase:clbk_impact(tag, unit, body, other_unit, other_body, position
 	end
 end
 function ArrowBase:throw(...)
-	self._unit:sound_source(Idstring("snd")):post_event("arrow_flyby")
+	self:_tweak_data_play_sound("flyby")
 	self._requires_stop_flyby_sound = true
 	ArrowBase.super.throw(self, ...)
 end
@@ -111,9 +118,9 @@ function ArrowBase:_check_stop_flyby_sound(skip_impact)
 		return
 	end
 	self._requires_stop_flyby_sound = nil
-	self._unit:sound_source(Idstring("snd")):post_event("arrow_flyby_stop")
+	self:_tweak_data_play_sound("flyby_stop")
 	if not skip_impact then
-		self._unit:sound_source(Idstring("snd")):post_event("arrow_impact_gen")
+		self:_tweak_data_play_sound("impact")
 	end
 end
 function ArrowBase:_attach_to_hit_unit(is_remote, dynamic_pickup_wanted)
@@ -121,6 +128,7 @@ function ArrowBase:_attach_to_hit_unit(is_remote, dynamic_pickup_wanted)
 	self._unit:set_enabled(true)
 	self:_set_body_enabled(instant_dynamic_pickup)
 	self:_check_stop_flyby_sound(dynamic_pickup_wanted)
+	self:_kill_trail()
 	mrotation.set_look_at(mrot1, self._col_ray.velocity, math.UP)
 	self._unit:set_rotation(mrot1)
 	local hit_unit = self._col_ray.unit
@@ -215,7 +223,9 @@ function ArrowBase:_attach_to_hit_unit(is_remote, dynamic_pickup_wanted)
 	if not is_remote then
 		local dir = self._col_ray.velocity
 		mvector3.normalize(dir)
-		managers.network:session():send_to_peers_synched("sync_attach_projectile", self._unit:id() ~= -1 and self._unit or nil, dynamic_pickup_wanted or false, hit_unit:id() ~= -1 and hit_unit or nil, hit_unit:id() ~= -1 and parent_body or nil, hit_unit:id() ~= -1 and parent_obj or nil, hit_unit:id() ~= -1 and local_pos or self._unit:position(), dir, tweak_data.blackmarket:get_index_from_projectile_id(self._tweak_projectile_entry), managers.network:session():local_peer():id())
+		if managers.network:session() then
+			managers.network:session():send_to_peers_synched("sync_attach_projectile", self._unit:id() ~= -1 and self._unit or nil, dynamic_pickup_wanted or false, hit_unit:id() ~= -1 and hit_unit or nil, hit_unit:id() ~= -1 and parent_body or nil, hit_unit:id() ~= -1 and parent_obj or nil, hit_unit:id() ~= -1 and local_pos or self._unit:position(), dir, tweak_data.blackmarket:get_index_from_projectile_id(self._tweak_projectile_entry), managers.network:session():local_peer():id())
+		end
 	end
 	if alive(hit_unit) then
 		local dir = self._col_ray.velocity
@@ -316,6 +326,17 @@ function ArrowBase:clbk_hit_unit_destroyed()
 	self._destroy_listener_id = nil
 	self:_switch_to_pickup(true)
 end
+ArrowBase.DEFUALT_SOUNDS = {
+	flyby = "arrow_flyby",
+	flyby_stop = "arrow_flyby_stop",
+	impact = "arrow_impact_gen"
+}
+function ArrowBase:_tweak_data_play_sound(entry)
+	local tweak_entry = tweak_data.projectiles[self._tweak_projectile_entry]
+	local event = tweak_entry.sounds and tweak_entry.sounds[entry]
+	event = event or ArrowBase.DEFUALT_SOUNDS[entry]
+	self._unit:sound_source(Idstring("snd")):post_event(event)
+end
 function ArrowBase:outside_worlds_bounding_box()
 	if Network:is_server() or self._unit:id() == -1 then
 		self._unit:set_slot(0)
@@ -392,6 +413,9 @@ function ArrowBase:_remove_switch_to_pickup_clbk()
 	managers.enemy:remove_delayed_clbk(self._switch_to_pickup_clbk)
 	self._switch_to_pickup_clbk = nil
 end
+function ArrowBase:_kill_trail()
+	managers.game_play_central:remove_projectile_trail(self._unit)
+end
 function ArrowBase:destroy(unit)
 	self:_check_stop_flyby_sound()
 	if self._owner_peer_id and ArrowBase._arrow_units[self._owner_peer_id] then
@@ -407,6 +431,7 @@ function ArrowBase:destroy(unit)
 	self._destroy_listener_id = nil
 	self:_remove_switch_to_pickup_clbk()
 	self:_remove_attached_body_disabled_cbk()
+	self:_kill_trail()
 	ArrowBase.super.destroy(self, unit)
 end
 function ArrowBase.find_nearest_arrow(peer_id, position)

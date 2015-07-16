@@ -847,6 +847,7 @@ function RaycastWeaponBase:on_reload()
 		self:set_ammo_remaining_in_clip(self:get_ammo_max_per_clip())
 		self:set_ammo_total(self:get_ammo_max_per_clip())
 	end
+	managers.job:set_memory("kill_count_no_reload_" .. tostring(self._name_id), nil, true)
 end
 function RaycastWeaponBase:ammo_max()
 	return self:get_ammo_max() == self:get_ammo_total()
@@ -974,10 +975,10 @@ function RaycastWeaponBase:set_timer(timer)
 	self._unit:set_animation_timer(timer)
 end
 InstantBulletBase = InstantBulletBase or class()
-function InstantBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, blank)
+function InstantBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, blank, no_sound)
 	local hit_unit = col_ray.unit
 	local play_impact_flesh = not hit_unit:character_damage() or not hit_unit:character_damage()._no_blood
-	if hit_unit:damage() and col_ray.body:extension() and col_ray.body:extension().damage then
+	if hit_unit:damage() and managers.network:session() and col_ray.body:extension() and col_ray.body:extension().damage then
 		local sync_damage = not blank and hit_unit:id() ~= -1
 		local network_damage = math.ceil(damage * 163.84)
 		damage = network_damage / 163.84
@@ -1007,8 +1008,8 @@ function InstantBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage,
 		managers.game_play_central:physics_push(col_ray)
 	end
 	if play_impact_flesh then
-		managers.game_play_central:play_impact_flesh({col_ray = col_ray})
-		self:play_impact_sound_and_effects(col_ray)
+		managers.game_play_central:play_impact_flesh({col_ray = col_ray, no_sound = no_sound})
+		self:play_impact_sound_and_effects(col_ray, no_sound)
 	end
 	return result
 end
@@ -1029,8 +1030,8 @@ end
 function InstantBulletBase:blank_slotmask()
 	return managers.slot:get_mask("bullet_blank_impact_targets")
 end
-function InstantBulletBase:play_impact_sound_and_effects(col_ray)
-	managers.game_play_central:play_impact_sound_and_effects({col_ray = col_ray})
+function InstantBulletBase:play_impact_sound_and_effects(col_ray, no_sound)
+	managers.game_play_central:play_impact_sound_and_effects({col_ray = col_ray, no_sound = no_sound})
 end
 function InstantBulletBase:give_impact_damage(col_ray, weapon_unit, user_unit, damage, armor_piercing)
 	local action_data = {}
@@ -1218,7 +1219,7 @@ function FlameBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, b
 		managers.game_play_central:physics_push(col_ray)
 	end
 	if play_impact_flesh then
-		managers.game_play_central:play_impact_flesh({col_ray = col_ray})
+		managers.game_play_central:play_impact_flesh({col_ray = col_ray, no_sound = true})
 		self:play_impact_sound_and_effects(col_ray)
 	end
 	return result
@@ -1253,7 +1254,7 @@ function FlameBulletBase:give_fire_damage_dot(col_ray, weapon_unit, attacker_uni
 	action_data.col_ray = col_ray
 	action_data.is_fire_dot_damage = is_fire_dot_damage
 	local defense_data = {}
-	if col_ray and col_ray.unit and alive(col_ray.unit) and col_ray.unit.character_damage then
+	if col_ray and col_ray.unit and alive(col_ray.unit) and col_ray.unit:character_damage() then
 		defense_data = col_ray.unit:character_damage():damage_fire(action_data)
 	end
 	return defense_data
@@ -1308,4 +1309,71 @@ function DragonBreathBulletBase:give_impact_damage(col_ray, weapon_unit, user_un
 	action_data.ignite_character = "dragonsbreath"
 	local defense_data = col_ray.unit:character_damage():damage_bullet(action_data)
 	return defense_data
+end
+DOTBulletBase = DOTBulletBase or class(InstantBulletBase)
+DOTBulletBase.DOT_DATA = {
+	dot_damage = 0.5,
+	hurt_animation_chance = 1,
+	dot_length = 6,
+	dot_tick_period = 0.5
+}
+function DOTBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, blank)
+	local result = DOTBulletBase.super.on_collision(self, col_ray, weapon_unit, user_unit, damage, blank, self.NO_BULLET_INPACT_SOUND)
+	local hit_unit = col_ray.unit
+	if hit_unit:character_damage() and hit_unit:character_damage().damage_dot and not hit_unit:character_damage():dead() then
+		result = self:start_dot_damage(col_ray, weapon_unit, self:_dot_data_by_weapon(weapon_unit))
+	end
+	return result
+end
+function DOTBulletBase:_dot_data_by_weapon(weapon_unit)
+	if not alive(weapon_unit) then
+		return nil
+	end
+	if weapon_unit:base()._ammo_data and weapon_unit:base()._ammo_data.dot_data then
+		local ammo_dot_data = weapon_unit:base()._ammo_data.dot_data
+		return managers.dot:create_dot_data(ammo_dot_data.type, ammo_dot_data.custom_data)
+	end
+	return nil
+end
+function DOTBulletBase:start_dot_damage(col_ray, weapon_unit, dot_data)
+	local hurt_animation = not dot_data.hurt_animation_chance or math.rand(1) < dot_data.hurt_animation_chance
+	dot_data = dot_data or self.DOT_DATA
+	managers.dot:add_doted_enemy(col_ray.unit, TimerManager:game():time(), weapon_unit, dot_data.dot_length, dot_data.dot_damage, hurt_animation, self.VARIANT)
+end
+function DOTBulletBase:give_damage_dot(col_ray, weapon_unit, attacker_unit, damage, hurt_animation)
+	local action_data = {}
+	action_data.variant = self.VARIANT
+	action_data.damage = damage
+	action_data.weapon_unit = weapon_unit
+	action_data.attacker_unit = attacker_unit
+	action_data.col_ray = col_ray
+	action_data.hurt_animation = hurt_animation
+	local defense_data = {}
+	if col_ray and col_ray.unit and alive(col_ray.unit) and col_ray.unit:character_damage() then
+		defense_data = col_ray.unit:character_damage():damage_dot(action_data)
+	end
+	return defense_data
+end
+PoisonBulletBase = PoisonBulletBase or class(DOTBulletBase)
+PoisonBulletBase.VARIANT = "poison"
+ProjectilesPoisonBulletBase = ProjectilesPoisonBulletBase or class(PoisonBulletBase)
+ProjectilesPoisonBulletBase.NO_BULLET_INPACT_SOUND = true
+function ProjectilesPoisonBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, blank)
+	local result = DOTBulletBase.super.on_collision(self, col_ray, weapon_unit, user_unit, damage, blank, self.NO_BULLET_INPACT_SOUND)
+	local hit_unit = col_ray.unit
+	if hit_unit:character_damage() and hit_unit:character_damage().damage_dot and not hit_unit:character_damage():dead() then
+		local dot_data = tweak_data.projectiles[weapon_unit:base()._projectile_entry].dot_data
+		if not dot_data then
+			return
+		end
+		local dot_type_data = tweak_data:get_dot_type_data(dot_data.type)
+		if not dot_type_data then
+			return
+		end
+		result = self:start_dot_damage(col_ray, nil, {
+			dot_damage = dot_type_data.dot_damage,
+			dot_length = dot_data.custom_length or dot_type_data.dot_length
+		})
+	end
+	return result
 end

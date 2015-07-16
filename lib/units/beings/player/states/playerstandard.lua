@@ -31,6 +31,12 @@ PlayerStandard.IDS_MELEE_ATTACK = Idstring("melee_attack")
 PlayerStandard.IDS_MELEE_ATTACK_STATE = Idstring("fps/melee_attack")
 PlayerStandard.IDS_MELEE_EXIT_STATE = Idstring("fps/melee_exit")
 PlayerStandard.IDS_MELEE_ENTER = Idstring("melee_enter")
+PlayerStandard.IDS_PROJECTILE_START = Idstring("throw_projectile_start")
+PlayerStandard.IDS_PROJECTILE_IDLE = Idstring("throw_projectile_idle")
+PlayerStandard.IDS_PROJECTILE_THROW = Idstring("throw_projectile")
+PlayerStandard.IDS_PROJECTILE_THROW_STATE = Idstring("fps/throw_projectile")
+PlayerStandard.IDS_PROJECTILE_EXIT_STATE = Idstring("fps/throw_projectile_exit")
+PlayerStandard.IDS_PROJECTILE_ENTER = Idstring("throw_projectile_enter")
 PlayerStandard.IDS_CHARGE = Idstring("charge")
 PlayerStandard.IDS_BASE = Idstring("base")
 PlayerStandard.debug_bipod = nil
@@ -369,6 +375,9 @@ function PlayerStandard:_get_input(t, dt)
 		btn_meleet_state = downed and self._controller:get_input_bool("melee"),
 		btn_weapon_gadget_press = pressed and self._controller:get_input_pressed("weapon_gadget"),
 		btn_throw_grenade_press = pressed and self._controller:get_input_pressed("throw_grenade"),
+		btn_projectile_press = pressed and self._controller:get_input_pressed("throw_grenade"),
+		btn_projectile_release = released and self._controller:get_input_released("throw_grenade"),
+		btn_projectile_state = downed and self._controller:get_input_bool("throw_grenade"),
 		btn_weapon_firemode_press = pressed and self._controller:get_input_pressed("weapon_firemode")
 	}
 	if win32 then
@@ -423,7 +432,12 @@ function PlayerStandard:_update_check_actions(t, dt)
 	local input = self:_get_input()
 	self:_determine_move_direction()
 	self:_update_interaction_timers(t)
-	self:_update_throw_grenade_timers(t, input)
+	local projectile_entry = managers.blackmarket:equipped_projectile()
+	if tweak_data.blackmarket.projectiles[projectile_entry].is_a_grenade then
+		self:_update_throw_grenade_timers(t, input)
+	else
+		self:_update_throw_projectile_timers(t, input)
+	end
 	self:_update_reload_timers(t, dt, input)
 	self:_update_melee_timers(t, input)
 	self:_update_charging_weapon_timers(t, input)
@@ -454,7 +468,14 @@ function PlayerStandard:_update_check_actions(t, dt)
 	new_action = new_action or self:_check_action_primary_attack(t, input)
 	new_action = new_action or self:_check_action_equip(t, input)
 	new_action = new_action or self:_check_use_item(t, input)
-	new_action = new_action or self:_check_action_throw_grenade(t, input)
+	if not new_action then
+		local projectile_entry = managers.blackmarket:equipped_projectile()
+		if tweak_data.blackmarket.projectiles[projectile_entry].is_a_grenade then
+			new_action = self:_check_action_throw_grenade(t, input)
+		else
+			new_action = self:_check_action_throw_projectile(t, input)
+		end
+	end
 	if managers.player:current_state() ~= "driving" and not new_action then
 		new_action = self:_check_action_interact(t, input)
 	end
@@ -664,7 +685,7 @@ function PlayerStandard:_stance_entered(unequipped)
 		stance_mod = self._state_data.in_steelsight and self._equipped_unit:base().stance_mod and self._equipped_unit:base():stance_mod() or stance_mod
 	end
 	local stances
-	if self:_is_meleeing() or self:_is_throwing_grenade() then
+	if self:_is_meleeing() or self:_is_throwing_projectile() then
 		stances = tweak_data.player.stances.default
 	else
 		stances = tweak_data.player.stances[stance_id] or tweak_data.player.stances.default
@@ -712,7 +733,7 @@ function PlayerStandard:_get_max_walk_speed(t)
 		speed_state = "run"
 	end
 	local morale_boost_bonus = self._ext_movement:morale_boost()
-	local multiplier = managers.player:movement_speed_multiplier(speed_state, speed_state and morale_boost_bonus and morale_boost_bonus.move_speed_bonus)
+	local multiplier = managers.player:movement_speed_multiplier(speed_state, speed_state and morale_boost_bonus and morale_boost_bonus.move_speed_bonus, nil, self._ext_damage:health_ratio())
 	local apply_weapon_penalty = true
 	if self:_is_meleeing() then
 		local melee_entry = managers.blackmarket:equipped_melee_weapon()
@@ -724,7 +745,7 @@ function PlayerStandard:_get_max_walk_speed(t)
 	return movement_speed * multiplier
 end
 function PlayerStandard:_start_action_steelsight(t)
-	if self:_changing_weapon() or self:_is_reloading() or self:_interacting() or self:_is_meleeing() or self._use_item_expire_t or self:_is_throwing_grenade() or self:_on_zipline() then
+	if self:_changing_weapon() or self:_is_reloading() or self:_interacting() or self:_is_meleeing() or self._use_item_expire_t or self:_is_throwing_projectile() or self:_on_zipline() then
 		self._steelsight_wanted = true
 		return
 	end
@@ -796,7 +817,7 @@ function PlayerStandard:_start_action_running(t)
 	if self:on_ladder() or self:_on_zipline() then
 		return
 	end
-	if (self._shooting or self:_is_charging_weapon()) and not self.RUN_AND_SHOOT or self:_changing_weapon() or self:_is_meleeing() or self._use_item_expire_t or self._state_data.in_air or self:_is_throwing_grenade() then
+	if (self._shooting or self:_is_charging_weapon()) and not self.RUN_AND_SHOOT or self:_changing_weapon() or self:_is_meleeing() or self._use_item_expire_t or self._state_data.in_air or self:_is_throwing_projectile() then
 		self._running_wanted = true
 		return
 	end
@@ -930,6 +951,143 @@ function PlayerStandard:_start_action_equip(redirect, extra_time)
 	end
 	local result = self._ext_camera:play_redirect(redirect or self.IDS_EQUIP)
 end
+function PlayerStandard:_check_action_throw_projectile(t, input)
+	if not managers.player:can_throw_grenade() then
+		self._state_data.projectile_throw_wanted = nil
+		self._state_data.projectile_idle_wanted = nil
+		return
+	end
+	if self._state_data.projectile_throw_wanted then
+		if not self._state_data.projectile_throw_allowed_t then
+			self._state_data.projectile_throw_wanted = nil
+			self:_do_action_throw_projectile(t, input)
+		end
+		return
+	end
+	local action_wanted = input.btn_projectile_press or input.btn_projectile_release or self._state_data.projectile_idle_wanted
+	if not action_wanted then
+		return
+	end
+	if input.btn_projectile_release then
+		if self._state_data.throwing_projectile then
+			if self._state_data.projectile_throw_allowed_t then
+				self._state_data.projectile_throw_wanted = true
+				return
+			end
+			self:_do_action_throw_projectile(t, input)
+		end
+		return
+	end
+	local action_forbidden = not PlayerBase.USE_GRENADES or not self:_projectile_repeat_allowed() or self:chk_action_forbidden("interact") or self:_interacting() or self:is_deploying() or self:_changing_weapon() or self:_is_meleeing() or self:_is_using_bipod()
+	if action_forbidden then
+		return
+	end
+	self:_start_action_throw_projectile(t, input)
+	return true
+end
+function PlayerStandard:_start_action_throw_projectile(t, input)
+	self._equipped_unit:base():tweak_data_anim_stop("fire")
+	self:_interupt_action_reload(t)
+	self:_interupt_action_steelsight(t)
+	self:_interupt_action_running(t)
+	self:_interupt_action_charging_weapon(t)
+	self._state_data.projectile_idle_wanted = nil
+	self._state_data.throwing_projectile = true
+	self._state_data.projectile_start_t = nil
+	local projectile_entry = managers.blackmarket:equipped_projectile()
+	self:_stance_entered()
+	if self._state_data.projectile_global_value then
+		self._camera_unit:anim_state_machine():set_global(self._state_data.projectile_global_value, 0)
+	end
+	self._state_data.projectile_global_value = tweak_data.blackmarket.projectiles[projectile_entry].anim_global_param or "projectile_frag"
+	self._camera_unit:anim_state_machine():set_global(self._state_data.projectile_global_value, 1)
+	local current_state_name = self._camera_unit:anim_state_machine():segment_state(PlayerStandard.IDS_BASE)
+	local throw_allowed_expire_t = tweak_data.blackmarket.projectiles[projectile_entry].throw_allowed_expire_t or 0.15
+	self._state_data.projectile_throw_allowed_t = t + (current_state_name ~= PlayerStandard.IDS_PROJECTILE_THROW_STATE and throw_allowed_expire_t or 0)
+	if current_state_name == PlayerStandard.IDS_PROJECTILE_THROW_STATE then
+		self._ext_camera:play_redirect(PlayerStandard.IDS_PROJECTILE_IDLE)
+		return
+	end
+	local offset
+	if current_state_name == PlayerStandard.IDS_PROJECTILE_EXIT_STATE then
+		local segment_relative_time = self._camera_unit:anim_state_machine():segment_relative_time(PlayerStandard.IDS_BASE)
+		offset = (1 - segment_relative_time) * 0.9
+	end
+	self._ext_camera:play_redirect(PlayerStandard.IDS_PROJECTILE_ENTER, nil, offset)
+end
+function PlayerStandard:_is_throwing_projectile()
+	local projectile_entry = managers.blackmarket:equipped_projectile()
+	if tweak_data.blackmarket.projectiles[projectile_entry].is_a_grenade then
+		return self:_is_throwing_grenade()
+	end
+	return (self._state_data.throwing_projectile or self._state_data.projectile_expire_t) and true
+end
+function PlayerStandard:in_throw_projectile()
+	return self._state_data.throwing_projectile and true
+end
+function PlayerStandard:_projectile_repeat_allowed()
+	return not self._camera_unit_anim_data.throwing and not self._state_data.throwing_projectile and not self._state_data.projectile_repeat_expire_t
+end
+function PlayerStandard:_do_action_throw_projectile(t, input, drop_projectile)
+	local current_state_name = self._camera_unit:anim_state_machine():segment_state(PlayerStandard.IDS_BASE)
+	print(current_state_name)
+	self._state_data.throwing_projectile = nil
+	local projectile_entry = managers.blackmarket:equipped_projectile()
+	local projectile_data = tweak_data.blackmarket.projectiles[projectile_entry]
+	self._state_data.projectile_expire_t = t + projectile_data.expire_t
+	self._state_data.projectile_repeat_expire_t = t + math.min(projectile_data.repeat_expire_t, projectile_data.expire_t)
+	managers.network:session():send_to_peers_synched("play_distance_interact_redirect", self._unit, "throw_grenade")
+	self._state_data.projectile_global_value = projectile_data.anim_global_param or "projectile_frag"
+	self._camera_unit:anim_state_machine():set_global(self._state_data.projectile_global_value, 1)
+	self._ext_camera:play_redirect(self.IDS_PROJECTILE_THROW)
+	self:_stance_entered()
+end
+function PlayerStandard:_interupt_action_throw_projectile(t)
+	if not self:_is_throwing_projectile() then
+		return
+	end
+	self._state_data.projectile_idle_wanted = nil
+	self._state_data.projectile_expire_t = nil
+	self._state_data.projectile_throw_allowed_t = nil
+	self._state_data.throwing_projectile = nil
+	self._camera_unit_anim_data.throwing = nil
+	self._ext_camera:play_redirect(self.IDS_EQUIP)
+	self._equipped_unit:base():tweak_data_anim_stop("unequip")
+	self._equipped_unit:base():tweak_data_anim_play("equip")
+	self._camera_unit:base():unspawn_grenade()
+	self._camera_unit:base():show_weapon()
+	self:_stance_entered()
+end
+function PlayerStandard:_update_throw_projectile_timers(t, input)
+	if self._state_data.throwing_projectile then
+	end
+	if self._state_data.projectile_throw_allowed_t and t >= self._state_data.projectile_throw_allowed_t then
+		self._state_data.projectile_start_t = t
+		self._state_data.projectile_throw_allowed_t = nil
+		local projectile_entry = managers.blackmarket:equipped_projectile()
+		local instant = tweak_data.blackmarket.projectiles[projectile_entry].instant
+		if instant then
+			self:_do_action_throw_projectile(t, input)
+			return
+		end
+	end
+	if self._state_data.projectile_repeat_expire_t and t >= self._state_data.projectile_repeat_expire_t then
+		self._state_data.projectile_repeat_expire_t = nil
+		if input.btn_projectile_state then
+			local projectile_entry = managers.blackmarket:equipped_projectile()
+			local instant_throw = tweak_data.blackmarket.projectiles[projectile_entry].instant
+			self._state_data.projectile_idle_wanted = not instant_throw and true
+		end
+	end
+	if self._state_data.projectile_expire_t and t >= self._state_data.projectile_expire_t then
+		self._state_data.projectile_expire_t = nil
+		self._state_data.projectile_repeat_expire_t = nil
+		self:_stance_entered()
+		if self._equipped_unit and input.btn_steelsight_state then
+			self._steelsight_wanted = true
+		end
+	end
+end
 function PlayerStandard:_check_action_throw_grenade(t, input)
 	local action_wanted = input.btn_throw_grenade_press
 	if not action_wanted then
@@ -987,7 +1145,7 @@ function PlayerStandard:_check_action_interact(t, input)
 	local new_action, timer, interact_object
 	local interaction_wanted = input.btn_interact_press
 	if interaction_wanted then
-		local action_forbidden = self:chk_action_forbidden("interact") or self._unit:base():stats_screen_visible() or self:_interacting() or self._ext_movement:has_carry_restriction() or self:is_deploying() or self:_changing_weapon() or self:_is_throwing_grenade() or self:_is_meleeing() or self:_on_zipline() or self:_is_using_bipod()
+		local action_forbidden = self:chk_action_forbidden("interact") or self._unit:base():stats_screen_visible() or self:_interacting() or self._ext_movement:has_carry_restriction() or self:is_deploying() or self:_changing_weapon() or self:_is_throwing_projectile() or self:_is_meleeing() or self:_on_zipline() or self:_is_using_bipod()
 		if not action_forbidden then
 			new_action, timer, interact_object = managers.interaction:interact(self._unit)
 			if new_action then
@@ -1106,7 +1264,7 @@ function PlayerStandard:_check_action_melee(t, input)
 		end
 		return
 	end
-	local action_forbidden = not self:_melee_repeat_allowed() or self._use_item_expire_t or self:_changing_weapon() or self:_interacting() or self:_is_throwing_grenade() or self:_is_using_bipod()
+	local action_forbidden = not self:_melee_repeat_allowed() or self._use_item_expire_t or self:_changing_weapon() or self:_interacting() or self:_is_throwing_projectile() or self:_is_using_bipod()
 	if action_forbidden then
 		return
 	end
@@ -1299,8 +1457,9 @@ function PlayerStandard:_do_melee_damage(t, bayonet_melee)
 				end
 			end
 			local health_ratio = self._ext_damage:health_ratio()
-			if health_ratio <= tweak_data.upgrades.player_damage_health_ratio_threshold then
-				local damage_ratio = 1 - health_ratio / math.max(0.01, tweak_data.upgrades.player_damage_health_ratio_threshold)
+			local damage_health_ratio = managers.player:get_damage_health_ratio(health_ratio, "melee")
+			if damage_health_ratio > 0 then
+				local damage_ratio = damage_health_ratio
 				dmg_multiplier = dmg_multiplier * (1 + managers.player:upgrade_value("player", "melee_damage_health_ratio_multiplier", 0) * damage_ratio)
 			end
 			dmg_multiplier = dmg_multiplier * managers.player:temporary_upgrade_value("temporary", "berserker_damage_multiplier", 1)
@@ -1333,6 +1492,7 @@ function PlayerStandard:_do_melee_damage(t, bayonet_melee)
 				end
 			end
 			local defense_data = character_unit:character_damage():damage_melee(action_data)
+			self:_check_melee_dot_damage(col_ray, defense_data, melee_entry)
 			return defense_data
 		end
 	else
@@ -1345,6 +1505,18 @@ function PlayerStandard:_do_melee_damage(t, bayonet_melee)
 		stack[2] = 0
 	end
 	return col_ray
+end
+function PlayerStandard:_check_melee_dot_damage(col_ray, defense_data, melee_entry)
+	if not defense_data or defense_data.type == "death" then
+		return
+	end
+	local dot_data = tweak_data.blackmarket.melee_weapons[melee_entry].dot_data
+	if not dot_data then
+		return
+	end
+	local data = managers.dot:create_dot_data(dot_data.type, dot_data.custom_data)
+	local damage_class = CoreSerialize.string_to_classtable(data.damage_class)
+	damage_class:start_dot_damage(col_ray, nil, data)
 end
 function PlayerStandard:_play_melee_sound(melee_entry, sound_id)
 	local tweak_data = tweak_data.blackmarket.melee_weapons[melee_entry]
@@ -1365,6 +1537,8 @@ function PlayerStandard:_interupt_action_melee(t)
 	self._state_data.meleeing = nil
 	self._unit:sound():play("interupt_melee", nil, false)
 	self._ext_camera:play_redirect(self.IDS_EQUIP)
+	self._equipped_unit:base():tweak_data_anim_stop("unequip")
+	self._equipped_unit:base():tweak_data_anim_play("equip")
 	self._camera_unit:base():unspawn_melee_item()
 	self._camera_unit:base():show_weapon()
 	if self._state_data.melee_charge_shake then
@@ -1423,7 +1597,7 @@ function PlayerStandard:_check_action_reload(t, input)
 	local new_action
 	local action_wanted = input.btn_reload_press
 	if action_wanted then
-		local action_forbidden = self:_is_reloading() or self:_changing_weapon() or self:_is_meleeing() or self._use_item_expire_t or self:_interacting() or self:_is_throwing_grenade()
+		local action_forbidden = self:_is_reloading() or self:_changing_weapon() or self:_is_meleeing() or self._use_item_expire_t or self:_interacting() or self:_is_throwing_projectile()
 		if not action_forbidden and self._equipped_unit and not self._equipped_unit:base():clip_full() then
 			self:_start_action_reload_enter(t)
 			new_action = true
@@ -1490,7 +1664,7 @@ function PlayerStandard:_check_use_item(t, input)
 	local new_action
 	local action_wanted = input.btn_use_item_press
 	if action_wanted then
-		local action_forbidden = self._use_item_expire_t or self:_interacting() or self:_changing_weapon() or self:_is_throwing_grenade() or self:_is_meleeing()
+		local action_forbidden = self._use_item_expire_t or self:_interacting() or self:_changing_weapon() or self:_is_throwing_projectile() or self:_is_meleeing()
 		if not action_forbidden and managers.player:can_use_selected_equipment(self._unit) then
 			self:_start_action_use_item(t)
 			new_action = true
@@ -1556,6 +1730,7 @@ function PlayerStandard:_interupt_action_use_item(t, input, complete)
 		self._equip_weapon_expire_t = managers.player:player_timer():time() + (tweak_data.timers.equip or 0.7)
 		local result = self._ext_camera:play_redirect(self.IDS_EQUIP)
 		self._equipped_unit:base():tweak_data_anim_stop("unequip")
+		self._equipped_unit:base():tweak_data_anim_play("equip")
 		managers.hud:hide_progress_timer_bar(complete)
 		managers.hud:remove_progress_timer()
 		local post_event = managers.player:selected_equipment_sound_interupt()
@@ -1572,7 +1747,7 @@ function PlayerStandard:_check_change_weapon(t, input)
 	if action_wanted then
 		local action_forbidden = self:_changing_weapon()
 		action_forbidden = action_forbidden or self:_is_meleeing() or self._use_item_expire_t or self._change_item_expire_t
-		action_forbidden = action_forbidden or self._unit:inventory():num_selections() == 1 or self:_interacting() or self:_is_throwing_grenade()
+		action_forbidden = action_forbidden or self._unit:inventory():num_selections() == 1 or self:_interacting() or self:_is_throwing_projectile()
 		if not action_forbidden then
 			local data = {}
 			data.next = true
@@ -2048,7 +2223,7 @@ function PlayerStandard:_check_action_equip(t, input)
 	local selection_wanted = input.btn_primary_choice
 	if selection_wanted then
 		local action_forbidden = self:chk_action_forbidden("equip")
-		action_forbidden = action_forbidden or not self._ext_inventory:is_selection_available(selection_wanted) or self:_is_meleeing() or self._use_item_expire_t or self:_changing_weapon() or self:_interacting() or self:_is_throwing_grenade()
+		action_forbidden = action_forbidden or not self._ext_inventory:is_selection_available(selection_wanted) or self:_is_meleeing() or self._use_item_expire_t or self:_changing_weapon() or self:_interacting() or self:_is_throwing_projectile()
 		if not action_forbidden then
 			local new_action = not self._ext_inventory:is_equipped(selection_wanted)
 			if new_action then
@@ -2190,7 +2365,7 @@ function PlayerStandard:_on_zipline()
 	return self._state_data.on_zipline
 end
 function PlayerStandard:_update_omniscience(t, dt)
-	local action_forbidden = not managers.player:has_category_upgrade("player", "standstill_omniscience") or managers.player:current_state() == "civilian" or self:_interacting() or self._ext_movement:has_carry_restriction() or self:is_deploying() or self:_changing_weapon() or self:_is_throwing_grenade() or self:_is_meleeing() or self:_on_zipline() or self._moving or self:running() or self:_is_reloading() or self:in_air() or self:in_steelsight() or self:is_equipping() or self:shooting() or not managers.groupai:state():whisper_mode() or not tweak_data.player.omniscience
+	local action_forbidden = not managers.player:has_category_upgrade("player", "standstill_omniscience") or managers.player:current_state() == "civilian" or self:_interacting() or self._ext_movement:has_carry_restriction() or self:is_deploying() or self:_changing_weapon() or self:_is_throwing_projectile() or self:_is_meleeing() or self:_on_zipline() or self._moving or self:running() or self:_is_reloading() or self:in_air() or self:in_steelsight() or self:is_equipping() or self:shooting() or not managers.groupai:state():whisper_mode() or not tweak_data.player.omniscience
 	if action_forbidden then
 		if self._state_data.omniscience_t then
 			self._state_data.omniscience_t = nil
@@ -2372,7 +2547,7 @@ function PlayerStandard:_check_action_primary_attack(t, input)
 	local new_action
 	local action_wanted = input.btn_primary_attack_state or input.btn_primary_attack_release
 	if action_wanted then
-		local action_forbidden = self:_is_reloading() or self:_changing_weapon() or self:_is_meleeing() or self._use_item_expire_t or self:_interacting() or self:_is_throwing_grenade() or self:_is_deploying_bipod()
+		local action_forbidden = self:_is_reloading() or self:_changing_weapon() or self:_is_meleeing() or self._use_item_expire_t or self:_interacting() or self:_is_throwing_projectile() or self:_is_deploying_bipod()
 		if not action_forbidden then
 			self._queue_reload_interupt = nil
 			self._ext_inventory:equip_selected_primary(false)
@@ -2430,9 +2605,10 @@ function PlayerStandard:_check_action_primary_attack(t, input)
 						dmg_mul = dmg_mul * managers.player:temporary_upgrade_value("temporary", "overkill_damage_multiplier", 1)
 					end
 					local health_ratio = self._ext_damage:health_ratio()
-					if health_ratio <= tweak_data.upgrades.player_damage_health_ratio_threshold then
+					local damage_health_ratio = managers.player:get_damage_health_ratio(health_ratio, weapon_category)
+					if damage_health_ratio > 0 then
 						local upgrade_name = weapon_category == "saw" and "melee_damage_health_ratio_multiplier" or "damage_health_ratio_multiplier"
-						local damage_ratio = 1 - health_ratio / math.max(0.01, tweak_data.upgrades.player_damage_health_ratio_threshold)
+						local damage_ratio = damage_health_ratio
 						dmg_mul = dmg_mul * (1 + managers.player:upgrade_value("player", upgrade_name, 0) * damage_ratio)
 					end
 					dmg_mul = dmg_mul * managers.player:temporary_upgrade_value("temporary", "berserker_damage_multiplier", 1)
@@ -2684,6 +2860,8 @@ function PlayerStandard:_start_action_equip_weapon(t)
 	local tweak_data = self._equipped_unit:base():weapon_tweak_data()
 	self._equip_weapon_expire_t = t + (tweak_data.timers.equip or 0.7) / speed_multiplier
 	self._ext_camera:play_redirect(self.IDS_EQUIP, speed_multiplier)
+	self._equipped_unit:base():tweak_data_anim_stop("unequip")
+	self._equipped_unit:base():tweak_data_anim_play("equip", speed_multiplier)
 	managers.upgrades:setup_current_weapon()
 end
 function PlayerStandard:_changing_weapon()

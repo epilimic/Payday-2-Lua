@@ -267,6 +267,13 @@ function CopActionHurt:init(action_desc, common_data)
 			self._machine:set_global(hurt_sick, hurt_sick == variant and 1 or 0)
 		end
 		self._sick_time = t + duration
+	elseif action_type == "poison_hurt" then
+		redir_res = self._ext_movement:play_redirect("hurt_poison")
+		if not redir_res then
+			debug_pause("[CopActionHurt:init] hurt_sick redirect failed in", self._machine:segment_state(Idstring("base")))
+			return
+		end
+		self._sick_time = t + 2
 	elseif action_type == "bleedout" then
 		redir_res = self._ext_movement:play_redirect("bleedout")
 		if not redir_res then
@@ -293,6 +300,8 @@ function CopActionHurt:init(action_desc, common_data)
 		end
 		self:_start_enemy_fire_effect_on_death(variant)
 		managers.fire:check_achievemnts(self._unit, t)
+	elseif action_type == "death" and action_desc.variant == "poison" then
+		self:force_ragdoll()
 	elseif action_type == "death" and (self._ext_anim.run and self._ext_anim.move_fwd or self._ext_anim.sprint) and not common_data.char_tweak.no_run_death_anim then
 		redir_res = self._ext_movement:play_redirect("death_run")
 		if not redir_res then
@@ -452,7 +461,7 @@ function CopActionHurt:init(action_desc, common_data)
 				m_last_pos = common_data.pos + common_data.fwd * 500
 			}
 		end
-	elseif action_type == "hurt_sick" then
+	elseif action_type == "hurt_sick" or action_type == "poison_hurt" then
 		self.update = self._upd_sick
 	elseif action_desc.variant == "tase" then
 	elseif self._ragdolled then
@@ -907,7 +916,7 @@ function CopActionHurt:chk_block(action_type, t)
 	if CopActionAct.chk_block(self, action_type, t) then
 		return true
 	elseif action_type == "death" then
-	elseif (action_type == "hurt" or action_type == "heavy_hurt" or action_type == "hurt_sick") and not self._ext_anim.hurt_exit then
+	elseif (action_type == "hurt" or action_type == "heavy_hurt" or action_type == "hurt_sick" or action_type == "poison_hurt") and not self._ext_anim.hurt_exit then
 		return true
 	end
 end

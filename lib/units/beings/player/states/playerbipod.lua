@@ -53,7 +53,12 @@ function PlayerBipod:_update_check_actions(t, dt)
 	local input = self:_get_input()
 	self:_determine_move_direction()
 	self:_update_interaction_timers(t)
-	self:_update_throw_grenade_timers(t, input)
+	local projectile_entry = managers.blackmarket:equipped_projectile()
+	if tweak_data.blackmarket.projectiles[projectile_entry].is_a_grenade then
+		self:_update_throw_grenade_timers(t, input)
+	else
+		self:_update_throw_projectile_timers(t, input)
+	end
 	self:_update_reload_timers(t, dt, input)
 	self:_update_melee_timers(t, input)
 	self:_update_equip_weapon_timers(t, input)
@@ -76,7 +81,14 @@ function PlayerBipod:_update_check_actions(t, dt)
 		new_action = self:_check_action_primary_attack(t, input)
 		self._shooting = new_action
 	end
-	new_action = new_action or self:_check_action_throw_grenade(t, input)
+	if not new_action then
+		local projectile_entry = managers.blackmarket:equipped_projectile()
+		if tweak_data.blackmarket.projectiles[projectile_entry].is_a_grenade then
+			new_action = self:_check_action_throw_grenade(t, input)
+		else
+			new_action = self:_check_action_throw_projectile(t, input)
+		end
+	end
 	self:_check_action_interact(t, input)
 	self:_check_action_jump(t, input)
 	self:_check_action_run(t, input)

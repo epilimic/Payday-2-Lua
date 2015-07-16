@@ -1419,7 +1419,10 @@ end
 function MenuSceneManager:spawn_item_weapon(factory_id, blueprint, texture_switches)
 	local factory_weapon = tweak_data.weapon.factory[factory_id]
 	local ids_unit_name = Idstring(factory_weapon.unit)
-	managers.dyn_resource:load(Idstring("unit"), ids_unit_name, DynamicResourceManager.DYN_RESOURCES_PACKAGE, false)
+	if not managers.dyn_resource:is_resource_ready(Idstring("unit"), ids_unit_name, DynamicResourceManager.DYN_RESOURCES_PACKAGE) then
+		print("[MenuSceneManager:spawn_item_weapon]", "Weapon unit is not loaded, force loading it.", factory_weapon.unit)
+		managers.dyn_resource:load(Idstring("unit"), ids_unit_name, DynamicResourceManager.DYN_RESOURCES_PACKAGE, false)
+	end
 	self._item_pos = Vector3(0, 0, 200)
 	mrotation.set_zero(self._item_rot_mod)
 	self._item_yaw = 0

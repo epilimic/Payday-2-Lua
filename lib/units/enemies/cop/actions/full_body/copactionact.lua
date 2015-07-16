@@ -615,6 +615,9 @@ CopActionAct._act_redirects.SO = {
 	"so_escort_before_door_idle",
 	"so_escort_before_door_enter",
 	"drive_falcogini_passanger",
+	"drive_forklift_passanger",
+	"drive_escape_van_passanger",
+	"drive_escape_van_kneel",
 	"drive_muscle_passanger",
 	"drive_muscle_back_right",
 	"drive_muscle_back_left"

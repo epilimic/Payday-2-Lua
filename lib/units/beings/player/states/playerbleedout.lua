@@ -11,7 +11,12 @@ function PlayerBleedOut:enter(state_data, enter_data)
 	self._tilt_wait_t = managers.player:player_timer():time() + 1
 	self._old_selection = nil
 	if (not managers.player:has_category_upgrade("player", "primary_weapon_when_downed") or self._unit:inventory():equipped_unit():base():weapon_tweak_data().not_allowed_in_bleedout) and self._unit:inventory():equipped_selection() ~= 1 then
-		self:_interupt_action_throw_grenade(managers.player:player_timer():time())
+		local projectile_entry = managers.blackmarket:equipped_projectile()
+		if tweak_data.blackmarket.projectiles[projectile_entry].is_a_grenade then
+			self:_interupt_action_throw_grenade(managers.player:player_timer():time())
+		else
+			self:_interupt_action_throw_projectile(managers.player:player_timer():time())
+		end
 		self._old_selection = self._unit:inventory():equipped_selection()
 		self:_start_action_unequip_weapon(managers.player:player_timer():time(), {selection_wanted = 1})
 		self._unit:inventory():unit_by_selection(1):base():on_reload()
@@ -96,7 +101,12 @@ end
 function PlayerBleedOut:_update_check_actions(t, dt)
 	local input = self:_get_input()
 	self._unit:camera():set_shaker_parameter("headbob", "amplitude", 0)
-	self:_update_throw_grenade_timers(t, input)
+	local projectile_entry = managers.blackmarket:equipped_projectile()
+	if tweak_data.blackmarket.projectiles[projectile_entry].is_a_grenade then
+		self:_update_throw_grenade_timers(t, input)
+	else
+		self:_update_throw_projectile_timers(t, input)
+	end
 	self:_update_reload_timers(t, dt, input)
 	self:_update_equip_weapon_timers(t, input)
 	if input.btn_stats_screen_press then
@@ -114,7 +124,14 @@ function PlayerBleedOut:_update_check_actions(t, dt)
 		new_action = self:_check_action_primary_attack(t, input)
 		self._shooting = new_action
 	end
-	new_action = new_action or self:_check_action_throw_grenade(t, input)
+	if not new_action then
+		local projectile_entry = managers.blackmarket:equipped_projectile()
+		if tweak_data.blackmarket.projectiles[projectile_entry].is_a_grenade then
+			new_action = self:_check_action_throw_grenade(t, input)
+		else
+			new_action = self:_check_action_throw_projectile(t, input)
+		end
+	end
 	new_action = new_action or self:_check_action_equip(t, input)
 	new_action = new_action or self:_check_action_interact(t, input)
 	new_action = new_action or self:_check_action_steelsight(t, input)

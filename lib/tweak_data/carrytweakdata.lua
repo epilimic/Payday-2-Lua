@@ -234,7 +234,7 @@ function CarryTweakData:init(tweak_data)
 	self.mus_artifact.bag_value = "mus_artifact_bag"
 	self.mus_artifact.AI_carry = {SO_category = "enemies"}
 	self.mus_artifact_paint = {}
-	self.mus_artifact_paint.type = "medium"
+	self.mus_artifact_paint.type = "light"
 	self.mus_artifact_paint.name_id = "hud_carry_artifact"
 	self.mus_artifact_paint.bag_value = "mus_artifact_bag"
 	self.mus_artifact_paint.unit = "units/payday2/pickups/gen_pku_canvasbag/gen_pku_canvasbag"
@@ -331,7 +331,7 @@ function CarryTweakData:init(tweak_data)
 	self.watertank_full.visual_object = "g_cagebag"
 	self.watertank_full.unit = "units/payday2/pickups/gen_pku_cage_bag/gen_pku_cage_bag"
 	self.unknown = {}
-	self.unknown.type = "very_heavy"
+	self.unknown.type = "heavy"
 	self.unknown.name_id = "hud_carry_???"
 	self.unknown.skip_exit_secure = false
 	self.unknown.AI_carry = {SO_category = "enemies"}

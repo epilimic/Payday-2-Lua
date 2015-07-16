@@ -23,6 +23,9 @@ function NpcVehicleDamage:damage_bullet(attack_data)
 	elseif self:_chk_dmg_too_soon(attack_data.damage) then
 		return
 	end
+	if attack_data.attacker_unit == managers.player:player_unit() then
+		managers.hud:on_hit_confirmed()
+	end
 	self:_health_recap(attack_data)
 	return attack_data.result
 end
@@ -40,6 +43,9 @@ function NpcVehicleDamage:damage_explosion(attack_data)
 		return
 	elseif self:_chk_dmg_too_soon(attack_data.damage) then
 		return
+	end
+	if attack_data.attacker_unit == managers.player:player_unit() then
+		managers.hud:on_hit_confirmed()
 	end
 	self:_health_recap(attack_data)
 end
@@ -59,6 +65,9 @@ function NpcVehicleDamage:damage_fire(attack_data)
 		return
 	elseif self:_chk_dmg_too_soon(attack_data.damage) then
 		return
+	end
+	if attack_data.attacker_unit == managers.player:player_unit() and attack_data.weapon_unit and attack_data.variant ~= "stun" then
+		managers.hud:on_hit_confirmed()
 	end
 	self:_health_recap(attack_data)
 end
@@ -97,16 +106,5 @@ function NpcVehicleDamage:_set_health_recap()
 	if current_health <= 0 and self._is_alive then
 		self._is_alive = false
 		self._unit:npc_vehicle_driving():on_vehicle_death()
-	end
-end
-function NpcVehicleDamage:spawn_broken_smoke_effect()
-	if not self._broken_effect_id then
-		local engine_locator = self._unit:get_object(self._broken_engine_locator)
-		if engine_locator then
-			self._broken_effect_id = World:effect_manager():spawn({
-				effect = self._broken_effect,
-				parent = engine_locator
-			})
-		end
 	end
 end

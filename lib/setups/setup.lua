@@ -320,6 +320,7 @@ function Setup:init_game()
 	return game_state_machine
 end
 function Setup:init_finalize()
+	Setup.super.init_finalize(self)
 	game_state_machine:init_finilize()
 	managers.dlc:init_finalize()
 	managers.achievment:init_finalize()

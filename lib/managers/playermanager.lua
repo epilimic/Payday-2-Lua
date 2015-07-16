@@ -815,7 +815,7 @@ function PlayerManager:get_hostage_bonus_addend(category)
 	end
 	return addend * hostages
 end
-function PlayerManager:movement_speed_multiplier(speed_state, bonus_multiplier, upgrade_level)
+function PlayerManager:movement_speed_multiplier(speed_state, bonus_multiplier, upgrade_level, health_ratio)
 	local multiplier = 1
 	local armor_penalty = self:mod_movement_penalty(self:body_armor_value("movement", upgrade_level, 1))
 	multiplier = multiplier + armor_penalty - 1
@@ -839,6 +839,10 @@ function PlayerManager:movement_speed_multiplier(speed_state, bonus_multiplier, 
 	if managers.player:has_activate_temporary_upgrade("temporary", "berserker_damage_multiplier") then
 		multiplier = multiplier * (tweak_data.upgrades.berserker_movement_speed_multiplier or 1)
 	end
+	if health_ratio then
+		local damage_health_ratio = self:get_damage_health_ratio(health_ratio, "movement_speed")
+		multiplier = multiplier * (1 + managers.player:upgrade_value("player", "movement_speed_damage_health_ratio_multiplier", 0) * damage_health_ratio)
+	end
 	return multiplier
 end
 function PlayerManager:mod_movement_penalty(movement_penalty)
@@ -860,7 +864,7 @@ function PlayerManager:body_armor_skill_multiplier()
 	multiplier = multiplier + self:upgrade_value("player", "perk_armor_loss_multiplier", 1) - 1
 	return multiplier
 end
-function PlayerManager:body_armor_regen_multiplier(moving)
+function PlayerManager:body_armor_regen_multiplier(moving, health_ratio)
 	local multiplier = 1
 	multiplier = multiplier * self:upgrade_value("player", "armor_regen_timer_multiplier_tier", 1)
 	multiplier = multiplier * self:upgrade_value("player", "armor_regen_timer_multiplier", 1)
@@ -870,6 +874,10 @@ function PlayerManager:body_armor_regen_multiplier(moving)
 	multiplier = multiplier * self:upgrade_value("player", "perk_armor_regen_timer_multiplier", 1)
 	if not moving then
 		multiplier = multiplier * managers.player:upgrade_value("player", "armor_regen_timer_stand_still_multiplier", 1)
+	end
+	if health_ratio then
+		local damage_health_ratio = self:get_damage_health_ratio(health_ratio, "armor_regen")
+		multiplier = multiplier * (1 - managers.player:upgrade_value("player", "armor_regen_damage_health_ratio_multiplier", 0) * damage_health_ratio)
 	end
 	return multiplier
 end
@@ -1387,26 +1395,30 @@ function PlayerManager:transfer_special_equipment(peer_id, include_custody)
 		local peers = {}
 		local peers_loadout = {}
 		local peers_custody = {}
-		if not local_peer:waiting_for_player_ready() then
-			table.insert(peers_loadout, local_peer)
-		elseif managers.trade:is_peer_in_custody(local_peer:id()) then
-			if include_custody then
-				table.insert(peers_custody, local_peer)
+		if local_peer_id ~= peer_id then
+			if not local_peer:waiting_for_player_ready() then
+				table.insert(peers_loadout, local_peer)
+			elseif managers.trade:is_peer_in_custody(local_peer:id()) then
+				if include_custody then
+					table.insert(peers_custody, local_peer)
+				end
+			else
+				table.insert(peers, local_peer)
 			end
-		else
-			table.insert(peers, local_peer)
 		end
 		for _, peer in pairs(managers.network:session():peers()) do
-			if not peer:waiting_for_player_ready() then
-				table.insert(peers_loadout, peer)
-			elseif managers.trade:is_peer_in_custody(peer:id()) then
-				if include_custody then
-					table.insert(peers_custody, peer)
+			if peer:id() ~= peer_id then
+				if not peer:waiting_for_player_ready() then
+					table.insert(peers_loadout, peer)
+				elseif managers.trade:is_peer_in_custody(peer:id()) then
+					if include_custody then
+						table.insert(peers_custody, peer)
+					end
+				elseif peer:is_host() then
+					table.insert(peers, 1, peer)
+				else
+					table.insert(peers, peer)
 				end
-			elseif peer:is_host() then
-				table.insert(peers, 1, peer)
-			else
-				table.insert(peers, peer)
 			end
 		end
 		peers = table.list_add(peers, peers_loadout)
@@ -1420,7 +1432,7 @@ function PlayerManager:transfer_special_equipment(peer_id, include_custody)
 				for _, p in ipairs(peers) do
 					local id = p:id()
 					local peer_amount = self._global.synced_equipment_possession[id] and self._global.synced_equipment_possession[id][name] or 0
-					if max_amount > peer_amount and id ~= peer_id then
+					if max_amount > peer_amount then
 						local transfer_amount = math.min(amount_to_transfer, max_amount - peer_amount)
 						amount_to_transfer = amount_to_transfer - transfer_amount
 						if Network:is_server() then
@@ -1859,12 +1871,13 @@ function PlayerManager:add_special(params)
 		})
 		self:update_synced_cable_ties_to_peers(quantity)
 	else
+		local new_amount = params.transfer and params.amount or quantity
 		managers.hud:add_special_equipment({
 			id = name,
 			icon = icon,
-			amount = quantity or equipment.transfer_quantity and 1 or nil
+			amount = new_amount or equipment.transfer_quantity and 1 or nil
 		})
-		self:update_equipment_possession_to_peers(name, quantity)
+		self:update_equipment_possession_to_peers(name, new_amount)
 	end
 	self._equipment.specials[name] = {
 		amount = quantity and Application:digest_value(quantity, true) or nil,
@@ -2150,6 +2163,20 @@ end
 function PlayerManager:is_berserker()
 	local player_unit = self:player_unit()
 	return alive(player_unit) and player_unit:character_damage() and player_unit:character_damage():is_berserker() or false
+end
+function PlayerManager:get_damage_health_ratio(health_ratio, category)
+	local damage_ratio = 1 - health_ratio / math.max(0.01, self:_get_damage_health_ratio_threshold(category))
+	return math.max(damage_ratio, 0)
+end
+function PlayerManager:_get_damage_health_ratio_threshold(category)
+	local threshold = tweak_data.upgrades.player_damage_health_ratio_threshold
+	if category then
+		threshold = threshold * self:upgrade_value("player", category .. "_damage_health_ratio_threshold_multiplier", 1)
+	end
+	return threshold
+end
+function PlayerManager:is_damage_health_ratio_active(health_ratio)
+	return self:has_category_upgrade("player", "melee_damage_health_ratio_multiplier") and self:get_damage_health_ratio(health_ratio, "melee") > 0 or self:has_category_upgrade("player", "armor_regen_damage_health_ratio_multiplier") and 0 < self:get_damage_health_ratio(health_ratio, "armor_regen") or self:has_category_upgrade("player", "damage_health_ratio_multiplier") and 0 < self:get_damage_health_ratio(health_ratio, "damage") or self:has_category_upgrade("player", "movement_speed_damage_health_ratio_multiplier") and 0 < self:get_damage_health_ratio(health_ratio, "movement_speed")
 end
 function PlayerManager:is_carrying()
 	return self:get_my_carry_data() and true or false

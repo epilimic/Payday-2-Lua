@@ -252,7 +252,8 @@ function CopMovement:post_init()
 		"taser_tased",
 		"death",
 		"fatal",
-		"fire_hurt"
+		"fire_hurt",
+		"poison_hurt"
 	}, callback(self, self, "damage_clbk"))
 	self._unit:inventory():add_listener("movement", {"equip", "unequip"}, callback(self, self, "clbk_inventory"))
 	local prim_weap_name = self._ext_base:default_weapon_name("primary")
@@ -1043,7 +1044,7 @@ end
 function CopMovement:damage_clbk(my_unit, damage_info)
 	local hurt_type = damage_info.result.type
 	local block_type = hurt_type
-	if hurt_type == "expl_hurt" or hurt_type == "fire_hurt" then
+	if hurt_type == "expl_hurt" or hurt_type == "fire_hurt" or hurt_type == "poison_hurt" then
 		block_type = "heavy_hurt"
 	end
 	if hurt_type == "death" and self._queued_actions then
@@ -1095,13 +1096,13 @@ function CopMovement:damage_clbk(my_unit, damage_info)
 	end
 	if damage_info.variant == "tase" then
 		block_type = "bleedout"
-	elseif hurt_type == "expl_hurt" or hurt_type == "fire_hurt" then
+	elseif hurt_type == "expl_hurt" or hurt_type == "fire_hurt" or hurt_type == "poison_hurt" then
 		block_type = "heavy_hurt"
 	else
 		block_type = hurt_type
 	end
 	local client_interrupt
-	if Network:is_client() and (hurt_type == "light_hurt" or hurt_type == "hurt" and damage_info.variant ~= "tase" or hurt_type == "heavy_hurt" or hurt_type == "expl_hurt" or hurt_type == "shield_knock" or hurt_type == "counter_tased" or hurt_type == "taser_tased" or hurt_type == "counter_spooc" or hurt_type == "death" or hurt_type == "hurt_sick" or hurt_type == "fire_hurt") then
+	if Network:is_client() and (hurt_type == "light_hurt" or hurt_type == "hurt" and damage_info.variant ~= "tase" or hurt_type == "heavy_hurt" or hurt_type == "expl_hurt" or hurt_type == "shield_knock" or hurt_type == "counter_tased" or hurt_type == "taser_tased" or hurt_type == "counter_spooc" or hurt_type == "death" or hurt_type == "hurt_sick" or hurt_type == "fire_hurt" or hurt_type == "poison_hurt") then
 		client_interrupt = true
 	end
 	local tweak = self._tweak_data
@@ -1128,6 +1129,12 @@ function CopMovement:damage_clbk(my_unit, damage_info)
 			self._queued_actions = {}
 		end
 	end
+end
+function CopMovement:anim_clbk_spawn_effect(unit, effect_name, object_name)
+	World:effect_manager():spawn({
+		effect = Idstring(effect_name),
+		parent = self._unit:get_object(Idstring(object_name))
+	})
 end
 function CopMovement:anim_clbk_footstep(unit)
 	managers.game_play_central:request_play_footstep(unit, self._m_pos)

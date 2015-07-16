@@ -272,7 +272,9 @@ function NetworkPeer:_verify_content(item_type, item_id)
 	return true
 end
 function NetworkPeer:verify_grenade(value)
-	if self._grenades and self._grenades + value > tweak_data.equipments.max_amount.grenades then
+	local grenade_id = self:grenade_id()
+	local max_amount = grenade_id and tweak_data.blackmarket.projectiles[grenade_id] and tweak_data.blackmarket.projectiles[grenade_id].max_amount or tweak_data.equipments.max_amount.grenades
+	if self._grenades and max_amount < self._grenades + value then
 		if Network:is_server() then
 			self:mark_cheater(VoteManager.REASON.many_grenades, true)
 		else
@@ -1120,6 +1122,27 @@ function NetworkPeer:_reload_outfit()
 		new_outfit_assets.unit.melee_w = {
 			name = Idstring(melee_u_name)
 		}
+	end
+	local grenade_tweak_data = tweak_data.blackmarket.projectiles[complete_outfit.grenade]
+	local grenade_u_name = grenade_tweak_data.unit
+	if grenade_u_name then
+		new_outfit_assets.unit.grenade_w = {
+			name = Idstring(grenade_u_name)
+		}
+	end
+	local grenade_sprint_u_name = grenade_tweak_data.sprint_unit
+	if grenade_sprint_u_name then
+		new_outfit_assets.unit.grenade_sprint_w = {
+			name = Idstring(grenade_sprint_u_name)
+		}
+	end
+	if is_local_peer then
+		local grenade_dummy_u_name = grenade_tweak_data.unit_dummy
+		if grenade_dummy_u_name then
+			new_outfit_assets.unit.grenade_dummy_w = {
+				name = Idstring(grenade_dummy_u_name)
+			}
+		end
 	end
 	self._outfit_assets = new_outfit_assets
 	for asset_id, asset_data in pairs(new_outfit_assets.unit) do

@@ -815,6 +815,19 @@ function LootDropTweakData:init(tweak_data)
 	self.global_values.kenaz.track = true
 	self.global_values.kenaz.sort_number = 105
 	self.global_values.kenaz.category = "dlc"
+	self.global_values.turtles = {}
+	self.global_values.turtles.name_id = "bm_global_value_turtles"
+	self.global_values.turtles.desc_id = "menu_l_global_value_turtles"
+	self.global_values.turtles.unlock_id = "bm_global_value_turtles_unlock"
+	self.global_values.turtles.color = Color(255, 255, 212, 0) / 255
+	self.global_values.turtles.dlc = true
+	self.global_values.turtles.chance = 1
+	self.global_values.turtles.value_multiplier = tweak_data:get_value("money_manager", "global_value_multipliers", "turtles")
+	self.global_values.turtles.durability_multiplier = 1
+	self.global_values.turtles.drops = true
+	self.global_values.turtles.track = true
+	self.global_values.turtles.sort_number = 106
+	self.global_values.turtles.category = "dlc"
 	self.global_values.legendary = {}
 	self.global_values.legendary.name_id = "bm_global_value_legendary"
 	self.global_values.legendary.desc_id = "menu_l_global_value_legendary"
@@ -875,7 +888,8 @@ function LootDropTweakData:init(tweak_data)
 		"west",
 		"arena",
 		"character_pack_sokol",
-		"kenaz"
+		"kenaz",
+		"turtles"
 	}
 	self:_create_global_value_list_map()
 end

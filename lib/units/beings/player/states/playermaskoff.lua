@@ -2,6 +2,12 @@ PlayerMaskOff = PlayerMaskOff or class(PlayerStandard)
 function PlayerMaskOff:init(unit)
 	PlayerMaskOff.super.init(self, unit)
 	self._ids_unequip = Idstring("unequip")
+	self._mask_off_attention_settings = {
+		"pl_mask_off_friend_combatant",
+		"pl_mask_off_friend_non_combatant",
+		"pl_mask_off_foe_combatant",
+		"pl_mask_off_foe_non_combatant"
+	}
 end
 function PlayerMaskOff:enter(state_data, enter_data)
 	if managers.groupai:state():enemy_weapons_hot() then
@@ -21,12 +27,7 @@ function PlayerMaskOff:_enter(enter_data)
 		self._unit:camera():play_redirect(self._ids_unequip)
 	end
 	self._unit:base():set_slot(self._unit, 4)
-	self._ext_movement:set_attention_settings({
-		"pl_mask_off_friend_combatant",
-		"pl_mask_off_friend_non_combatant",
-		"pl_mask_off_foe_combatant",
-		"pl_mask_off_foe_non_combatant"
-	})
+	self._ext_movement:set_attention_settings(self._mask_off_attention_settings)
 	if not managers.groupai:state():enemy_weapons_hot() then
 		self._enemy_weapons_hot_listen_id = "PlayerMaskOff" .. tostring(self._unit:key())
 		managers.groupai:state():add_listener(self._enemy_weapons_hot_listen_id, {
@@ -141,6 +142,9 @@ end
 function PlayerMaskOff:_end_action_interact()
 	self:_interupt_action_interact(nil, nil, true)
 	managers.interaction:end_action_interact(self._unit)
+end
+function PlayerMaskOff:_upd_attention()
+	self._ext_movement:set_attention_settings(self._mask_off_attention_settings)
 end
 function PlayerMaskOff:_check_use_item(t, input)
 	local new_action
