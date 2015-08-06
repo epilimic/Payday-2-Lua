@@ -357,6 +357,7 @@ function TeamAIDamage:_check_fatal()
 		self._health_ratio = 0
 		self._fatal = true
 		managers.groupai:state():on_criminal_disabled(self._unit)
+		PlayerMovement.set_attention_settings(self._unit:brain(), nil, "team_AI")
 	end
 end
 function TeamAIDamage:pause_bleed_out()
@@ -645,6 +646,9 @@ function TeamAIDamage:revive(reviving_unit)
 		local res = self._unit:movement():action_request(action_data)
 		self._unit:interaction():set_active(false, false)
 		self._unit:brain():on_recovered(reviving_unit)
+		PlayerMovement.set_attention_settings(self._unit:brain(), {
+			"team_enemy_cbt"
+		}, "team_AI")
 		self._unit:network():send("from_server_unit_recovered")
 		managers.groupai:state():on_criminal_recovered(self._unit)
 	elseif self._arrested_timer then
@@ -663,6 +667,9 @@ function TeamAIDamage:revive(reviving_unit)
 		}
 		local res = self._unit:movement():action_request(action_data)
 		self._unit:brain():on_recovered(reviving_unit)
+		PlayerMovement.set_attention_settings(self._unit:brain(), {
+			"team_enemy_cbt"
+		}, "team_AI")
 		self._unit:network():send("from_server_unit_recovered")
 		managers.groupai:state():on_criminal_recovered(self._unit)
 	end

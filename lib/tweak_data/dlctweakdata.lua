@@ -3826,4 +3826,14 @@ function DLCTweakData:init(tweak_data)
 			amount = 1
 		}
 	}
+	self.bobblehead = {}
+	self.bobblehead.dlc = "has_bobblehead"
+	self.bobblehead.content = {}
+	self.bobblehead.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "bobblehead_dozer",
+			amount = 1
+		}
+	}
 end

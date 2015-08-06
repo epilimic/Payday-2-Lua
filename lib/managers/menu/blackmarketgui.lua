@@ -5884,9 +5884,9 @@ function BlackMarketGui:populate_grenades(data)
 		data[i] = nil
 	end
 	local index = 0
-	local guis_catalog, m_tweak_data, melee_weapon_id
+	local guis_catalog, m_tweak_data, grenade_id
 	for i, grenades_data in ipairs(sort_data) do
-		melee_weapon_id = grenades_data[1]
+		grenade_id = grenades_data[1]
 		m_tweak_data = tweak_data.blackmarket.projectiles[grenades_data[1]] or {}
 		guis_catalog = "guis/"
 		local bundle_folder = m_tweak_data.texture_bundle_folder
@@ -5894,7 +5894,7 @@ function BlackMarketGui:populate_grenades(data)
 			guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
 		end
 		new_data = {}
-		new_data.name = melee_weapon_id
+		new_data.name = grenade_id
 		new_data.name_localized = managers.localization:text(tweak_data.blackmarket.projectiles[new_data.name].name_id)
 		new_data.category = "grenades"
 		new_data.slot = i
@@ -5925,6 +5925,24 @@ function BlackMarketGui:populate_grenades(data)
 			new_data.dlc_locked = tweak_data.lootdrop.global_values[new_data.global_value].unlock_id or "bm_menu_dlc_locked"
 		end
 		new_data.bitmap_texture = guis_catalog .. "textures/pd2/blackmarket/icons/grenades/" .. tostring(new_data.name)
+		if managers.blackmarket:got_new_drop("normal", "grenades", grenade_id) then
+			new_data.mini_icons = new_data.mini_icons or {}
+			table.insert(new_data.mini_icons, {
+				name = "new_drop",
+				texture = "guis/textures/pd2/blackmarket/inv_newdrop",
+				right = 0,
+				top = 0,
+				layer = 1,
+				w = 16,
+				h = 16,
+				stream = false
+			})
+			new_data.new_drop_data = {
+				"normal",
+				"grenades",
+				grenade_id
+			}
+		end
 		if new_data.unlocked and not new_data.equipped then
 			table.insert(new_data, "lo_g_equip")
 		end

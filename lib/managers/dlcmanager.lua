@@ -460,6 +460,9 @@ end
 function GenericDLCManager:has_gage_pack_historical()
 	return Global.dlc_manager.all_dlc_data.gage_pack_historical and Global.dlc_manager.all_dlc_data.gage_pack_historical.verified
 end
+function GenericDLCManager:has_bobblehead()
+	return Global.dlc_manager.all_dlc_data.bobblehead and Global.dlc_manager.all_dlc_data.bobblehead.verified
+end
 function GenericDLCManager:has_achievement(data)
 	local achievement = managers.achievment and data and data.achievement_id and managers.achievment:get_info(data.achievement_id)
 	return achievement and achievement.awarded or false
@@ -1219,6 +1222,7 @@ function WINDLCManager:init()
 			e3_s15c = {app_id = "375384", no_install = true},
 			e3_s15d = {app_id = "375385", no_install = true},
 			gage_pack_historical = {app_id = "331900", no_install = true},
+			bobblehead = {app_id = "328860", no_install = true},
 			pd2_clan = {
 				source_id = "103582791433980119"
 			}

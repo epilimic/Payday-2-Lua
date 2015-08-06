@@ -92,7 +92,8 @@ function GrenadeBase:_check_achievements(unit, is_dead, damage_percent, hit_coun
 		end
 		timer_pass = not achievement_data.timer
 		if achievement_data.timer and is_dead then
-			memory = managers.job:get_memory(achievement)
+			local memory_name = "gre_ach_" .. achievement
+			memory = managers.job:get_memory(memory_name, true)
 			local t = Application:time()
 			if memory then
 				table.insert(memory, t)
@@ -102,9 +103,9 @@ function GrenadeBase:_check_achievements(unit, is_dead, damage_percent, hit_coun
 					end
 				end
 				timer_pass = #memory >= achievement_data.kill_count
-				managers.job:set_memory(achievement, memory, true)
+				managers.job:set_memory(memory_name, memory, true)
 			else
-				managers.job:set_memory(achievement, {t}, true)
+				managers.job:set_memory(memory_name, {t}, true)
 			end
 		end
 		all_pass = count_pass and grenade_type_pass and kill_pass and distance_pass and enemy_pass and flying_strike_pass and timer_pass

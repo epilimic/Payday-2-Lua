@@ -391,6 +391,9 @@ function CopBrain:set_active(state)
 	if state then
 		self:set_logic("idle")
 	elseif self._current_logic_name ~= "inactive" then
+		if self._logic_data.is_converted then
+			self._attention_handler:override_attention("enemy_team_cbt", nil)
+		end
 		self:set_logic("inactive")
 	end
 end
