@@ -403,14 +403,15 @@ function RaycastWeaponBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul
 	end
 	if self._shoot_through_data and hit_unit and col_ray and self._shoot_through_data.kills and 0 < self._shoot_through_data.kills and hit_unit.type == "death" then
 		local unit_type = col_ray.unit:base() and col_ray.unit:base()._tweak_table
-		local multi_kill, enemy_pass, obstacle_pass, weapon_pass, weapons_pass
+		local multi_kill, enemy_pass, obstacle_pass, weapon_pass, weapons_pass, weapon_type_pass
 		for achievement, achievement_data in pairs(tweak_data.achievement.sniper_kill_achievements) do
 			multi_kill = not achievement_data.multi_kill or self._shoot_through_data.kills == achievement_data.multi_kill
 			enemy_pass = not achievement_data.enemy or unit_type == achievement_data.enemy
 			obstacle_pass = not achievement_data.obstacle or achievement_data.obstacle == "wall" and self._shoot_through_data.has_hit_wall or achievement_data.obstacle == "shield" and self._shoot_through_data.has_passed_shield
 			weapon_pass = not achievement_data.weapon or self._name_id == achievement_data.weapon
 			weapons_pass = not achievement_data.weapons or table.contains(achievement_data.weapons, self._name_id)
-			if multi_kill and enemy_pass and obstacle_pass and weapon_pass and weapons_pass then
+			weapon_type_pass = not achievement_data.weapon_type or self:weapon_tweak_data().category == achievement_data.weapon_type
+			if multi_kill and enemy_pass and obstacle_pass and weapon_pass and weapons_pass and weapon_type_pass then
 				if achievement_data.stat then
 					managers.achievment:award_progress(achievement_data.stat)
 				elseif achievement_data.award then

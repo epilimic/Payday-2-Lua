@@ -1983,7 +1983,7 @@ function PlayerStandard:_get_unit_intimidation_action(intimidate_enemies, intimi
 	if intimidate_enemies then
 		local enemies = managers.enemy:all_enemies()
 		for u_key, u_data in pairs(enemies) do
-			if u_data.unit:movement():team() ~= self._unit:movement():team() and not u_data.unit:anim_data().hands_tied and (u_data.char_tweak.priority_shout or not only_special_enemies) then
+			if self._unit:movement():team().foes[u_data.unit:movement():team().id] and not u_data.unit:anim_data().hands_tied and (u_data.char_tweak.priority_shout or not only_special_enemies) then
 				if managers.groupai:state():whisper_mode() then
 					if u_data.char_tweak.silent_priority_shout and u_data.unit:movement():cool() then
 						self:_add_unit_to_char_table(char_table, u_data.unit, unit_type_enemy, highlight_range, false, false, 0.01, my_head_pos, cam_fwd)

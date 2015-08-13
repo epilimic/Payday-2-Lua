@@ -1044,7 +1044,7 @@ end
 function CopMovement:damage_clbk(my_unit, damage_info)
 	local hurt_type = damage_info.result.type
 	local block_type = hurt_type
-	if hurt_type == "expl_hurt" or hurt_type == "fire_hurt" or hurt_type == "poison_hurt" then
+	if hurt_type == "expl_hurt" or hurt_type == "fire_hurt" or hurt_type == "poison_hurt" or hurt_type == "taser_tased" then
 		block_type = "heavy_hurt"
 	end
 	if hurt_type == "death" and self._queued_actions then
@@ -1096,7 +1096,7 @@ function CopMovement:damage_clbk(my_unit, damage_info)
 	end
 	if damage_info.variant == "tase" then
 		block_type = "bleedout"
-	elseif hurt_type == "expl_hurt" or hurt_type == "fire_hurt" or hurt_type == "poison_hurt" then
+	elseif hurt_type == "expl_hurt" or hurt_type == "fire_hurt" or hurt_type == "poison_hurt" or hurt_type == "taser_tased" then
 		block_type = "heavy_hurt"
 	else
 		block_type = hurt_type

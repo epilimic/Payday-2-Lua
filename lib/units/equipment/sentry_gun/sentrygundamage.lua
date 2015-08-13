@@ -87,6 +87,7 @@ function SentryGunDamage:damage_bullet(attack_data)
 	if hit_shield and self._shield_health > 0 then
 		dmg_shield = true
 	end
+	local result = {type = "dmg_rcv", variant = "bullet"}
 	local damage_sync = self:_apply_damage(dmg_adjusted, dmg_shield, not dmg_shield, true)
 	if self._ignore_client_damage then
 		local health_percent = math.ceil(self._health / self._HEALTH_INIT_PERCENT)
@@ -112,6 +113,7 @@ function SentryGunDamage:damage_bullet(attack_data)
 	if attacker_unit == managers.player:player_unit() and attack_data then
 		managers.player:on_damage_dealt(self._unit, attack_data)
 	end
+	return result
 end
 function SentryGunDamage:damage_fire(attack_data)
 	if self._dead or self._invulnerable or Network:is_client() and self._ignore_client_damage or attack_data.variant == "stun" or not tweak_data.weapon[self._unit:base():get_name_id()].FIRE_DMG_MUL then

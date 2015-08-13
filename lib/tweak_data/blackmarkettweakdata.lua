@@ -6609,6 +6609,24 @@ function BlackMarketTweakData:_init_projectiles()
 	self.projectiles.wpn_prj_four.throw_allowed_expire_t = 0.15
 	self.projectiles.wpn_prj_four.expire_t = 1.1
 	self.projectiles.wpn_prj_four.repeat_expire_t = 0.5
+	self.projectiles.wpn_prj_ace = {}
+	self.projectiles.wpn_prj_ace.name_id = "bm_wpn_prj_ace"
+	self.projectiles.wpn_prj_ace.unit = "units/pd2_dlc_cake/weapons/wpn_prj_ace/wpn_prj_ace"
+	self.projectiles.wpn_prj_ace.unit_dummy = "units/pd2_dlc_cake/weapons/wpn_prj_ace/wpn_prj_ace_husk"
+	self.projectiles.wpn_prj_ace.local_unit = "units/pd2_dlc_cake/weapons/wpn_prj_ace/wpn_prj_ace_local"
+	self.projectiles.wpn_prj_ace.icon = "ace_projectile"
+	self.projectiles.wpn_prj_ace.throw_shout = true
+	self.projectiles.wpn_prj_ace.no_cheat_count = true
+	self.projectiles.wpn_prj_ace.impact_detonation = true
+	self.projectiles.wpn_prj_ace.client_authoritative = true
+	self.projectiles.wpn_prj_ace.add_trail_effect = true
+	self.projectiles.wpn_prj_ace.throwable = true
+	self.projectiles.wpn_prj_ace.dlc = "pd2_clan"
+	self.projectiles.wpn_prj_ace.max_amount = 21
+	self.projectiles.wpn_prj_ace.anim_global_param = "projectile_four"
+	self.projectiles.wpn_prj_ace.throw_allowed_expire_t = 0.15
+	self.projectiles.wpn_prj_ace.expire_t = 1.1
+	self.projectiles.wpn_prj_ace.repeat_expire_t = 0.3
 	self.projectiles.launcher_frag = {}
 	self.projectiles.launcher_frag.name_id = "bm_launcher_frag"
 	self.projectiles.launcher_frag.unit = "units/pd2_dlc_gage_assault/weapons/wpn_launcher_frag_grenade/wpn_launcher_frag_grenade"
@@ -6692,7 +6710,8 @@ function BlackMarketTweakData:_init_projectiles()
 		"crossbow_arrow",
 		"crossbow_poison_arrow",
 		"crossbow_arrow_exp",
-		"wpn_prj_four"
+		"wpn_prj_four",
+		"wpn_prj_ace"
 	}
 	self:_add_desc_from_name_macro(self.projectiles)
 end

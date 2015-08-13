@@ -1228,7 +1228,8 @@ Play the full version soon to get your full PAYDAY!]],
 	self.achievement.pincushion = {
 		award = "scorpion_3",
 		enemy = "tank",
-		count = 10
+		count = 10,
+		weapon_category = "bow"
 	}
 	self.achievement.one_man_army = {
 		award = "gage5_3",
@@ -2597,7 +2598,11 @@ Play the full version soon to get your full PAYDAY!]],
 		}
 	}
 	self.achievement.sniper_kill_achievements = {
-		did_i_do_that = {award = "gage3_9", multi_kill = 3},
+		did_i_do_that = {
+			award = "gage3_9",
+			multi_kill = 3,
+			weapon_type = "snp"
+		},
 		max_peneration = {
 			stat = "gage3_10_stats",
 			weapon = "r93",
@@ -3542,6 +3547,17 @@ Play the full version soon to get your full PAYDAY!]],
 	self.projectiles.wpn_prj_four.sounds.flyby = "throwing_star_flyby"
 	self.projectiles.wpn_prj_four.sounds.flyby_stop = "throwing_star_flyby_stop"
 	self.projectiles.wpn_prj_four.sounds.impact = "throwables_impact_gen"
+	self.projectiles.wpn_prj_ace = {}
+	self.projectiles.wpn_prj_ace.damage = 4
+	self.projectiles.wpn_prj_ace.launch_speed = 1500
+	self.projectiles.wpn_prj_ace.adjust_z = 0
+	self.projectiles.wpn_prj_ace.mass_look_up_modifier = 1
+	self.projectiles.wpn_prj_ace.name_id = "bm_prj_ace"
+	self.projectiles.wpn_prj_ace.push_at_body_index = 0
+	self.projectiles.wpn_prj_ace.sounds = {}
+	self.projectiles.wpn_prj_ace.sounds.flyby = "throwing_star_flyby"
+	self.projectiles.wpn_prj_ace.sounds.flyby_stop = "throwing_star_flyby_stop"
+	self.projectiles.wpn_prj_ace.sounds.impact = "throwables_impact_gen"
 	self.voting = {}
 	self.voting.timeout = 30
 	self.voting.cooldown = 50

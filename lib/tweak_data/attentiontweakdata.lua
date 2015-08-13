@@ -320,7 +320,7 @@ function AttentionTweakData:_init_enemy()
 		reaction = "REACT_SCARED",
 		filter = "combatant",
 		relation = "friend",
-		max_range = 8000,
+		max_range = 3900,
 		uncover_range = 300,
 		notice_delay_mul = 0.5,
 		verification_interval = 0.5,
@@ -591,6 +591,8 @@ function AttentionTweakData:_init_drill()
 		reaction = "REACT_SCARED",
 		filter = "civilians_enemies",
 		verification_interval = 0.4,
+		suspicion_range = 1100,
+		max_range = 2300,
 		uncover_range = 200,
 		release_delay = 1,
 		notice_requires_FOV = false
@@ -599,6 +601,8 @@ function AttentionTweakData:_init_drill()
 		reaction = "REACT_SCARED",
 		filter = "civilians_enemies",
 		verification_interval = 0.4,
+		suspicion_range = 1000,
+		max_range = 2200,
 		uncover_range = 200,
 		release_delay = 1,
 		notice_requires_FOV = true
@@ -624,6 +628,26 @@ function AttentionTweakData:_init_sentry_gun()
 	}
 end
 function AttentionTweakData:_init_prop()
+	self.settings.prop_carry_bag = {
+		reaction = "REACT_SCARED",
+		filter = "law_enforcer",
+		suspicion_range = 800,
+		max_range = 1800,
+		verification_interval = 0.4,
+		uncover_range = 200,
+		release_delay = 1,
+		notice_requires_FOV = true
+	}
+	self.settings.prop_carry_bodybag = {
+		reaction = "REACT_SCARED",
+		filter = "civilians_enemies",
+		suspicion_range = 800,
+		max_range = 1900,
+		verification_interval = 0.4,
+		uncover_range = 200,
+		release_delay = 1,
+		notice_requires_FOV = true
+	}
 	self.settings.prop_civ_ene_ntl = {
 		reaction = "REACT_AIM",
 		filter = "civilians_enemies",

@@ -1639,7 +1639,8 @@ function UpgradesTweakData:init()
 		upgrades = {
 			"body_armor5",
 			"chef",
-			"peacemaker"
+			"peacemaker",
+			"wpn_prj_ace"
 		}
 	}
 	self.level_tree[32] = {
@@ -6500,6 +6501,7 @@ function UpgradesTweakData:_grenades_definitions()
 	self.definitions.frag = {category = "grenade", dlc = "gage_pack"}
 	self.definitions.dynamite = {category = "grenade", dlc = "west"}
 	self.definitions.wpn_prj_four = {category = "grenade", dlc = "turtles"}
+	self.definitions.wpn_prj_ace = {category = "grenade", dlc = "pd2_clan"}
 end
 function UpgradesTweakData:_weapon_definitions()
 	self.definitions.weapon_modded_damage_multiplier = {

@@ -415,6 +415,11 @@ function NetworkPeer:load(data)
 	if self._rpc and not self._loading and managers.network.voice_chat.on_member_added then
 		managers.network.voice_chat:on_member_added(self)
 	end
+	local local_peer = managers.network:session():local_peer()
+	if self == local_peer and Global.player_manager.kit.equipment_slots[1] == "armor_kit" then
+		local_peer:set_outfit_string(managers.blackmarket:outfit_string())
+		managers.network:session():check_send_outfit(local_peer)
+	end
 	self._expected_dropin_pause_confirmations = data.expected_dropin_pause_confirmations
 end
 function NetworkPeer:save(data)

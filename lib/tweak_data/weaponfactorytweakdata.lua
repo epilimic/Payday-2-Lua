@@ -647,7 +647,7 @@ function WeaponFactoryTweakData:_init_sights()
 				translation = Vector3(0, 0, -4.8)
 			},
 			wpn_fps_smg_akmsu = {
-				translation = Vector3(0, 0, -3.3)
+				translation = Vector3(-0.028, 0, -3.3)
 			},
 			wpn_fps_ass_ak5 = {
 				translation = Vector3(0.025, 0, -3.725)
@@ -662,7 +662,7 @@ function WeaponFactoryTweakData:_init_sights()
 				translation = Vector3(0, 0, -2.97)
 			},
 			wpn_fps_ass_m14 = {
-				translation = Vector3(0, 0, -3.8)
+				translation = Vector3(0.045, 0, -3.83)
 			},
 			wpn_fps_smg_mp9 = {
 				translation = Vector3(0, 0, -3.47)
@@ -727,7 +727,7 @@ function WeaponFactoryTweakData:_init_sights()
 				translation = Vector3(-0.02, -10, -5.406)
 			},
 			wpn_fps_ass_g3 = {
-				translation = Vector3(0.02, -8, -3.42)
+				translation = Vector3(0.025, -8, -3.42)
 			},
 			wpn_fps_ass_galil = {
 				translation = Vector3(-0.01, -5, -3.25)
@@ -1294,7 +1294,7 @@ function WeaponFactoryTweakData:_init_content_dlc2_dec16()
 				translation = Vector3(0, 0, -4.8)
 			},
 			wpn_fps_smg_akmsu = {
-				translation = Vector3(0, 0, -3.3)
+				translation = Vector3(-0.028, 0, -3.3)
 			},
 			wpn_fps_ass_ak5 = {
 				translation = Vector3(0.025, 0, -3.45),
@@ -1310,7 +1310,7 @@ function WeaponFactoryTweakData:_init_content_dlc2_dec16()
 				translation = Vector3(0, 0, -2.97)
 			},
 			wpn_fps_ass_m14 = {
-				translation = Vector3(0, -15, -3.8)
+				translation = Vector3(0.05, -15, -3.8)
 			},
 			wpn_fps_smg_mp9 = {
 				translation = Vector3(0, 0, -3.47)
@@ -1977,7 +1977,7 @@ function WeaponFactoryTweakData:_init_content_jobs()
 				translation = Vector3(0, 0, -0.45)
 			},
 			wpn_fps_pis_usp = {
-				translation = Vector3(0.03, 0, -0.34)
+				translation = Vector3(-0.015, 0, -0.34)
 			},
 			wpn_fps_pis_ppk = {
 				translation = Vector3(0, 0, -1)
@@ -22055,7 +22055,8 @@ function WeaponFactoryTweakData:_init_wa2000()
 		"wpn_fps_upg_o_rx30",
 		"wpn_fps_upg_o_cs",
 		"wpn_fps_upg_fl_ass_peq15",
-		"wpn_fps_upg_fl_ass_laser"
+		"wpn_fps_upg_fl_ass_laser",
+		"wpn_fps_upg_fl_ass_utg"
 	}
 	self.wpn_fps_snp_wa2000_npc = deep_clone(self.wpn_fps_snp_wa2000)
 	self.wpn_fps_snp_wa2000_npc.unit = "units/pd2_dlc_turtles/weapons/wpn_fps_snp_wa2000/wpn_fps_snp_wa2000_npc"

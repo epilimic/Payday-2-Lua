@@ -41,7 +41,7 @@ function ProjectileBase:set_weapon_unit(weapon_unit)
 	self._weapon_damage_mult = weapon_unit and weapon_unit:base().projectile_damage_multiplier and weapon_unit:base():projectile_damage_multiplier() or 1
 end
 function ProjectileBase:weapon_unit()
-	return alive(self._thrower_unit) and self._thrower_unit or nil
+	return alive(self._weapon_unit) and self._weapon_unit or nil
 end
 function ProjectileBase:set_projectile_entry(projectile_entry)
 	self._projectile_entry = projectile_entry
