@@ -107,13 +107,14 @@ function UpgradesTweakData:_init_pd2_values()
 	self.hostage_max_num = {
 		health_regen = 1,
 		health = 10,
-		stamina = 10
+		stamina = 10,
+		damage_dampener = 1
 	}
 	self.on_headshot_dealt_cooldown = 3
-	self.on_killshot_cooldown = 3
-	self.on_damage_dealt_cooldown = 3
-	self.close_combat_distance = 800
-	self.killshot_close_panic_range = 1000
+	self.on_killshot_cooldown = 2
+	self.on_damage_dealt_cooldown = 2
+	self.close_combat_distance = 1800
+	self.killshot_close_panic_range = 900
 	self.berserker_movement_speed_multiplier = 0.4
 	self.weapon_cost_multiplier = {}
 	self.weapon_cost_multiplier.akimbo = 1.4
@@ -341,9 +342,9 @@ function UpgradesTweakData:_init_pd2_values()
 	self.values.player.can_free_run = {true}
 	self.values.ecm_jammer.affects_cameras = {true}
 	self.values.player.passive_dodge_chance = {
-		0.1,
-		0.2,
-		0.3
+		0.05,
+		0.15,
+		0.25
 	}
 	self.values.weapon.passive_swap_speed_multiplier = {5, 2}
 	self.values.player.passive_concealment_modifier = {1}
@@ -438,15 +439,15 @@ function UpgradesTweakData:_init_pd2_values()
 		{1, 9}
 	}
 	self.values.player.berserker_no_ammo_cost = {true}
-	self.values.player.hostage_health_regen_addend = {0.006, 0.02}
+	self.values.player.hostage_health_regen_addend = {0.015, 0.045}
 	self.values.player.carry_sentry_and_trip = {true}
 	self.values.player.tier_armor_multiplier = {
 		1.05,
-		1.05,
 		1.1,
+		1.2,
+		1.3,
 		1.15,
-		1.15,
-		1.2
+		1.35
 	}
 	self.values.shotgun.hip_fire_damage_multiplier = {1.2}
 	self.values.pistol.hip_fire_damage_multiplier = {1.2}
@@ -518,6 +519,23 @@ function UpgradesTweakData:_init_pd2_values()
 	self.values.player.uncover_multiplier = {1.15}
 	self.values.player.passive_xp_multiplier = {1.45}
 	self.values.player.pick_up_ammo_multiplier_2 = {1.3}
+	self.values.team.damage_dampener.hostage_multiplier = {0.92}
+	self.values.player.level_2_armor_multiplier = {
+		1.2,
+		1.4,
+		1.65
+	}
+	self.values.player.level_3_armor_multiplier = {
+		1.2,
+		1.4,
+		1.65
+	}
+	self.values.player.level_4_armor_multiplier = {
+		1.2,
+		1.4,
+		1.65
+	}
+	self.values.player.passive_health_regen = {0.04}
 	self.values.cable_tie.quantity_2 = {4}
 	self.ecm_feedback_retrigger_interval = 240
 	self.ecm_feedback_retrigger_chance = 1
@@ -547,7 +565,7 @@ function UpgradesTweakData:_init_pd2_values()
 		0.85,
 		0.8
 	}
-	self.values.player.headshot_regen_armor_bonus = {0.8, 2.4}
+	self.values.player.headshot_regen_armor_bonus = {1.5, 4.5}
 	self.values.pistol.stacking_hit_damage_multiplier = {0.1}
 	self.values.bodybags_bag.quantity = {1}
 	self.values.first_aid_kit.quantity = {3, 10}
@@ -583,32 +601,32 @@ function UpgradesTweakData:_init_pd2_values()
 	self.values.player.pick_lock_speed_multiplier = {0.8}
 	self.values.player.alarm_pager_speed_multiplier = {0.9}
 	self.values.temporary.melee_life_leech = {
-		{0.1, 15}
+		{0.2, 10}
 	}
 	self.values.temporary.dmg_dampener_outnumbered_strong = {
 		{0.92, 7}
 	}
 	self.values.temporary.dmg_dampener_close_contact = {
-		{0.96, 7},
 		{0.92, 7},
-		{0.88, 7}
+		{0.84, 7},
+		{0.76, 7}
 	}
 	self.values.melee.stacking_hit_damage_multiplier = {0.1, 0.2}
-	self.values.melee.stacking_hit_expire_t = {6}
-	self.values.player.melee_kill_life_leech = {0.05}
-	self.values.player.killshot_regen_armor_bonus = {1}
-	self.values.player.killshot_close_regen_armor_bonus = {1}
-	self.values.player.killshot_close_panic_chance = {0.2}
+	self.values.melee.stacking_hit_expire_t = {7}
+	self.values.player.melee_kill_life_leech = {0.1}
+	self.values.player.killshot_regen_armor_bonus = {3}
+	self.values.player.killshot_close_regen_armor_bonus = {3}
+	self.values.player.killshot_close_panic_chance = {0.75}
 	self.loose_ammo_restore_health_values = {
 		base = 4,
-		cd = 15,
-		multiplier = 0.1,
+		cd = 4,
+		multiplier = 0.2,
 		{0, 2},
 		{2, 4},
 		{4, 6}
 	}
 	self.loose_ammo_give_team_ratio = 0.5
-	self.loose_ammo_give_team_health_ratio = 0.5
+	self.loose_ammo_give_team_health_ratio = 1
 	self.values.temporary.loose_ammo_restore_health = {}
 	for i, data in ipairs(self.loose_ammo_restore_health_values) do
 		local base = self.loose_ammo_restore_health_values.base
@@ -628,9 +646,9 @@ function UpgradesTweakData:_init_pd2_values()
 		armors_allowed = {"level_1", "level_2"},
 		works_with_armor_kit = true,
 		tick_time = 0.5,
-		total_ticks = 6,
+		total_ticks = 10,
 		max_stacks = false,
-		stacking_cooldown = 1,
+		stacking_cooldown = 1.5,
 		add_stack_sources = {
 			bullet = true,
 			explosion = true,
@@ -641,10 +659,10 @@ function UpgradesTweakData:_init_pd2_values()
 		}
 	}
 	self.values.player.damage_to_hot = {
+		0.1,
 		0.2,
 		0.3,
-		0.4,
-		0.5
+		0.4
 	}
 	self.values.player.damage_to_hot_extra_ticks = {2}
 	self.values.player.armor_piercing_chance = {0.1, 0.3}
@@ -666,8 +684,8 @@ function UpgradesTweakData:_init_pd2_values()
 			{"175%"}
 		},
 		black_marketeer = {
-			{"0.6%", "5"},
-			{"2%", "5"}
+			{"1.5%", "5"},
+			{"4.5%", "5"}
 		},
 		blast_radius = {
 			{"70%"},
@@ -1079,8 +1097,8 @@ function UpgradesTweakData:_init_pd2_values()
 			}
 		},
 		prison_wife = {
-			{"8", "3"},
-			{"16", "3"}
+			{"15", "3"},
+			{"45", "3"}
 		},
 		mastermind_tier1 = {
 			{"20%"}
@@ -1208,6 +1226,7 @@ function UpgradesTweakData:_init_pd2_values()
 				"2%",
 				"4%",
 				"10",
+				"8%",
 				"10%"
 			}
 		},
@@ -1224,18 +1243,23 @@ function UpgradesTweakData:_init_pd2_values()
 			{"135%"},
 			{},
 			{"5%", "20%"},
-			{"40%", "10%"}
+			{
+				"40%",
+				"10%",
+				"5",
+				"4%"
+			}
 		},
 		{
-			{"5%"},
+			{"10%"},
 			{"25%"},
-			{"5%"},
+			{"10%"},
 			{
 				"+1",
 				"15%",
 				"45%"
 			},
-			{"5%"},
+			{"10%"},
 			{"135%"},
 			{"10%"},
 			{"5%", "20%"},
@@ -1246,7 +1270,7 @@ function UpgradesTweakData:_init_pd2_values()
 			}
 		},
 		{
-			{"10%"},
+			{"5%"},
 			{"25%"},
 			{"15%", "45%"},
 			{
@@ -1290,17 +1314,17 @@ function UpgradesTweakData:_init_pd2_values()
 			}
 		},
 		{
-			{"10%"},
+			{"5%"},
 			{"25%"},
-			{"10%"},
+			{"10%", "20%"},
 			{
 				"+1",
 				"15%",
 				"45%"
 			},
-			{"10%"},
+			{"10%", "20%"},
 			{"135%"},
-			{"15%"},
+			{"15%", "25%"},
 			{"5%", "20%"},
 			{"10%", "10%"}
 		},
@@ -1328,58 +1352,58 @@ function UpgradesTweakData:_init_pd2_values()
 			{"20%", "10%"}
 		},
 		{
-			{"4%"},
+			{"8%"},
 			{"25%"},
-			{"4%"},
+			{"8%"},
 			{
 				"+1",
 				"15%",
 				"45%"
 			},
 			{
-				"4%",
+				"8%",
 				"10%",
-				"6",
+				"7",
 				"4"
 			},
 			{"135%"},
 			{
 				"8%",
 				"10%",
-				"6",
+				"7",
 				"4"
 			},
 			{"5%", "20%"},
 			{
-				"10%",
-				"15",
+				"20%",
+				"5",
 				"10%"
 			}
 		},
 		{
-			{"4%"},
+			{"8%"},
 			{"25%"},
-			{"10", "3"},
+			{"30", "2"},
 			{
 				"+1",
 				"15%",
 				"45%"
 			},
-			{"5%", "3"},
+			{"10%", "2"},
 			{"135%"},
-			{"10", "3"},
-			{"5%", "20%"},
+			{"30", "2"},
+			{"10%", "20%"},
 			{
-				"20%",
-				"3",
+				"35%",
+				"2",
 				"10%"
 			}
 		},
 		{
 			{
-				"4",
-				"6",
-				"15"
+				"8",
+				"12",
+				"4"
 			},
 			{"25%"},
 			{"50%", "5"},
@@ -1388,24 +1412,24 @@ function UpgradesTweakData:_init_pd2_values()
 				"15%",
 				"45%"
 			},
-			{"50%"},
+			{"100%"},
 			{"135%"},
-			{"2"},
+			{"4"},
 			{"5%", "20%"},
-			{"2", "10%"}
+			{"4", "10%"}
 		},
 		{
 			{
-				"2",
+				"1",
 				"0.5",
-				"3",
-				"1.0"
+				"5",
+				"1.5"
 			},
 			{"25%"},
 			{
-				"3",
+				"2",
 				"0.5",
-				"3",
+				"5",
 				"20%"
 			},
 			{
@@ -1414,23 +1438,23 @@ function UpgradesTweakData:_init_pd2_values()
 				"45%"
 			},
 			{
-				"4",
-				"0.5",
 				"3",
+				"0.5",
+				"5",
 				"10%"
 			},
 			{"135%"},
 			{
-				"5",
+				"4",
 				"0.5",
-				"3",
+				"5",
 				"20%"
 			},
 			{"5%", "20%"},
 			{
-				"5",
-				"0.5",
 				"4",
+				"0.5",
+				"6",
 				"20%",
 				"10%"
 			}
@@ -2103,6 +2127,7 @@ function UpgradesTweakData:_init_value_tables()
 	self.values.team.stamina = {}
 	self.values.team.health = {}
 	self.values.team.cash = {}
+	self.values.team.damage_dampener = {}
 end
 function UpgradesTweakData:_init_values()
 	self.values.weapon = self.values.weapon or {}
@@ -2943,6 +2968,96 @@ function UpgradesTweakData:_player_definitions()
 			value = 1
 		}
 	}
+	self.definitions.player_level_2_armor_multiplier_1 = {
+		category = "feature",
+		incremental = true,
+		name_id = "menu_player_level_2_armor_multiplier",
+		upgrade = {
+			category = "player",
+			upgrade = "level_2_armor_multiplier",
+			value = 1
+		}
+	}
+	self.definitions.player_level_3_armor_multiplier_1 = {
+		category = "feature",
+		incremental = true,
+		name_id = "menu_player_level_3_armor_multiplier",
+		upgrade = {
+			category = "player",
+			upgrade = "level_3_armor_multiplier",
+			value = 1
+		}
+	}
+	self.definitions.player_level_4_armor_multiplier_1 = {
+		category = "feature",
+		incremental = true,
+		name_id = "menu_player_level_4_armor_multiplier",
+		upgrade = {
+			category = "player",
+			upgrade = "level_4_armor_multiplier",
+			value = 1
+		}
+	}
+	self.definitions.player_level_2_armor_multiplier_2 = {
+		category = "feature",
+		incremental = true,
+		name_id = "menu_player_level_2_armor_multiplier",
+		upgrade = {
+			category = "player",
+			upgrade = "level_2_armor_multiplier",
+			value = 1
+		}
+	}
+	self.definitions.player_level_3_armor_multiplier_2 = {
+		category = "feature",
+		incremental = true,
+		name_id = "menu_player_level_3_armor_multiplier",
+		upgrade = {
+			category = "player",
+			upgrade = "level_3_armor_multiplier",
+			value = 1
+		}
+	}
+	self.definitions.player_level_4_armor_multiplier_2 = {
+		category = "feature",
+		incremental = true,
+		name_id = "menu_player_level_4_armor_multiplier",
+		upgrade = {
+			category = "player",
+			upgrade = "level_4_armor_multiplier",
+			value = 1
+		}
+	}
+	self.definitions.player_level_2_armor_multiplier_3 = {
+		category = "feature",
+		incremental = true,
+		name_id = "menu_player_level_2_armor_multiplier",
+		upgrade = {
+			category = "player",
+			upgrade = "level_2_armor_multiplier",
+			value = 1
+		}
+	}
+	self.definitions.player_level_3_armor_multiplier_3 = {
+		category = "feature",
+		incremental = true,
+		name_id = "menu_player_level_3_armor_multiplier",
+		upgrade = {
+			category = "player",
+			upgrade = "level_3_armor_multiplier",
+			value = 1
+		}
+	}
+	self.definitions.player_level_4_armor_multiplier_3 = {
+		category = "feature",
+		incremental = true,
+		name_id = "menu_player_level_4_armor_multiplier",
+		upgrade = {
+			category = "player",
+			upgrade = "level_4_armor_multiplier",
+			value = 1
+		}
+	}
 	self.definitions.player_tier_dodge_chance_1 = {
 		category = "feature",
 		name_id = "menu_player_tier_dodge_chance",
@@ -3205,6 +3320,15 @@ function UpgradesTweakData:_player_definitions()
 		upgrade = {
 			category = "player",
 			upgrade = "hostage_health_regen_addend",
+			value = 1
+		}
+	}
+	self.definitions.player_passive_health_regen = {
+		category = "temporary",
+		name_id = "menu_player_passive_health_regen",
+		upgrade = {
+			category = "player",
+			upgrade = "passive_health_regen",
 			value = 1
 		}
 	}
@@ -7390,6 +7514,15 @@ function UpgradesTweakData:_team_definitions()
 		upgrade = {
 			category = "cash",
 			upgrade = "stealth_bags_multiplier",
+			value = 1
+		}
+	}
+	self.definitions.team_hostage_damage_dampener_multiplier = {
+		category = "team",
+		name_id = "menu_team_hostage_damage_dampener_multiplier",
+		upgrade = {
+			category = "damage_dampener",
+			upgrade = "hostage_multiplier",
 			value = 1
 		}
 	}

@@ -40,7 +40,7 @@ function PlayerMovement:init(unit)
 		chk_interval_inactive = 1,
 		chk_t = 6,
 		nr_enemies = 2,
-		max_dis_sq = 640000,
+		max_dis_sq = 3240000,
 		has_dmg_dampener = managers.player:has_category_upgrade("temporary", "dmg_dampener_outnumbered") or managers.player:has_category_upgrade("temporary", "dmg_dampener_outnumbered_strong"),
 		has_dmg_mul = managers.player:has_category_upgrade("temporary", "dmg_multiplier_outnumbered")
 	}

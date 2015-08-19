@@ -854,7 +854,7 @@ function PlayerManager:mod_movement_penalty(movement_penalty)
 	end
 	return movement_penalty
 end
-function PlayerManager:body_armor_skill_multiplier()
+function PlayerManager:body_armor_skill_multiplier(override_armor)
 	local multiplier = 1
 	multiplier = multiplier + self:upgrade_value("player", "tier_armor_multiplier", 1) - 1
 	multiplier = multiplier + self:upgrade_value("player", "passive_armor_multiplier", 1) - 1
@@ -862,6 +862,7 @@ function PlayerManager:body_armor_skill_multiplier()
 	multiplier = multiplier + self:team_upgrade_value("armor", "multiplier", 1) - 1
 	multiplier = multiplier + self:get_hostage_bonus_multiplier("armor") - 1
 	multiplier = multiplier + self:upgrade_value("player", "perk_armor_loss_multiplier", 1) - 1
+	multiplier = multiplier + self:upgrade_value("player", tostring(override_armor or managers.blackmarket:equipped_armor(true, true)) .. "_armor_multiplier", 1) - 1
 	return multiplier
 end
 function PlayerManager:body_armor_regen_multiplier(moving, health_ratio)
@@ -959,12 +960,33 @@ function PlayerManager:health_regen()
 	local health_regen = tweak_data.player.damage.HEALTH_REGEN
 	health_regen = health_regen + self:temporary_upgrade_value("temporary", "wolverine_health_regen", 0)
 	health_regen = health_regen + self:get_hostage_bonus_addend("health_regen")
+	health_regen = health_regen + self:upgrade_value("player", "passive_health_regen", 0)
 	return health_regen
 end
 function PlayerManager:max_health()
 	local base_health = PlayerDamage._HEALTH_INIT
 	local health = (base_health + self:thick_skin_value()) * self:health_skill_multiplier()
 	return health
+end
+function PlayerManager:damage_reduction_skill_multiplier(damage_type, current_state, enemy_type)
+	local multiplier = 1
+	multiplier = multiplier * self:temporary_upgrade_value("temporary", "dmg_dampener_outnumbered", 1)
+	multiplier = multiplier * self:temporary_upgrade_value("temporary", "dmg_dampener_outnumbered_strong", 1)
+	multiplier = multiplier * self:temporary_upgrade_value("temporary", "dmg_dampener_close_contact", 1)
+	multiplier = multiplier * self:upgrade_value("player", "damage_dampener", 1)
+	multiplier = multiplier * self:temporary_upgrade_value("temporary", "first_aid_damage_reduction", 1)
+	multiplier = multiplier * self:temporary_upgrade_value("temporary", "passive_revive_damage_reduction", 1)
+	multiplier = multiplier * self:get_hostage_bonus_multiplier("damage_dampener")
+	if damage_type == "melee" then
+		multiplier = multiplier * managers.player:upgrade_value("player", "melee_damage_dampener", 1)
+	end
+	if current_state and current_state:_interacting() then
+		multiplier = multiplier * managers.player:upgrade_value("player", "interacting_damage_multiplier", 1)
+	end
+	if CopDamage and CopDamage.is_gangster(enemy_type) then
+		multiplier = multiplier * managers.player:upgrade_value("player", "gangster_damage_dampener", 1)
+	end
+	return multiplier
 end
 function PlayerManager:thick_skin_value()
 	if not self:has_category_upgrade("player", "thick_skin") then

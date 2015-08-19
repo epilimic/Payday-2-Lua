@@ -3357,7 +3357,7 @@ function BlackMarketGui:_get_armor_stats(name)
 				value = math.round((base + mod) * tweak_data.gui.stats_present_multiplier)
 			}
 			skill_stats[stat.name] = {
-				value = math.round((base_stats[stat.name].value + managers.player:body_armor_skill_addend(name) * tweak_data.gui.stats_present_multiplier) * managers.player:body_armor_skill_multiplier() - base_stats[stat.name].value)
+				value = math.round((base_stats[stat.name].value + managers.player:body_armor_skill_addend(name) * tweak_data.gui.stats_present_multiplier) * managers.player:body_armor_skill_multiplier(name) - base_stats[stat.name].value)
 			}
 		elseif stat.name == "health" then
 			local base = tweak_data.player.damage.HEALTH_INIT
