@@ -346,7 +346,7 @@ function UpgradesTweakData:_init_pd2_values()
 		0.15,
 		0.25
 	}
-	self.values.weapon.passive_swap_speed_multiplier = {5, 2}
+	self.values.weapon.passive_swap_speed_multiplier = {1.8, 2}
 	self.values.player.passive_concealment_modifier = {1}
 	self.values.player.passive_armor_movement_penalty_multiplier = {0.75}
 	self.values.player.passive_loot_drop_multiplier = {1.1}
@@ -1097,8 +1097,8 @@ function UpgradesTweakData:_init_pd2_values()
 			}
 		},
 		prison_wife = {
-			{"15", "3"},
-			{"45", "3"}
+			{"15", "2"},
+			{"30", "2"}
 		},
 		mastermind_tier1 = {
 			{"20%"}
@@ -1218,7 +1218,7 @@ function UpgradesTweakData:_init_pd2_values()
 				"15%",
 				"45%"
 			},
-			{"15%"},
+			{"10%"},
 			{"135%"},
 			{"10%", "5%"},
 			{"5%", "20%"},
@@ -1245,9 +1245,9 @@ function UpgradesTweakData:_init_pd2_values()
 			{"5%", "20%"},
 			{
 				"40%",
-				"10%",
+				"4%",
 				"5",
-				"4%"
+				"10%"
 			}
 		},
 		{
@@ -1376,7 +1376,7 @@ function UpgradesTweakData:_init_pd2_values()
 			{"5%", "20%"},
 			{
 				"20%",
-				"5",
+				"10",
 				"10%"
 			}
 		},
@@ -1392,9 +1392,9 @@ function UpgradesTweakData:_init_pd2_values()
 			{"10%", "2"},
 			{"135%"},
 			{"30", "2"},
-			{"10%", "20%"},
+			{"5%", "20%"},
 			{
-				"35%",
+				"75%",
 				"2",
 				"10%"
 			}
