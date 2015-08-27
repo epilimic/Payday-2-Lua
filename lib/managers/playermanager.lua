@@ -2165,13 +2165,13 @@ function PlayerManager:force_drop_carry()
 	managers.hud:temp_hide_carry_bag()
 	self:update_removed_synced_carry_to_peers()
 end
-function PlayerManager:clear_carry()
+function PlayerManager:clear_carry(soft_reset)
 	local carry_data = self:get_my_carry_data()
 	if not carry_data then
 		return
 	end
 	local player = self:player_unit()
-	if not alive(player) then
+	if not soft_reset and not alive(player) then
 		print("COULDN'T FORCE DROP! DIDN'T HAVE A UNIT")
 		return
 	end
@@ -2384,6 +2384,7 @@ function PlayerManager:soft_reset()
 		selected_index = nil
 	}
 	self._global.synced_grenades = {}
+	self:clear_carry(true)
 end
 function PlayerManager:on_peer_synch_request(peer)
 	self:player_unit():network():synch_to_peer(peer)

@@ -29,7 +29,11 @@ function PlayerMovement:init(unit)
 	mvector3.set_z(self._m_stand_pos, self._m_pos.z + 140)
 	self._m_com = math.lerp(self._m_pos, self._m_stand_pos, 0.5)
 	self._kill_overlay_t = managers.player:player_timer():time() + 5
-	self._state_data = {ducking = false, in_air = false}
+	self._state_data = {
+		ducking = false,
+		in_air = false,
+		reticle_obj = nil
+	}
 	self._synced_suspicion = false
 	self._suspicion_ratio = false
 	self._SO_access = managers.navigation:convert_access_flag("teamAI1")

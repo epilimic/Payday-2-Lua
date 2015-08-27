@@ -3440,9 +3440,6 @@ function BlackMarketGui:_get_stats(name, category, slot)
 			single_mod = managers.weapon_factory:has_perk("fire_mode_single", factory_id, equipped_mods)
 			auto_mod = managers.weapon_factory:has_perk("fire_mode_auto", factory_id, equipped_mods)
 		end
-		for _, default_part in ipairs(default_blueprint) do
-			table.delete(equipped_mods, default_part)
-		end
 	end
 	local base_stats = self:_get_base_stats(name)
 	local mods_stats = self:_get_mods_stats(name, base_stats, equipped_mods)
@@ -6221,6 +6218,7 @@ function BlackMarketGui:populate_masks(data)
 		new_data.bitmap_texture = guis_catalog .. "textures/pd2/blackmarket/icons/masks/" .. guis_mask_id
 		new_data.stream = false
 		new_data.holding = currently_holding and hold_crafted_item.slot == i
+		new_data.item_id = crafted.item_id
 		local is_locked = tweak_data.lootdrop.global_values[new_data.global_value] and tweak_data.lootdrop.global_values[new_data.global_value].dlc and not managers.dlc:is_dlc_unlocked(new_data.global_value)
 		local locked_parts = {}
 		local mask_is_locked = is_locked

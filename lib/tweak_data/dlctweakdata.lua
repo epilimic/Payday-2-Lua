@@ -30,6 +30,7 @@ function DLCTweakData:init(tweak_data)
 		character_pack_sokol = true,
 		kenaz = true,
 		turtles = true,
+		dragon = true,
 		pd2_goty = 1,
 		pd2_hw_boxing = true,
 		hlm2 = true,
@@ -3833,6 +3834,41 @@ function DLCTweakData:init(tweak_data)
 		{
 			type_items = "masks",
 			item_entry = "bobblehead_dozer",
+			amount = 1
+		}
+	}
+	self.dragon = {}
+	self.dragon.dlc = "has_dragon"
+	self.dragon.content = {}
+	self.dragon.content.loot_drops = {
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_smg_baka_b_comp",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_smg_baka_b_longsupp",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_smg_baka_b_midsupp",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_smg_baka_b_smallsupp",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_smg_baka_s_standard",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_smg_baka_s_unfolded",
 			amount = 1
 		}
 	}

@@ -754,6 +754,9 @@ function BlackMarketManager:outfit_string_from_list(outfit)
 	s = s .. " " .. managers.skilltree:pack_to_string_from_list(outfit.skills)
 	return s
 end
+function BlackMarketManager:signature()
+	return ""
+end
 function BlackMarketManager:load_equipped_weapons()
 	do
 		local weapon = self:equipped_primary()
@@ -1605,6 +1608,7 @@ end
 function BlackMarketManager:get_lootdropable_mods_by_weapon_id(weapon_id, global_value)
 	local droppable_parts = self:get_dropable_mods_by_weapon_id(weapon_id)
 	local loot_table = {}
+	local limited_loot_table = {}
 	if global_value == "all" then
 		global_value = false
 	end
@@ -1615,16 +1619,21 @@ function BlackMarketManager:get_lootdropable_mods_by_weapon_id(weapon_id, global
 		end
 		return true
 	end
-	local gv
+	local part_id, gv, amount_in_inventory
 	for category, parts in pairs(droppable_parts) do
 		for _, part_data in ipairs(parts) do
+			part_id = part_data[1]
 			gv = part_data[2] or "normal"
-			if (not global_value or gv == global_value) and tweak_data.lootdrop.global_values[gv] and (not tweak_data.lootdrop.global_values[gv].dlc or managers.dlc:is_dlc_unlocked(gv)) and tweak_data.weapon.factory.parts[part_data[1]] and (tweak_data.weapon.factory.parts[part_data[1]].pc or tweak_data.weapon.factory.parts[part_data[1]].pcs and #tweak_data.weapon.factory.parts[part_data[1]].pcs > 0) then
+			if (not global_value or gv == global_value) and tweak_data.lootdrop.global_values[gv] and (not tweak_data.lootdrop.global_values[gv].dlc or managers.dlc:is_dlc_unlocked(gv)) and tweak_data.weapon.factory.parts[part_id] and (tweak_data.weapon.factory.parts[part_id].pc or tweak_data.weapon.factory.parts[part_id].pcs and #tweak_data.weapon.factory.parts[part_id].pcs > 0) then
 				table.insert(loot_table, part_data)
+				amount_in_inventory = managers.blackmarket:get_item_amount(gv, "weapon_mods", part_id, true)
+				if tweak_data.blackmarket.weapon_mods[part_id] and tweak_data.blackmarket.weapon_mods[part_id].max_in_inventory and amount_in_inventory < tweak_data.blackmarket.weapon_mods[part_id].max_in_inventory then
+					table.insert(limited_loot_table, part_data)
+				end
 			end
 		end
 	end
-	return loot_table
+	return loot_table, limited_loot_table
 end
 function BlackMarketManager:get_dropable_mods_by_weapon_id(weapon_id, weapon_data)
 	local parts_tweak_data = tweak_data.weapon.factory.parts
@@ -2955,7 +2964,8 @@ function BlackMarketManager:on_buy_mask(mask_id, global_value, slot, item_id)
 		mask_id = mask_id,
 		global_value = global_value,
 		blueprint = blueprint,
-		modded = false
+		modded = false,
+		item_id = item_id
 	}
 	self:_verfify_equipped_category(category)
 end
@@ -3200,6 +3210,9 @@ function BlackMarketManager:reset()
 	self:_setup_unlocked_mask_slots()
 	self:_setup_unlocked_weapon_slots()
 	self:_setup_track_global_values()
+	if self._reset then
+		self:_reset()
+	end
 	self:aquire_default_weapons()
 	self:aquire_default_masks()
 	self:_verfify_equipped()
@@ -3240,6 +3253,9 @@ function BlackMarketManager:load(data)
 		local default_global = self._global or {}
 		Global.blackmarket_manager = data.blackmarket
 		self._global = Global.blackmarket_manager
+		if self._load then
+			self:_load()
+		end
 		if self._global.equipped_armor and type(self._global.equipped_armor) ~= "string" then
 			self._global.equipped_armor = nil
 		end

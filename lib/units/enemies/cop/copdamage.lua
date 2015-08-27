@@ -137,6 +137,42 @@ function CopDamage:is_head(body)
 	local head = self._head_body_name and body and body:name() == self._ids_head_body_name
 	return head
 end
+function CopDamage:_dismember_body_part(attack_data)
+	Application:debug("CopDamage:_dismember_body_part( attack_data )")
+	local hit_body_part = attack_data.body_name
+	hit_body_part = hit_body_part or attack_data.col_ray.body:name()
+	local sound = "split_gen_head"
+	if hit_body_part == Idstring("body") then
+		sound = "split_gen_body"
+	end
+	Application:trace("CopDamage:_dismember_body_part( attack_data ) - sound: ", inspect(sound))
+	self._unit:sound():play(sound, nil, nil)
+	local dismembers = {}
+	dismembers[Idstring("head"):key()] = "dismember_head"
+	dismembers[Idstring("body"):key()] = "dismember_body_top"
+	dismembers[Idstring("hit_Head"):key()] = "dismember_head"
+	dismembers[Idstring("hit_Body"):key()] = "dismember_body_top"
+	dismembers[Idstring("hit_RightUpLeg"):key()] = "dismember_r_upper_leg"
+	dismembers[Idstring("hit_LeftUpLeg"):key()] = "dismember_l_upper_leg"
+	dismembers[Idstring("hit_RightArm"):key()] = "dismember_r_upper_arm"
+	dismembers[Idstring("hit_LeftArm"):key()] = "dismember_l_upper_arm"
+	dismembers[Idstring("hit_RightForeArm"):key()] = "dismember_r_lower_arm"
+	dismembers[Idstring("hit_LeftForeArm"):key()] = "dismember_l_lower_arm"
+	dismembers[Idstring("hit_RightLeg"):key()] = "dismember_r_lower_leg"
+	dismembers[Idstring("hit_LeftLeg"):key()] = "dismember_l_lower_leg"
+	dismembers[Idstring("rag_Head"):key()] = "dismember_head"
+	dismembers[Idstring("rag_RightUpLeg"):key()] = "dismember_r_upper_leg"
+	dismembers[Idstring("rag_LeftUpLeg"):key()] = "dismember_l_upper_leg"
+	dismembers[Idstring("rag_RightArm"):key()] = "dismember_r_upper_arm"
+	dismembers[Idstring("rag_LeftArm"):key()] = "dismember_l_upper_arm"
+	dismembers[Idstring("rag_RightForeArm"):key()] = "dismember_r_lower_arm"
+	dismembers[Idstring("rag_LeftForeArm"):key()] = "dismember_l_lower_arm"
+	dismembers[Idstring("rag_RightLeg"):key()] = "dismember_r_lower_leg"
+	dismembers[Idstring("rag_LeftLeg"):key()] = "dismember_l_lower_leg"
+	if self._unit:damage():has_sequence(dismembers[hit_body_part:key()]) then
+		self._unit:damage():run_sequence_simple(dismembers[hit_body_part:key()])
+	end
+end
 function CopDamage:damage_bullet(attack_data)
 	if self._dead or self._invulnerable then
 		return
@@ -227,8 +263,8 @@ function CopDamage:damage_bullet(attack_data)
 			type = "death",
 			variant = attack_data.variant
 		}
-		self:die(attack_data.variant)
-		self:chk_killshot(attack_data.attacker_unit, attack_data.variant)
+		self:die(attack_data)
+		self:chk_killshot(attack_data.attacker_unit, "bullet")
 	else
 		attack_data.damage = damage
 		local result_type = self:get_damage_type(damage_percent, "bullet")
@@ -464,8 +500,8 @@ function CopDamage:damage_fire(attack_data)
 			type = "death",
 			variant = attack_data.variant
 		}
-		self:die(attack_data.variant)
-		self:chk_killshot(attack_data.attacker_unit, attack_data.variant)
+		self:die(attack_data)
+		self:chk_killshot(attack_data.attacker_unit, "fire")
 	else
 		attack_data.damage = damage
 		local result_type = attack_data.variant == "stun" and "hurt_sick" or self:get_damage_type(damage_percent, "fire")
@@ -593,8 +629,8 @@ function CopDamage:damage_dot(attack_data)
 			type = "death",
 			variant = attack_data.variant
 		}
-		self:die(attack_data.variant)
-		self:chk_killshot(attack_data.attacker_unit, attack_data.variant)
+		self:die(attack_data)
+		self:chk_killshot(attack_data.attacker_unit, attack_data.variant or "dot")
 	else
 		attack_data.damage = damage
 		local result_type = attack_data.hurt_animation and self:get_damage_type(damage_percent, attack_data.variant) or "dmg_rcv"
@@ -668,7 +704,7 @@ function CopDamage:damage_explosion(attack_data)
 			type = "death",
 			variant = attack_data.variant
 		}
-		self:die(attack_data.variant)
+		self:die(attack_data)
 	else
 		attack_data.damage = damage
 		local result_type = attack_data.variant == "stun" and "hurt_sick" or self:get_damage_type(damage_percent, "explosion")
@@ -710,7 +746,7 @@ function CopDamage:damage_explosion(attack_data)
 			attacker_unit = attacker_unit:base():thrower_unit()
 			data.weapon_unit = attack_data.attacker_unit
 		end
-		self:chk_killshot(attacker_unit, attack_data.variant)
+		self:chk_killshot(attacker_unit, "explosion")
 		if attacker_unit == managers.player:player_unit() then
 			if alive(attacker_unit) then
 				self:_comment_death(attacker_unit, self._unit:base()._tweak_table)
@@ -750,6 +786,19 @@ function CopDamage:roll_critical_hit(damage)
 		end
 	end
 	return critical_hit, damage
+end
+function CopDamage:_dismember_condition(attack_data)
+	local dismember_victim = false
+	local target_is_spook = false
+	target_is_spook = attack_data.col_ray.unit and attack_data.col_ray.unit:base()._tweak_table == "spooc"
+	local criminal_name = managers.criminals:local_character_name()
+	local criminal_melee_weapon = managers.blackmarket:equipped_melee_weapon()
+	local weapon_charged = false
+	weapon_charged = attack_data.charge_lerp_value and attack_data.charge_lerp_value > 0.5
+	if target_is_spook and weapon_charged and criminal_name == "dragon" and criminal_melee_weapon == "sandsteel" then
+		dismember_victim = true
+	end
+	return dismember_victim
 end
 function CopDamage:damage_melee(attack_data)
 	if self._dead or self._invulnerable then
@@ -792,8 +841,8 @@ function CopDamage:damage_melee(attack_data)
 			type = "death",
 			variant = attack_data.variant
 		}
-		self:die(attack_data.variant)
-		self:chk_killshot(attack_data.attacker_unit, attack_data.variant)
+		self:die(attack_data)
+		self:chk_killshot(attack_data.attacker_unit, "melee")
 	else
 		attack_data.damage = damage
 		damage_effect = math.clamp(damage_effect, self._HEALTH_INIT_PRECENT, self._HEALTH_INIT)
@@ -809,8 +858,13 @@ function CopDamage:damage_melee(attack_data)
 	end
 	attack_data.result = result
 	attack_data.pos = attack_data.col_ray.position
+	local dismember_victim = false
 	local snatch_pager = false
 	if result.type == "death" then
+		if self:_dismember_condition(attack_data) then
+			self:_dismember_body_part(attack_data)
+			dismember_victim = true
+		end
 		local data = {
 			name = self._unit:base()._tweak_table,
 			head_shot = head,
@@ -903,10 +957,13 @@ function CopDamage:damage_melee(attack_data)
 		variant = 3
 	elseif result.type == "taser_tased" then
 		variant = 5
+	elseif dismember_victim then
+		variant = 6
 	else
 		variant = 0
 	end
-	self:_send_melee_attack_result(attack_data, damage_percent, damage_effect_percent, hit_offset_height, variant)
+	local body_index = self._unit:get_body_index(attack_data.col_ray.body:name())
+	self:_send_melee_attack_result(attack_data, damage_percent, damage_effect_percent, hit_offset_height, variant, body_index)
 	self:_on_damage_received(attack_data)
 	return result
 end
@@ -921,7 +978,7 @@ function CopDamage:damage_mission(attack_data)
 		type = "death",
 		variant = attack_data.variant
 	}
-	self:die(attack_data.variant)
+	self:die(attack_data)
 	attack_data.result = result
 	attack_data.attack_dir = self._unit:rotation():y()
 	attack_data.pos = self._unit:position()
@@ -1050,7 +1107,8 @@ function CopDamage:_remove_debug_gui()
 		self._gui = nil
 	end
 end
-function CopDamage:die(variant)
+function CopDamage:die(attack_data)
+	local variant = attack_data.variant
 	self:_remove_debug_gui()
 	self._unit:base():set_slot(self._unit, 17)
 	if alive(managers.interaction:active_unit()) then
@@ -1153,8 +1211,8 @@ function CopDamage:sync_damage_bullet(attacker_unit, damage_percent, i_body, hit
 			})
 		end
 		result = {type = "death", variant = "bullet"}
-		self:die(attack_data.variant)
-		self:chk_killshot(attacker_unit, attack_data.variant)
+		self:die(attack_data)
+		self:chk_killshot(attacker_unit, "bullet")
 		local data = {
 			name = self._unit:base()._tweak_table,
 			head_shot = head,
@@ -1201,7 +1259,7 @@ function CopDamage:sync_damage_explosion(attacker_unit, damage_percent, i_attack
 	local result
 	if death then
 		result = {type = "death", variant = variant}
-		self:die(attack_data.variant)
+		self:die(attack_data)
 		local data = {
 			name = self._unit:base()._tweak_table,
 			head_shot = false,
@@ -1252,7 +1310,7 @@ function CopDamage:sync_damage_explosion(attacker_unit, damage_percent, i_attack
 			attacker_unit = attacker_unit:base():thrower_unit()
 			data.weapon_unit = attack_data.attacker_unit
 		end
-		self:chk_killshot(attacker_unit, variant)
+		self:chk_killshot(attacker_unit, "explosion")
 		if attacker_unit == managers.player:player_unit() then
 			if alive(attacker_unit) then
 				self:_comment_death(attacker_unit, self._unit:base()._tweak_table)
@@ -1304,8 +1362,8 @@ function CopDamage:sync_damage_fire(attacker_unit, damage_percent, start_dot_dan
 	end
 	if death then
 		result = {type = "death", variant = variant}
-		self:die(attack_data.variant)
-		self:chk_killshot(attacker_unit, variant)
+		self:die(attack_data)
+		self:chk_killshot(attacker_unit, "fire")
 		local data = {
 			name = self._unit:base()._tweak_table,
 			head_shot = false,
@@ -1383,8 +1441,8 @@ function CopDamage:sync_damage_dot(attacker_unit, damage_percent, death, variant
 	local result
 	if death then
 		result = {type = "death", variant = variant}
-		self:die(attack_data.variant)
-		self:chk_killshot(attacker_unit, attack_data.variant)
+		self:die(attack_data)
+		self:chk_killshot(attacker_unit, variant or "dot")
 		local data = {
 			name = self._unit:base()._tweak_table,
 			head_shot = false,
@@ -1406,17 +1464,35 @@ function CopDamage:sync_damage_dot(attacker_unit, damage_percent, death, variant
 	attack_data.damage = damage
 	self:_on_damage_received(attack_data)
 end
-function CopDamage:sync_damage_melee(attacker_unit, damage_percent, damage_effect_percent, i_body, hit_offset_height, variant, death)
-	if self._dead then
-		return
+function CopDamage:_sync_dismember(attacker_unit)
+	local dismember_victim = false
+	if not attacker_unit then
+		return dismember_victim
 	end
-	local damage = damage_percent * self._HEALTH_INIT_PRECENT
+	local attacker_name = managers.criminals:character_name_by_unit(attacker_unit)
+	local peer_id = managers.network:session():peer_by_unit(attacker_unit):id()
+	local peer = managers.network:session():peer(peer_id)
+	local attacker_weapon = peer:melee_id()
+	if attacker_name == "dragon" and attacker_weapon == "sandsteel" then
+		Application:trace("CopDamage:_dismember_body_part : not yakuza with katana")
+		dismember_victim = true
+	end
+	return dismember_victim
+end
+function CopDamage:sync_damage_melee(attacker_unit, damage_percent, damage_effect_percent, i_body, hit_offset_height, variant, death)
 	local attack_data = {}
+	local body = self._unit:body(i_body)
+	attack_data.attacker_unit = attacker_unit
+	local damage = damage_percent * self._HEALTH_INIT_PRECENT
 	local result
 	if death then
+		if self:_sync_dismember(attacker_unit) and variant == 6 then
+			attack_data.body_name = body:name()
+			self:_dismember_body_part(attack_data)
+		end
 		result = {type = "death", variant = "melee"}
-		self:die(attack_data.variant)
-		self:chk_killshot(attacker_unit, variant)
+		self:die(attack_data)
+		self:chk_killshot(attacker_unit, "melee")
 		local data = {
 			name = self._unit:base()._tweak_table,
 			head_shot = false,
@@ -1481,8 +1557,9 @@ end
 function CopDamage:_send_dot_attack_result(attack_data, attacker, damage_percent, variant, direction)
 	self._unit:network():send("damage_dot", attacker, damage_percent, self._dead and true or false, variant, attack_data.hurt_animation)
 end
-function CopDamage:_send_melee_attack_result(attack_data, damage_percent, damage_effect_percent, hit_offset_height, variant)
-	self._unit:network():send("damage_melee", attack_data.attacker_unit, damage_percent, damage_effect_percent, 1, hit_offset_height, variant, self._dead and true or false)
+function CopDamage:_send_melee_attack_result(attack_data, damage_percent, damage_effect_percent, hit_offset_height, variant, body_index)
+	body_index = math.clamp(body_index, 0, 128)
+	self._unit:network():send("damage_melee", attack_data.attacker_unit, damage_percent, damage_effect_percent, body_index, hit_offset_height, variant, self._dead and true or false)
 end
 function CopDamage:_send_sync_bullet_attack_result(attack_data, hit_offset_height)
 end

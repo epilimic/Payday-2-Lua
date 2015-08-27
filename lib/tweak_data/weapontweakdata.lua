@@ -97,6 +97,7 @@ function WeaponTweakData:init(tweak_data)
 	self:_init_data_wa2000_npc()
 	self:_init_data_polymer_npc()
 	self:_init_data_hunter_npc()
+	self:_init_data_baka_npc()
 	self:_precalculate_values()
 end
 function WeaponTweakData:_set_easy()
@@ -1540,6 +1541,20 @@ function WeaponTweakData:_init_data_hunter_npc()
 	self.hunter_npc.hold = "pistol"
 	self.hunter_npc.alert_size = 5000
 	self.hunter_npc.suppression = 1
+end
+function WeaponTweakData:_init_data_baka_npc()
+	self.baka_npc.sounds.prefix = "baka_npc"
+	self.baka_npc.use_data.selection_index = 1
+	self.baka_npc.DAMAGE = 2
+	self.baka_npc.muzzleflash = "effects/payday2/particles/weapons/9mm_auto"
+	self.baka_npc.muzzleflash_silenced = "effects/payday2/particles/weapons/9mm_auto_silence"
+	self.baka_npc.shell_ejection = "effects/payday2/particles/weapons/shells/shell_9mm"
+	self.baka_npc.CLIP_AMMO_MAX = 30
+	self.baka_npc.NR_CLIPS_MAX = 5
+	self.baka_npc.auto.fire_rate = 20
+	self.baka_npc.hold = "pistol"
+	self.baka_npc.alert_size = 5000
+	self.baka_npc.suppression = 1
 end
 function WeaponTweakData:_init_data_player_weapons(tweak_data)
 	local autohit_rifle_default, autohit_pistol_default, autohit_shotgun_default, autohit_lmg_default, autohit_snp_default, autohit_smg_default, autohit_minigun_default, aim_assist_rifle_default, aim_assist_pistol_default, aim_assist_shotgun_default, aim_assist_lmg_default, aim_assist_snp_default, aim_assist_smg_default, aim_assist_minigun_default
@@ -9497,6 +9512,96 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 		value = 1
 	}
 	self.hunter.stats_modifiers = {damage = 2}
+	self.baka = {}
+	self.baka.category = "smg"
+	self.baka.damage_melee = damage_melee_default
+	self.baka.damage_melee_effect_mul = damage_melee_effect_multiplier_default
+	self.baka.sounds = {}
+	self.baka.sounds.fire = "baka_fire_single"
+	self.baka.sounds.fire_single = "baka_fire_single"
+	self.baka.sounds.fire_auto = "baka_fire"
+	self.baka.sounds.stop_fire = "baka_stop"
+	self.baka.sounds.dryfire = "secondary_dryfire"
+	self.baka.sounds.enter_steelsight = "secondary_steel_sight_enter"
+	self.baka.sounds.leave_steelsight = "secondary_steel_sight_exit"
+	self.baka.timers = {}
+	self.baka.timers.reload_not_empty = 1.85
+	self.baka.timers.reload_empty = 2.6
+	self.baka.timers.unequip = 0.7
+	self.baka.timers.equip = 0.5
+	self.baka.name_id = "bm_w_baka"
+	self.baka.desc_id = "bm_w_baka_desc"
+	self.baka.description_id = "des_baka"
+	self.baka.muzzleflash = "effects/payday2/particles/weapons/9mm_auto_fps"
+	self.baka.muzzleflash_silenced = "effects/payday2/particles/weapons/9mm_auto_silence_fps"
+	self.baka.shell_ejection = "effects/payday2/particles/weapons/shells/shell_9mm"
+	self.baka.use_data = {}
+	self.baka.use_data.selection_index = 1
+	self.baka.DAMAGE = 1
+	self.baka.CLIP_AMMO_MAX = 32
+	self.baka.NR_CLIPS_MAX = 4
+	self.baka.AMMO_MAX = self.baka.CLIP_AMMO_MAX * self.baka.NR_CLIPS_MAX
+	self.baka.AMMO_PICKUP = self:_pickup_chance(self.baka.AMMO_MAX, 1)
+	self.baka.FIRE_MODE = "auto"
+	self.baka.fire_mode_data = {}
+	self.baka.fire_mode_data.fire_rate = 0.05
+	self.baka.CAN_TOGGLE_FIREMODE = true
+	self.baka.auto = {}
+	self.baka.auto.fire_rate = 0.05
+	self.baka.spread = {}
+	self.baka.spread.standing = self.new_m4.spread.standing * 1.1
+	self.baka.spread.crouching = self.new_m4.spread.standing * 0.85
+	self.baka.spread.steelsight = self.new_m4.spread.steelsight
+	self.baka.spread.moving_standing = self.new_m4.spread.standing * 1.2
+	self.baka.spread.moving_crouching = self.new_m4.spread.standing * 0.95
+	self.baka.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
+	self.baka.kick = {}
+	self.baka.kick.standing = {
+		-0.1,
+		0.6,
+		-1.2,
+		1.2
+	}
+	self.baka.kick.crouching = self.baka.kick.standing
+	self.baka.kick.steelsight = self.baka.kick.standing
+	self.baka.crosshair = {}
+	self.baka.crosshair.standing = {}
+	self.baka.crosshair.crouching = {}
+	self.baka.crosshair.steelsight = {}
+	self.baka.crosshair.standing.offset = 0.5
+	self.baka.crosshair.standing.moving_offset = 0.8
+	self.baka.crosshair.standing.kick_offset = 0.7
+	self.baka.crosshair.crouching.offset = 0.4
+	self.baka.crosshair.crouching.moving_offset = 0.7
+	self.baka.crosshair.crouching.kick_offset = 0.5
+	self.baka.crosshair.steelsight.hidden = true
+	self.baka.crosshair.steelsight.offset = 0
+	self.baka.crosshair.steelsight.moving_offset = 0
+	self.baka.crosshair.steelsight.kick_offset = 0.5
+	self.baka.shake = {}
+	self.baka.shake.fire_multiplier = 1.1
+	self.baka.shake.fire_steelsight_multiplier = -1.1
+	self.baka.autohit = autohit_smg_default
+	self.baka.aim_assist = aim_assist_smg_default
+	self.baka.weapon_hold = "baka"
+	self.baka.animations = {}
+	self.baka.animations.equip_id = "equip_baka"
+	self.baka.animations.recoil_steelsight = true
+	self.baka.global_value = "dragon"
+	self.baka.texture_bundle_folder = "dragon"
+	self.baka.stats = {
+		damage = 11,
+		spread = 4,
+		recoil = 4,
+		spread_moving = 4,
+		zoom = 3,
+		concealment = 29,
+		suppression = 14,
+		alert_size = 7,
+		extra_ammo = 6,
+		total_ammo_mod = 21,
+		value = 1
+	}
 end
 function WeaponTweakData:_init_data_offhand_weapons()
 	self.b92fs_primary = deep_clone(self.b92fs)
@@ -10154,6 +10259,12 @@ function WeaponTweakData:_create_table_structure()
 		use_data = {},
 		auto = {}
 	}
+	self.baka_npc = {
+		usage = "mp5",
+		sounds = {},
+		use_data = {},
+		auto = {}
+	}
 end
 function WeaponTweakData:_precalculate_values_wip()
 end
@@ -10251,4 +10362,5 @@ function WeaponTweakData:_precalculate_values()
 	self.wa2000_npc.AMMO_MAX = self.wa2000_npc.CLIP_AMMO_MAX * self.wa2000_npc.NR_CLIPS_MAX
 	self.polymer_npc.AMMO_MAX = self.polymer_npc.CLIP_AMMO_MAX * self.polymer_npc.NR_CLIPS_MAX
 	self.hunter_npc.AMMO_MAX = self.hunter_npc.CLIP_AMMO_MAX * self.hunter_npc.NR_CLIPS_MAX
+	self.baka_npc.AMMO_MAX = self.baka_npc.CLIP_AMMO_MAX * self.baka_npc.NR_CLIPS_MAX
 end

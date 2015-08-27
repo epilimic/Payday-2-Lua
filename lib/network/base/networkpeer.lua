@@ -1349,7 +1349,7 @@ function NetworkPeer:spawn_unit(spawn_point_id, is_drop_in, spawn_as)
 		end
 	end
 	local vehicle = managers.vehicle:find_active_vehicle_with_player()
-	if vehicle then
+	if vehicle and not spawn_in_custody then
 		Application:debug("[NetworkPeer] Spawning peer_id in vehicle, peer_id:" .. self._id)
 		managers.player:server_enter_vehicle(vehicle, self._id, unit)
 	end

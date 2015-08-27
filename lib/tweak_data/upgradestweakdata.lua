@@ -110,7 +110,7 @@ function UpgradesTweakData:_init_pd2_values()
 		stamina = 10,
 		damage_dampener = 1
 	}
-	self.on_headshot_dealt_cooldown = 3
+	self.on_headshot_dealt_cooldown = 2
 	self.on_killshot_cooldown = 2
 	self.on_damage_dealt_cooldown = 2
 	self.close_combat_distance = 1800
@@ -554,10 +554,10 @@ function UpgradesTweakData:_init_pd2_values()
 	self.values.akimbo.clip_ammo_increase = self.values.weapon.clip_ammo_increase
 	self.values.player.perk_armor_regen_timer_multiplier = {
 		0.95,
-		0.9,
-		0.8,
-		0.7,
-		0.6
+		0.85,
+		0.75,
+		0.65,
+		0.55
 	}
 	self.values.player.perk_armor_loss_multiplier = {
 		0.95,
@@ -593,9 +593,9 @@ function UpgradesTweakData:_init_pd2_values()
 		0.2
 	}
 	self.values.player.stand_still_crouch_camouflage_bonus = {
-		0.95,
 		0.9,
-		0.85
+		0.85,
+		0.8
 	}
 	self.values.player.corpse_dispose_speed_multiplier = {0.8}
 	self.values.player.pick_lock_speed_multiplier = {0.8}
@@ -653,6 +653,8 @@ function UpgradesTweakData:_init_pd2_values()
 			bullet = true,
 			explosion = true,
 			melee = true,
+			taser_tased = true,
+			poison = true,
 			fire = true,
 			swat_van = true,
 			civilian = false
@@ -666,6 +668,14 @@ function UpgradesTweakData:_init_pd2_values()
 	}
 	self.values.player.damage_to_hot_extra_ticks = {2}
 	self.values.player.armor_piercing_chance = {0.1, 0.3}
+	self.values.player.armor_regen_damage_health_ratio_multiplier = {
+		0.8,
+		0.6,
+		0.4
+	}
+	self.values.player.movement_speed_damage_health_ratio_multiplier = {0.2}
+	self.values.player.armor_regen_damage_health_ratio_threshold_multiplier = {2}
+	self.values.player.movement_speed_damage_health_ratio_threshold_multiplier = {2}
 	local editable_skill_descs = {
 		ammo_2x = {
 			{"2"},
@@ -1239,7 +1249,7 @@ function UpgradesTweakData:_init_pd2_values()
 				"15%",
 				"45%"
 			},
-			{"30%"},
+			{"20%"},
 			{"135%"},
 			{},
 			{"5%", "20%"},
@@ -1458,6 +1468,25 @@ function UpgradesTweakData:_init_pd2_values()
 				"20%",
 				"10%"
 			}
+		},
+		{
+			{"25%", "20%"},
+			{"25%"},
+			{"25%", "20%"},
+			{
+				"+1",
+				"15%",
+				"45%"
+			},
+			{"25%", "20%"},
+			{"135%"},
+			{"25%", "20%"},
+			{"5%", "20%"},
+			{
+				"50%",
+				"25%",
+				"10%"
+			}
 		}
 	}
 	self.specialization_descs = {}
@@ -1577,7 +1606,11 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[19] = {
 		name_id = "weapons",
-		upgrades = {"olympic", "mp9"}
+		upgrades = {
+			"olympic",
+			"mp9",
+			"baka"
+		}
 	}
 	self.level_tree[20] = {
 		name_id = "lvl_20",
@@ -1625,7 +1658,11 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[26] = {
 		name_id = "weapons",
-		upgrades = {"new_m14", "saiga"}
+		upgrades = {
+			"new_m14",
+			"saiga",
+			"sandsteel"
+		}
 	}
 	self.level_tree[27] = {
 		name_id = "weapons",
@@ -2050,6 +2087,7 @@ function UpgradesTweakData:init()
 	self:_wa2000_definitions()
 	self:_polymer_definitions()
 	self:_hunter_definitions()
+	self:_baka_definitions()
 	self:_melee_weapon_definitions()
 	self:_grenades_definitions()
 	self:_carry_definitions()
@@ -4817,6 +4855,60 @@ function UpgradesTweakData:_player_definitions()
 			value = 2
 		}
 	}
+	self.definitions.player_armor_regen_damage_health_ratio_multiplier_1 = {
+		category = "feature",
+		name_id = "menu_player_armor_regen_damage_health_ratio_multiplier",
+		upgrade = {
+			category = "player",
+			upgrade = "armor_regen_damage_health_ratio_multiplier",
+			value = 1
+		}
+	}
+	self.definitions.player_armor_regen_damage_health_ratio_multiplier_2 = {
+		category = "feature",
+		name_id = "menu_player_armor_regen_damage_health_ratio_multiplier",
+		upgrade = {
+			category = "player",
+			upgrade = "armor_regen_damage_health_ratio_multiplier",
+			value = 2
+		}
+	}
+	self.definitions.player_armor_regen_damage_health_ratio_multiplier_3 = {
+		category = "feature",
+		name_id = "menu_player_armor_regen_damage_health_ratio_multiplier",
+		upgrade = {
+			category = "player",
+			upgrade = "armor_regen_damage_health_ratio_multiplier",
+			value = 3
+		}
+	}
+	self.definitions.player_movement_speed_damage_health_ratio_multiplier = {
+		category = "feature",
+		name_id = "menu_player_movement_speed_damage_health_ratio_multiplier",
+		upgrade = {
+			category = "player",
+			upgrade = "movement_speed_damage_health_ratio_multiplier",
+			value = 1
+		}
+	}
+	self.definitions.player_armor_regen_damage_health_ratio_threshold_multiplier = {
+		category = "feature",
+		name_id = "menu_player_armor_regen_damage_health_ratio_threshold_multiplier",
+		upgrade = {
+			category = "player",
+			upgrade = "armor_regen_damage_health_ratio_threshold_multiplier",
+			value = 1
+		}
+	}
+	self.definitions.player_movement_speed_damage_health_ratio_threshold_multiplier = {
+		category = "feature",
+		name_id = "menu_player_movement_speed_damage_health_ratio_threshold_multiplier",
+		upgrade = {
+			category = "player",
+			upgrade = "movement_speed_damage_health_ratio_threshold_multiplier",
+			value = 1
+		}
+	}
 	self.definitions.toolset = {
 		tree = 4,
 		step = 1,
@@ -6618,6 +6710,10 @@ function UpgradesTweakData:_melee_weapon_definitions()
 	self.definitions.fight = {
 		category = "melee_weapon",
 		dlc = "turtles"
+	}
+	self.definitions.sandsteel = {
+		category = "melee_weapon",
+		dlc = "dragon"
 	}
 end
 function UpgradesTweakData:_grenades_definitions()
@@ -9062,5 +9158,13 @@ function UpgradesTweakData:_hunter_definitions()
 		weapon_id = "hunter",
 		factory_id = "wpn_fps_bow_hunter",
 		dlc = "turtles"
+	}
+end
+function UpgradesTweakData:_baka_definitions()
+	self.definitions.baka = {
+		category = "weapon",
+		weapon_id = "baka",
+		factory_id = "wpn_fps_smg_baka",
+		dlc = "dragon"
 	}
 end

@@ -179,6 +179,7 @@ function WeaponFactoryTweakData:init()
 	self:_init_wa2000()
 	self:_init_polymer()
 	self:_init_hunter()
+	self:_init_baka()
 	self:create_ammunition()
 	self:_init_content_unfinished()
 end
@@ -562,36 +563,21 @@ function WeaponFactoryTweakData:_init_vertical_grips()
 		name_id = "bm_wp_upg_vg_ass_smg_verticalgrip",
 		a_obj = "a_vg",
 		unit = "units/payday2/weapons/wpn_fps_upg_vg_ass_smg_verticalgrip/wpn_fps_upg_vg_ass_smg_verticalgrip",
-		stats = {
-			value = 2,
-			spread = 1,
-			spread_moving = 2,
-			concealment = -1
-		}
+		stats = {value = 1}
 	}
 	self.parts.wpn_fps_upg_vg_ass_smg_stubby = {
 		type = "vertical_grip",
 		name_id = "bm_wp_upg_vg_ass_smg_stubby",
 		a_obj = "a_vg",
 		unit = "units/payday2/weapons/wpn_fps_upg_vg_ass_smg_stubby/wpn_fps_upg_vg_ass_smg_stubby",
-		stats = {
-			value = 2,
-			spread = 1,
-			spread_moving = 2,
-			concealment = 1
-		}
+		stats = {value = 1}
 	}
 	self.parts.wpn_fps_upg_vg_ass_smg_afg = {
 		type = "vertical_grip",
 		name_id = "bm_wp_upg_vg_ass_smg_afg",
 		a_obj = "a_vg",
 		unit = "units/payday2/weapons/wpn_fps_upg_vg_ass_smg_afg/wpn_fps_upg_vg_ass_smg_afg",
-		stats = {
-			value = 2,
-			spread = 1,
-			spread_moving = 2,
-			concealment = -1
-		}
+		stats = {value = 1}
 	}
 	self.parts.wpn_fps_upg_vg_ass_smg_verticalgrip.third_unit = "units/payday2/weapons/wpn_third_upg_vg_ass_smg_verticalgrip/wpn_third_upg_vg_ass_smg_verticalgrip"
 	self.parts.wpn_fps_upg_vg_ass_smg_stubby.third_unit = "units/payday2/weapons/wpn_third_upg_vg_ass_smg_stubby/wpn_third_upg_vg_ass_smg_stubby"
@@ -641,13 +627,13 @@ function WeaponFactoryTweakData:_init_sights()
 				translation = Vector3(0, 0, -3)
 			},
 			wpn_fps_shot_r870 = {
-				translation = Vector3(0.01, 0, -4.8)
+				translation = Vector3(0.01, 0, -3.3)
 			},
 			wpn_fps_shot_serbu = {
-				translation = Vector3(0, 0, -4.8)
+				translation = Vector3(0, 0, -3.3)
 			},
 			wpn_fps_smg_akmsu = {
-				translation = Vector3(-0.028, 0, -3.3)
+				translation = Vector3(-0.028, 0, -3.35)
 			},
 			wpn_fps_ass_ak5 = {
 				translation = Vector3(0.025, 0, -3.725)
@@ -949,6 +935,12 @@ function WeaponFactoryTweakData:_init_sights()
 		perks = {"scope"},
 		adds = {
 			"wpn_upg_o_marksmansight_front"
+		},
+		stance_mod = {
+			wpn_fps_pis_beretta = {
+				translation = Vector3(0, 0, -0.25),
+				rotation = Rotation(0, -0.1, 0)
+			}
 		}
 	}
 	self.parts.wpn_upg_o_marksmansight_front = {
@@ -1066,7 +1058,8 @@ function WeaponFactoryTweakData:_init_sights()
 		texture_switch = {
 			material = "gfx_reddot1",
 			channel = "diffuse_texture"
-		}
+		},
+		reticle_obj = "g_reddot"
 	}
 	self.parts.wpn_fps_upg_o_leupold = {
 		pcs = {},
@@ -1105,7 +1098,8 @@ function WeaponFactoryTweakData:_init_sights()
 		texture_switch = {
 			material = "gfx_reddot1",
 			channel = "diffuse_texture"
-		}
+		},
+		reticle_obj = "g_reticle"
 	}
 	self.parts.wpn_fps_upg_o_45iron.third_unit = "units/pd2_dlc_gage_snp/weapons/wpn_fps_upg_o_45iron/wpn_third_upg_o_45iron"
 	self.parts.wpn_fps_upg_o_shortdot.third_unit = "units/pd2_dlc_gage_snp/weapons/wpn_fps_upg_o_shortdot/wpn_third_upg_o_shortdot"
@@ -1288,10 +1282,10 @@ function WeaponFactoryTweakData:_init_content_dlc2_dec16()
 				translation = Vector3(0, 0, -3)
 			},
 			wpn_fps_shot_r870 = {
-				translation = Vector3(0.015, 0, -4.76)
+				translation = Vector3(0.015, 0, -3.25)
 			},
 			wpn_fps_shot_serbu = {
-				translation = Vector3(0, 0, -4.8)
+				translation = Vector3(0, 0, -3.25)
 			},
 			wpn_fps_smg_akmsu = {
 				translation = Vector3(-0.028, 0, -3.3)
@@ -1965,7 +1959,8 @@ function WeaponFactoryTweakData:_init_content_jobs()
 				translation = Vector3(0, 0, -0.45)
 			},
 			wpn_fps_pis_beretta = {
-				translation = Vector3(0, 0, -0.34)
+				translation = Vector3(0, 0, -0.7),
+				rotation = Rotation(0, 0, 0)
 			},
 			wpn_fps_pis_deagle = {
 				translation = Vector3(0, 0, -0.78)
@@ -2363,7 +2358,7 @@ function WeaponFactoryTweakData:_init_m4()
 		name_id = "bm_wp_m4_uupg_fg_rail",
 		a_obj = "a_fg",
 		unit = "units/payday2/weapons/wpn_fps_ass_m4_pts/wpn_fps_m4_uupg_fg_rail",
-		stats = {value = 1, concealment = -1},
+		stats = {value = 1},
 		adds = {
 			"wpn_fps_m4_uupg_fg_rail_ext"
 		},
@@ -3536,12 +3531,7 @@ function WeaponFactoryTweakData:_init_ak_parts()
 		name_id = "bm_wp_ak_s_folding",
 		a_obj = "a_s",
 		unit = "units/payday2/weapons/wpn_fps_upg_ak_reusable/wpn_upg_ak_s_folding_gold",
-		stats = {
-			value = 3,
-			spread_moving = 2,
-			recoil = -1,
-			concealment = 2
-		},
+		stats = {value = 1},
 		adds = {
 			"wpn_upg_ak_g_standard"
 		}
@@ -4191,7 +4181,11 @@ function WeaponFactoryTweakData:_init_akmsu()
 			wpn_fps_upg_o_t1micro = {a_obj = "a_of"},
 			wpn_fps_upg_o_cmore = {a_obj = "a_of"},
 			wpn_fps_upg_o_acog = {a_obj = "a_of"},
-			wpn_fps_upg_o_cs = {a_obj = "a_of"}
+			wpn_fps_upg_o_cs = {a_obj = "a_of"},
+			wpn_fps_upg_o_eotech_xps = {a_obj = "a_of"},
+			wpn_fps_upg_o_reflex = {a_obj = "a_of"},
+			wpn_fps_upg_o_rx01 = {a_obj = "a_of"},
+			wpn_fps_upg_o_rx30 = {a_obj = "a_of"}
 		}
 	}
 	self.parts.wpn_fps_smg_akmsu_b_standard.third_unit = "units/payday2/weapons/wpn_third_smg_akmsu_pts/wpn_third_smg_akmsu_b_standard"
@@ -15682,7 +15676,8 @@ function WeaponFactoryTweakData:_init_c96()
 		texture_switch = {
 			material = "gfx_reddot1",
 			channel = "diffuse_texture"
-		}
+		},
+		reticle_obj = "g_reddot"
 	}
 	self.parts.wpn_fps_pis_c96_rail = {
 		type = "extra",
@@ -18250,7 +18245,7 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 						translation = Vector3(0, 0, -4.6)
 					},
 					wpn_fps_smg_akmsu = {
-						translation = Vector3(0, 0, -4.3)
+						translation = Vector3(-0.028, 0, -4.36)
 					}
 				}
 			},
@@ -18270,7 +18265,7 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 						translation = Vector3(0, 0, -4.6)
 					},
 					wpn_fps_smg_akmsu = {
-						translation = Vector3(0, 0, -4.3)
+						translation = Vector3(-0.028, 0, -4.36)
 					}
 				}
 			},
@@ -18290,7 +18285,7 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 						translation = Vector3(0, 0, -4.6)
 					},
 					wpn_fps_smg_akmsu = {
-						translation = Vector3(0, 0, -4.3)
+						translation = Vector3(-0.028, 0, -4.36)
 					}
 				}
 			},
@@ -18310,7 +18305,7 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 						translation = Vector3(0, 0, -4.6)
 					},
 					wpn_fps_smg_akmsu = {
-						translation = Vector3(0, 0, -4.3)
+						translation = Vector3(-0.028, 0, -4.36)
 					}
 				}
 			},
@@ -18330,7 +18325,7 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 						translation = Vector3(0, 0, -4.6)
 					},
 					wpn_fps_smg_akmsu = {
-						translation = Vector3(0, 0, -4.3)
+						translation = Vector3(-0.028, 0, -4.36)
 					}
 				}
 			},
@@ -18350,7 +18345,7 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 						translation = Vector3(0, 0, -4.6)
 					},
 					wpn_fps_smg_akmsu = {
-						translation = Vector3(0, 0, -4.3)
+						translation = Vector3(-0.028, 0, -4.36)
 					}
 				}
 			},
@@ -18370,27 +18365,7 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 						translation = Vector3(0, 0, -4.6)
 					},
 					wpn_fps_smg_akmsu = {
-						translation = Vector3(0, 0, -4.3)
-					}
-				}
-			},
-			wpn_fps_upg_o_acog = {
-				a_obj = "a_o_sm",
-				stance_mod = {
-					wpn_fps_ass_74 = {
-						translation = Vector3(0, 6, -4.6)
-					},
-					wpn_fps_ass_akm = {
-						translation = Vector3(0, 6, -4.6)
-					},
-					wpn_fps_ass_akm_gold = {
-						translation = Vector3(0, 6, -4.6)
-					},
-					wpn_fps_shot_saiga = {
-						translation = Vector3(0, 6, -4.6)
-					},
-					wpn_fps_smg_akmsu = {
-						translation = Vector3(0, 6, -4.3)
+						translation = Vector3(-0.028, 0, -4.36)
 					}
 				}
 			},
@@ -18410,7 +18385,7 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 						translation = Vector3(0, 0, -4.6)
 					},
 					wpn_fps_smg_akmsu = {
-						translation = Vector3(0, 0, -4.3)
+						translation = Vector3(-0.028, 0, -4.36)
 					}
 				}
 			},
@@ -18430,7 +18405,7 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 						translation = Vector3(0, 0, -4.6)
 					},
 					wpn_fps_smg_akmsu = {
-						translation = Vector3(0, 0, -4.3)
+						translation = Vector3(-0.028, 0, -4.36)
 					}
 				}
 			},
@@ -18450,7 +18425,7 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 						translation = Vector3(0, 0, -4.6)
 					},
 					wpn_fps_smg_akmsu = {
-						translation = Vector3(0, 0, -4.3)
+						translation = Vector3(-0.028, 0, -4.36)
 					}
 				}
 			},
@@ -18470,7 +18445,7 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 						translation = Vector3(0, 0, -4.6)
 					},
 					wpn_fps_smg_akmsu = {
-						translation = Vector3(0, 0, -4.3)
+						translation = Vector3(-0.028, 0, -4.36)
 					}
 				}
 			},
@@ -18490,7 +18465,27 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 						translation = Vector3(0, 0, -4.6)
 					},
 					wpn_fps_smg_akmsu = {
-						translation = Vector3(0, 0, -4.3)
+						translation = Vector3(-0.028, 0, -4.36)
+					}
+				}
+			},
+			wpn_fps_upg_o_acog = {
+				a_obj = "a_o_sm",
+				stance_mod = {
+					wpn_fps_ass_74 = {
+						translation = Vector3(0, 6, -4.6)
+					},
+					wpn_fps_ass_akm = {
+						translation = Vector3(0, 6, -4.6)
+					},
+					wpn_fps_ass_akm_gold = {
+						translation = Vector3(0, 6, -4.6)
+					},
+					wpn_fps_shot_saiga = {
+						translation = Vector3(0, 6, -4.6)
+					},
+					wpn_fps_smg_akmsu = {
+						translation = Vector3(-0.028, 6, -4.35)
 					}
 				}
 			}
@@ -19666,7 +19661,7 @@ function WeaponFactoryTweakData:_init_butchermodpack()
 				a_obj = "a_o_sm",
 				stance_mod = {
 					wpn_fps_ass_m14 = {
-						translation = Vector3(0, 0, -5.2)
+						translation = Vector3(0.05, 0, -5.19)
 					}
 				}
 			},
@@ -19674,7 +19669,7 @@ function WeaponFactoryTweakData:_init_butchermodpack()
 				a_obj = "a_o_sm",
 				stance_mod = {
 					wpn_fps_ass_m14 = {
-						translation = Vector3(0, 0, -5.2)
+						translation = Vector3(0.05, 0, -5.19)
 					}
 				}
 			},
@@ -19682,7 +19677,7 @@ function WeaponFactoryTweakData:_init_butchermodpack()
 				a_obj = "a_o_sm",
 				stance_mod = {
 					wpn_fps_ass_m14 = {
-						translation = Vector3(0, 0, -5.2)
+						translation = Vector3(0.05, 0, -5.19)
 					}
 				}
 			},
@@ -19690,7 +19685,7 @@ function WeaponFactoryTweakData:_init_butchermodpack()
 				a_obj = "a_o_sm",
 				stance_mod = {
 					wpn_fps_ass_m14 = {
-						translation = Vector3(0, 0, -5.2)
+						translation = Vector3(0.05, 0, -5.19)
 					}
 				}
 			},
@@ -19698,7 +19693,7 @@ function WeaponFactoryTweakData:_init_butchermodpack()
 				a_obj = "a_o_sm",
 				stance_mod = {
 					wpn_fps_ass_m14 = {
-						translation = Vector3(0, 0, -5.2)
+						translation = Vector3(0.05, 0, -5.19)
 					}
 				}
 			},
@@ -19706,7 +19701,7 @@ function WeaponFactoryTweakData:_init_butchermodpack()
 				a_obj = "a_o_sm",
 				stance_mod = {
 					wpn_fps_ass_m14 = {
-						translation = Vector3(0, 0, -5.2)
+						translation = Vector3(0.05, 0, -5.19)
 					}
 				}
 			},
@@ -19714,15 +19709,7 @@ function WeaponFactoryTweakData:_init_butchermodpack()
 				a_obj = "a_o_sm",
 				stance_mod = {
 					wpn_fps_ass_m14 = {
-						translation = Vector3(0, 0, -5.2)
-					}
-				}
-			},
-			wpn_fps_upg_o_acog = {
-				a_obj = "a_o_sm",
-				stance_mod = {
-					wpn_fps_ass_m14 = {
-						translation = Vector3(0, 6, -5.2)
+						translation = Vector3(0.05, 0, -5.19)
 					}
 				}
 			},
@@ -19730,7 +19717,7 @@ function WeaponFactoryTweakData:_init_butchermodpack()
 				a_obj = "a_o_sm",
 				stance_mod = {
 					wpn_fps_ass_m14 = {
-						translation = Vector3(0, 0, -5.2)
+						translation = Vector3(0.05, 0, -5.19)
 					}
 				}
 			},
@@ -19738,7 +19725,7 @@ function WeaponFactoryTweakData:_init_butchermodpack()
 				a_obj = "a_o_sm",
 				stance_mod = {
 					wpn_fps_ass_m14 = {
-						translation = Vector3(0, 0, -5.2)
+						translation = Vector3(0.05, 0, -5.19)
 					}
 				}
 			},
@@ -19746,7 +19733,7 @@ function WeaponFactoryTweakData:_init_butchermodpack()
 				a_obj = "a_o_sm",
 				stance_mod = {
 					wpn_fps_ass_m14 = {
-						translation = Vector3(0, 0, -5.2)
+						translation = Vector3(0.05, 0, -5.19)
 					}
 				}
 			},
@@ -19754,7 +19741,7 @@ function WeaponFactoryTweakData:_init_butchermodpack()
 				a_obj = "a_o_sm",
 				stance_mod = {
 					wpn_fps_ass_m14 = {
-						translation = Vector3(0, 0, -5.2)
+						translation = Vector3(0.05, 0, -5.19)
 					}
 				}
 			},
@@ -19762,7 +19749,15 @@ function WeaponFactoryTweakData:_init_butchermodpack()
 				a_obj = "a_o_sm",
 				stance_mod = {
 					wpn_fps_ass_m14 = {
-						translation = Vector3(0, 0, -5.2)
+						translation = Vector3(0.05, 0, -5.19)
+					}
+				}
+			},
+			wpn_fps_upg_o_acog = {
+				a_obj = "a_o_sm",
+				stance_mod = {
+					wpn_fps_ass_m14 = {
+						translation = Vector3(0.05, 6, -5.16)
 					}
 				}
 			}
@@ -20997,7 +20992,8 @@ function WeaponFactoryTweakData:_init_winchester1874()
 			}
 		},
 		dlc = "west",
-		texture_bundle_folder = "west"
+		texture_bundle_folder = "west",
+		reticle_obj = "g_reticle"
 	}
 	self.parts.wpn_fps_snp_winchester_b_standard.third_unit = "units/pd2_dlc_west/weapons/wpn_third_snp_winchester/wpn_third_snp_winchester_b_standard"
 	self.parts.wpn_fps_snp_winchester_b_long.third_unit = "units/pd2_dlc_west/weapons/wpn_third_snp_winchester/wpn_third_snp_winchester_b_long"
@@ -21332,7 +21328,7 @@ function WeaponFactoryTweakData:_init_asval()
 	}
 	self.parts.wpn_fps_ass_asval_body_standard = {
 		type = "lower_reciever",
-		name_id = "bm_wp_asval_b_pro",
+		name_id = "bm_wp_asval_b_st",
 		a_obj = "a_body",
 		unit = "units/pd2_dlc_character_sokol/weapons/wpn_fps_ass_asval_pts/wpn_fps_ass_asval_body_standard",
 		stats = {value = 1},
@@ -21345,14 +21341,14 @@ function WeaponFactoryTweakData:_init_asval()
 	}
 	self.parts.wpn_fps_ass_asval_fg_standard = {
 		type = "foregrip",
-		name_id = "bm_wp_asval_b_pro",
+		name_id = "bm_wp_asval_fg_st",
 		a_obj = "a_fg",
 		unit = "units/pd2_dlc_character_sokol/weapons/wpn_fps_ass_asval_pts/wpn_fps_ass_asval_fg_standard",
 		stats = {value = 1}
 	}
 	self.parts.wpn_fps_ass_asval_g_standard = {
 		type = "grip",
-		name_id = "bm_wp_asval_b_pro",
+		name_id = "bm_wp_asval_g_standard",
 		a_obj = "a_g",
 		unit = "units/pd2_dlc_character_sokol/weapons/wpn_fps_ass_asval_pts/wpn_fps_ass_asval_g_standard",
 		stats = {value = 1}
@@ -21471,7 +21467,6 @@ function WeaponFactoryTweakData:_init_asval()
 		"wpn_fps_ass_asval_b_standard",
 		"wpn_fps_ass_asval_body_standard",
 		"wpn_fps_ass_asval_fg_standard",
-		"wpn_fps_ass_asval_g_standard",
 		"wpn_fps_ass_asval_m_standard",
 		"wpn_fps_ass_asval_s_standard"
 	}
@@ -22459,4 +22454,274 @@ function WeaponFactoryTweakData:_init_hunter()
 	}
 	self.wpn_fps_bow_hunter_npc = deep_clone(self.wpn_fps_bow_hunter)
 	self.wpn_fps_bow_hunter_npc.unit = "units/pd2_dlc_turtles/weapons/wpn_fps_bow_hunter/wpn_fps_bow_hunter_npc"
+end
+function WeaponFactoryTweakData:_init_baka()
+	self.parts.wpn_fps_smg_baka_body_standard = {
+		type = "upper_reciever",
+		name_id = "bm_wp_baka_body_standard",
+		a_obj = "a_body",
+		unit = "units/pd2_dlc_dragon/weapons/wpn_fps_smg_baka_pts/wpn_fps_smg_baka_body_standard",
+		stats = {value = 1},
+		animations = {
+			reload = "reload",
+			fire_steelsight = "recoil",
+			fire = "recoil"
+		}
+	}
+	self.parts.wpn_fps_smg_baka_m_standard = {
+		type = "magazine",
+		name_id = "bm_wp_baka_m_standard",
+		a_obj = "a_m",
+		bullet_objects = {prefix = "g_bullet_", amount = 2},
+		unit = "units/pd2_dlc_dragon/weapons/wpn_fps_smg_baka_pts/wpn_fps_smg_baka_m_standard",
+		stats = {value = 1},
+		animations = {
+			reload = "reload",
+			reload_not_empty = "reload_not_empty"
+		}
+	}
+	self.parts.wpn_fps_smg_baka_b_comp = {
+		pcs = {
+			10,
+			20,
+			30,
+			40
+		},
+		type = "barrel",
+		name_id = "bm_wp_baka_b_comp",
+		a_obj = "a_b",
+		unit = "units/pd2_dlc_dragon/weapons/wpn_fps_smg_baka_pts/wpn_fps_smg_baka_b_comp",
+		stats = {
+			value = 1,
+			spread = 1,
+			concealment = -1
+		},
+		texture_bundle_folder = "dragon",
+		dlc = "dragon"
+	}
+	self.parts.wpn_fps_smg_baka_b_standard = {
+		type = "barrel",
+		name_id = "bm_wp_baka_b_standard",
+		a_obj = "a_b",
+		unit = "units/pd2_dlc_dragon/weapons/wpn_fps_smg_baka_pts/wpn_fps_smg_baka_b_standard",
+		stats = {value = 1}
+	}
+	self.parts.wpn_fps_smg_baka_b_midsupp = {
+		pcs = {
+			10,
+			20,
+			30,
+			40
+		},
+		type = "barrel_ext",
+		sub_type = "silencer",
+		name_id = "bm_wp_baka_b_midsupp",
+		a_obj = "a_b",
+		unit = "units/pd2_dlc_dragon/weapons/wpn_fps_smg_baka_pts/wpn_fps_smg_baka_b_midsupp",
+		stats = {
+			value = 1,
+			concealment = -2,
+			damage = -2,
+			recoil = 2,
+			suppression = 12,
+			alert_size = 12
+		},
+		texture_bundle_folder = "dragon",
+		dlc = "dragon",
+		perks = {"silencer"},
+		sound_switch = {
+			suppressed = "suppressed_b"
+		}
+	}
+	self.parts.wpn_fps_smg_baka_b_smallsupp = {
+		pcs = {
+			10,
+			20,
+			30,
+			40
+		},
+		type = "barrel_ext",
+		sub_type = "silencer",
+		name_id = "bm_wp_baka_b_smallsupp",
+		a_obj = "a_b",
+		unit = "units/pd2_dlc_dragon/weapons/wpn_fps_smg_baka_pts/wpn_fps_smg_baka_b_smallsupp",
+		stats = {
+			value = 1,
+			concealment = 0,
+			suppression = 12,
+			alert_size = 12,
+			damage = -4
+		},
+		texture_bundle_folder = "dragon",
+		dlc = "dragon",
+		perks = {"silencer"},
+		sound_switch = {
+			suppressed = "suppressed_c"
+		}
+	}
+	self.parts.wpn_fps_smg_baka_b_longsupp = {
+		pcs = {
+			10,
+			20,
+			30,
+			40
+		},
+		type = "barrel_ext",
+		sub_type = "silencer",
+		name_id = "bm_wp_baka_b_longsupp",
+		a_obj = "a_b",
+		unit = "units/pd2_dlc_dragon/weapons/wpn_fps_smg_baka_pts/wpn_fps_smg_baka_b_longsupp",
+		stats = {
+			value = 1,
+			concealment = -4,
+			recoil = 5,
+			suppression = 12,
+			alert_size = 12
+		},
+		texture_bundle_folder = "dragon",
+		dlc = "dragon",
+		perks = {"silencer"},
+		sound_switch = {
+			suppressed = "suppressed_a"
+		}
+	}
+	self.parts.wpn_fps_smg_baka_g_standard = {
+		type = "grip",
+		name_id = "bm_wp_baka_g_standard",
+		a_obj = "a_g",
+		unit = "units/pd2_dlc_dragon/weapons/wpn_fps_smg_baka_pts/wpn_fps_smg_baka_g_standard",
+		stats = {value = 1}
+	}
+	self.parts.wpn_fps_smg_baka_s_standard = {
+		pcs = {
+			10,
+			20,
+			30,
+			40
+		},
+		type = "stock",
+		name_id = "bm_wp_baka_s_standard",
+		texture_bundle_folder = "dragon",
+		dlc = "dragon",
+		a_obj = "a_s",
+		unit = "units/pd2_dlc_dragon/weapons/wpn_fps_smg_baka_pts/wpn_fps_smg_baka_s_standard",
+		stats = {
+			value = 1,
+			recoil = -2,
+			concealment = 3
+		}
+	}
+	self.parts.wpn_fps_smg_baka_s_folded = {
+		type = "stock",
+		name_id = "bm_wp_baka_s_folded",
+		texture_bundle_folder = "dragon",
+		a_obj = "a_s",
+		unit = "units/pd2_dlc_dragon/weapons/wpn_fps_smg_baka_pts/wpn_fps_smg_baka_s_folded",
+		stats = {value = 1}
+	}
+	self.parts.wpn_fps_smg_baka_s_unfolded = {
+		pcs = {
+			10,
+			20,
+			30,
+			40
+		},
+		type = "stock",
+		name_id = "bm_wp_baka_s_unfolded",
+		texture_bundle_folder = "dragon",
+		dlc = "dragon",
+		a_obj = "a_s",
+		unit = "units/pd2_dlc_dragon/weapons/wpn_fps_smg_baka_pts/wpn_fps_smg_baka_s_unfolded",
+		stats = {
+			value = 1,
+			recoil = 2,
+			concealment = -3
+		}
+	}
+	self.parts.wpn_fps_smg_baka_o_adapter = {
+		type = "extra",
+		name_id = "bm_w_baka_o_adapter",
+		a_obj = "a_o",
+		unit = "units/pd2_dlc_dragon/weapons/wpn_fps_smg_baka_pts/wpn_fps_smg_baka_o_adapter",
+		stats = {value = 1}
+	}
+	self.parts.wpn_fps_smg_baka_fl_adapter = {
+		type = "extra",
+		name_id = "bm_w_baka_fl_adapter",
+		a_obj = "a_fl",
+		unit = "units/pd2_dlc_dragon/weapons/wpn_fps_smg_baka_pts/wpn_fps_smg_baka_fl_adapter",
+		stats = {value = 1}
+	}
+	self.parts.wpn_fps_smg_baka_body_standard.third_unit = "units/pd2_dlc_dragon/weapons/wpn_third_smg_baka_pts/wpn_third_smg_baka_body_standard"
+	self.parts.wpn_fps_smg_baka_m_standard.third_unit = "units/pd2_dlc_dragon/weapons/wpn_third_smg_baka_pts/wpn_third_smg_baka_m_standard"
+	self.parts.wpn_fps_smg_baka_b_comp.third_unit = "units/pd2_dlc_dragon/weapons/wpn_third_smg_baka_pts/wpn_third_smg_baka_b_comp"
+	self.parts.wpn_fps_smg_baka_b_standard.third_unit = "units/pd2_dlc_dragon/weapons/wpn_third_smg_baka_pts/wpn_third_smg_baka_b_standard"
+	self.parts.wpn_fps_smg_baka_b_midsupp.third_unit = "units/pd2_dlc_dragon/weapons/wpn_third_smg_baka_pts/wpn_third_smg_baka_b_midsupp"
+	self.parts.wpn_fps_smg_baka_b_smallsupp.third_unit = "units/pd2_dlc_dragon/weapons/wpn_third_smg_baka_pts/wpn_third_smg_baka_b_smallsupp"
+	self.parts.wpn_fps_smg_baka_b_longsupp.third_unit = "units/pd2_dlc_dragon/weapons/wpn_third_smg_baka_pts/wpn_third_smg_baka_b_longsupp"
+	self.parts.wpn_fps_smg_baka_g_standard.third_unit = "units/pd2_dlc_dragon/weapons/wpn_third_smg_baka_pts/wpn_third_smg_baka_g_standard"
+	self.parts.wpn_fps_smg_baka_s_standard.third_unit = "units/pd2_dlc_dragon/weapons/wpn_third_smg_baka_pts/wpn_third_smg_baka_s_standard"
+	self.parts.wpn_fps_smg_baka_s_folded.third_unit = "units/pd2_dlc_dragon/weapons/wpn_third_smg_baka_pts/wpn_third_smg_baka_s_folded"
+	self.parts.wpn_fps_smg_baka_s_unfolded.third_unit = "units/pd2_dlc_dragon/weapons/wpn_third_smg_baka_pts/wpn_third_smg_baka_s_unfolded"
+	self.parts.wpn_fps_smg_baka_o_adapter.third_unit = "units/pd2_dlc_dragon/weapons/wpn_third_smg_baka_pts/wpn_third_smg_baka_o_adapter"
+	self.parts.wpn_fps_smg_baka_fl_adapter.third_unit = "units/pd2_dlc_dragon/weapons/wpn_third_smg_baka_pts/wpn_third_smg_baka_fl_adapter"
+	self.wpn_fps_smg_baka = {}
+	self.wpn_fps_smg_baka.unit = "units/pd2_dlc_dragon/weapons/wpn_fps_smg_baka/wpn_fps_smg_baka"
+	self.wpn_fps_smg_baka.optional_types = {"gadget", "sight"}
+	self.wpn_fps_smg_baka.adds = {
+		wpn_fps_upg_fl_pis_laser = {
+			"wpn_fps_smg_baka_fl_adapter"
+		},
+		wpn_fps_upg_fl_pis_tlr1 = {
+			"wpn_fps_smg_baka_fl_adapter"
+		},
+		wpn_fps_upg_fl_pis_crimson = {
+			"wpn_fps_smg_baka_fl_adapter"
+		},
+		wpn_fps_upg_fl_pis_x400v = {
+			"wpn_fps_smg_baka_fl_adapter"
+		},
+		wpn_fps_upg_fl_pis_m3x = {
+			"wpn_fps_smg_baka_fl_adapter"
+		}
+	}
+	self.wpn_fps_smg_baka.default_blueprint = {
+		"wpn_fps_smg_baka_body_standard",
+		"wpn_fps_smg_baka_m_standard",
+		"wpn_fps_smg_baka_b_standard",
+		"wpn_fps_smg_baka_g_standard",
+		"wpn_fps_smg_baka_s_folded"
+	}
+	self.wpn_fps_smg_baka.uses_parts = {
+		"wpn_fps_smg_baka_body_standard",
+		"wpn_fps_smg_baka_m_standard",
+		"wpn_fps_smg_baka_b_standard",
+		"wpn_fps_smg_baka_g_standard",
+		"wpn_fps_smg_baka_s_standard",
+		"wpn_fps_smg_baka_s_folded",
+		"wpn_fps_smg_baka_s_unfolded",
+		"wpn_fps_smg_baka_b_comp",
+		"wpn_fps_smg_baka_b_midsupp",
+		"wpn_fps_smg_baka_b_smallsupp",
+		"wpn_fps_smg_baka_b_longsupp",
+		"wpn_fps_upg_ns_ass_smg_large",
+		"wpn_fps_upg_ns_ass_smg_medium",
+		"wpn_fps_upg_ns_ass_smg_small",
+		"wpn_fps_upg_ns_ass_smg_firepig",
+		"wpn_fps_upg_ns_ass_smg_stubby",
+		"wpn_fps_upg_ns_ass_smg_tank",
+		"wpn_fps_upg_i_singlefire",
+		"wpn_fps_upg_i_autofire",
+		"wpn_fps_upg_ass_ns_jprifles",
+		"wpn_fps_upg_ass_ns_linear",
+		"wpn_fps_upg_ass_ns_surefire",
+		"wpn_fps_upg_fl_pis_laser",
+		"wpn_fps_upg_fl_pis_tlr1",
+		"wpn_fps_upg_fl_pis_crimson",
+		"wpn_fps_upg_fl_pis_x400v",
+		"wpn_fps_upg_ass_ns_battle",
+		"wpn_fps_upg_fl_pis_m3x"
+	}
+	self.wpn_fps_smg_baka_npc = deep_clone(self.wpn_fps_smg_baka)
+	self.wpn_fps_smg_baka_npc.unit = "units/pd2_dlc_dragon/weapons/wpn_fps_smg_baka/wpn_fps_smg_baka_npc"
 end

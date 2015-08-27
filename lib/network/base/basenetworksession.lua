@@ -299,6 +299,7 @@ function BaseNetworkSession:_on_peer_removed(peer, peer_id, reason)
 		end
 		if Network:is_client() then
 			if player_left then
+				managers.criminals:on_peer_left(peer_id)
 				managers.criminals:remove_character_by_peer_id(peer_id)
 				managers.trade:replace_player_with_ai(player_character, player_character)
 			end
@@ -307,6 +308,7 @@ function BaseNetworkSession:_on_peer_removed(peer, peer_id, reason)
 			Network:remove_client(peer:rpc())
 			if player_left then
 				managers.achievment:set_script_data("cant_touch_fail", true)
+				managers.criminals:on_peer_left(peer_id)
 				managers.criminals:remove_character_by_peer_id(peer_id)
 				local unit = managers.groupai:state():spawn_one_teamAI(true, player_character)
 				self._old_players[peer_ident] = {

@@ -842,6 +842,19 @@ function LootDropTweakData:init(tweak_data)
 	self.global_values.bobblehead.sort_number = 107
 	self.global_values.bobblehead.hide_unavailable = true
 	self.global_values.bobblehead.category = "global_event"
+	self.global_values.dragon = {}
+	self.global_values.dragon.name_id = "bm_global_value_dragon"
+	self.global_values.dragon.desc_id = "menu_l_global_value_dragon"
+	self.global_values.dragon.unlock_id = "bm_global_value_dragon_unlock"
+	self.global_values.dragon.color = Color(255, 255, 212, 0) / 255
+	self.global_values.dragon.dlc = true
+	self.global_values.dragon.chance = 1
+	self.global_values.dragon.value_multiplier = tweak_data:get_value("money_manager", "global_value_multipliers", "dragon")
+	self.global_values.dragon.durability_multiplier = 1
+	self.global_values.dragon.drops = true
+	self.global_values.dragon.track = true
+	self.global_values.dragon.sort_number = 108
+	self.global_values.dragon.category = "dlc"
 	self.global_values.legendary = {}
 	self.global_values.legendary.name_id = "bm_global_value_legendary"
 	self.global_values.legendary.desc_id = "menu_l_global_value_legendary"
@@ -903,7 +916,8 @@ function LootDropTweakData:init(tweak_data)
 		"arena",
 		"character_pack_sokol",
 		"kenaz",
-		"turtles"
+		"turtles",
+		"dragon"
 	}
 	self:_create_global_value_list_map()
 end

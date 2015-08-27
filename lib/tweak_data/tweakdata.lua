@@ -384,7 +384,8 @@ function TweakData:init()
 		"dragan",
 		"jacket",
 		"bonnie",
-		"sokol"
+		"sokol",
+		"dragon"
 	}
 	self.criminals.characters = {
 		{
@@ -505,6 +506,17 @@ function TweakData:init()
 				color_id = 4,
 				voice = "rb11",
 				ai_mask_id = "sokol",
+				mask_id = 4
+			}
+		},
+		{
+			name = "dragon",
+			static_data = {
+				ai_character_id = "ai_dragon",
+				ssuffix = "s",
+				color_id = 4,
+				voice = "rb12",
+				ai_mask_id = "jiro",
 				mask_id = 4
 			}
 		}

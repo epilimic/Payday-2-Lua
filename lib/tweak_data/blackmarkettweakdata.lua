@@ -98,6 +98,7 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.character_locked.jacket = "richard_returns"
 	self.masks.character_locked.bonnie = "bonnie"
 	self.masks.character_locked.sokol = "sokol"
+	self.masks.character_locked.dragon = "jiro"
 	self.masks.skull = {}
 	self.masks.skull.unit = "units/payday2/masks/msk_skull/msk_skull"
 	self.masks.skull.name_id = "bm_msk_skull"
@@ -1711,7 +1712,7 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.balaclava_chains.inaccessible = true
 	self.masks.balaclava_wolf = {}
 	self.masks.balaclava_wolf.unit = "units/pd2_dlc_infamy/masks/msk_balaclava_wolf/msk_balaclava_wolf"
-	self.masks.balaclava_wolf.name_id = "bm_msk_balaclava"
+	self.masks.balaclava_wolf.name_id = "bm_msk_cheat_error"
 	self.masks.balaclava_wolf.type = "helmet"
 	self.masks.balaclava_wolf.inaccessible = true
 	self.masks.balaclava_clover = {}
@@ -1763,7 +1764,8 @@ function BlackMarketTweakData:_init_masks()
 		dragan = "balaclava_dragan",
 		jacket = "balaclava_wolf",
 		bonnie = "balaclava_dallas",
-		sokol = "balaclava_sokol"
+		sokol = "balaclava_sokol",
+		dragon = "balaclava_dallas"
 	}
 	self.masks.the_overkill_mask = {}
 	self.masks.the_overkill_mask.unit = "units/pd2_dlc_overkill_pack/masks/msk_the_overkill_mask/msk_the_overkill_mask"
@@ -2100,6 +2102,25 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.sokol_begins.value = 0
 	self.masks.sokol_begins.texture_bundle_folder = "character_pack_sokol"
 	self.masks.sokol_begins.dlc = "character_pack_sokol"
+	self.masks.jiro = {}
+	self.masks.jiro.unit = "units/pd2_dlc_dragon/masks/jiro/msk_jiro"
+	self.masks.jiro.name_id = "bm_msk_jiro"
+	self.masks.jiro.pcs = {}
+	self.masks.jiro.value = 0
+	self.masks.jiro.texture_bundle_folder = "dragon"
+	self.masks.jiro.dlc = "dragon"
+	self.masks.jiro_begins = {}
+	self.masks.jiro_begins.unit = "units/pd2_dlc_dragon/masks/jiro_begins/msk_jiro_begins"
+	self.masks.jiro_begins.name_id = "bm_msk_jiro_begins"
+	self.masks.jiro_begins.pcs = {
+		10,
+		20,
+		30,
+		40
+	}
+	self.masks.jiro_begins.value = 0
+	self.masks.jiro_begins.texture_bundle_folder = "dragon"
+	self.masks.jiro_begins.dlc = "dragon"
 	self.masks.croupier_hat = {}
 	self.masks.croupier_hat.unit = "units/pd2_dlc_casino/masks/msk_croupier_hat/msk_croupier_hat"
 	self.masks.croupier_hat.name_id = "bm_msk_croupier_hat"
@@ -2271,6 +2292,11 @@ function BlackMarketTweakData:_init_characters()
 		texture_bundle_folder = "character_pack_sokol",
 		dlc = "character_pack_sokol"
 	}
+	self.characters.locked.dragon = {
+		sequence = "var_mtr_jiro",
+		texture_bundle_folder = "dragon",
+		dlc = "dragon"
+	}
 	self.characters.female_1 = {}
 	self.characters.female_1.fps_unit = "units/payday2/characters/fps_mover/fps_female_1_mover"
 	self.characters.female_1.npc_unit = "units/payday2/characters/npc_criminal_female_1/npc_criminal_female_1"
@@ -2341,6 +2367,9 @@ function BlackMarketTweakData:_init_characters()
 	self.characters.ai_sokol.mask_on_sequence = "mask_on_sokol"
 	self.characters.ai_sokol.mask_off_sequence = "mask_off_sokol"
 	self.characters.ai_sokol.name_id = "bm_character_ai_sokol"
+	self.characters.ai_dragon = {}
+	self.characters.ai_dragon.npc_unit = "units/payday2/characters/npc_criminals_suit_1/dragon/npc_criminal_suit_dragon"
+	self.characters.ai_dragon.sequence = "var_mtr_jiro"
 end
 function BlackMarketTweakData:_init_colors()
 	self.colors = {}
@@ -8178,5 +8207,42 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.twins.sounds.charge = "twin_charge"
 	self.melee_weapons.twins.repeat_expire_t = 0.6
 	self.melee_weapons.twins.stats.concealment = 28
+	self.melee_weapons.sandsteel = {}
+	self.melee_weapons.sandsteel.name_id = "bm_melee_sandsteel"
+	self.melee_weapons.sandsteel.animation = nil
+	self.melee_weapons.sandsteel.anim_attack_vars = {
+		"var1",
+		"var2",
+		"var3",
+		"var4"
+	}
+	self.melee_weapons.sandsteel.anim_global_param = "melee_sandsteel"
+	self.melee_weapons.sandsteel.dlc = "dragon"
+	self.melee_weapons.sandsteel.texture_bundle_folder = "dragon"
+	self.melee_weapons.sandsteel.type = "axe"
+	self.melee_weapons.sandsteel.align_objects = {
+		"a_weapon_right"
+	}
+	self.melee_weapons.sandsteel.unit = "units/pd2_dlc_dragon/weapons/wpn_fps_mel_sandsteel/wpn_fps_mel_sandsteel"
+	self.melee_weapons.sandsteel.third_unit = "units/pd2_dlc_dragon/weapons/wpn_fps_mel_sandsteel/wpn_third_mel_sandsteel"
+	self.melee_weapons.sandsteel.sounds = {}
+	self.melee_weapons.sandsteel.sounds.equip = "sandsteel_equip"
+	self.melee_weapons.sandsteel.sounds.hit_air = "sandsteel_hit_air"
+	self.melee_weapons.sandsteel.sounds.hit_gen = "sandsteel_hit_gen"
+	self.melee_weapons.sandsteel.sounds.hit_body = "sandsteel_hit_body"
+	self.melee_weapons.sandsteel.sounds.charge = "sandsteel_charge"
+	self.melee_weapons.sandsteel.stats = {}
+	self.melee_weapons.sandsteel.stats.weapon_type = "sharp"
+	self.melee_weapons.sandsteel.stats.min_damage = 7
+	self.melee_weapons.sandsteel.stats.max_damage = 45
+	self.melee_weapons.sandsteel.stats.min_damage_effect = 0.1
+	self.melee_weapons.sandsteel.stats.max_damage_effect = 0.1
+	self.melee_weapons.sandsteel.stats.charge_time = 4
+	self.melee_weapons.sandsteel.stats.range = 275
+	self.melee_weapons.sandsteel.stats.concealment = 26
+	self.melee_weapons.sandsteel.stats.remove_weapon_movement_penalty = true
+	self.melee_weapons.sandsteel.repeat_expire_t = 0.5
+	self.melee_weapons.sandsteel.expire_t = 0.85
+	self.melee_weapons.sandsteel.melee_damage_delay = 0.1
 	self:_add_desc_from_name_macro(self.melee_weapons)
 end

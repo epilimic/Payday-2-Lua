@@ -229,6 +229,23 @@ end
 function PlayerStandard:in_steelsight()
 	return self._state_data.in_steelsight
 end
+function PlayerStandard:is_reticle_aim()
+	return self._state_data.reticle_obj and self._camera_unit:base():is_stance_done() and not self._equipped_unit:base():is_second_sight_on()
+end
+function PlayerStandard:get_fire_weapon_position()
+	if self:is_reticle_aim() then
+		return self._ext_camera:position_with_shake()
+	else
+		return self._ext_camera:position()
+	end
+end
+function PlayerStandard:get_fire_weapon_direction()
+	if self:is_reticle_aim() then
+		return self._ext_camera:forward_with_shake_toward_reticle(self._state_data.reticle_obj)
+	else
+		return self._ext_camera:forward()
+	end
+end
 local temp_vec1 = Vector3()
 function PlayerStandard:_upd_nav_data()
 	if mvec3_dis_sq(self._m_pos, self._pos) > 1 then
@@ -767,14 +784,16 @@ function PlayerStandard:_start_action_steelsight(t)
 		self._state_data.steelsight_weight_target = 1
 		self._camera_unit:base():set_steelsight_anim_enabled(true)
 	end
+	self._state_data.reticle_obj = weap_base.get_reticle_obj and weap_base:get_reticle_obj()
 	if managers.controller:get_default_wrapper_type() ~= "pc" and managers.user:get_setting("aim_assist") then
-		local closest_ray = self._equipped_unit:base():check_autoaim(self._ext_camera:position(), self._ext_camera:forward(), nil, true)
+		local closest_ray = self._equipped_unit:base():check_autoaim(self:get_fire_weapon_position(), self:get_fire_weapon_direction(), nil, true)
 		self._camera_unit:base():clbk_aim_assist(closest_ray)
 	end
 	self._ext_network:send("set_stance", 3, false, false)
 end
 function PlayerStandard:_end_action_steelsight(t)
 	self._state_data.in_steelsight = false
+	self._state_data.reticle_obj = nil
 	self:_stance_entered()
 	self:_update_crosshair_offset()
 	self._camera_unit:base():clbk_stop_aim_assist()
@@ -1479,6 +1498,7 @@ function PlayerStandard:_do_melee_damage(t, bayonet_melee)
 			action_data.col_ray = col_ray
 			action_data.shield_knock = can_shield_knock
 			action_data.name_id = melee_entry
+			action_data.charge_lerp_value = charge_lerp_value
 			if managers.player:has_category_upgrade("melee", "stacking_hit_damage_multiplier") then
 				self._state_data.stacking_dmg_mul = self._state_data.stacking_dmg_mul or {}
 				self._state_data.stacking_dmg_mul.melee = self._state_data.stacking_dmg_mul.melee or {nil, 0}
@@ -2625,16 +2645,16 @@ function PlayerStandard:_check_action_primary_attack(t, input)
 					local fired
 					if fire_mode == "single" then
 						if input.btn_primary_attack_press then
-							fired = weap_base:trigger_pressed(self._ext_camera:position(), self._ext_camera:forward(), dmg_mul, nil, spread_mul, autohit_mul, suppression_mul)
+							fired = weap_base:trigger_pressed(self:get_fire_weapon_position(), self:get_fire_weapon_direction(), dmg_mul, nil, spread_mul, autohit_mul, suppression_mul)
 						elseif fire_on_release then
 							if input.btn_primary_attack_release then
-								fired = weap_base:trigger_released(self._ext_camera:position(), self._ext_camera:forward(), dmg_mul, nil, spread_mul, autohit_mul, suppression_mul)
+								fired = weap_base:trigger_released(self:get_fire_weapon_position(), self:get_fire_weapon_direction(), dmg_mul, nil, spread_mul, autohit_mul, suppression_mul)
 							elseif input.btn_primary_attack_state then
-								weap_base:trigger_held(self._ext_camera:position(), self._ext_camera:forward(), dmg_mul, nil, spread_mul, autohit_mul, suppression_mul)
+								weap_base:trigger_held(self:get_fire_weapon_position(), self:get_fire_weapon_direction(), dmg_mul, nil, spread_mul, autohit_mul, suppression_mul)
 							end
 						end
 					elseif input.btn_primary_attack_state then
-						fired = weap_base:trigger_held(self._ext_camera:position(), self._ext_camera:forward(), dmg_mul, nil, spread_mul, autohit_mul, suppression_mul)
+						fired = weap_base:trigger_held(self:get_fire_weapon_position(), self:get_fire_weapon_direction(), dmg_mul, nil, spread_mul, autohit_mul, suppression_mul)
 					end
 					if weap_base.manages_steelsight and weap_base:manages_steelsight() then
 						if weap_base:wants_steelsight() and not self._state_data.in_steelsight then

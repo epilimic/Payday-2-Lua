@@ -1107,6 +1107,10 @@ function MenuCallbackHandler:dlc_buy_turtles_pc()
 	print("[MenuCallbackHandler:dlc_buy_turtles_pc]")
 	Steam:overlay_activate("store", 384021)
 end
+function MenuCallbackHandler:dlc_buy_dragon_pc()
+	print("[MenuCallbackHandler:dlc_buy_dragon_pc]")
+	Steam:overlay_activate("store", 384020)
+end
 function MenuCallbackHandler:dlc_buy_ps3()
 	print("[MenuCallbackHandler:dlc_buy_ps3]")
 	managers.dlc:buy_product("dlc1")
@@ -1144,6 +1148,7 @@ function MenuCallbackHandler:show_game_is_installing_menu()
 end
 function MenuCallbackHandler:is_dlc_latest_locked(check_dlc)
 	local dlcs = {
+		"dragon",
 		"turtles",
 		"character_pack_sokol",
 		"kenaz",
@@ -1257,6 +1262,9 @@ function MenuCallbackHandler:visible_callback_kenaz()
 end
 function MenuCallbackHandler:visible_callback_turtles()
 	return self:is_dlc_latest_locked("turtles")
+end
+function MenuCallbackHandler:visible_callback_dragon()
+	return self:is_dlc_latest_locked("dragon")
 end
 function MenuCallbackHandler:not_has_all_dlcs()
 	return not self:has_all_dlcs()
@@ -7174,9 +7182,10 @@ function MenuCallbackHandler:choice_challenge_get_weapon_mod_reward(item)
 	managers.menu:show_challenge_reward(reward)
 end
 function MenuCallbackHandler:roll_challenge_give_weapon_mod(weapon_id, global_value)
-	local loot_table = managers.blackmarket:get_lootdropable_mods_by_weapon_id(weapon_id, global_value)
-	if #loot_table > 0 then
-		local entry = loot_table[math.random(#loot_table)]
+	local loot_table, limited_loot_table = managers.blackmarket:get_lootdropable_mods_by_weapon_id(weapon_id, global_value)
+	local my_loot_table = #limited_loot_table > 0 and limited_loot_table or loot_table
+	if #my_loot_table > 0 then
+		local entry = my_loot_table[math.random(#my_loot_table)]
 		managers.blackmarket:add_to_inventory(entry[2] or "normal", "weapon_mods", entry[1])
 		print("[MenuCallbackHandler:roll_challenge_give_weapon_mod] Drop", entry[2] or "normal", "weapon_mods", entry[1])
 		return entry

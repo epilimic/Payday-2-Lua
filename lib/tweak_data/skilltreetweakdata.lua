@@ -2799,6 +2799,62 @@ function SkillTreeTweakData:init()
 				name_id = "menu_deck11_9",
 				desc_id = "menu_deck11_9_desc"
 			}
+		},
+		{
+			name_id = "menu_st_spec_12",
+			desc_id = "menu_st_spec_12_desc",
+			dlc = "dragon",
+			{
+				upgrades = {
+					"player_armor_regen_damage_health_ratio_multiplier_1"
+				},
+				cost = 200,
+				icon_xy = {6, 6},
+				name_id = "menu_deck12_1",
+				desc_id = "menu_deck12_1_desc"
+			},
+			deck2,
+			{
+				upgrades = {
+					"player_movement_speed_damage_health_ratio_multiplier"
+				},
+				cost = 400,
+				icon_xy = {7, 6},
+				name_id = "menu_deck12_3",
+				desc_id = "menu_deck12_3_desc"
+			},
+			deck4,
+			{
+				upgrades = {
+					"player_armor_regen_damage_health_ratio_multiplier_2"
+				},
+				cost = 1000,
+				icon_xy = {0, 7},
+				name_id = "menu_deck12_5",
+				desc_id = "menu_deck12_5_desc"
+			},
+			deck6,
+			{
+				upgrades = {
+					"player_armor_regen_damage_health_ratio_multiplier_3"
+				},
+				cost = 2400,
+				icon_xy = {1, 7},
+				name_id = "menu_deck12_7",
+				desc_id = "menu_deck12_7_desc"
+			},
+			deck8,
+			{
+				upgrades = {
+					"player_armor_regen_damage_health_ratio_threshold_multiplier",
+					"player_movement_speed_damage_health_ratio_threshold_multiplier",
+					"player_passive_loot_drop_multiplier"
+				},
+				cost = 4000,
+				icon_xy = {2, 7},
+				name_id = "menu_deck12_9",
+				desc_id = "menu_deck12_9_desc"
+			}
 		}
 	}
 end

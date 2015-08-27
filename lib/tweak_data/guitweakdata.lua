@@ -401,6 +401,14 @@ function GuiTweakData:init()
 		store = 384021,
 		image = "guis/dlcs/turtles/textures/pd2/content_updates/turtles"
 	}
+	local dragon = {
+		id = "dragon",
+		name_id = "menu_content_dragon",
+		desc_id = "menu_content_dragon_desc",
+		date_id = "menu_content_dragon_date",
+		store = 384020,
+		image = "guis/dlcs/dragon/textures/pd2/content_updates/dragon"
+	}
 	self.content_updates = {
 		title_id = "menu_content_updates",
 		choice_id = "menu_content_updates_previous",
@@ -455,7 +463,8 @@ function GuiTweakData:init()
 			arena,
 			kenaz,
 			character_pack_sokol,
-			turtles
+			turtles,
+			dragon
 		}
 	elseif SystemInfo:platform() == Idstring("PS3") then
 		self.content_updates.item_list = {
@@ -1779,6 +1788,15 @@ function GuiTweakData:init()
 					desc_id = "menu_sokol_desc_codex",
 					videos = {"sokol1"},
 					post_event = "pln_contact_sokol"
+				}
+			},
+			{
+				id = "dragon",
+				name_id = "menu_dragon",
+				{
+					desc_id = "menu_dragon_desc_codex",
+					videos = {"dragon1"},
+					post_event = "pln_contact_jiro"
 				}
 			}
 		}

@@ -117,7 +117,7 @@ function ExplosionManager:detect_and_give_dmg(params)
 	local hit_units = {}
 	local type
 	for _, hit_body in ipairs(bodies) do
-		local character = hit_body:unit():character_damage() and hit_body:unit():character_damage().damage_explosion
+		local character = hit_body:unit():character_damage() and hit_body:unit():character_damage().damage_explosion and not hit_body:unit():character_damage():dead()
 		local apply_dmg = hit_body:extension() and hit_body:extension().damage
 		units_to_push[hit_body:unit():key()] = hit_body:unit()
 		local dir, len, damage, ray_hit, damage_character
@@ -128,8 +128,9 @@ function ExplosionManager:detect_and_give_dmg(params)
 				characters_hit[hit_body:unit():key()] = true
 			else
 				for i_splinter, s_pos in ipairs(splinters) do
-					ray_hit = not World:raycast("ray", s_pos, hit_body:center_of_mass(), "slot_mask", slotmask, "ignore_unit", {
-						hit_body:unit()
+					ray_hit = not World:raycast("ray", s_pos, hit_body:center_of_mass(), "slot_mask", slotmask - 17, "ignore_unit", {
+						hit_body:unit(),
+						ignore_unit
 					}, "report")
 					if ray_hit then
 						characters_hit[hit_body:unit():key()] = true

@@ -350,7 +350,12 @@ function MenuInput:mouse_pressed(o, button, x, y)
 							self._logic:trigger_item(true, item)
 						end
 					elseif row_item.gui_text:inside(x, y) then
-						if item:next() then
+						if row_item.align == "left" then
+							if item:previous() then
+								self:post_event("selection_previous")
+								self._logic:trigger_item(true, item)
+							end
+						elseif item:next() then
 							self:post_event("selection_next")
 							self._logic:trigger_item(true, item)
 						end

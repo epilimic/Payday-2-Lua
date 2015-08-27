@@ -91,11 +91,11 @@ function WeaponLaser:update(unit, t, dt)
 		mvector3.multiply(pos, 50)
 		mvector3.negate(pos)
 		mvector3.add(pos, ray.position)
-		self._light:set_position(pos)
-		self._light_glow:set_position(pos)
+		self._light:set_final_position(pos)
+		self._light_glow:set_final_position(pos)
 	else
-		self._light:set_position(to)
-		self._light_glow:set_position(to)
+		self._light:set_final_position(to)
+		self._light_glow:set_final_position(to)
 		self._brush:cylinder(from, to, self._is_npc and 0.5 or 0.25)
 	end
 end

@@ -286,6 +286,30 @@ function CriminalsManager:get_num_player_criminals()
 	end
 	return num
 end
+function CriminalsManager:on_peer_left(peer_id)
+	for id, data in pairs(self._characters) do
+		local char_dmg = alive(data.unit) and data.unit:character_damage()
+		if char_dmg and char_dmg.get_paused_counter_name_by_peer then
+			local counter_name = char_dmg:get_paused_counter_name_by_peer(peer_id)
+			if counter_name then
+				if counter_name == "downed" then
+					char_dmg:unpause_downed_timer(peer_id)
+				elseif counter_name == "arrested" then
+					char_dmg:unpause_arrested_timer(peer_id)
+				elseif counter_name == "bleed_out" then
+					char_dmg:unpause_bleed_out(peer_id)
+				else
+					Application:stack_dump_error("Unknown counter name \"" .. tostring(counter_name) .. "\" by peer id " .. tostring(peer_id))
+				end
+				local interact_ext = data.unit:interaction()
+				if interact_ext then
+					interact_ext:set_waypoint_paused(false)
+				end
+				managers.network:session():send_to_peers_synched("interaction_set_waypoint_paused", data.unit, false)
+			end
+		end
+	end
+end
 function CriminalsManager:remove_character_by_unit(unit)
 	if type_name(unit) ~= "Unit" then
 		return

@@ -319,7 +319,7 @@ function RaycastWeaponBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul
 			hit_unit = self._bullet_class:on_collision(col_ray, self._unit, user_unit, damage)
 		end
 		self._shot_fired_stats_table.hit = hit_unit and true or false
-		if (not shoot_through_data or hit_unit) and (not self._ammo_data or not self._ammo_data.ignore_statistic) then
+		if (not shoot_through_data or hit_unit) and (not self._ammo_data or not self._ammo_data.ignore_statistic) and not self._rays then
 			self._shot_fired_stats_table.skip_bullet_count = shoot_through_data and true
 			managers.statistics:shot_fired(self._shot_fired_stats_table)
 		end

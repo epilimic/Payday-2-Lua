@@ -138,6 +138,7 @@ function MenuSceneManager:_set_up_templates()
 	self._scene_templates.standard = {}
 	self._scene_templates.standard.use_character_grab = true
 	self._scene_templates.standard.character_visible = true
+	self._scene_templates.standard.complete_overkill_pack_safe_visible = true
 	self._scene_templates.standard.camera_pos = ref:position()
 	self._scene_templates.standard.target_pos = target_pos
 	self._scene_templates.standard.character_pos = c_ref:position()
@@ -431,6 +432,12 @@ function MenuSceneManager:_setup_bg()
 		if Global.blackmarket_manager.characters[character_id].equipped then
 			self:set_character(character_id)
 		end
+	end
+	if managers.dlc:is_dlc_unlocked("complete_overkill_pack") then
+		local a = self._bg_unit:get_object(Idstring("a_reference"))
+		local rot = Rotation(60, 0, 0)
+		local pos = Vector3(-180, 160, -120)
+		self._complete_overkill_pack_safe = World:spawn_unit(Idstring("units/payday2/equipment/gen_interactable_sec_safe_overkill/gen_interactable_sec_safe_overkill"), pos, rot)
 	end
 	self:_setup_lobby_characters()
 end
@@ -1147,6 +1154,7 @@ function MenuSceneManager:set_scene_template(template, data, custom_name, skip_t
 		self._character_values.pos_current = self._character_values.pos_target or template_data.character_pos
 		self._character_values.pos_target = template_data.character_pos or self._character_values.pos_current
 		self:_chk_character_visibility(self._character_unit)
+		self:_chk_complete_overkill_pack_safe_visibility()
 		self._camera_values.camera_pos_current = self._camera_values.camera_pos_target
 		self._camera_values.target_pos_current = self._camera_values.target_pos_target
 		self._camera_values.fov_current = self._camera_values.fov_target
@@ -1196,6 +1204,13 @@ function MenuSceneManager:set_scene_template(template, data, custom_name, skip_t
 			end
 		end
 	end
+	managers.network.account:refresh()
+end
+function MenuSceneManager:_chk_complete_overkill_pack_safe_visibility()
+	if not alive(self._complete_overkill_pack_safe) then
+		return
+	end
+	self._complete_overkill_pack_safe:set_visible(self._scene_templates[self._current_scene_template].complete_overkill_pack_safe_visible)
 end
 function MenuSceneManager:dispatch_transition_done()
 	self._transition_done_callback_handler:dispatch()

@@ -231,9 +231,7 @@ function NarrativeTweakData:init()
 	self.jobs.firestarter.briefing_event = "hct_firestarter_brf"
 	self.jobs.firestarter.debrief_event = "hct_firestarter_debrief"
 	self.jobs.firestarter.crimenet_callouts = {
-		"hct_firestarter_cnc_01",
-		"hct_firestarter_cnc_02",
-		"hct_firestarter_cnc_03"
+		"hct_firestarter_cnc_01"
 	}
 	self.jobs.firestarter.crimenet_videos = {
 		"cn_fires1",
@@ -327,9 +325,7 @@ function NarrativeTweakData:init()
 	self.jobs.alex.briefing_event = "hct_rats_brf_speak"
 	self.jobs.alex.debrief_event = "hct_rats_debrief"
 	self.jobs.alex.crimenet_callouts = {
-		"hct_rats_cnc_01",
-		"hct_rats_cnc_02",
-		"hct_rats_cnc_03"
+		"hct_rats_cnc_01"
 	}
 	self.jobs.alex.crimenet_videos = {
 		"cn_rat1",
@@ -412,9 +408,7 @@ function NarrativeTweakData:init()
 	self.jobs.welcome_to_the_jungle_wrapper.briefing_event = "elp_bigoil_brf"
 	self.jobs.welcome_to_the_jungle_wrapper.debrief_event = "elp_bigoil_debrief"
 	self.jobs.welcome_to_the_jungle_wrapper.crimenet_callouts = {
-		"elp_bigoil_cnc_01",
-		"elp_bigoil_cnc_02",
-		"elp_bigoil_cnc_03"
+		"elp_bigoil_cnc_01"
 	}
 	self.jobs.welcome_to_the_jungle_wrapper.crimenet_videos = {
 		"cn_bigoil1",
@@ -537,9 +531,7 @@ function NarrativeTweakData:init()
 	self.jobs.framing_frame.briefing_event = "elp_framing_brf"
 	self.jobs.framing_frame.debrief_event = "elp_framing_debrief"
 	self.jobs.framing_frame.crimenet_callouts = {
-		"elp_framing_cmc_01",
-		"elp_framing_cmc_02",
-		"elp_framing_cmc_03"
+		"elp_framing_cmc_01"
 	}
 	self.jobs.framing_frame.crimenet_videos = {
 		"cn_framingframe1",
@@ -609,9 +601,7 @@ function NarrativeTweakData:init()
 	self.jobs.watchdogs_wrapper.briefing_event = "hct_watchdogs_brf_speak"
 	self.jobs.watchdogs_wrapper.debrief_event = "hct_watchdogs_debrief"
 	self.jobs.watchdogs_wrapper.crimenet_callouts = {
-		"hct_watchdogs_cnc_01",
-		"hct_watchdogs_cnc_02",
-		"hct_watchdogs_cnc_03"
+		"hct_watchdogs_cnc_01"
 	}
 	self.jobs.watchdogs_wrapper.crimenet_videos = {
 		"cn_watchdog1",
@@ -718,9 +708,7 @@ function NarrativeTweakData:init()
 	self.jobs.nightclub.briefing_event = "vld_nightclub_brf"
 	self.jobs.nightclub.debrief_event = "vld_nightclub_debrief"
 	self.jobs.nightclub.crimenet_callouts = {
-		"vld_nightclub_cnc_01",
-		"vld_nightclub_cnc_02",
-		"vld_nightclub_cnc_03"
+		"vld_nightclub_cnc_01"
 	}
 	self.jobs.nightclub.crimenet_videos = {
 		"cn_nightc1",
@@ -784,10 +772,7 @@ function NarrativeTweakData:init()
 	self.jobs.ukrainian_job.briefing_event = "vld_ukranian_brf"
 	self.jobs.ukrainian_job.debrief_event = "vld_ukranian_debrief"
 	self.jobs.ukrainian_job.crimenet_callouts = {
-		"vld_ukranian_cnc_01",
-		"vld_ukranian_cnc_02",
-		"vld_ukranian_cnc_03",
-		"vld_ukranian_cnc_04"
+		"vld_ukranian_cnc_01"
 	}
 	self.jobs.ukrainian_job.crimenet_videos = {
 		"cn_ukr1",
@@ -851,9 +836,7 @@ function NarrativeTweakData:init()
 	self.jobs.jewelry_store.briefing_event = "pln_jewelrystore_stage1_brf_speak"
 	self.jobs.jewelry_store.debrief_event = nil
 	self.jobs.jewelry_store.crimenet_callouts = {
-		"pln_jewelrystore_stage1_cnc_01",
-		"pln_jewelrystore_stage1_cnc_02",
-		"pln_jewelrystore_stage1_cnc_03"
+		"pln_jewelrystore_stage1_cnc_01"
 	}
 	self.jobs.jewelry_store.crimenet_videos = {
 		"cn_jewel1",
@@ -924,9 +907,7 @@ function NarrativeTweakData:init()
 	self.jobs.four_stores.briefing_event = "vld_fourstores_brf"
 	self.jobs.four_stores.debrief_event = "vld_fourstores_debrief"
 	self.jobs.four_stores.crimenet_callouts = {
-		"vld_fourstores_cnc_01",
-		"vld_fourstores_cnc_02",
-		"vld_fourstores_cnc_03"
+		"vld_fourstores_cnc_01"
 	}
 	self.jobs.four_stores.crimenet_videos = {
 		"cn_fours1",
@@ -990,9 +971,7 @@ function NarrativeTweakData:init()
 	self.jobs.mallcrasher.briefing_event = "vld_mallcrashers_brf"
 	self.jobs.mallcrasher.debrief_event = "vld_mallcrashers_debrief"
 	self.jobs.mallcrasher.crimenet_callouts = {
-		"vld_mallcrashers_cnc_01",
-		"vld_mallcrashers_cnc_02",
-		"vld_mallcrashers_cnc_03"
+		"vld_mallcrashers_cnc_01"
 	}
 	self.jobs.mallcrasher.crimenet_videos = {
 		"cn_mallcrash1",
@@ -1059,12 +1038,7 @@ function NarrativeTweakData:init()
 	self.jobs.branchbank.briefing_event = "pln_branchbank_random_brf_speak"
 	self.jobs.branchbank.debrief_event = nil
 	self.jobs.branchbank.crimenet_callouts = {
-		"pln_branchbank_random_cnc_01",
-		"pln_branchbank_random_cnc_02",
-		"pln_branchbank_random_cnc_03",
-		"pln_branchbank_random_cnc_04",
-		"pln_branchbank_random_cnc_05",
-		"pln_branchbank_random_cnc_06"
+		"pln_branchbank_random_cnc_01"
 	}
 	self.jobs.branchbank.crimenet_videos = {
 		"cn_branchbank1",
@@ -1139,12 +1113,7 @@ function NarrativeTweakData:init()
 	self.jobs.branchbank_deposit.briefing_event = "pln_branchbank_depositbox_brf_speak"
 	self.jobs.branchbank_deposit.debrief_event = nil
 	self.jobs.branchbank_deposit.crimenet_callouts = {
-		"pln_branchbank_deposit_cnc_01",
-		"pln_branchbank_deposit_cnc_02",
-		"pln_branchbank_deposit_cnc_03",
-		"pln_branchbank_deposit_cnc_04",
-		"pln_branchbank_deposit_cnc_05",
-		"pln_branchbank_deposit_cnc_06"
+		"pln_branchbank_deposit_cnc_01"
 	}
 	self.jobs.branchbank_deposit.crimenet_videos = {
 		"cn_branchbank1",
@@ -1219,13 +1188,7 @@ function NarrativeTweakData:init()
 	self.jobs.branchbank_cash.briefing_event = "pln_branchbank_cash_brf_speak"
 	self.jobs.branchbank_cash.debrief_event = nil
 	self.jobs.branchbank_cash.crimenet_callouts = {
-		"pln_branchbank_cash_cnc_01",
-		"pln_branchbank_cash_cnc_02",
-		"pln_branchbank_cash_cnc_03",
-		"pln_branchbank_cash_cnc_04",
-		"pln_branchbank_cash_cnc_05",
-		"pln_branchbank_cash_cnc_06",
-		"pln_branchbank_cash_cnc_07"
+		"pln_branchbank_cash_cnc_01"
 	}
 	self.jobs.branchbank_cash.crimenet_videos = {
 		"cn_branchbank1",
@@ -1300,13 +1263,7 @@ function NarrativeTweakData:init()
 	self.jobs.branchbank_gold.briefing_event = "pln_branchbank_gold_brf_speak"
 	self.jobs.branchbank_gold.debrief_event = nil
 	self.jobs.branchbank_gold.crimenet_callouts = {
-		"pln_branchbank_gold_cnc_01",
-		"pln_branchbank_gold_cnc_02",
-		"pln_branchbank_gold_cnc_03",
-		"pln_branchbank_gold_cnc_04",
-		"pln_branchbank_gold_cnc_05",
-		"pln_branchbank_gold_cnc_06",
-		"pln_branchbank_gold_cnc_07"
+		"pln_branchbank_gold_cnc_01"
 	}
 	self.jobs.branchbank_gold.crimenet_videos = {
 		"cn_branchbank1",
@@ -1403,9 +1360,7 @@ function NarrativeTweakData:init()
 	self.jobs.election_day.briefing_event = "elp_election_brf"
 	self.jobs.election_day.debrief_event = "elp_election_debrief"
 	self.jobs.election_day.crimenet_callouts = {
-		"elp_election_cmc_01",
-		"elp_election_cmc_02",
-		"elp_election_cmc_03"
+		"elp_election_cmc_01"
 	}
 	self.jobs.election_day.crimenet_videos = {
 		"cn_elcday1",
@@ -1570,18 +1525,18 @@ function NarrativeTweakData:init()
 	self.jobs.arm_cro.spawn_chance_multiplier = 0.5
 	self.jobs.arm_cro.contract_visuals = {}
 	self.jobs.arm_cro.contract_visuals.min_mission_xp = {
-		8000,
-		8000,
-		8000,
-		8000,
-		8000
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
 	}
 	self.jobs.arm_cro.contract_visuals.max_mission_xp = {
-		8000,
-		8000,
-		8000,
-		8000,
-		8000
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
 	}
 	self.jobs.arm_cro_prof = deep_clone(self.jobs.arm_cro)
 	self.jobs.arm_cro_prof.jc = 30
@@ -1637,18 +1592,18 @@ function NarrativeTweakData:init()
 	self.jobs.arm_und.spawn_chance_multiplier = 0.5
 	self.jobs.arm_und.contract_visuals = {}
 	self.jobs.arm_und.contract_visuals.min_mission_xp = {
-		8000,
-		8000,
-		8000,
-		8000,
-		8000
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
 	}
 	self.jobs.arm_und.contract_visuals.max_mission_xp = {
-		8000,
-		8000,
-		8000,
-		8000,
-		8000
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
 	}
 	self.jobs.arm_und_prof = deep_clone(self.jobs.arm_und)
 	self.jobs.arm_und_prof.jc = 30
@@ -1704,18 +1659,18 @@ function NarrativeTweakData:init()
 	self.jobs.arm_hcm.spawn_chance_multiplier = 0.5
 	self.jobs.arm_hcm.contract_visuals = {}
 	self.jobs.arm_hcm.contract_visuals.min_mission_xp = {
-		8000,
-		8000,
-		8000,
-		8000,
-		8000
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
 	}
 	self.jobs.arm_hcm.contract_visuals.max_mission_xp = {
-		8000,
-		8000,
-		8000,
-		8000,
-		8000
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
 	}
 	self.jobs.arm_hcm_prof = deep_clone(self.jobs.arm_hcm)
 	self.jobs.arm_hcm_prof.jc = 30
@@ -1771,18 +1726,18 @@ function NarrativeTweakData:init()
 	self.jobs.arm_par.spawn_chance_multiplier = 0.5
 	self.jobs.arm_par.contract_visuals = {}
 	self.jobs.arm_par.contract_visuals.min_mission_xp = {
-		8000,
-		8000,
-		8000,
-		8000,
-		8000
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
 	}
 	self.jobs.arm_par.contract_visuals.max_mission_xp = {
-		8000,
-		8000,
-		8000,
-		8000,
-		8000
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
 	}
 	self.jobs.arm_par_prof = deep_clone(self.jobs.arm_par)
 	self.jobs.arm_par_prof.jc = 40
@@ -1838,18 +1793,18 @@ function NarrativeTweakData:init()
 	self.jobs.arm_fac.spawn_chance_multiplier = 0.5
 	self.jobs.arm_fac.contract_visuals = {}
 	self.jobs.arm_fac.contract_visuals.min_mission_xp = {
-		8000,
-		8000,
-		8000,
-		8000,
-		8000
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
 	}
 	self.jobs.arm_fac.contract_visuals.max_mission_xp = {
-		8000,
-		8000,
-		8000,
-		8000,
-		8000
+		12000,
+		12000,
+		12000,
+		12000,
+		12000
 	}
 	self.jobs.arm_fac_prof = deep_clone(self.jobs.arm_fac)
 	self.jobs.arm_fac_prof.jc = 30
@@ -1873,9 +1828,7 @@ function NarrativeTweakData:init()
 	self.jobs.arm_for.briefing_event = "pln_tr1b_cbf_01"
 	self.jobs.arm_for.debrief_event = nil
 	self.jobs.arm_for.crimenet_callouts = {
-		"pln_tr1b_cnc_01_01",
-		"pln_tr1b_cnc_01_02",
-		"pln_tr1b_cnc_01_03"
+		"pln_tr1b_cnc_01_01"
 	}
 	self.jobs.arm_for.crimenet_videos = {
 		"cn_jewel1",
@@ -1906,11 +1859,11 @@ function NarrativeTweakData:init()
 	self.jobs.arm_for.dlc = "armored_transport"
 	self.jobs.arm_for.contract_visuals = {}
 	self.jobs.arm_for.contract_visuals.min_mission_xp = {
-		16000,
-		16000,
-		16000,
-		16000,
-		16000
+		20200,
+		20200,
+		20200,
+		20200,
+		20200
 	}
 	self.jobs.arm_for.contract_visuals.max_mission_xp = {
 		36000,
@@ -1997,9 +1950,7 @@ function NarrativeTweakData:init()
 	self.jobs.family.briefing_event = "pln_fj1_cbf_01"
 	self.jobs.family.debrief_event = nil
 	self.jobs.family.crimenet_callouts = {
-		"pln_fj1_cnc_01_01",
-		"pln_fj1_cnc_01_02",
-		"pln_fj1_cnc_01_03"
+		"pln_fj1_cnc_01_01"
 	}
 	self.jobs.family.crimenet_videos = {
 		"cn_jewel1",
@@ -2072,8 +2023,6 @@ function NarrativeTweakData:init()
 	self.jobs.big.briefing_event = "gus_bb1_cbf_01"
 	self.jobs.big.debrief_event = "gus_bb1_debrief_01"
 	self.jobs.big.crimenet_callouts = {
-		"gus_bb1_cnc_01",
-		"gus_bb1_cnc_01",
 		"gus_bb1_cnc_01"
 	}
 	self.jobs.big.crimenet_videos = {
@@ -2098,18 +2047,18 @@ function NarrativeTweakData:init()
 	self.jobs.big.dlc = "big_bank"
 	self.jobs.big.contract_visuals = {}
 	self.jobs.big.contract_visuals.min_mission_xp = {
-		24000,
-		24000,
-		24000,
-		24000,
-		24000
+		34000,
+		34000,
+		34000,
+		34000,
+		34000
 	}
 	self.jobs.big.contract_visuals.max_mission_xp = {
-		38000,
-		38000,
-		38000,
-		38000,
-		38000
+		45000,
+		45000,
+		45000,
+		45000,
+		45000
 	}
 	self.jobs.big_prof = deep_clone(self.jobs.big)
 	self.jobs.big_prof.jc = 60
@@ -2140,9 +2089,7 @@ function NarrativeTweakData:init()
 		self.jobs.roberts.briefing_event = "pln_cs1_cbf_01"
 		self.jobs.roberts.debrief_event = nil
 		self.jobs.roberts.crimenet_callouts = {
-			"pln_cs1_cnc_01",
-			"pln_cs1_cnc_02",
-			"pln_cs1_cnc_03"
+			"pln_cs1_cnc_01"
 		}
 		self.jobs.roberts.crimenet_videos = {
 			"cn_jewel1",
@@ -2197,44 +2144,6 @@ function NarrativeTweakData:init()
 			140000
 		}
 	end
-	self.jobs.haunted = {}
-	self.jobs.haunted.name_id = "heist_haunted"
-	self.jobs.haunted.briefing_id = "heist_haunted_crimenet"
-	self.jobs.haunted.contact = "wip"
-	self.jobs.haunted.region = "street"
-	self.jobs.haunted.jc = 10
-	self.jobs.haunted.chain = {
-		{
-			level_id = "haunted",
-			type_id = "heist_type_assault",
-			type = "d"
-		}
-	}
-	self.jobs.haunted.briefing_event = nil
-	self.jobs.haunted.debrief_event = nil
-	self.jobs.haunted.crimenet_videos = {
-		"cn_branchbank1",
-		"cn_branchbank2",
-		"cn_branchbank3"
-	}
-	self.jobs.haunted.payout = {
-		10000,
-		20000,
-		30000,
-		40000,
-		80000
-	}
-	self.jobs.haunted_prof = deep_clone(self.jobs.haunted)
-	self.jobs.haunted_prof.jc = 40
-	self.jobs.haunted_prof.professional = true
-	self.jobs.haunted_prof.region = "professional"
-	self.jobs.haunted_prof.payout = {
-		10000,
-		20000,
-		30000,
-		40000,
-		80000
-	}
 	self.jobs.kosugi = {}
 	self.jobs.kosugi.name_id = "heist_kosugi"
 	self.jobs.kosugi.briefing_id = "heist_kosugi_crimenet"
@@ -2251,8 +2160,6 @@ function NarrativeTweakData:init()
 	self.jobs.kosugi.briefing_event = "pln_ko1_cbf_01"
 	self.jobs.kosugi.debrief_event = nil
 	self.jobs.kosugi.crimenet_callouts = {
-		"pln_ko1_cnc_01",
-		"pln_ko1_cnc_01",
 		"pln_ko1_cnc_01"
 	}
 	self.jobs.kosugi.crimenet_videos = {
@@ -2290,18 +2197,18 @@ function NarrativeTweakData:init()
 	}
 	self.jobs.kosugi.contract_visuals = {}
 	self.jobs.kosugi.contract_visuals.min_mission_xp = {
-		1000,
-		1000,
-		1000,
-		1000,
-		1000
+		5500,
+		5500,
+		5500,
+		5500,
+		5500
 	}
 	self.jobs.kosugi.contract_visuals.max_mission_xp = {
-		5500,
-		5500,
-		5500,
-		5500,
-		5000
+		22000,
+		22000,
+		22000,
+		22000,
+		22000
 	}
 	self.jobs.kosugi_prof = deep_clone(self.jobs.kosugi)
 	self.jobs.kosugi_prof.jc = 40
@@ -2335,8 +2242,6 @@ function NarrativeTweakData:init()
 	self.jobs.mia.briefing_event = "dentist_hm1_cnc_01"
 	self.jobs.mia.debrief_event = "dentist_hm1_debrief_01_01"
 	self.jobs.mia.crimenet_callouts = {
-		"dentist_hm1_cnc_01",
-		"dentist_hm1_cnc_01",
 		"dentist_hm1_cnc_01"
 	}
 	self.jobs.mia.crimenet_videos = {
@@ -2427,7 +2332,6 @@ function NarrativeTweakData:init()
 	self.jobs.gallery.briefing_event = "pln_art_cbf_01"
 	self.jobs.gallery.debrief_event = nil
 	self.jobs.gallery.crimenet_callouts = {
-		"pln_art_cnc_02",
 		"pln_art_cnc_01"
 	}
 	self.jobs.gallery.crimenet_videos = {
@@ -2586,9 +2490,7 @@ function NarrativeTweakData:init()
 	self.jobs.pines.briefing_event = "vld_cp1_cbf_01"
 	self.jobs.pines.debrief_event = nil
 	self.jobs.pines.crimenet_callouts = {
-		"vld_cp1_cnc_02",
-		"vld_cp1_cnc_01",
-		"vld_cp1_cnc_03"
+		"vld_cp1_cnc_01"
 	}
 	self.jobs.pines.crimenet_videos = {
 		"cn_ukr1",
@@ -2676,9 +2578,7 @@ function NarrativeTweakData:init()
 		"dentist_hd1_debrief_02"
 	}
 	self.jobs.mus.crimenet_callouts = {
-		"dentist_hd1_cnc_01_01",
-		"dentist_hd1_cnc_01_02",
-		"dentist_hd1_cnc_01_03"
+		"dentist_hd1_cnc_01_01"
 	}
 	self.jobs.mus.crimenet_videos = {
 		"cn_jewel1",
@@ -2702,18 +2602,18 @@ function NarrativeTweakData:init()
 	}
 	self.jobs.mus.contract_visuals = {}
 	self.jobs.mus.contract_visuals.min_mission_xp = {
-		16000,
-		16000,
-		16000,
-		16000,
-		16000
+		17000,
+		17000,
+		17000,
+		17000,
+		17000
 	}
 	self.jobs.mus.contract_visuals.max_mission_xp = {
-		32000,
-		32000,
-		32000,
-		32000,
-		32000
+		36000,
+		36000,
+		36000,
+		36000,
+		36000
 	}
 	self.jobs.mus_prof = deep_clone(self.jobs.mus)
 	self.jobs.mus_prof.jc = 70
@@ -2757,9 +2657,7 @@ function NarrativeTweakData:init()
 	self.jobs.cage.briefing_event = "pln_ch1_cbf_01"
 	self.jobs.cage.debrief_event = "pln_ch1_end_01"
 	self.jobs.cage.crimenet_callouts = {
-		"pln_ch1_cnc_01_01",
-		"pln_ch1_cnc_01_02",
-		"pln_ch1_cnc_01_03"
+		"pln_ch1_cnc_01_01"
 	}
 	self.jobs.cage.crimenet_videos = {
 		"cn_jewel1",
@@ -2789,11 +2687,11 @@ function NarrativeTweakData:init()
 		10000
 	}
 	self.jobs.cage.contract_visuals.max_mission_xp = {
-		10000,
-		10000,
-		10000,
-		10000,
-		10000
+		13000,
+		13000,
+		13000,
+		13000,
+		13000
 	}
 	self.jobs.cage_prof = deep_clone(self.jobs.cage)
 	self.jobs.cage_prof.jc = 70
@@ -2837,9 +2735,7 @@ function NarrativeTweakData:init()
 	self.jobs.hox_3.briefing_event = "hoxton_hb3_cbf_01"
 	self.jobs.hox_3.debrief_event = "hoxton_hb3_debrief_01"
 	self.jobs.hox_3.crimenet_callouts = {
-		"hoxton_hb3_cnc_01_01",
-		"hoxton_hb3_cnc_01_02",
-		"hoxton_hb3_cnc_01_03"
+		"hoxton_hb3_cnc_01_01"
 	}
 	self.jobs.hox_3.crimenet_videos = {
 		"cn_jewel1",
@@ -2895,8 +2791,6 @@ function NarrativeTweakData:init()
 		"butcher_cr1_debrief_02"
 	}
 	self.jobs.crojob1.crimenet_callouts = {
-		"butcher_cr1_cnc_01",
-		"butcher_cr1_cnc_01",
 		"butcher_cr1_cnc_01"
 	}
 	self.jobs.crojob1.crimenet_videos = {
@@ -2928,18 +2822,18 @@ function NarrativeTweakData:init()
 	self.jobs.crojob1.dlc = "the_bomb"
 	self.jobs.crojob1.contract_visuals = {}
 	self.jobs.crojob1.contract_visuals.min_mission_xp = {
-		10000,
-		10000,
-		10000,
-		10000,
-		10000
+		18000,
+		18000,
+		18000,
+		18000,
+		18000
 	}
 	self.jobs.crojob1.contract_visuals.max_mission_xp = {
-		15000,
-		15000,
-		15000,
-		15000,
-		15000
+		33500,
+		33500,
+		33500,
+		33500,
+		33500
 	}
 	self.jobs.crojob1_prof = deep_clone(self.jobs.crojob1)
 	self.jobs.crojob1_prof.jc = 70
@@ -2983,8 +2877,6 @@ function NarrativeTweakData:init()
 	self.jobs.crojob_wrapper.briefing_event = "butcher_cr1_cbf_03"
 	self.jobs.crojob_wrapper.debrief_event = "butcher_cr1_debrief_03"
 	self.jobs.crojob_wrapper.crimenet_callouts = {
-		"butcher_cr1_cnc_01",
-		"butcher_cr1_cnc_01",
 		"butcher_cr1_cnc_01"
 	}
 	self.jobs.crojob_wrapper.crimenet_videos = {
@@ -3015,18 +2907,18 @@ function NarrativeTweakData:init()
 	}
 	self.jobs.crojob_wrapper.contract_visuals = {}
 	self.jobs.crojob_wrapper.contract_visuals.min_mission_xp = {
-		20000,
-		20000,
-		20000,
-		20000,
-		20000
+		34000,
+		34000,
+		34000,
+		34000,
+		34000
 	}
 	self.jobs.crojob_wrapper.contract_visuals.max_mission_xp = {
-		20000,
-		20000,
-		20000,
-		20000,
-		20000
+		41500,
+		41500,
+		41500,
+		41500,
+		41500
 	}
 	self.jobs.crojob_wrapper.dlc = "the_bomb"
 	self.jobs.shoutout_raid = {}
@@ -3045,9 +2937,7 @@ function NarrativeTweakData:init()
 	self.jobs.shoutout_raid.briefing_event = "vld_ko1b_cbf_01_01"
 	self.jobs.shoutout_raid.debrief_event = nil
 	self.jobs.shoutout_raid.crimenet_callouts = {
-		"vld_ko1b_cnc_01_01",
-		"vld_ko1b_cnc_01_02",
-		"vld_ko1b_cnc_01_03"
+		"vld_ko1b_cnc_01_01"
 	}
 	self.jobs.shoutout_raid.crimenet_videos = {
 		"cn_jewel1",
@@ -3077,11 +2967,11 @@ function NarrativeTweakData:init()
 		20000
 	}
 	self.jobs.shoutout_raid.contract_visuals.max_mission_xp = {
-		36000,
-		36000,
-		36000,
-		36000,
-		36000
+		34000,
+		34000,
+		34000,
+		34000,
+		34000
 	}
 	self.jobs.crojob2 = {}
 	self.jobs.crojob2.package = "packages/job_crojob"
@@ -3118,9 +3008,7 @@ function NarrativeTweakData:init()
 	self.jobs.arena.briefing_event = "pln_al1_cbf_01_01"
 	self.jobs.arena.debrief_event = nil
 	self.jobs.arena.crimenet_callouts = {
-		"pln_al1_cnc_01_01",
-		"pln_al1_cnc_01_02",
-		"pln_al1_cnc_01_03"
+		"pln_al1_cnc_01_01"
 	}
 	self.jobs.arena.crimenet_videos = {
 		"cn_branchbank1",
@@ -3189,9 +3077,7 @@ function NarrativeTweakData:init()
 		"Play_pln_ca1_intro_02"
 	}
 	self.jobs.kenaz.crimenet_callouts = {
-		"dentist_ca1_cnc_01_01",
-		"dentist_ca1_cnc_01_02",
-		"dentist_ca1_cnc_01_03"
+		"dentist_ca1_cnc_01_01"
 	}
 	self.jobs.kenaz.crimenet_videos = {
 		"cn_big1",

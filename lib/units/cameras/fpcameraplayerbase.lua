@@ -8,6 +8,7 @@ function FPCameraPlayerBase:init(unit)
 	self._unit = unit
 	unit:set_timer(managers.player:player_timer())
 	unit:set_animation_timer(managers.player:player_timer())
+	unit:set_approximate_orientation(false)
 	self._anims_enabled = true
 	self._obj_eye = self._unit:orientation_object()
 	self._weap_align = self._unit:get_object(Idstring("right_weapon_align"))
@@ -288,7 +289,8 @@ function FPCameraPlayerBase:_update_rot(axis)
 	local stick_input_x, stick_input_y = self._look_function(axis, self._input.look_multiplier, dt)
 	local look_polar_spin = data.spin - stick_input_x
 	local look_polar_pitch = math.clamp(data.pitch + stick_input_y, -85, 85)
-	if self._limits then
+	local player_state = managers.player:current_state()
+	if self._limits and player_state ~= "bipod" and player_state ~= "driving" then
 		if self._limits.spin then
 			local d = (look_polar_spin - self._limits.spin.mid) / self._limits.spin.offset
 			look_polar_spin = data.spin - math.lerp(stick_input_x, 0, math.abs(d))
@@ -297,6 +299,13 @@ function FPCameraPlayerBase:_update_rot(axis)
 			local d = math.abs((look_polar_pitch - self._limits.pitch.mid) / self._limits.pitch.offset)
 			look_polar_pitch = data.pitch + math.lerp(stick_input_y, 0, math.abs(d))
 			look_polar_pitch = math.clamp(look_polar_pitch, -85, 85)
+		end
+	elseif self._limits and (player_state == "bipod" or player_state == "driving") then
+		if self._limits.spin then
+			look_polar_spin = math.clamp(look_polar_spin, self._limits.spin.mid - self._limits.spin.offset, self._limits.spin.mid + self._limits.spin.offset)
+		end
+		if self._limits.pitch then
+			look_polar_pitch = math.clamp(look_polar_pitch, self._limits.pitch.mid - self._limits.pitch.offset, self._limits.pitch.mid + self._limits.pitch.offset)
 		end
 	end
 	if not self._limits or not self._limits.spin then
@@ -340,7 +349,6 @@ function FPCameraPlayerBase:_update_rot(axis)
 	mrotation.multiply(new_shoulder_rot, self._output_data.rotation)
 	mrotation.multiply(new_shoulder_rot, self._shoulder_stance.rotation)
 	mrotation.multiply(new_shoulder_rot, self._vel_overshot.rotation)
-	local player_state = managers.player:current_state()
 	if player_state == "driving" then
 		self:_set_camera_position_in_vehicle()
 	else
@@ -655,6 +663,9 @@ function FPCameraPlayerBase:set_stance_instant(stance_name)
 		self._vel_overshot.pivot = mvector3.copy(new_overshot.pivot)
 	end
 	self:set_stance_fov_instant(stance_name)
+end
+function FPCameraPlayerBase:is_stance_done()
+	return not self._shoulder_stance.transition and not self._head_stance.transition and not self._vel_overshot.transition
 end
 function FPCameraPlayerBase:set_fov_instant(new_fov)
 	if new_fov then

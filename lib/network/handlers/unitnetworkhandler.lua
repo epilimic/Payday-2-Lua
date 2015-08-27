@@ -825,52 +825,58 @@ function UnitNetworkHandler:revive_player(revive_health_level, revive_damage_red
 	end
 end
 function UnitNetworkHandler:start_revive_player(timer, sender)
-	if not self._verify_gamestate(self._gamestate_filter.downed) or not self._verify_sender(sender) then
+	local peer = self._verify_sender(sender)
+	if not self._verify_gamestate(self._gamestate_filter.downed) or not peer then
 		return
 	end
 	local player = managers.player:player_unit()
 	if alive(player) then
-		player:character_damage():pause_downed_timer(timer)
+		player:character_damage():pause_downed_timer(timer, peer:id())
 	end
 end
 function UnitNetworkHandler:interupt_revive_player(sender)
-	if not self._verify_gamestate(self._gamestate_filter.downed) or not self._verify_sender(sender) then
+	local peer = self._verify_sender(sender)
+	if not self._verify_gamestate(self._gamestate_filter.downed) or not peer then
 		return
 	end
 	local player = managers.player:player_unit()
 	if alive(player) then
-		player:character_damage():unpause_downed_timer()
+		player:character_damage():unpause_downed_timer(peer:id())
 	end
 end
 function UnitNetworkHandler:start_free_player(sender)
-	if not self._verify_gamestate(self._gamestate_filter.arrested) or not self._verify_sender(sender) then
+	local peer = self._verify_sender(sender)
+	if not self._verify_gamestate(self._gamestate_filter.arrested) or not peer then
 		return
 	end
 	local player = managers.player:player_unit()
 	if alive(player) then
-		player:character_damage():pause_arrested_timer()
+		player:character_damage():pause_arrested_timer(peer:id())
 	end
 end
 function UnitNetworkHandler:interupt_free_player(sender)
-	if not self._verify_gamestate(self._gamestate_filter.arrested) or not self._verify_sender(sender) then
+	local peer = self._verify_sender(sender)
+	if not self._verify_gamestate(self._gamestate_filter.arrested) or not peer then
 		return
 	end
 	local player = managers.player:player_unit()
 	if alive(player) then
-		player:character_damage():unpause_arrested_timer()
+		player:character_damage():unpause_arrested_timer(peer:id())
 	end
 end
 function UnitNetworkHandler:pause_arrested_timer(unit, sender)
-	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not self._verify_character_and_sender(unit, sender) then
+	local peer = self._verify_sender(sender)
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not peer or not self._verify_character(unit) then
 		return
 	end
-	unit:character_damage():pause_arrested_timer()
+	unit:character_damage():pause_arrested_timer(peer:id())
 end
 function UnitNetworkHandler:unpause_arrested_timer(unit, sender)
-	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not self._verify_character_and_sender(unit, sender) then
+	local peer = self._verify_sender(sender)
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not peer or not self._verify_character(unit) then
 		return
 	end
-	unit:character_damage():unpause_arrested_timer()
+	unit:character_damage():unpause_arrested_timer(peer:id())
 end
 function UnitNetworkHandler:revive_unit(unit, reviving_unit)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not self._verify_character(unit) or not alive(reviving_unit) then
@@ -879,16 +885,18 @@ function UnitNetworkHandler:revive_unit(unit, reviving_unit)
 	unit:interaction():interact(reviving_unit)
 end
 function UnitNetworkHandler:pause_bleed_out(unit, sender)
-	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not self._verify_character_and_sender(unit, sender) then
+	local peer = self._verify_sender(sender)
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not peer or not self._verify_character(unit) then
 		return
 	end
-	unit:character_damage():pause_bleed_out()
+	unit:character_damage():pause_bleed_out(peer:id())
 end
 function UnitNetworkHandler:unpause_bleed_out(unit, sender)
-	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not self._verify_character_and_sender(unit, sender) then
+	local peer = self._verify_sender(sender)
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not peer or not self._verify_character(unit) then
 		return
 	end
-	unit:character_damage():unpause_bleed_out()
+	unit:character_damage():unpause_bleed_out(peer:id())
 end
 function UnitNetworkHandler:interaction_set_waypoint_paused(unit, paused, sender)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not self._verify_sender(sender) then

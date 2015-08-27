@@ -427,6 +427,9 @@ end
 function GenericDLCManager:has_turtles()
 	return Global.dlc_manager.all_dlc_data.turtles and Global.dlc_manager.all_dlc_data.turtles.verified
 end
+function GenericDLCManager:has_dragon()
+	return Global.dlc_manager.all_dlc_data.dragon and Global.dlc_manager.all_dlc_data.dragon.verified
+end
 function GenericDLCManager:has_xmas_soundtrack()
 	return Global.dlc_manager.all_dlc_data.xmas_soundtrack and Global.dlc_manager.all_dlc_data.xmas_soundtrack.verified
 end
@@ -1211,6 +1214,7 @@ function WINDLCManager:init()
 			arena = {app_id = "366660", no_install = true},
 			kenaz = {app_id = "374300", no_install = true},
 			turtles = {app_id = "384021", no_install = true},
+			dragon = {app_id = "384020", no_install = true},
 			xmas_soundtrack = {app_id = "267381", no_install = true},
 			bsides_soundtrack = {app_id = "368870", no_install = true},
 			twitch_pack = {app_id = "306110", no_install = true},

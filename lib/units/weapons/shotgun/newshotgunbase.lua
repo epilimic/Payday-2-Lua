@@ -176,10 +176,12 @@ function NewShotgunBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul, s
 			result.rays = #col_rays > 0 and col_rays
 		end
 	end
-	managers.statistics:shot_fired({
-		hit = false,
-		weapon_unit = self._unit
-	})
+	if not shoot_through_data then
+		managers.statistics:shot_fired({
+			hit = false,
+			weapon_unit = self._unit
+		})
+	end
 	for _, _ in pairs(hit_enemies) do
 		managers.statistics:shot_fired({
 			hit = true,

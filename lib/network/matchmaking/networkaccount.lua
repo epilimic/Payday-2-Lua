@@ -33,3 +33,5 @@ function NetworkAccount:_load_globals()
 end
 function NetworkAccount:_save_globals()
 end
+function NetworkAccount:refresh()
+end

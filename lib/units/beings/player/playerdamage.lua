@@ -830,15 +830,29 @@ function PlayerDamage:on_downed()
 	managers.hud:on_downed()
 	self:_stop_tinnitus()
 end
-function PlayerDamage:pause_downed_timer(timer)
+function PlayerDamage:get_paused_counter_name_by_peer(peer_id)
+	return self._paused_counter_name_by_peer_map and self._paused_counter_name_by_peer_map[peer_id]
+end
+function PlayerDamage:set_peer_paused_counter(peer_id, counter_name)
+	if peer_id then
+		self._paused_counter_name_by_peer_map = self._paused_counter_name_by_peer_map or {}
+		self._paused_counter_name_by_peer_map[peer_id] = counter_name
+		if not next(self._paused_counter_name_by_peer_map) then
+			self._paused_counter_name_by_peer_map = nil
+		end
+	end
+end
+function PlayerDamage:pause_downed_timer(timer, peer_id)
 	self._downed_paused_counter = self._downed_paused_counter + 1
+	self:set_peer_paused_counter(peer_id, "downed")
 	if self._downed_paused_counter == 1 then
 		managers.hud:pd_pause_timer()
 		managers.hud:pd_start_progress(0, timer or tweak_data.interaction.revive.timer, "debug_interact_being_revived", "interaction_help")
 	end
 end
-function PlayerDamage:unpause_downed_timer()
+function PlayerDamage:unpause_downed_timer(peer_id)
 	self._downed_paused_counter = self._downed_paused_counter - 1
+	self:set_peer_paused_counter(peer_id, nil)
 	if self._downed_paused_counter == 0 then
 		managers.hud:pd_unpause_timer()
 		managers.hud:pd_stop_progress()
@@ -864,21 +878,23 @@ function PlayerDamage:on_arrested()
 	})
 	managers.hud:on_arrested()
 end
-function PlayerDamage:pause_arrested_timer()
+function PlayerDamage:pause_arrested_timer(peer_id)
 	if not self._arrested_timer or self._arrested_timer <= 0 then
 		return
 	end
 	self._arrested_paused_counter = self._arrested_paused_counter + 1
+	self:set_peer_paused_counter(peer_id, "arrested")
 	if self._arrested_paused_counter == 1 then
 		managers.hud:pd_pause_timer()
 		managers.hud:pd_start_progress(0, tweak_data.interaction.free.timer, "debug_interact_being_freed", "interaction_free")
 	end
 end
-function PlayerDamage:unpause_arrested_timer()
+function PlayerDamage:unpause_arrested_timer(peer_id)
 	if not self._arrested_timer or self._arrested_timer <= 0 then
 		return
 	end
 	self._arrested_paused_counter = self._arrested_paused_counter - 1
+	self:set_peer_paused_counter(peer_id, nil)
 	if self._arrested_paused_counter == 0 then
 		managers.hud:pd_unpause_timer()
 		managers.hud:pd_stop_progress()

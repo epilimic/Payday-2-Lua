@@ -1,3 +1,4 @@
+require("lib/units/beings/player/PlayerDamage")
 TeamAIDamage = TeamAIDamage or class()
 TeamAIDamage._all_event_types = {
 	"bleedout",
@@ -360,8 +361,10 @@ function TeamAIDamage:_check_fatal()
 		PlayerMovement.set_attention_settings(self._unit:brain(), nil, "team_AI")
 	end
 end
-function TeamAIDamage:pause_bleed_out()
+TeamAIDamage.get_paused_counter_name_by_peer = PlayerDamage.get_paused_counter_name_by_peer
+function TeamAIDamage:pause_bleed_out(peer_id)
 	self._bleed_out_paused_count = self._bleed_out_paused_count + 1
+	PlayerDamage.set_peer_paused_counter(self, peer_id, "bleed_out")
 	if (self._bleed_out or self._fatal) and self._bleed_out_paused_count == 1 then
 		self._to_dead_remaining_t = self._to_dead_t - TimerManager:game():time()
 		if self._to_dead_remaining_t < 0 then
@@ -374,8 +377,9 @@ function TeamAIDamage:pause_bleed_out()
 		self._to_dead_t = nil
 	end
 end
-function TeamAIDamage:unpause_bleed_out()
+function TeamAIDamage:unpause_bleed_out(peer_id)
 	self._bleed_out_paused_count = self._bleed_out_paused_count - 1
+	PlayerDamage.set_peer_paused_counter(self, peer_id, nil)
 	if (self._bleed_out or self._fatal) and self._bleed_out_paused_count == 0 then
 		self._to_dead_t = TimerManager:game():time() + self._to_dead_remaining_t
 		if Network:is_server() and not self._dead and not self._to_dead_clbk_id then
@@ -397,11 +401,13 @@ function TeamAIDamage:on_arrested()
 		managers.groupai:state():report_criminal_downed(self._unit)
 	end
 end
-function TeamAIDamage:pause_arrested_timer()
+function TeamAIDamage:pause_arrested_timer(peer_id)
 	self._arrested_paused_counter = self._arrested_paused_counter + 1
+	PlayerDamage.set_peer_paused_counter(self, peer_id, "arrested")
 end
-function TeamAIDamage:unpause_arrested_timer()
+function TeamAIDamage:unpause_arrested_timer(peer_id)
 	self._arrested_paused_counter = self._arrested_paused_counter - 1
+	PlayerDamage.set_peer_paused_counter(self, peer_id, nil)
 end
 function TeamAIDamage:_on_hurt()
 	if self._to_incapacitated_clbk_id then

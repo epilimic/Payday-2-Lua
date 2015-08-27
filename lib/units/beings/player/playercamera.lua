@@ -128,6 +128,19 @@ end
 function PlayerCamera:forward()
 	return self._m_cam_fwd
 end
+local camera_mvec = Vector3()
+local reticle_mvec = Vector3()
+function PlayerCamera:position_with_shake()
+	self._camera_object:m_position(camera_mvec)
+	return camera_mvec
+end
+function PlayerCamera:forward_with_shake_toward_reticle(reticle_obj)
+	reticle_obj:m_position(reticle_mvec)
+	self._camera_object:m_position(camera_mvec)
+	mvector3.subtract(reticle_mvec, camera_mvec)
+	mvector3.normalize(reticle_mvec)
+	return reticle_mvec
+end
 function PlayerCamera:set_position(pos)
 	self._camera_controller:set_camera(pos)
 	mvector3.set(self._m_cam_pos, pos)

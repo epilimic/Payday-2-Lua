@@ -339,7 +339,19 @@ function NewRaycastWeaponBase:_update_stats_values()
 	self._scopes = managers.weapon_factory:get_parts_from_weapon_by_type_or_perk("scope", self._factory_id, self._blueprint)
 	self._can_highlight = managers.weapon_factory:has_perk("highlight", self._factory_id, self._blueprint)
 	self:_check_second_sight()
+	self:_check_reticle_obj()
 	self:replenish()
+end
+function NewRaycastWeaponBase:_check_reticle_obj()
+	self._reticle_obj = nil
+	local part = managers.weapon_factory:get_part_from_weapon_by_type("sight", self._parts)
+	if part then
+		local part_id = managers.weapon_factory:get_part_id_from_weapon_by_type("sight", self._blueprint)
+		local part_tweak = tweak_data.weapon.factory.parts[part_id]
+		if part_tweak and part_tweak.reticle_obj then
+			self._reticle_obj = part.unit:get_object(Idstring(part_tweak.reticle_obj))
+		end
+	end
 end
 function NewRaycastWeaponBase:_check_second_sight()
 	self._second_sight_data = nil
@@ -415,6 +427,9 @@ function NewRaycastWeaponBase:movement_penalty()
 end
 function NewRaycastWeaponBase:armor_piercing_chance()
 	return self._armor_piercing_chance or 0
+end
+function NewRaycastWeaponBase:get_reticle_obj()
+	return self._reticle_obj
 end
 function NewRaycastWeaponBase:stance_mod()
 	if not self._blueprint or not self._factory_id then

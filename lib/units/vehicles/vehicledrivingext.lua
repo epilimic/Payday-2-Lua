@@ -162,8 +162,13 @@ function VehicleDrivingExt:update(unit, t, dt)
 		self:_catch_loot()
 	end
 	for _, seat in pairs(self._seats) do
-		if alive(seat.occupant) and seat.occupant:brain() and seat.occupant:character_damage():is_downed() then
-			self:_evacuate_seat(seat)
+		if alive(seat.occupant) and seat.occupant:brain() then
+			if seat.occupant:character_damage():is_downed() then
+				self:_evacuate_seat(seat)
+			else
+				local pos = seat.third_object:position()
+				seat.occupant:movement():set_position(pos)
+			end
 		end
 	end
 	self._current_state:update(t, dt)

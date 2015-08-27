@@ -39,6 +39,7 @@ function CharacterTweakData:init(tweak_data)
 	self:_init_jacket(presets)
 	self:_init_bonnie(presets)
 	self:_init_sokol(presets)
+	self:_init_dragon(presets)
 	self:_init_old_hoxton_mission(presets)
 end
 function CharacterTweakData:_init_security(presets)
@@ -1558,6 +1559,26 @@ function CharacterTweakData:_init_sokol(presets)
 	self.sokol.weapon_voice = "3"
 	self.sokol.access = "teamAI1"
 	self.sokol.arrest = {
+		timeout = 240,
+		aggression_timeout = 6,
+		arrest_timeout = 240
+	}
+end
+function CharacterTweakData:_init_dragon(presets)
+	self.dragon = {}
+	self.dragon.damage = presets.gang_member_damage
+	self.dragon.weapon = deep_clone(presets.weapon.gang_member)
+	self.dragon.weapon.weapons_of_choice = {
+		primary = Idstring("units/payday2/weapons/wpn_npc_m4/wpn_npc_m4"),
+		secondary = Idstring("units/payday2/weapons/wpn_npc_mac11/wpn_npc_mac11")
+	}
+	self.dragon.detection = presets.detection.gang_member
+	self.dragon.move_speed = presets.move_speed.fast
+	self.dragon.crouch_move = false
+	self.dragon.speech_prefix = "rb12"
+	self.dragon.weapon_voice = "3"
+	self.dragon.access = "teamAI1"
+	self.dragon.arrest = {
 		timeout = 240,
 		aggression_timeout = 6,
 		arrest_timeout = 240
