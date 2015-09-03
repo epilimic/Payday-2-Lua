@@ -669,9 +669,9 @@ function UpgradesTweakData:_init_pd2_values()
 	self.values.player.damage_to_hot_extra_ticks = {2}
 	self.values.player.armor_piercing_chance = {0.1, 0.3}
 	self.values.player.armor_regen_damage_health_ratio_multiplier = {
-		0.8,
-		0.6,
-		0.4
+		0.2,
+		0.4,
+		0.6
 	}
 	self.values.player.movement_speed_damage_health_ratio_multiplier = {0.2}
 	self.values.player.armor_regen_damage_health_ratio_threshold_multiplier = {2}

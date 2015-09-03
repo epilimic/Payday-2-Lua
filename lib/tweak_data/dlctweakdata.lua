@@ -3827,16 +3827,6 @@ function DLCTweakData:init(tweak_data)
 			amount = 1
 		}
 	}
-	self.bobblehead = {}
-	self.bobblehead.dlc = "has_bobblehead"
-	self.bobblehead.content = {}
-	self.bobblehead.content.loot_drops = {
-		{
-			type_items = "masks",
-			item_entry = "bobblehead_dozer",
-			amount = 1
-		}
-	}
 	self.dragon = {}
 	self.dragon.dlc = "has_dragon"
 	self.dragon.content = {}
@@ -3869,6 +3859,26 @@ function DLCTweakData:init(tweak_data)
 		{
 			type_items = "weapon_mods",
 			item_entry = "wpn_fps_smg_baka_s_unfolded",
+			amount = 1
+		}
+	}
+	self.pdcon_2015 = {}
+	self.pdcon_2015.dlc = "has_pdcon_2015"
+	self.pdcon_2015.content = {}
+	self.pdcon_2015.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "king_of_jesters",
+			amount = 1
+		}
+	}
+	self.bobblehead = {}
+	self.bobblehead.dlc = "has_bobblehead"
+	self.bobblehead.content = {}
+	self.bobblehead.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "bobblehead_dozer",
 			amount = 1
 		}
 	}

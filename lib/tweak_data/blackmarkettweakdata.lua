@@ -2200,6 +2200,13 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.bobblehead_dozer.dlc = "bobblehead"
 	self.masks.bobblehead_dozer.type = "helmet"
 	self.masks.bobblehead_dozer.sort_number = 9
+	self.masks.king_of_jesters = {}
+	self.masks.king_of_jesters.unit = "units/pd2_dlc_paydaycon2015/masks/king_of_jesters/msk_king_of_jesters"
+	self.masks.king_of_jesters.name_id = "bm_msk_king_of_jesters"
+	self.masks.king_of_jesters.pcs = {}
+	self.masks.king_of_jesters.dlc = "pdcon_2015"
+	self.masks.king_of_jesters.value = 0
+	self.masks.king_of_jesters.sort_number = 9
 	if SystemInfo:platform() == Idstring("PS3") then
 		self.masks.sweettooth = {}
 		self.masks.sweettooth.unit = "units/payday2/masks/msk_sweettooth/msk_sweettooth"
@@ -7999,7 +8006,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.switchblade.stats.range = 175
 	self.melee_weapons.switchblade.stats.concealment = 30
 	self.melee_weapons.switchblade.repeat_expire_t = 0.3
-	self.melee_weapons.switchblade.expire_t = 0.8
+	self.melee_weapons.switchblade.expire_t = 1
 	self.melee_weapons.switchblade.melee_damage_delay = 0.1
 	self.melee_weapons.taser = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.taser.name_id = "bm_melee_taser"
@@ -8242,7 +8249,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.sandsteel.stats.concealment = 26
 	self.melee_weapons.sandsteel.stats.remove_weapon_movement_penalty = true
 	self.melee_weapons.sandsteel.repeat_expire_t = 0.5
-	self.melee_weapons.sandsteel.expire_t = 0.85
+	self.melee_weapons.sandsteel.expire_t = 1
 	self.melee_weapons.sandsteel.melee_damage_delay = 0.1
 	self:_add_desc_from_name_macro(self.melee_weapons)
 end

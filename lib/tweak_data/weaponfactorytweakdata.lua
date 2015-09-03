@@ -22608,7 +22608,7 @@ function WeaponFactoryTweakData:_init_baka()
 		stats = {
 			value = 1,
 			recoil = -2,
-			concealment = 3
+			concealment = 1
 		}
 	}
 	self.parts.wpn_fps_smg_baka_s_folded = {

@@ -466,6 +466,9 @@ end
 function GenericDLCManager:has_bobblehead()
 	return Global.dlc_manager.all_dlc_data.bobblehead and Global.dlc_manager.all_dlc_data.bobblehead.verified
 end
+function GenericDLCManager:has_pdcon_2015()
+	return Global.dlc_manager.all_dlc_data.pdcon_2015 and Global.dlc_manager.all_dlc_data.pdcon_2015.verified
+end
 function GenericDLCManager:has_achievement(data)
 	local achievement = managers.achievment and data and data.achievement_id and managers.achievment:get_info(data.achievement_id)
 	return achievement and achievement.awarded or false
@@ -1225,6 +1228,7 @@ function WINDLCManager:init()
 			e3_s15b = {app_id = "375383", no_install = true},
 			e3_s15c = {app_id = "375384", no_install = true},
 			e3_s15d = {app_id = "375385", no_install = true},
+			pdcon_2015 = {app_id = "338950", no_install = true},
 			gage_pack_historical = {app_id = "331900", no_install = true},
 			bobblehead = {app_id = "328860", no_install = true},
 			pd2_clan = {
