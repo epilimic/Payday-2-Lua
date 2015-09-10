@@ -31,6 +31,7 @@ function DLCTweakData:init(tweak_data)
 		kenaz = true,
 		turtles = true,
 		dragon = true,
+		steel = true,
 		pd2_goty = 1,
 		pd2_hw_boxing = true,
 		hlm2 = true,
@@ -3859,6 +3860,134 @@ function DLCTweakData:init(tweak_data)
 		{
 			type_items = "weapon_mods",
 			item_entry = "wpn_fps_smg_baka_s_unfolded",
+			amount = 1
+		}
+	}
+	self.steel = {}
+	self.steel.dlc = "has_steel"
+	self.steel.content = {}
+	self.steel.content.loot_drops = {}
+	self.steel_free = {}
+	self.steel_free.free = true
+	self.steel_free.content = {}
+	self.steel_free.content.loot_global_value = "normal"
+	self.steel_free.content.loot_drops = {
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_bow_arblast_m_poison",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_bow_arblast_m_explosive",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_bow_frankish_m_poison",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_bow_frankish_m_explosive",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_bow_long_m_explosive",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_bow_long_m_poison",
+			amount = 1
+		}
+	}
+	self.ach_steel_1 = {}
+	self.ach_steel_1.dlc = "has_achievement"
+	self.ach_steel_1.achievement_id = "steel_1"
+	self.ach_steel_1.content = {}
+	self.ach_steel_1.content.loot_global_value = "steel"
+	self.ach_steel_1.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "agatha_knight",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "blooded",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "agatha",
+			amount = 1
+		}
+	}
+	self.ach_steel_2 = {}
+	self.ach_steel_2.dlc = "has_achievement"
+	self.ach_steel_2.achievement_id = "steel_2"
+	self.ach_steel_2.content = {}
+	self.ach_steel_2.content.loot_global_value = "steel"
+	self.ach_steel_2.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "agatha_vanguard_veteran",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "chain_armor",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "med_pat",
+			amount = 1
+		}
+	}
+	self.ach_steel_3 = {}
+	self.ach_steel_3.dlc = "has_achievement"
+	self.ach_steel_3.achievement_id = "steel_3"
+	self.ach_steel_3.content = {}
+	self.ach_steel_3.content.loot_global_value = "steel"
+	self.ach_steel_3.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "mason_knight_veteran",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "scale_armor",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "mason",
+			amount = 1
+		}
+	}
+	self.ach_steel_4 = {}
+	self.ach_steel_4.dlc = "has_achievement"
+	self.ach_steel_4.achievement_id = "steel_4"
+	self.ach_steel_4.content = {}
+	self.ach_steel_4.content.loot_global_value = "steel"
+	self.ach_steel_4.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "mason_vanguard_veteran",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "forged",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "checkered_out",
 			amount = 1
 		}
 	}

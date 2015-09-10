@@ -2207,6 +2207,38 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.king_of_jesters.dlc = "pdcon_2015"
 	self.masks.king_of_jesters.value = 0
 	self.masks.king_of_jesters.sort_number = 9
+	self.masks.mason_knight_veteran = {}
+	self.masks.mason_knight_veteran.unit = "units/pd2_dlc_steel/masks/mason_knight_veteran/msk_mason_knight_veteran"
+	self.masks.mason_knight_veteran.name_id = "bm_msk_mason_knight_veteran"
+	self.masks.mason_knight_veteran.pcs = {}
+	self.masks.mason_knight_veteran.value = 0
+	self.masks.mason_knight_veteran.dlc = "steel"
+	self.masks.mason_knight_veteran.texture_bundle_folder = "steel"
+	self.masks.mason_knight_veteran.type = "helmet"
+	self.masks.agatha_knight = {}
+	self.masks.agatha_knight.unit = "units/pd2_dlc_steel/masks/agatha_knight/msk_agatha_knight"
+	self.masks.agatha_knight.name_id = "bm_msk_agatha_knight"
+	self.masks.agatha_knight.pcs = {}
+	self.masks.agatha_knight.value = 0
+	self.masks.agatha_knight.dlc = "steel"
+	self.masks.agatha_knight.texture_bundle_folder = "steel"
+	self.masks.agatha_knight.type = "helmet"
+	self.masks.agatha_vanguard_veteran = {}
+	self.masks.agatha_vanguard_veteran.unit = "units/pd2_dlc_steel/masks/agatha_vanguard_veteran/msk_agatha_vanguard_veteran"
+	self.masks.agatha_vanguard_veteran.name_id = "bm_msk_agatha_vanguard_veteran"
+	self.masks.agatha_vanguard_veteran.pcs = {}
+	self.masks.agatha_vanguard_veteran.value = 0
+	self.masks.agatha_vanguard_veteran.dlc = "steel"
+	self.masks.agatha_vanguard_veteran.texture_bundle_folder = "steel"
+	self.masks.agatha_vanguard_veteran.type = "helmet"
+	self.masks.mason_vanguard_veteran = {}
+	self.masks.mason_vanguard_veteran.unit = "units/pd2_dlc_steel/masks/mason_vanguard_veteran/msk_mason_vanguard_veteran"
+	self.masks.mason_vanguard_veteran.name_id = "bm_msk_mason_vanguard_veteran"
+	self.masks.mason_vanguard_veteran.pcs = {}
+	self.masks.mason_vanguard_veteran.value = 0
+	self.masks.mason_vanguard_veteran.dlc = "steel"
+	self.masks.mason_vanguard_veteran.texture_bundle_folder = "steel"
+	self.masks.mason_vanguard_veteran.type = "helmet"
 	if SystemInfo:platform() == Idstring("PS3") then
 		self.masks.sweettooth = {}
 		self.masks.sweettooth.unit = "units/payday2/masks/msk_sweettooth/msk_sweettooth"
@@ -4520,6 +4552,32 @@ function BlackMarketTweakData:_init_materials()
 	self.materials.origami.material_amount = 0
 	self.materials.origami.value = 0
 	self.materials.origami.dlc = "turtles"
+	self.materials.forged = {}
+	self.materials.forged.name_id = "bm_mtl_forged"
+	self.materials.forged.pcs = {}
+	self.materials.forged.texture = "units/pd2_dlc_steel/masks/materials/matcap_forged_df"
+	self.materials.forged.value = 0
+	self.materials.forged.dlc = "steel"
+	self.materials.blooded = {}
+	self.materials.blooded.name_id = "bm_mtl_blooded"
+	self.materials.blooded.pcs = {}
+	self.materials.blooded.texture = "units/pd2_dlc_steel/masks/materials/matcap_blooded_df"
+	self.materials.blooded.value = 0
+	self.materials.blooded.dlc = "steel"
+	self.materials.chain_armor = {}
+	self.materials.chain_armor.name_id = "bm_mtl_chain_armor"
+	self.materials.chain_armor.pcs = {}
+	self.materials.chain_armor.texture = "units/pd2_dlc_steel/masks/materials/matcap_chain_armor_df"
+	self.materials.chain_armor.material_amount = 0
+	self.materials.chain_armor.value = 0
+	self.materials.chain_armor.dlc = "steel"
+	self.materials.scale_armor = {}
+	self.materials.scale_armor.name_id = "bm_mtl_scale_armor"
+	self.materials.scale_armor.pcs = {}
+	self.materials.scale_armor.texture = "units/pd2_dlc_steel/masks/materials/matcap_scale_armor_df"
+	self.materials.scale_armor.material_amount = 0
+	self.materials.scale_armor.value = 0
+	self.materials.scale_armor.dlc = "steel"
 end
 function BlackMarketTweakData:_init_textures()
 	self.textures = {}
@@ -6358,6 +6416,30 @@ function BlackMarketTweakData:_init_textures()
 	self.textures.koi.value = 0
 	self.textures.koi.dlc = "turtles"
 	self.textures.koi.texture_bundle_folder = "turtles"
+	self.textures.agatha = {}
+	self.textures.agatha.name_id = "bm_txt_agatha"
+	self.textures.agatha.pcs = {}
+	self.textures.agatha.texture = "units/pd2_dlc_steel/masks/patterns/pattern_agatha_df"
+	self.textures.agatha.value = 0
+	self.textures.agatha.dlc = "steel"
+	self.textures.checkered_out = {}
+	self.textures.checkered_out.name_id = "bm_txt_checkered_out"
+	self.textures.checkered_out.pcs = {}
+	self.textures.checkered_out.texture = "units/pd2_dlc_steel/masks/patterns/pattern_checkered_out_df"
+	self.textures.checkered_out.value = 0
+	self.textures.checkered_out.dlc = "steel"
+	self.textures.mason = {}
+	self.textures.mason.name_id = "bm_txt_mason"
+	self.textures.mason.pcs = {}
+	self.textures.mason.texture = "units/pd2_dlc_steel/masks/patterns/pattern_mason_df"
+	self.textures.mason.value = 0
+	self.textures.mason.dlc = "steel"
+	self.textures.med_pat = {}
+	self.textures.med_pat.name_id = "bm_txt_med_pat"
+	self.textures.med_pat.pcs = {}
+	self.textures.med_pat.texture = "units/pd2_dlc_steel/masks/patterns/pattern_med_patt_df"
+	self.textures.med_pat.value = 0
+	self.textures.med_pat.dlc = "steel"
 end
 function BlackMarketTweakData:_init_cash()
 	self.cash = {}
@@ -6732,6 +6814,88 @@ function BlackMarketTweakData:_init_projectiles()
 	self.projectiles.crossbow_arrow_exp.no_cheat_count = true
 	self.projectiles.crossbow_arrow_exp.impact_detonation = true
 	self.projectiles.crossbow_arrow_exp.client_authoritative = true
+	self.projectiles.wpn_prj_jav = {}
+	self.projectiles.wpn_prj_jav.name_id = "bm_wpn_prj_jav"
+	self.projectiles.wpn_prj_jav.unit = "units/pd2_dlc_steel/weapons/wpn_prj_jav/wpn_prj_jav"
+	self.projectiles.wpn_prj_jav.unit_dummy = "units/pd2_dlc_steel/weapons/wpn_prj_jav/wpn_prj_jav_husk"
+	self.projectiles.wpn_prj_jav.local_unit = "units/pd2_dlc_steel/weapons/wpn_prj_jav/wpn_prj_jav_local"
+	self.projectiles.wpn_prj_jav.icon = "jav_projectile"
+	self.projectiles.wpn_prj_jav.throw_shout = true
+	self.projectiles.wpn_prj_jav.no_cheat_count = true
+	self.projectiles.wpn_prj_jav.impact_detonation = true
+	self.projectiles.wpn_prj_jav.client_authoritative = true
+	self.projectiles.wpn_prj_jav.add_trail_effect = true
+	self.projectiles.wpn_prj_jav.throwable = true
+	self.projectiles.wpn_prj_jav.texture_bundle_folder = "steel"
+	self.projectiles.wpn_prj_jav.dlc = "steel"
+	self.projectiles.wpn_prj_jav.max_amount = 3
+	self.projectiles.wpn_prj_jav.anim_global_param = "projectile_jav"
+	self.projectiles.wpn_prj_jav.throw_allowed_expire_t = 0.4
+	self.projectiles.wpn_prj_jav.expire_t = 1.1
+	self.projectiles.wpn_prj_jav.repeat_expire_t = 1
+	self.projectiles.arblast_arrow = {}
+	self.projectiles.arblast_arrow.unit = "units/pd2_dlc_steel/weapons/wpn_prj_arblast_arrow/wpn_prj_arblast_arrow"
+	self.projectiles.arblast_arrow.local_unit = "units/pd2_dlc_steel/weapons/wpn_prj_arblast_arrow/wpn_prj_arblast_arrow_local"
+	self.projectiles.arblast_arrow.weapon_id = "arblast"
+	self.projectiles.arblast_arrow.no_cheat_count = true
+	self.projectiles.arblast_arrow.impact_detonation = true
+	self.projectiles.arblast_arrow.client_authoritative = true
+	self.projectiles.arblast_poison_arrow = {}
+	self.projectiles.arblast_poison_arrow.unit = "units/pd2_dlc_steel/weapons/wpn_prj_arblast_poison_arrow/wpn_prj_arblast_poison_arrow"
+	self.projectiles.arblast_poison_arrow.local_unit = "units/pd2_dlc_steel/weapons/wpn_prj_arblast_poison_arrow/wpn_prj_arblast_poison_arrow_local"
+	self.projectiles.arblast_poison_arrow.weapon_id = "arblast"
+	self.projectiles.arblast_poison_arrow.no_cheat_count = true
+	self.projectiles.arblast_poison_arrow.impact_detonation = true
+	self.projectiles.arblast_poison_arrow.client_authoritative = true
+	self.projectiles.arblast_arrow_exp = {}
+	self.projectiles.arblast_arrow_exp.unit = "units/pd2_dlc_steel/weapons/wpn_prj_arblast_arrow_exp/wpn_prj_arblast_arrow_exp"
+	self.projectiles.arblast_arrow_exp.local_unit = "units/pd2_dlc_steel/weapons/wpn_prj_arblast_arrow_exp/wpn_prj_arblast_arrow_exp_local"
+	self.projectiles.arblast_arrow_exp.weapon_id = "arblast"
+	self.projectiles.arblast_arrow_exp.no_cheat_count = true
+	self.projectiles.arblast_arrow_exp.impact_detonation = true
+	self.projectiles.arblast_arrow_exp.client_authoritative = true
+	self.projectiles.frankish_arrow = {}
+	self.projectiles.frankish_arrow.unit = "units/pd2_dlc_steel/weapons/wpn_prj_frankish_arrow/wpn_prj_frankish_arrow"
+	self.projectiles.frankish_arrow.local_unit = "units/pd2_dlc_steel/weapons/wpn_prj_frankish_arrow/wpn_prj_frankish_arrow_local"
+	self.projectiles.frankish_arrow.weapon_id = "frankish"
+	self.projectiles.frankish_arrow.no_cheat_count = true
+	self.projectiles.frankish_arrow.impact_detonation = true
+	self.projectiles.frankish_arrow.client_authoritative = true
+	self.projectiles.frankish_poison_arrow = {}
+	self.projectiles.frankish_poison_arrow.unit = "units/pd2_dlc_steel/weapons/wpn_prj_frankish_poison_arrow/wpn_prj_frankish_poison_arrow"
+	self.projectiles.frankish_poison_arrow.local_unit = "units/pd2_dlc_steel/weapons/wpn_prj_frankish_poison_arrow/wpn_prj_frankish_poison_arrow_local"
+	self.projectiles.frankish_poison_arrow.weapon_id = "frankish"
+	self.projectiles.frankish_poison_arrow.no_cheat_count = true
+	self.projectiles.frankish_poison_arrow.impact_detonation = true
+	self.projectiles.frankish_poison_arrow.client_authoritative = true
+	self.projectiles.frankish_arrow_exp = {}
+	self.projectiles.frankish_arrow_exp.unit = "units/pd2_dlc_steel/weapons/wpn_prj_frankish_arrow_exp/wpn_prj_frankish_arrow_exp"
+	self.projectiles.frankish_arrow_exp.local_unit = "units/pd2_dlc_steel/weapons/wpn_prj_frankish_arrow_exp/wpn_prj_frankish_arrow_exp_local"
+	self.projectiles.frankish_arrow_exp.weapon_id = "frankish"
+	self.projectiles.frankish_arrow_exp.no_cheat_count = true
+	self.projectiles.frankish_arrow_exp.impact_detonation = true
+	self.projectiles.frankish_arrow_exp.client_authoritative = true
+	self.projectiles.long_arrow = {}
+	self.projectiles.long_arrow.unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_prj_long_arrow"
+	self.projectiles.long_arrow.local_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_prj_long_arrow_local"
+	self.projectiles.long_arrow.weapon_id = "long"
+	self.projectiles.long_arrow.no_cheat_count = true
+	self.projectiles.long_arrow.impact_detonation = true
+	self.projectiles.long_arrow.client_authoritative = true
+	self.projectiles.long_poison_arrow = {}
+	self.projectiles.long_poison_arrow.unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_prj_long_poison_arrow"
+	self.projectiles.long_poison_arrow.local_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_prj_long_poison_arrow_local"
+	self.projectiles.long_poison_arrow.weapon_id = "long"
+	self.projectiles.long_poison_arrow.no_cheat_count = true
+	self.projectiles.long_poison_arrow.impact_detonation = true
+	self.projectiles.long_poison_arrow.client_authoritative = true
+	self.projectiles.long_arrow_exp = {}
+	self.projectiles.long_arrow_exp.unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_prj_long_arrow_exp"
+	self.projectiles.long_arrow_exp.local_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_prj_long_arrow_exp_local"
+	self.projectiles.long_arrow_exp.weapon_id = "long"
+	self.projectiles.long_arrow_exp.no_cheat_count = true
+	self.projectiles.long_arrow_exp.impact_detonation = true
+	self.projectiles.long_arrow_exp.client_authoritative = true
 	self._projectiles_index = {
 		"frag",
 		"launcher_frag",
@@ -6747,7 +6911,17 @@ function BlackMarketTweakData:_init_projectiles()
 		"crossbow_poison_arrow",
 		"crossbow_arrow_exp",
 		"wpn_prj_four",
-		"wpn_prj_ace"
+		"wpn_prj_ace",
+		"wpn_prj_jav",
+		"arblast_arrow",
+		"arblast_poison_arrow",
+		"arblast_arrow_exp",
+		"frankish_arrow",
+		"frankish_poison_arrow",
+		"frankish_arrow_exp",
+		"long_arrow",
+		"long_poison_arrow",
+		"long_arrow_exp"
 	}
 	self:_add_desc_from_name_macro(self.projectiles)
 end
@@ -8251,5 +8425,147 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.sandsteel.repeat_expire_t = 0.5
 	self.melee_weapons.sandsteel.expire_t = 1
 	self.melee_weapons.sandsteel.melee_damage_delay = 0.1
+	self.melee_weapons.great = {}
+	self.melee_weapons.great.name_id = "bm_melee_great"
+	self.melee_weapons.great.animation = nil
+	self.melee_weapons.great.anim_attack_vars = {
+		"var1",
+		"var2",
+		"var3",
+		"var4"
+	}
+	self.melee_weapons.great.anim_global_param = "melee_great"
+	self.melee_weapons.great.dlc = "steel"
+	self.melee_weapons.great.texture_bundle_folder = "steel"
+	self.melee_weapons.great.type = "sword"
+	self.melee_weapons.great.align_objects = {
+		"a_weapon_right"
+	}
+	self.melee_weapons.great.unit = "units/pd2_dlc_steel/weapons/wpn_fps_mel_great/wpn_fps_mel_great"
+	self.melee_weapons.great.third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_mel_great/wpn_third_mel_great"
+	self.melee_weapons.great.sounds = {}
+	self.melee_weapons.great.sounds.equip = "great_equip"
+	self.melee_weapons.great.sounds.hit_air = "great_hit_air"
+	self.melee_weapons.great.sounds.hit_gen = "great_hit_gen"
+	self.melee_weapons.great.sounds.hit_body = "great_hit_body"
+	self.melee_weapons.great.sounds.charge = "great_charge"
+	self.melee_weapons.great.stats = {}
+	self.melee_weapons.great.stats.weapon_type = "sharp"
+	self.melee_weapons.great.stats.min_damage = 7
+	self.melee_weapons.great.stats.max_damage = 45
+	self.melee_weapons.great.stats.min_damage_effect = 1
+	self.melee_weapons.great.stats.max_damage_effect = 1
+	self.melee_weapons.great.stats.charge_time = 4
+	self.melee_weapons.great.stats.range = 275
+	self.melee_weapons.great.stats.concealment = 25
+	self.melee_weapons.great.stats.remove_weapon_movement_penalty = true
+	self.melee_weapons.great.repeat_expire_t = 1.1
+	self.melee_weapons.great.expire_t = 1.5
+	self.melee_weapons.great.melee_damage_delay = 0.6
+	self.melee_weapons.beardy = {}
+	self.melee_weapons.beardy.name_id = "bm_melee_beardy"
+	self.melee_weapons.beardy.animation = nil
+	self.melee_weapons.beardy.anim_attack_vars = {
+		"var1",
+		"var2",
+		"var3"
+	}
+	self.melee_weapons.beardy.anim_global_param = "melee_beardy"
+	self.melee_weapons.beardy.dlc = "steel"
+	self.melee_weapons.beardy.texture_bundle_folder = "steel"
+	self.melee_weapons.beardy.type = "axe"
+	self.melee_weapons.beardy.align_objects = {
+		"a_weapon_right"
+	}
+	self.melee_weapons.beardy.unit = "units/pd2_dlc_steel/weapons/wpn_fps_mel_beardy/wpn_fps_mel_beardy"
+	self.melee_weapons.beardy.third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_mel_beardy/wpn_third_mel_beardy"
+	self.melee_weapons.beardy.sounds = {}
+	self.melee_weapons.beardy.sounds.equip = "beardy_equip"
+	self.melee_weapons.beardy.sounds.hit_air = "beardy_hit_air"
+	self.melee_weapons.beardy.sounds.hit_gen = "beardy_hit_gen"
+	self.melee_weapons.beardy.sounds.hit_body = "beardy_hit_body"
+	self.melee_weapons.beardy.sounds.charge = "beardy_charge"
+	self.melee_weapons.beardy.stats = {}
+	self.melee_weapons.beardy.stats.weapon_type = "sharp"
+	self.melee_weapons.beardy.stats.min_damage = 9
+	self.melee_weapons.beardy.stats.max_damage = 14
+	self.melee_weapons.beardy.stats.min_damage_effect = 1
+	self.melee_weapons.beardy.stats.max_damage_effect = 1
+	self.melee_weapons.beardy.stats.charge_time = 3.5
+	self.melee_weapons.beardy.stats.range = 250
+	self.melee_weapons.beardy.stats.concealment = 26
+	self.melee_weapons.beardy.stats.remove_weapon_movement_penalty = true
+	self.melee_weapons.beardy.repeat_expire_t = 1.1
+	self.melee_weapons.beardy.expire_t = 1.5
+	self.melee_weapons.beardy.melee_damage_delay = 0.6
+	self.melee_weapons.buck = {}
+	self.melee_weapons.buck.name_id = "bm_melee_buck"
+	self.melee_weapons.buck.animation = nil
+	self.melee_weapons.buck.anim_attack_vars = {"var1", "var2"}
+	self.melee_weapons.buck.anim_global_param = "melee_buck"
+	self.melee_weapons.buck.dlc = "steel"
+	self.melee_weapons.buck.texture_bundle_folder = "steel"
+	self.melee_weapons.buck.type = "axe"
+	self.melee_weapons.buck.align_objects = {
+		"a_weapon_right"
+	}
+	self.melee_weapons.buck.unit = "units/pd2_dlc_steel/weapons/wpn_fps_mel_buck/wpn_fps_mel_buck"
+	self.melee_weapons.buck.third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_mel_buck/wpn_third_mel_buck"
+	self.melee_weapons.buck.sounds = {}
+	self.melee_weapons.buck.sounds.equip = "buck_equip"
+	self.melee_weapons.buck.sounds.hit_air = "buck_hit_air"
+	self.melee_weapons.buck.sounds.hit_gen = "buck_hit_gen"
+	self.melee_weapons.buck.sounds.hit_body = "buck_hit_body"
+	self.melee_weapons.buck.sounds.charge = "buck_charge"
+	self.melee_weapons.buck.stats = {}
+	self.melee_weapons.buck.stats.weapon_type = "sharp"
+	self.melee_weapons.buck.stats.min_damage = 3.5
+	self.melee_weapons.buck.stats.max_damage = 6
+	self.melee_weapons.buck.stats.min_damage_effect = 4
+	self.melee_weapons.buck.stats.max_damage_effect = 3.2
+	self.melee_weapons.buck.stats.charge_time = 2
+	self.melee_weapons.buck.stats.range = 175
+	self.melee_weapons.buck.stats.concealment = 30
+	self.melee_weapons.buck.stats.remove_weapon_movement_penalty = true
+	self.melee_weapons.buck.repeat_expire_t = 0.9
+	self.melee_weapons.buck.expire_t = 1.4
+	self.melee_weapons.buck.melee_damage_delay = 0.4
+	self.melee_weapons.morning = {}
+	self.melee_weapons.morning.name_id = "bm_melee_morning"
+	self.melee_weapons.morning.animation = nil
+	self.melee_weapons.morning.anim_attack_vars = {
+		"var1",
+		"var2",
+		"var3",
+		"var4"
+	}
+	self.melee_weapons.morning.anim_global_param = "melee_axe"
+	self.melee_weapons.morning.dlc = "steel"
+	self.melee_weapons.morning.texture_bundle_folder = "steel"
+	self.melee_weapons.morning.type = "axe"
+	self.melee_weapons.morning.align_objects = {
+		"a_weapon_right"
+	}
+	self.melee_weapons.morning.unit = "units/pd2_dlc_steel/weapons/wpn_fps_mel_morning/wpn_fps_mel_morning"
+	self.melee_weapons.morning.third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_mel_morning/wpn_third_mel_morning"
+	self.melee_weapons.morning.sounds = {}
+	self.melee_weapons.morning.sounds.equip = "morning_equip"
+	self.melee_weapons.morning.sounds.hit_air = "morning_hit_air"
+	self.melee_weapons.morning.sounds.hit_gen = "morning_hit_gen"
+	self.melee_weapons.morning.sounds.hit_body = "morning_hit_body"
+	self.melee_weapons.morning.sounds.charge = "morning_charge"
+	self.melee_weapons.morning.stats = {}
+	self.melee_weapons.morning.stats.weapon_type = "sharp"
+	self.melee_weapons.morning.stats.min_damage = 4
+	self.melee_weapons.morning.stats.max_damage = 6.64
+	self.melee_weapons.morning.stats.min_damage_effect = 4
+	self.melee_weapons.morning.stats.max_damage_effect = 3.2
+	self.melee_weapons.morning.stats.charge_time = 3.5
+	self.melee_weapons.morning.stats.range = 225
+	self.melee_weapons.morning.stats.concealment = 26
+	self.melee_weapons.morning.stats.remove_weapon_movement_penalty = true
+	self.melee_weapons.morning.repeat_expire_t = 0.5
+	self.melee_weapons.morning.expire_t = 1.1
+	self.melee_weapons.morning.melee_damage_delay = 0.1
 	self:_add_desc_from_name_macro(self.melee_weapons)
 end

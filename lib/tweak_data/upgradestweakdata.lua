@@ -1592,7 +1592,8 @@ function UpgradesTweakData:init()
 		upgrades = {
 			"akm_gold",
 			"baton",
-			"slot_lever"
+			"slot_lever",
+			"frankish"
 		}
 	}
 	self.level_tree[18] = {
@@ -1622,7 +1623,8 @@ function UpgradesTweakData:init()
 		name_id = "body_armor4",
 		upgrades = {
 			"body_armor4",
-			"kampfmesser"
+			"kampfmesser",
+			"buck"
 		}
 	}
 	self.level_tree[22] = {
@@ -1686,7 +1688,8 @@ function UpgradesTweakData:init()
 		upgrades = {
 			"akmsu",
 			"glock_18c",
-			"asval"
+			"asval",
+			"long"
 		}
 	}
 	self.level_tree[30] = {
@@ -1717,7 +1720,8 @@ function UpgradesTweakData:init()
 		upgrades = {
 			"ak5",
 			"striker",
-			"wa2000"
+			"wa2000",
+			"beardy"
 		}
 	}
 	self.level_tree[34] = {
@@ -1751,7 +1755,11 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[38] = {
 		name_id = "weapons",
-		upgrades = {"m134", "rpg7"}
+		upgrades = {
+			"m134",
+			"rpg7",
+			"arblast"
+		}
 	}
 	self.level_tree[39] = {
 		name_id = "weapons",
@@ -1769,7 +1777,11 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[41] = {
 		name_id = "weapons",
-		upgrades = {"gerber", "fairbair"}
+		upgrades = {
+			"gerber",
+			"fairbair",
+			"wpn_prj_jav"
+		}
 	}
 	self.level_tree[42] = {
 		name_id = "weapons",
@@ -1777,7 +1789,11 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[43] = {
 		name_id = "weapons",
-		upgrades = {"b682", "m32"}
+		upgrades = {
+			"b682",
+			"m32",
+			"morning"
+		}
 	}
 	self.level_tree[44] = {
 		name_id = "weapons",
@@ -1792,7 +1808,7 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[46] = {
 		name_id = "weapons",
-		upgrades = {"gre_m79"}
+		upgrades = {"gre_m79", "great"}
 	}
 	self.level_tree[47] = {
 		name_id = "weapons",
@@ -2088,6 +2104,9 @@ function UpgradesTweakData:init()
 	self:_polymer_definitions()
 	self:_hunter_definitions()
 	self:_baka_definitions()
+	self:_arblast_weapon_definitions()
+	self:_frankish_weapon_definitions()
+	self:_long_weapon_definitions()
 	self:_melee_weapon_definitions()
 	self:_grenades_definitions()
 	self:_carry_definitions()
@@ -6715,6 +6734,22 @@ function UpgradesTweakData:_melee_weapon_definitions()
 		category = "melee_weapon",
 		dlc = "dragon"
 	}
+	self.definitions.great = {
+		category = "melee_weapon",
+		dlc = "steel"
+	}
+	self.definitions.beardy = {
+		category = "melee_weapon",
+		dlc = "steel"
+	}
+	self.definitions.buck = {
+		category = "melee_weapon",
+		dlc = "steel"
+	}
+	self.definitions.morning = {
+		category = "melee_weapon",
+		dlc = "steel"
+	}
 end
 function UpgradesTweakData:_grenades_definitions()
 	self.definitions.molotov = {category = "grenade", dlc = "bbq"}
@@ -6722,6 +6757,7 @@ function UpgradesTweakData:_grenades_definitions()
 	self.definitions.dynamite = {category = "grenade", dlc = "west"}
 	self.definitions.wpn_prj_four = {category = "grenade", dlc = "turtles"}
 	self.definitions.wpn_prj_ace = {category = "grenade", dlc = "pd2_clan"}
+	self.definitions.wpn_prj_jav = {category = "grenade", dlc = "steel"}
 end
 function UpgradesTweakData:_weapon_definitions()
 	self.definitions.weapon_modded_damage_multiplier = {
@@ -9166,5 +9202,29 @@ function UpgradesTweakData:_baka_definitions()
 		weapon_id = "baka",
 		factory_id = "wpn_fps_smg_baka",
 		dlc = "dragon"
+	}
+end
+function UpgradesTweakData:_arblast_weapon_definitions()
+	self.definitions.arblast = {
+		category = "weapon",
+		weapon_id = "arblast",
+		factory_id = "wpn_fps_bow_arblast",
+		dlc = "pd2_clan"
+	}
+end
+function UpgradesTweakData:_frankish_weapon_definitions()
+	self.definitions.frankish = {
+		category = "weapon",
+		weapon_id = "frankish",
+		factory_id = "wpn_fps_bow_frankish",
+		dlc = "pd2_clan"
+	}
+end
+function UpgradesTweakData:_long_weapon_definitions()
+	self.definitions.long = {
+		category = "weapon",
+		weapon_id = "long",
+		factory_id = "wpn_fps_bow_long",
+		dlc = "pd2_clan"
 	}
 end

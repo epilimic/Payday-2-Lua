@@ -550,4 +550,13 @@ function TweakData:_init_pd2()
 			32
 		}
 	}
+	self.hud_icons.jav_projectile = {
+		texture = "guis/textures/pd2/equipment",
+		texture_rect = {
+			64,
+			96,
+			32,
+			32
+		}
+	}
 end

@@ -98,6 +98,9 @@ function WeaponTweakData:init(tweak_data)
 	self:_init_data_polymer_npc()
 	self:_init_data_hunter_npc()
 	self:_init_data_baka_npc()
+	self:_init_data_arblast_npc()
+	self:_init_data_frankish_npc()
+	self:_init_data_long_npc()
 	self:_precalculate_values()
 end
 function WeaponTweakData:_set_easy()
@@ -1555,6 +1558,51 @@ function WeaponTweakData:_init_data_baka_npc()
 	self.baka_npc.hold = "pistol"
 	self.baka_npc.alert_size = 5000
 	self.baka_npc.suppression = 1
+end
+function WeaponTweakData:_init_data_arblast_npc()
+	self.arblast_npc.sounds.prefix = "arblast_npc"
+	self.arblast_npc.use_data.selection_index = 1
+	self.arblast_npc.DAMAGE = 2
+	self.arblast_npc.muzzleflash = "effects/payday2/particles/weapons/9mm_auto"
+	self.arblast_npc.muzzleflash_silenced = "effects/payday2/particles/weapons/9mm_auto_silence"
+	self.arblast_npc.shell_ejection = "effects/payday2/particles/weapons/shells/shell_empty"
+	self.arblast_npc.CLIP_AMMO_MAX = 30
+	self.arblast_npc.NR_CLIPS_MAX = 5
+	self.arblast_npc.auto.fire_rate = 20
+	self.arblast_npc.hold = "rifle"
+	self.arblast_npc.alert_size = 5000
+	self.arblast_npc.suppression = 1
+end
+function WeaponTweakData:_init_data_frankish_npc()
+	self.frankish_npc.sounds.prefix = "frankish_npc"
+	self.frankish_npc.use_data.selection_index = 1
+	self.frankish_npc.DAMAGE = 2
+	self.frankish_npc.muzzleflash = "effects/payday2/particles/weapons/9mm_auto"
+	self.frankish_npc.muzzleflash_silenced = "effects/payday2/particles/weapons/9mm_auto_silence"
+	self.frankish_npc.shell_ejection = "effects/payday2/particles/weapons/shells/shell_empty"
+	self.frankish_npc.CLIP_AMMO_MAX = 30
+	self.frankish_npc.NR_CLIPS_MAX = 5
+	self.frankish_npc.auto.fire_rate = 20
+	self.frankish_npc.hold = "rifle"
+	self.frankish_npc.alert_size = 5000
+	self.frankish_npc.suppression = 1
+end
+function WeaponTweakData:_init_data_long_npc()
+	self.long_npc.sounds.prefix = "bow_npc"
+	self.long_npc.use_data.selection_index = 2
+	self.long_npc.use_data.align_place = "left_hand"
+	self.long_npc.DAMAGE = 2
+	self.long_npc.muzzleflash = "effects/payday2/particles/weapons/9mm_auto"
+	self.long_npc.muzzleflash_silenced = "effects/payday2/particles/weapons/9mm_auto_silence"
+	self.long_npc.shell_ejection = "effects/payday2/particles/weapons/shells/shell_9mm"
+	self.long_npc.no_trail = true
+	self.long_npc.CLIP_AMMO_MAX = 1
+	self.long_npc.NR_CLIPS_MAX = 4
+	self.long_npc.auto.fire_rate = 0.1
+	self.long_npc.hold = "bow"
+	self.long_npc.has_fire_animation = true
+	self.long_npc.alert_size = 2800
+	self.long_npc.suppression = 1
 end
 function WeaponTweakData:_init_data_player_weapons(tweak_data)
 	local autohit_rifle_default, autohit_pistol_default, autohit_shotgun_default, autohit_lmg_default, autohit_snp_default, autohit_smg_default, autohit_minigun_default, aim_assist_rifle_default, aim_assist_pistol_default, aim_assist_shotgun_default, aim_assist_lmg_default, aim_assist_snp_default, aim_assist_smg_default, aim_assist_minigun_default
@@ -9602,6 +9650,285 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 		total_ammo_mod = 21,
 		value = 1
 	}
+	self.arblast = {}
+	self.arblast.category = "crossbow"
+	self.arblast.projectile_type_index = 17
+	self.arblast.upgrade_blocks = {
+		weapon = {
+			"clip_ammo_increase"
+		}
+	}
+	self.arblast.damage_melee = damage_melee_default
+	self.arblast.damage_melee_effect_mul = damage_melee_effect_multiplier_default
+	self.arblast.sounds = {}
+	self.arblast.sounds.fire = "arblast_fire"
+	self.arblast.sounds.fire_single = "arblast_fire"
+	self.arblast.sounds.fire_auto = "arblast_fire"
+	self.arblast.sounds.dryfire = "secondary_dryfire"
+	self.arblast.sounds.enter_steelsight = "secondary_steel_sight_enter"
+	self.arblast.sounds.leave_steelsight = "secondary_steel_sight_exit"
+	self.arblast.timers = {}
+	self.arblast.timers.reload_not_empty = 2.5
+	self.arblast.timers.reload_empty = 2.5
+	self.arblast.timers.unequip = 0.7
+	self.arblast.timers.equip = 0.5
+	self.arblast.name_id = "bm_w_arblast"
+	self.arblast.desc_id = "bm_w_arblast_desc"
+	self.arblast.description_id = "des_arblast"
+	self.arblast.muzzleflash = "effects/payday2/particles/weapons/shells/shell_empty"
+	self.arblast.shell_ejection = "effects/payday2/particles/weapons/shells/shell_empty"
+	self.arblast.use_data = {}
+	self.arblast.use_data.selection_index = 2
+	self.arblast.DAMAGE = 1
+	self.arblast.CLIP_AMMO_MAX = 1
+	self.arblast.NR_CLIPS_MAX = 35
+	self.arblast.AMMO_MAX = self.arblast.CLIP_AMMO_MAX * self.arblast.NR_CLIPS_MAX
+	self.arblast.AMMO_PICKUP = self:_pickup_chance(0, 1)
+	self.arblast.FIRE_MODE = "auto"
+	self.arblast.fire_mode_data = {}
+	self.arblast.fire_mode_data.fire_rate = 2.9
+	self.arblast.CAN_TOGGLE_FIREMODE = false
+	self.arblast.single = {}
+	self.arblast.single.fire_rate = 0.05
+	self.arblast.spread = {}
+	self.arblast.spread.standing = self.new_m4.spread.standing * 0.7
+	self.arblast.spread.crouching = self.new_m4.spread.standing * 0.7
+	self.arblast.spread.steelsight = self.new_m4.spread.steelsight
+	self.arblast.spread.moving_standing = self.new_m4.spread.standing * 0.7
+	self.arblast.spread.moving_crouching = self.new_m4.spread.standing * 0.7
+	self.arblast.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
+	self.arblast.kick = {}
+	self.arblast.kick.standing = {
+		-0.2,
+		0.4,
+		-1,
+		1
+	}
+	self.arblast.kick.crouching = self.arblast.kick.standing
+	self.arblast.kick.steelsight = self.arblast.kick.standing
+	self.arblast.crosshair = {}
+	self.arblast.crosshair.standing = {}
+	self.arblast.crosshair.crouching = {}
+	self.arblast.crosshair.steelsight = {}
+	self.arblast.crosshair.standing.offset = 0.4
+	self.arblast.crosshair.standing.moving_offset = 0.7
+	self.arblast.crosshair.standing.kick_offset = 0.6
+	self.arblast.crosshair.crouching.offset = 0.3
+	self.arblast.crosshair.crouching.moving_offset = 0.6
+	self.arblast.crosshair.crouching.kick_offset = 0.4
+	self.arblast.crosshair.steelsight.hidden = true
+	self.arblast.crosshair.steelsight.offset = 0
+	self.arblast.crosshair.steelsight.moving_offset = 0
+	self.arblast.crosshair.steelsight.kick_offset = 0.4
+	self.arblast.shake = {}
+	self.arblast.shake.fire_multiplier = 1
+	self.arblast.shake.fire_steelsight_multiplier = -1
+	self.arblast.autohit = autohit_smg_default
+	self.arblast.aim_assist = aim_assist_smg_default
+	self.arblast.weapon_hold = "arblast"
+	self.arblast.animations = {}
+	self.arblast.animations.equip_id = "equip_arblast"
+	self.arblast.animations.recoil_steelsight = true
+	self.arblast.global_value = "steel"
+	self.arblast.texture_bundle_folder = "steel"
+	self.arblast.panic_suppression_chance = 0.05
+	self.arblast.ignore_damage_upgrades = true
+	self.arblast.stats = {
+		damage = 26,
+		spread = 10,
+		recoil = 8,
+		spread_moving = 8,
+		zoom = 3,
+		concealment = 28,
+		suppression = 14,
+		alert_size = 7,
+		extra_ammo = 6,
+		total_ammo_mod = 21,
+		value = 1
+	}
+	self.arblast.stats_modifiers = {damage = 7}
+	self.frankish = {}
+	self.frankish.category = "crossbow"
+	self.frankish.projectile_type_index = 20
+	self.frankish.upgrade_blocks = {
+		weapon = {
+			"clip_ammo_increase"
+		}
+	}
+	self.frankish.damage_melee = damage_melee_default
+	self.frankish.damage_melee_effect_mul = damage_melee_effect_multiplier_default
+	self.frankish.sounds = {}
+	self.frankish.sounds.fire = "frankish_fire"
+	self.frankish.sounds.fire_single = "frankish_fire"
+	self.frankish.sounds.fire_auto = "frankish_fire"
+	self.frankish.sounds.dryfire = "secondary_dryfire"
+	self.frankish.sounds.enter_steelsight = "secondary_steel_sight_enter"
+	self.frankish.sounds.leave_steelsight = "secondary_steel_sight_exit"
+	self.frankish.timers = {}
+	self.frankish.timers.reload_not_empty = 1.5
+	self.frankish.timers.reload_empty = 1.5
+	self.frankish.timers.unequip = 0.7
+	self.frankish.timers.equip = 0.5
+	self.frankish.name_id = "bm_w_frankish"
+	self.frankish.desc_id = "bm_w_frankish_desc"
+	self.frankish.description_id = "des_frankish"
+	self.frankish.muzzleflash = "effects/payday2/particles/weapons/shells/shell_empty"
+	self.frankish.shell_ejection = "effects/payday2/particles/weapons/shells/shell_empty"
+	self.frankish.use_data = {}
+	self.frankish.use_data.selection_index = 2
+	self.frankish.DAMAGE = 1
+	self.frankish.CLIP_AMMO_MAX = 1
+	self.frankish.NR_CLIPS_MAX = 50
+	self.frankish.AMMO_MAX = self.frankish.CLIP_AMMO_MAX * self.frankish.NR_CLIPS_MAX
+	self.frankish.AMMO_PICKUP = self:_pickup_chance(0, 1)
+	self.frankish.FIRE_MODE = "auto"
+	self.frankish.fire_mode_data = {}
+	self.frankish.fire_mode_data.fire_rate = 1.5
+	self.frankish.CAN_TOGGLE_FIREMODE = false
+	self.frankish.single = {}
+	self.frankish.single.fire_rate = 0.05
+	self.frankish.spread = {}
+	self.frankish.spread.standing = self.new_m4.spread.standing * 0.7
+	self.frankish.spread.crouching = self.new_m4.spread.standing * 0.7
+	self.frankish.spread.steelsight = self.new_m4.spread.steelsight
+	self.frankish.spread.moving_standing = self.new_m4.spread.standing * 0.7
+	self.frankish.spread.moving_crouching = self.new_m4.spread.standing * 0.7
+	self.frankish.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
+	self.frankish.kick = {}
+	self.frankish.kick.standing = {
+		-0.2,
+		0.4,
+		-1,
+		1
+	}
+	self.frankish.kick.crouching = self.frankish.kick.standing
+	self.frankish.kick.steelsight = self.frankish.kick.standing
+	self.frankish.crosshair = {}
+	self.frankish.crosshair.standing = {}
+	self.frankish.crosshair.crouching = {}
+	self.frankish.crosshair.steelsight = {}
+	self.frankish.crosshair.standing.offset = 0.4
+	self.frankish.crosshair.standing.moving_offset = 0.7
+	self.frankish.crosshair.standing.kick_offset = 0.6
+	self.frankish.crosshair.crouching.offset = 0.3
+	self.frankish.crosshair.crouching.moving_offset = 0.6
+	self.frankish.crosshair.crouching.kick_offset = 0.4
+	self.frankish.crosshair.steelsight.hidden = true
+	self.frankish.crosshair.steelsight.offset = 0
+	self.frankish.crosshair.steelsight.moving_offset = 0
+	self.frankish.crosshair.steelsight.kick_offset = 0.4
+	self.frankish.shake = {}
+	self.frankish.shake.fire_multiplier = 1
+	self.frankish.shake.fire_steelsight_multiplier = -1
+	self.frankish.autohit = autohit_smg_default
+	self.frankish.aim_assist = aim_assist_smg_default
+	self.frankish.weapon_hold = "frankish"
+	self.frankish.animations = {}
+	self.frankish.animations.equip_id = "equip_frankish"
+	self.frankish.animations.recoil_steelsight = true
+	self.frankish.global_value = "steel"
+	self.frankish.texture_bundle_folder = "steel"
+	self.frankish.panic_suppression_chance = 0.05
+	self.frankish.ignore_damage_upgrades = true
+	self.frankish.stats = {
+		damage = 27,
+		spread = 10,
+		recoil = 8,
+		spread_moving = 8,
+		zoom = 3,
+		concealment = 29,
+		suppression = 14,
+		alert_size = 7,
+		extra_ammo = 6,
+		total_ammo_mod = 21,
+		value = 1
+	}
+	self.frankish.stats_modifiers = {damage = 3}
+	self.long = {}
+	self.long.category = "bow"
+	self.long.upgrade_blocks = {
+		weapon = {
+			"clip_ammo_increase"
+		}
+	}
+	self.long.projectile_type_index = 23
+	self.long.not_allowed_in_bleedout = true
+	self.long.damage_melee = damage_melee_default
+	self.long.damage_melee_effect_mul = damage_melee_effect_multiplier_default
+	self.long.sounds = {}
+	self.long.sounds.charge_release = "long_release"
+	self.long.sounds.charge_release_fail = "bow_release_fail"
+	self.long.sounds.charge = "long_charge"
+	self.long.sounds.charge_cancel = "bow_charge_cancel"
+	self.long.sounds.enter_steelsight = "secondary_steel_sight_enter"
+	self.long.sounds.leave_steelsight = "secondary_steel_sight_exit"
+	self.long.timers = {}
+	self.long.timers.reload_not_empty = 1.5
+	self.long.timers.reload_empty = self.long.timers.reload_not_empty
+	self.long.timers.unequip = 0.85
+	self.long.timers.equip = 0.85
+	self.long.charge_data = {}
+	self.long.charge_data.max_t = 1.5
+	self.long.name_id = "bm_w_long"
+	self.long.desc_id = "bm_w_long_desc"
+	self.long.description_id = "des_long"
+	self.long.muzzleflash = "effects/payday2/particles/weapons/762_auto_fps"
+	self.long.shell_ejection = "effects/payday2/particles/weapons/shells/shell_empty"
+	self.long.use_data = {}
+	self.long.use_data.selection_index = 2
+	self.long.use_data.align_place = "left_hand"
+	self.long.DAMAGE = 6
+	self.long.CLIP_AMMO_MAX = 1
+	self.long.NR_CLIPS_MAX = 35
+	self.long.AMMO_MAX = self.long.CLIP_AMMO_MAX * self.long.NR_CLIPS_MAX
+	self.long.AMMO_PICKUP = self:_pickup_chance(0, self.long.use_data.selection_index)
+	self.long.FIRE_MODE = "single"
+	self.long.fire_mode_data = {}
+	self.long.fire_mode_data.fire_rate = 0.2
+	self.long.single = {}
+	self.long.single.fire_rate = 0.2
+	self.long.spread = {}
+	self.long.spread.standing = self.r870.spread.standing
+	self.long.spread.crouching = self.r870.spread.crouching
+	self.long.spread.steelsight = self.r870.spread.steelsight
+	self.long.spread.moving_standing = self.r870.spread.moving_standing
+	self.long.spread.moving_crouching = self.r870.spread.moving_crouching
+	self.long.spread.moving_steelsight = self.r870.spread.moving_steelsight
+	self.long.kick = {}
+	self.long.kick.standing = {
+		2.9,
+		3,
+		-0.5,
+		0.5
+	}
+	self.long.kick.crouching = self.long.kick.standing
+	self.long.kick.steelsight = self.long.kick.standing
+	self.long.shake = {}
+	self.long.shake.fire_multiplier = 2
+	self.long.shake.fire_steelsight_multiplier = 2
+	self.long.autohit = autohit_shotgun_default
+	self.long.aim_assist = aim_assist_shotgun_default
+	self.long.animations = {}
+	self.long.animations.equip_id = "equip_long"
+	self.long.animations.recoil_steelsight = false
+	self.long.global_value = "steel"
+	self.long.texture_bundle_folder = "steel"
+	self.long.panic_suppression_chance = 0.3
+	self.long.ignore_damage_upgrades = true
+	self.long.stats = {
+		damage = 24,
+		spread = 10,
+		recoil = 14,
+		spread_moving = 12,
+		zoom = 5,
+		concealment = 29,
+		suppression = 2,
+		alert_size = 7,
+		extra_ammo = 6,
+		total_ammo_mod = 21,
+		value = 1
+	}
+	self.long.stats_modifiers = {damage = 10}
 end
 function WeaponTweakData:_init_data_offhand_weapons()
 	self.b92fs_primary = deep_clone(self.b92fs)
@@ -10265,6 +10592,24 @@ function WeaponTweakData:_create_table_structure()
 		use_data = {},
 		auto = {}
 	}
+	self.arblast_npc = {
+		usage = "r870",
+		sounds = {},
+		use_data = {},
+		auto = {}
+	}
+	self.frankish_npc = {
+		usage = "r870",
+		sounds = {},
+		use_data = {},
+		auto = {}
+	}
+	self.long_npc = {
+		usage = "bow",
+		sounds = {},
+		use_data = {},
+		auto = {}
+	}
 end
 function WeaponTweakData:_precalculate_values_wip()
 end
@@ -10363,4 +10708,7 @@ function WeaponTweakData:_precalculate_values()
 	self.polymer_npc.AMMO_MAX = self.polymer_npc.CLIP_AMMO_MAX * self.polymer_npc.NR_CLIPS_MAX
 	self.hunter_npc.AMMO_MAX = self.hunter_npc.CLIP_AMMO_MAX * self.hunter_npc.NR_CLIPS_MAX
 	self.baka_npc.AMMO_MAX = self.baka_npc.CLIP_AMMO_MAX * self.baka_npc.NR_CLIPS_MAX
+	self.arblast_npc.AMMO_MAX = self.arblast_npc.CLIP_AMMO_MAX * self.arblast_npc.NR_CLIPS_MAX
+	self.frankish_npc.AMMO_MAX = self.frankish_npc.CLIP_AMMO_MAX * self.frankish_npc.NR_CLIPS_MAX
+	self.long_npc.AMMO_MAX = self.long_npc.CLIP_AMMO_MAX * self.long_npc.NR_CLIPS_MAX
 end

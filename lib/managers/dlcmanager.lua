@@ -463,6 +463,9 @@ end
 function GenericDLCManager:has_gage_pack_historical()
 	return Global.dlc_manager.all_dlc_data.gage_pack_historical and Global.dlc_manager.all_dlc_data.gage_pack_historical.verified
 end
+function GenericDLCManager:has_steel()
+	return Global.dlc_manager.all_dlc_data.steel and Global.dlc_manager.all_dlc_data.steel.verified
+end
 function GenericDLCManager:has_bobblehead()
 	return Global.dlc_manager.all_dlc_data.bobblehead and Global.dlc_manager.all_dlc_data.bobblehead.verified
 end
@@ -1231,6 +1234,7 @@ function WINDLCManager:init()
 			pdcon_2015 = {app_id = "338950", no_install = true},
 			gage_pack_historical = {app_id = "331900", no_install = true},
 			bobblehead = {app_id = "328860", no_install = true},
+			steel = {app_id = "401650", no_install = true},
 			pd2_clan = {
 				source_id = "103582791433980119"
 			}

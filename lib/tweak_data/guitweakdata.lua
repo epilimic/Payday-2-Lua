@@ -409,6 +409,14 @@ function GuiTweakData:init()
 		store = 384020,
 		image = "guis/dlcs/dragon/textures/pd2/content_updates/dragon"
 	}
+	local steel = {
+		id = "steel",
+		name_id = "menu_content_steel",
+		desc_id = "menu_content_steel_desc",
+		date_id = "menu_content_steel_date",
+		store = 401650,
+		image = "guis/dlcs/steel/textures/pd2/content_updates/steel"
+	}
 	self.content_updates = {
 		title_id = "menu_content_updates",
 		choice_id = "menu_content_updates_previous",
@@ -464,7 +472,8 @@ function GuiTweakData:init()
 			kenaz,
 			character_pack_sokol,
 			turtles,
-			dragon
+			dragon,
+			steel
 		}
 	elseif SystemInfo:platform() == Idstring("PS3") then
 		self.content_updates.item_list = {

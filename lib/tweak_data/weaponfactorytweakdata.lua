@@ -180,6 +180,9 @@ function WeaponFactoryTweakData:init()
 	self:_init_polymer()
 	self:_init_hunter()
 	self:_init_baka()
+	self:_init_arblast()
+	self:_init_frankish()
+	self:_init_long()
 	self:create_ammunition()
 	self:_init_content_unfinished()
 end
@@ -22724,4 +22727,291 @@ function WeaponFactoryTweakData:_init_baka()
 	}
 	self.wpn_fps_smg_baka_npc = deep_clone(self.wpn_fps_smg_baka)
 	self.wpn_fps_smg_baka_npc.unit = "units/pd2_dlc_dragon/weapons/wpn_fps_smg_baka/wpn_fps_smg_baka_npc"
+end
+function WeaponFactoryTweakData:_init_arblast()
+	self.parts.wpn_fps_bow_arblast_b_steel = {
+		type = "barrel",
+		name_id = "bm_wp_standard",
+		a_obj = "a_b",
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast_pts/wpn_fps_bow_arblast_b_steel",
+		stats = {value = 1},
+		animations = {reload = "recoil"}
+	}
+	self.parts.wpn_fps_bow_arblast_body_standard = {
+		type = "lower_reciever",
+		name_id = "bm_wp_standard",
+		a_obj = "a_body",
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast_pts/wpn_fps_bow_arblast_body_standard",
+		stats = {value = 1},
+		animations = {reload = "reload"}
+	}
+	self.parts.wpn_fps_bow_arblast_g_standard = {
+		type = "grip",
+		name_id = "bm_wp_standard",
+		a_obj = "a_g",
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast_pts/wpn_fps_bow_arblast_g_standard",
+		stats = {value = 1}
+	}
+	self.parts.wpn_fps_bow_arblast_m_standard = {
+		type = "ammo",
+		name_id = "bm_wp_standard",
+		a_obj = "a_m",
+		bullet_objects = {prefix = "g_bullet_", amount = 1},
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast_pts/wpn_fps_bow_arblast_m_standard",
+		stats = {value = 1}
+	}
+	self.parts.wpn_fps_bow_arblast_m_poison = {
+		pcs = {},
+		type = "ammo",
+		name_id = "bm_wp_upg_a_arblast_poison",
+		a_obj = "a_m",
+		bullet_objects = {prefix = "g_bullet_", amount = 1},
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast_pts/wpn_fps_bow_arblast_m_poison",
+		third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast_pts/wpn_third_bow_arblast_m_poison",
+		stats = {damage = -14, total_ammo_mod = -6},
+		custom_stats = {
+			launcher_grenade = "arblast_poison_arrow",
+			dot_data = {
+				type = "poison",
+				custom_data = {dot_length = nil, hurt_animation_chance = nil}
+			}
+		},
+		texture_bundle_folder = "steel",
+		sub_type = "ammo_poison",
+		is_a_unlockable = true
+	}
+	self.parts.wpn_fps_bow_arblast_m_explosive = {
+		pcs = {},
+		type = "ammo",
+		name_id = "bm_wp_upg_a_arblast_explosion",
+		a_obj = "a_m",
+		bullet_objects = {prefix = "g_bullet_", amount = 1},
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast_pts/wpn_fps_bow_arblast_m_explosive",
+		third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast_pts/wpn_third_bow_arblast_m_explosive",
+		stats = {damage = 5},
+		custom_stats = {
+			launcher_grenade = "arblast_arrow_exp"
+		},
+		texture_bundle_folder = "steel",
+		sub_type = "ammo_explosive",
+		is_a_unlockable = true
+	}
+	self.parts.wpn_fps_bow_arblast_b_steel.third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast_pts/wpn_third_bow_arblast_b_steel"
+	self.parts.wpn_fps_bow_arblast_body_standard.third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast_pts/wpn_third_bow_arblast_body_standard"
+	self.parts.wpn_fps_bow_arblast_g_standard.third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast_pts/wpn_third_bow_arblast_g_standard"
+	self.parts.wpn_fps_bow_arblast_m_standard.third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast_pts/wpn_third_bow_arblast_m_standard"
+	self.wpn_fps_bow_arblast = {}
+	self.wpn_fps_bow_arblast.unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast/wpn_fps_bow_arblast"
+	self.wpn_fps_bow_arblast.optional_types = {
+		"gadget",
+		"sight",
+		"barrel_ext"
+	}
+	self.wpn_fps_bow_arblast.animations = {
+		reload = "reload",
+		reload_not_empty = "reload_not_empty"
+	}
+	self.wpn_fps_bow_arblast.default_blueprint = {
+		"wpn_fps_bow_arblast_b_steel",
+		"wpn_fps_bow_arblast_body_standard",
+		"wpn_fps_bow_arblast_g_standard",
+		"wpn_fps_bow_arblast_m_standard"
+	}
+	self.wpn_fps_bow_arblast.uses_parts = {
+		"wpn_fps_bow_arblast_b_steel",
+		"wpn_fps_bow_arblast_body_standard",
+		"wpn_fps_bow_arblast_g_standard",
+		"wpn_fps_bow_arblast_m_standard",
+		"wpn_fps_bow_arblast_m_poison",
+		"wpn_fps_bow_arblast_m_explosive"
+	}
+	self.wpn_fps_bow_arblast_npc = deep_clone(self.wpn_fps_bow_arblast)
+	self.wpn_fps_bow_arblast_npc.unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast/wpn_fps_bow_arblast_npc"
+end
+function WeaponFactoryTweakData:_init_frankish()
+	self.parts.wpn_fps_bow_frankish_b_steel = {
+		type = "barrel",
+		name_id = "bm_wp_standard",
+		a_obj = "a_b",
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish_pts/wpn_fps_bow_frankish_b_steel",
+		stats = {value = 1},
+		animations = {reload = "recoil"}
+	}
+	self.parts.wpn_fps_bow_frankish_body_standard = {
+		type = "lower_reciever",
+		name_id = "bm_wp_standard",
+		a_obj = "a_body",
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish_pts/wpn_fps_bow_frankish_body_standard",
+		stats = {value = 1},
+		animations = {reload = "reload"}
+	}
+	self.parts.wpn_fps_bow_frankish_g_standard = {
+		type = "grip",
+		name_id = "bm_wp_standard",
+		a_obj = "a_g",
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish_pts/wpn_fps_bow_frankish_g_standard",
+		stats = {value = 1}
+	}
+	self.parts.wpn_fps_bow_frankish_m_standard = {
+		type = "ammo",
+		name_id = "bm_wp_standard",
+		a_obj = "a_m",
+		bullet_objects = {prefix = "g_bullet_", amount = 1},
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish_pts/wpn_fps_bow_frankish_m_standard",
+		stats = {value = 1}
+	}
+	self.parts.wpn_fps_bow_frankish_m_poison = {
+		pcs = {},
+		type = "ammo",
+		name_id = "bm_wp_upg_a_frankish_poison",
+		a_obj = "a_m",
+		bullet_objects = {prefix = "g_bullet_", amount = 1},
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish_pts/wpn_fps_bow_frankish_m_poison",
+		third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish_pts/wpn_third_bow_frankish_m_poison",
+		stats = {damage = -14, total_ammo_mod = -6},
+		custom_stats = {
+			launcher_grenade = "frankish_poison_arrow",
+			dot_data = {
+				type = "poison",
+				custom_data = {dot_length = nil, hurt_animation_chance = nil}
+			}
+		},
+		texture_bundle_folder = "steel",
+		sub_type = "ammo_poison",
+		is_a_unlockable = true
+	}
+	self.parts.wpn_fps_bow_frankish_m_explosive = {
+		pcs = {},
+		type = "ammo",
+		name_id = "bm_wp_upg_a_frankish_explosion",
+		a_obj = "a_m",
+		bullet_objects = {prefix = "g_bullet_", amount = 1},
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish_pts/wpn_fps_bow_frankish_m_explosive",
+		third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish_pts/wpn_third_bow_frankish_m_explosive",
+		stats = {damage = 5},
+		custom_stats = {
+			launcher_grenade = "frankish_arrow_exp"
+		},
+		texture_bundle_folder = "steel",
+		sub_type = "ammo_explosive",
+		is_a_unlockable = true
+	}
+	self.parts.wpn_fps_bow_frankish_b_steel.third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish_pts/wpn_third_bow_frankish_b_steel"
+	self.parts.wpn_fps_bow_frankish_body_standard.third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish_pts/wpn_third_bow_frankish_body_standard"
+	self.parts.wpn_fps_bow_frankish_g_standard.third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish_pts/wpn_third_bow_frankish_g_standard"
+	self.parts.wpn_fps_bow_frankish_m_standard.third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish_pts/wpn_third_bow_frankish_m_standard"
+	self.wpn_fps_bow_frankish = {}
+	self.wpn_fps_bow_frankish.unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish/wpn_fps_bow_frankish"
+	self.wpn_fps_bow_frankish.optional_types = {
+		"gadget",
+		"sight",
+		"barrel_ext"
+	}
+	self.wpn_fps_bow_frankish.animations = {
+		reload = "reload",
+		reload_not_empty = "reload_not_empty"
+	}
+	self.wpn_fps_bow_frankish.default_blueprint = {
+		"wpn_fps_bow_frankish_b_steel",
+		"wpn_fps_bow_frankish_body_standard",
+		"wpn_fps_bow_frankish_g_standard",
+		"wpn_fps_bow_frankish_m_standard"
+	}
+	self.wpn_fps_bow_frankish.uses_parts = {
+		"wpn_fps_bow_frankish_b_steel",
+		"wpn_fps_bow_frankish_body_standard",
+		"wpn_fps_bow_frankish_g_standard",
+		"wpn_fps_bow_frankish_m_standard",
+		"wpn_fps_bow_frankish_m_poison",
+		"wpn_fps_bow_frankish_m_explosive"
+	}
+	self.wpn_fps_bow_frankish_npc = deep_clone(self.wpn_fps_bow_frankish)
+	self.wpn_fps_bow_frankish_npc.unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish/wpn_fps_bow_frankish_npc"
+end
+function WeaponFactoryTweakData:_init_long()
+	self.parts.wpn_fps_bow_long_b_standard = {
+		type = "barrel",
+		name_id = "bm_wp_long_barrel",
+		a_obj = "a_b",
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_fps_bow_long_b_standard",
+		stats = {value = 1}
+	}
+	self.parts.wpn_fps_bow_long_body_standard = {
+		type = "lower_reciever",
+		name_id = "bm_wp_long_barrel",
+		a_obj = "a_body",
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_fps_bow_long_body_standard",
+		stats = {value = 1},
+		animations = {
+			fire = "recoil",
+			fire_steelsight = "recoil",
+			reload = "reload",
+			charge = "charge"
+		}
+	}
+	self.parts.wpn_fps_bow_long_m_standard = {
+		type = "ammo",
+		name_id = "bm_wp_long_barrel",
+		a_obj = "a_m",
+		parent = "lower_reciever",
+		bullet_objects = {prefix = "g_bullet_", amount = 1},
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_fps_bow_long_m_standard",
+		stats = {value = 1}
+	}
+	self.parts.wpn_fps_bow_long_m_explosive = {
+		pcs = {},
+		type = "ammo",
+		name_id = "bm_wp_bow_long_explosion",
+		a_obj = "a_m",
+		parent = "lower_reciever",
+		bullet_objects = {prefix = "g_bullet_", amount = 1},
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_fps_bow_long_m_explosive",
+		third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_third_bow_long_m_explosive",
+		stats = {damage = 4},
+		custom_stats = {
+			launcher_grenade = "long_arrow_exp"
+		},
+		texture_bundle_folder = "steel",
+		sub_type = "ammo_explosive",
+		is_a_unlockable = true
+	}
+	self.parts.wpn_fps_bow_long_m_poison = {
+		pcs = {},
+		type = "ammo",
+		name_id = "bm_wp_bow_long_poison",
+		a_obj = "a_m",
+		parent = "lower_reciever",
+		bullet_objects = {prefix = "g_bullet_", amount = 1},
+		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_fps_bow_long_m_poison",
+		third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_third_bow_long_m_poison",
+		stats = {damage = -12, total_ammo_mod = -6},
+		custom_stats = {
+			launcher_grenade = "long_poison_arrow",
+			dot_data = {
+				type = "poison",
+				custom_data = {dot_length = nil, hurt_animation_chance = nil}
+			}
+		},
+		texture_bundle_folder = "steel",
+		sub_type = "ammo_poison",
+		is_a_unlockable = true
+	}
+	self.parts.wpn_fps_bow_long_body_standard.third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_third_bow_long_body_standard"
+	self.parts.wpn_fps_bow_long_m_standard.third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_third_bow_long_m_standard"
+	self.wpn_fps_bow_long = {}
+	self.wpn_fps_bow_long.unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long/wpn_fps_bow_long"
+	self.wpn_fps_bow_long.default_blueprint = {
+		"wpn_fps_bow_long_b_standard",
+		"wpn_fps_bow_long_body_standard",
+		"wpn_fps_bow_long_m_standard"
+	}
+	self.wpn_fps_bow_long.uses_parts = {
+		"wpn_fps_bow_long_b_standard",
+		"wpn_fps_bow_long_body_standard",
+		"wpn_fps_bow_long_m_standard",
+		"wpn_fps_bow_long_m_explosive",
+		"wpn_fps_bow_long_m_poison"
+	}
+	self.wpn_fps_bow_long_npc = deep_clone(self.wpn_fps_bow_long)
+	self.wpn_fps_bow_long_npc.unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long/wpn_fps_bow_long_npc"
 end

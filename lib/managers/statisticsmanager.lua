@@ -443,9 +443,8 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 	if Application:editor() or not managers.criminals:local_character_name() then
 		return
 	end
-	self:check_version()
 	local max_ranks = 25
-	local max_specializations = 11
+	local max_specializations = tweak_data.statistics:statistics_specializations()
 	local session_time_seconds = self:get_session_time_seconds()
 	local session_time_minutes = session_time_seconds / 60
 	local session_time = session_time_minutes / 60
@@ -453,7 +452,7 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 		return
 	end
 	local level_list, job_list, mask_list, weapon_list, melee_list, grenade_list, enemy_list, armor_list, character_list = tweak_data.statistics:statistics_table()
-	local stats = {}
+	local stats = self:check_version()
 	self._global.play_time.minutes = math.ceil(self._global.play_time.minutes + session_time_minutes)
 	local current_time = math.floor(self._global.play_time.minutes / 60)
 	local time_found = false
@@ -589,43 +588,29 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 	}
 	if completion == "win_begin" or completion == "win_dropin" or completion == "fail" then
 		for weapon_name, weapon_data in pairs(session.shots_by_weapon) do
-			if 0 < weapon_data.total then
-				if table.contains(weapon_list, weapon_name) then
-					stats["weapon_used_" .. weapon_name] = {type = "int", value = 1}
-				else
-					print("Statistics Missing: weapon_used_" .. weapon_name)
-				end
+			if 0 < weapon_data.total and table.contains(weapon_list, weapon_name) then
+				stats["weapon_used_" .. weapon_name] = {type = "int", value = 1}
 			end
 		end
 		local melee_name = managers.blackmarket:equipped_melee_weapon()
 		if table.contains(melee_list, melee_name) then
 			stats["melee_used_" .. melee_name] = {type = "int", value = 1}
-		elseif melee_name then
-			print("Statistics Missing: melee_used_" .. melee_name)
 		end
 		local grenade_name = managers.blackmarket:equipped_grenade()
 		if table.contains(grenade_list, grenade_name) then
 			stats["grenade_used_" .. grenade_name] = {type = "int", value = 1}
-		elseif grenade_name then
-			print("Statistics Missing: grenade_used_" .. grenade_name)
 		end
 		local mask_id = managers.blackmarket:equipped_mask().mask_id
 		if table.contains(mask_list, mask_id) then
 			stats["mask_used_" .. mask_id] = {type = "int", value = 1}
-		elseif mask_id then
-			print("Statistics Missing: mask_used_" .. mask_id)
 		end
 		local armor_id = managers.blackmarket:equipped_armor()
 		if table.contains(armor_list, armor_id) then
 			stats["armor_used_" .. armor_id] = {type = "int", value = 1}
-		elseif armor_id then
-			print("Statistics Missing: armor_used_" .. armor_id)
 		end
 		local character_id = managers.network:session() and managers.network:session():local_peer():character()
 		if table.contains(character_list, character_id) then
 			stats["character_used_" .. character_id] = {type = "int", value = 1}
-		elseif character_id then
-			print("Statistics Missing: character_used_" .. character_id)
 		end
 		stats["difficulty_" .. Global.game_settings.difficulty] = {type = "int", value = 1}
 		local specialization = managers.skilltree:get_specialization_value("current_specialization")
@@ -634,45 +619,29 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 		end
 	end
 	for weapon_name, weapon_data in pairs(session.killed_by_weapon) do
-		if 0 < weapon_data.count then
-			if table.contains(weapon_list, weapon_name) then
-				stats["weapon_kills_" .. weapon_name] = {
-					type = "int",
-					value = weapon_data.count
-				}
-			else
-				print("Statistics Missing: weapon_kills_" .. weapon_name)
-			end
+		if 0 < weapon_data.count and table.contains(weapon_list, weapon_name) then
+			stats["weapon_kills_" .. weapon_name] = {
+				type = "int",
+				value = weapon_data.count
+			}
 		end
 	end
 	for melee_name, melee_kill in pairs(session.killed_by_melee) do
-		if melee_kill > 0 then
-			if table.contains(melee_list, melee_name) then
-				stats["melee_kills_" .. melee_name] = {type = "int", value = melee_kill}
-			else
-				print("Statistics Missing: melee_kills_" .. melee_name)
-			end
+		if melee_kill > 0 and table.contains(melee_list, melee_name) then
+			stats["melee_kills_" .. melee_name] = {type = "int", value = melee_kill}
 		end
 	end
 	for grenade_name, grenade_kill in pairs(session.killed_by_grenade) do
-		if grenade_kill > 0 then
-			if table.contains(grenade_list, grenade_name) then
-				stats["grenade_kills_" .. grenade_name] = {type = "int", value = grenade_kill}
-			else
-				print("Statistics Missing: grenade_kills_" .. grenade_name)
-			end
+		if grenade_kill > 0 and table.contains(grenade_list, grenade_name) then
+			stats["grenade_kills_" .. grenade_name] = {type = "int", value = grenade_kill}
 		end
 	end
 	for enemy_name, enemy_data in pairs(session.killed) do
-		if 0 < enemy_data.count and enemy_name ~= "total" then
-			if table.contains(enemy_list, enemy_name) then
-				stats["enemy_kills_" .. enemy_name] = {
-					type = "int",
-					value = enemy_data.count
-				}
-			else
-				print("Statistics Missing: enemy_kills_" .. enemy_name)
-			end
+		if 0 < enemy_data.count and enemy_name ~= "total" and table.contains(enemy_list, enemy_name) then
+			stats["enemy_kills_" .. enemy_name] = {
+				type = "int",
+				value = enemy_data.count
+			}
 		end
 	end
 	if completion == "win_begin" then
@@ -718,8 +687,6 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 		local level_id = managers.job:current_level_id()
 		if table.contains(level_list, level_id) then
 			stats["level_" .. level_id] = {type = "int", value = 1}
-		elseif level_id then
-			print("Statistics Missing: level_" .. level_id)
 		end
 		if level_id == "election_day_2" then
 			local stealth = managers.groupai and managers.groupai:state():whisper_mode()
@@ -737,10 +704,6 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 		elseif completion == "fail" then
 			stats["contract_" .. job_id .. "_fail"] = {type = "int", value = 1}
 		end
-	elseif job_id then
-		print("Statistics Missing: contract_" .. job_id .. "_win")
-		print("Statistics Missing: contract_" .. job_id .. "_win_dropin")
-		print("Statistics Missing: contract_" .. job_id .. "_fail")
 	end
 	managers.network.account:publish_statistics(stats)
 end
@@ -789,10 +752,7 @@ function StatisticsManager:publish_skills_to_steam(skip_version_check)
 	if Application:editor() then
 		return
 	end
-	if not skip_version_check then
-		self:check_version()
-	end
-	local stats = {}
+	local stats = skip_version_check and {} or self:check_version()
 	local skill_amount = {}
 	local skill_data = tweak_data.skilltree.skills
 	local tree_data = tweak_data.skilltree.trees
@@ -861,16 +821,35 @@ function StatisticsManager:publish_skills_to_steam(skip_version_check)
 end
 function StatisticsManager:check_version()
 	local CURRENT_VERSION = 2
+	local stats = {}
+	local resolution = string.format("%dx%d", RenderSettings.resolution.x, RenderSettings.resolution.y)
+	local resolution_list = tweak_data.statistics:resolution_statistics_table()
+	for _, res in pairs(resolution_list) do
+		stats["option_resolution_" .. res] = {
+			type = "int",
+			method = "set",
+			value = 0
+		}
+	end
+	stats.option_resolution_other = {
+		type = "int",
+		method = "set",
+		value = 0
+	}
+	stats[table.contains(resolution_list, resolution) and "option_resolution_" .. resolution or "option_resolution_other"] = {
+		type = "int",
+		method = "set",
+		value = 1
+	}
 	if CURRENT_VERSION > managers.network.account:get_stat("stat_version") then
-		local stats = {}
 		self:publish_skills_to_steam(true)
 		stats.stat_version = {
 			type = "int",
 			method = "set",
 			value = CURRENT_VERSION
 		}
-		managers.network.account:publish_statistics(stats)
 	end
+	return stats
 end
 function StatisticsManager:debug_estimate_steam_players()
 	local key
@@ -1424,6 +1403,9 @@ function StatisticsManager:session_killed_by_weapons()
 		count = count + data.count
 	end
 	return count
+end
+function StatisticsManager:session_enemy_killed_by_type(enemy, type)
+	return self._global.session.killed and self._global.session.killed[enemy] and self._global.session.killed[enemy][type] or 0
 end
 function StatisticsManager:session_killed()
 	return self._global.session.killed

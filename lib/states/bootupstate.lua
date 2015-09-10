@@ -127,6 +127,16 @@ function BootupState:setup()
 			padding = 200,
 			can_skip = true
 		})
+		table.insert(self._play_data_list, {
+			visible = is_win32,
+			layer = intro_trailer_layer,
+			video = "movies/intro_trailer_exit",
+			width = res.x,
+			height = res.y,
+			padding = 200,
+			can_skip = true,
+			auto_skip = true
+		})
 	end
 	table.insert(self._play_data_list, {
 		layer = item_layer,
@@ -192,7 +202,7 @@ end
 function BootupState:update(t, dt)
 	self:check_confirm_pressed()
 	if not self:is_playing() or (self._play_data.can_skip or Global.override_bootup_can_skip) and self:is_skipped() then
-		self:play_next()
+		self:play_next(self:is_skipped())
 	else
 		self:update_fades()
 	end
@@ -274,10 +284,16 @@ function BootupState:is_playing()
 		return false
 	end
 end
-function BootupState:play_next()
+function BootupState:play_next(is_skipped)
 	self._play_time = TimerManager:game():time()
 	self._play_index = (self._play_index or 0) + 1
 	self._play_data = self._play_data_list[self._play_index]
+	if is_skipped then
+		while self._play_data and self._play_data.auto_skip do
+			self._play_index = self._play_index + 1
+			self._play_data = self._play_data_list[self._play_index]
+		end
+	end
 	if self._play_data then
 		self._fade = self._play_data.fade_in and 0 or 1
 		if alive(self._gui_obj) then

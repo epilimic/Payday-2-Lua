@@ -344,6 +344,10 @@ function CopDamage:damage_bullet(attack_data)
 end
 function CopDamage:_check_damage_achievements(attack_data, head)
 	local attack_weapon = attack_data.weapon_unit
+	if alive(attack_weapon) and attack_weapon:base() and attack_weapon:base().thrower_unit then
+		GrenadeBase._check_achievements(attack_weapon:base(), self._unit, true, 1, 1, 1)
+		return
+	end
 	if alive(attack_weapon) and attack_weapon:base() and attack_weapon:base().weapon_tweak_data and not CopDamage.is_civilian(self._unit:base()._tweak_table) then
 		if managers.blackmarket:equipped_mask().mask_id == tweak_data.achievement.pump_action.mask and attack_weapon:base():weapon_tweak_data().category == "shotgun" then
 			managers.achievment:award_progress(tweak_data.achievement.pump_action.stat)
@@ -892,12 +896,15 @@ function CopDamage:damage_melee(attack_data)
 				local achievements = tweak_data.achievement.enemy_melee_kill_achievements or {}
 				local melee_type = tweak_data.blackmarket.melee_weapons[attack_data.name_id].type
 				local enemy_type = self._unit:base()._tweak_table
+				local unit_weapon = self._unit:base()._default_weapon_id
 				local health_ratio = managers.player:player_unit():character_damage():health_ratio() * 100
-				local melee_pass, type_pass, enemy_pass, diff_pass, health_pass, level_pass, job_pass, jobs_pass, all_pass, cop_pass, gangster_pass, civilian_pass, stealth_pass, on_fire_pass, behind_pass
+				local melee_pass, melee_weapons_pass, type_pass, enemy_pass, enemy_weapon_pass, diff_pass, health_pass, level_pass, job_pass, jobs_pass, enemy_count_pass, all_pass, cop_pass, gangster_pass, civilian_pass, stealth_pass, on_fire_pass, behind_pass
 				for achievement, achievement_data in pairs(achievements) do
 					melee_pass = not achievement_data.melee_id or achievement_data.melee_id == attack_data.name_id
+					melee_weapons_pass = not achievement_data.melee_weapons or table.contains(achievement_data.melee_weapons, attack_data.name_id)
 					type_pass = not achievement_data.melee_type or melee_type == achievement_data.melee_type
 					enemy_pass = not achievement_data.enemy or enemy_type == achievement_data.enemy
+					enemy_weapon_pass = not achievement_data.enemy_weapon or unit_weapon == achievement_data.enemy_weapon
 					behind_pass = not achievement_data.from_behind or from_behind
 					diff_pass = not achievement_data.difficulty or table.contains(achievement_data.difficulty, Global.game_settings.difficulty)
 					health_pass = not achievement_data.health or health_ratio <= achievement_data.health
@@ -906,6 +913,7 @@ function CopDamage:damage_melee(attack_data)
 					end
 					job_pass = not achievement_data.job or managers.job:current_real_job_id() == achievement_data.job
 					jobs_pass = not achievement_data.jobs or table.contains(achievement_data.jobs, managers.job:current_real_job_id())
+					enemy_count_pass = not achievement_data.enemy_kills or managers.statistics:session_enemy_killed_by_type(achievement_data.enemy_kills.enemy, "melee") >= achievement_data.enemy_kills.count
 					cop_pass = not achievement_data.is_cop or is_cop
 					gangster_pass = not achievement_data.is_gangster or is_gangster
 					civilian_pass = not achievement_data.is_not_civilian or not is_civlian
@@ -920,7 +928,7 @@ function CopDamage:damage_melee(attack_data)
 							end
 						end
 					end
-					all_pass = melee_pass and type_pass and enemy_pass and behind_pass and diff_pass and health_pass and level_pass and job_pass and jobs_pass and cop_pass and gangster_pass and civilian_pass and stealth_pass and on_fire_pass
+					all_pass = melee_pass and melee_weapons_pass and type_pass and enemy_pass and enemy_weapon_pass and behind_pass and diff_pass and health_pass and level_pass and job_pass and jobs_pass and cop_pass and gangster_pass and civilian_pass and stealth_pass and on_fire_pass and enemy_count_pass
 					if all_pass then
 						if achievement_data.stat then
 							managers.achievment:award_progress(achievement_data.stat)

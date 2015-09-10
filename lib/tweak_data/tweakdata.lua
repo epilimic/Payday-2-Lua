@@ -1350,6 +1350,12 @@ Play the full version soon to get your full PAYDAY!]],
 			award = "scorpion_2",
 			kill = true
 		},
+		steel_3 = {
+			grenade_type = "wpn_prj_jav",
+			award = "steel_3",
+			kill = true,
+			enemy = "spooc"
+		},
 		any_kills = {challenge_stat = "any_kills", kill = true},
 		any_sniper_kills = {
 			challenge_stat = "any_sniper_kills",
@@ -1682,6 +1688,22 @@ Play the full version soon to get your full PAYDAY!]],
 			melee_id = "fork",
 			is_on_fire = true,
 			is_not_civilian = true
+		},
+		steel_2 = {
+			award = "steel_2",
+			melee_weapons = {
+				"morning",
+				"buck",
+				"beardy",
+				"great"
+			},
+			enemy_kills = {enemy = "shield", count = 10}
+		},
+		steel_4 = {
+			award = "steel_4",
+			melee_id = "great",
+			enemy = "tank",
+			enemy_weapon = "saiga"
 		},
 		melee_kills = {
 			challenge_stat = "melee_kills",
@@ -2291,6 +2313,41 @@ Play the full version soon to get your full PAYDAY!]],
 			killed_by_grenade = 4,
 			equipped = {
 				grenades = "wpn_prj_four"
+			}
+		},
+		steel_1 = {
+			award = "steel_1",
+			need_full_job = true,
+			num_players = 4,
+			difficulty = {
+				"overkill_145",
+				"overkill_290"
+			},
+			equipped_team = {
+				primaries = {
+					"wpn_fps_bow_long",
+					"wpn_fps_bow_frankish",
+					"wpn_fps_bow_arblast"
+				},
+				masks = {
+					"mason_knight_veteran",
+					"agatha_knight",
+					"agatha_vanguard_veteran",
+					"mason_vanguard_veteran"
+				},
+				armors = {
+					"level_3",
+					"level_4",
+					"level_5",
+					"level_6",
+					"level_7"
+				},
+				melee_weapons = {
+					"morning",
+					"buck",
+					"beardy",
+					"great"
+				}
 			}
 		},
 		bain_jobs = {
@@ -3570,6 +3627,56 @@ Play the full version soon to get your full PAYDAY!]],
 	self.projectiles.wpn_prj_ace.sounds.flyby = "throwing_star_flyby"
 	self.projectiles.wpn_prj_ace.sounds.flyby_stop = "throwing_star_flyby_stop"
 	self.projectiles.wpn_prj_ace.sounds.impact = "throwables_impact_gen"
+	self.projectiles.wpn_prj_jav = {}
+	self.projectiles.wpn_prj_jav.damage = 110
+	self.projectiles.wpn_prj_jav.launch_speed = 1500
+	self.projectiles.wpn_prj_jav.adjust_z = 30
+	self.projectiles.wpn_prj_jav.mass_look_up_modifier = 1
+	self.projectiles.wpn_prj_jav.name_id = "bm_prj_jav"
+	self.projectiles.wpn_prj_jav.push_at_body_index = 0
+	self.projectiles.wpn_prj_jav.sounds = {}
+	self.projectiles.wpn_prj_jav.sounds.flyby = "jav_flyby"
+	self.projectiles.wpn_prj_jav.sounds.flyby_stop = "jav_flyby_stop"
+	self.projectiles.wpn_prj_jav.sounds.impact = "jav_impact_gen"
+	self.projectiles.arblast_arrow = {}
+	self.projectiles.arblast_arrow.damage = 52.5
+	self.projectiles.arblast_arrow.launch_speed = 3500
+	self.projectiles.arblast_arrow.adjust_z = 0
+	self.projectiles.arblast_arrow.mass_look_up_modifier = 1
+	self.projectiles.arblast_arrow.push_at_body_index = 0
+	self.projectiles.arblast_poison_arrow = deep_clone(self.projectiles.arblast_arrow)
+	self.projectiles.arblast_poison_arrow.damage = 19.6
+	self.projectiles.arblast_poison_arrow.bullet_class = "PoisonBulletBase"
+	self.projectiles.arblast_arrow_exp = deep_clone(self.projectiles.arblast_arrow)
+	self.projectiles.arblast_arrow_exp.damage = 70
+	self.projectiles.arblast_arrow_exp.bullet_class = "InstantExplosiveBulletBase"
+	self.projectiles.arblast_arrow_exp.remove_on_impact = true
+	self.projectiles.frankish_arrow = {}
+	self.projectiles.frankish_arrow.damage = 24
+	self.projectiles.frankish_arrow.launch_speed = 2500
+	self.projectiles.frankish_arrow.adjust_z = 0
+	self.projectiles.frankish_arrow.mass_look_up_modifier = 1
+	self.projectiles.frankish_arrow.push_at_body_index = 0
+	self.projectiles.frankish_poison_arrow = deep_clone(self.projectiles.frankish_arrow)
+	self.projectiles.frankish_poison_arrow.damage = 9
+	self.projectiles.frankish_poison_arrow.bullet_class = "PoisonBulletBase"
+	self.projectiles.frankish_arrow_exp = deep_clone(self.projectiles.frankish_arrow)
+	self.projectiles.frankish_arrow_exp.damage = 31.5
+	self.projectiles.frankish_arrow_exp.bullet_class = "InstantExplosiveBulletBase"
+	self.projectiles.frankish_arrow_exp.remove_on_impact = true
+	self.projectiles.long_arrow = {}
+	self.projectiles.long_arrow.damage = 65
+	self.projectiles.long_arrow.launch_speed = 3500
+	self.projectiles.long_arrow.adjust_z = -30
+	self.projectiles.long_arrow.mass_look_up_modifier = 1
+	self.projectiles.long_arrow.push_at_body_index = 0
+	self.projectiles.long_poison_arrow = deep_clone(self.projectiles.long_arrow)
+	self.projectiles.long_poison_arrow.damage = 30
+	self.projectiles.long_poison_arrow.bullet_class = "PoisonBulletBase"
+	self.projectiles.long_arrow_exp = deep_clone(self.projectiles.long_arrow)
+	self.projectiles.long_arrow_exp.damage = 85
+	self.projectiles.long_arrow_exp.bullet_class = "InstantExplosiveBulletBase"
+	self.projectiles.long_arrow_exp.remove_on_impact = true
 	self.voting = {}
 	self.voting.timeout = 30
 	self.voting.cooldown = 50

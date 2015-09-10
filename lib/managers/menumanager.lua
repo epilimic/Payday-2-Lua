@@ -1111,6 +1111,10 @@ function MenuCallbackHandler:dlc_buy_dragon_pc()
 	print("[MenuCallbackHandler:dlc_buy_dragon_pc]")
 	Steam:overlay_activate("store", 384020)
 end
+function MenuCallbackHandler:dlc_buy_steel_pc()
+	print("[MenuCallbackHandler:dlc_buy_steel_pc]")
+	Steam:overlay_activate("store", 401650)
+end
 function MenuCallbackHandler:dlc_buy_ps3()
 	print("[MenuCallbackHandler:dlc_buy_ps3]")
 	managers.dlc:buy_product("dlc1")
@@ -1148,6 +1152,7 @@ function MenuCallbackHandler:show_game_is_installing_menu()
 end
 function MenuCallbackHandler:is_dlc_latest_locked(check_dlc)
 	local dlcs = {
+		"steel",
 		"dragon",
 		"turtles",
 		"character_pack_sokol",
@@ -1265,6 +1270,9 @@ function MenuCallbackHandler:visible_callback_turtles()
 end
 function MenuCallbackHandler:visible_callback_dragon()
 	return self:is_dlc_latest_locked("dragon")
+end
+function MenuCallbackHandler:visible_callback_steel()
+	return self:is_dlc_latest_locked("steel")
 end
 function MenuCallbackHandler:not_has_all_dlcs()
 	return not self:has_all_dlcs()

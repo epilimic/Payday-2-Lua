@@ -861,7 +861,7 @@ function RaycastWeaponBase:can_reload()
 end
 function RaycastWeaponBase:add_ammo(ratio, add_amount_override)
 	if self:ammo_max() then
-		return false
+		return false, 0
 	end
 	local multiplier_min = 1
 	local multiplier_max = 1
@@ -889,7 +889,7 @@ function RaycastWeaponBase:add_ammo(ratio, add_amount_override)
 	if Application:production_build() then
 		managers.player:add_weapon_ammo_gain(self._name_id, add_amount)
 	end
-	return picked_up
+	return picked_up, add_amount
 end
 function RaycastWeaponBase:add_ammo_from_bag(available)
 	if self:ammo_max() then

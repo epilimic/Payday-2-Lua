@@ -11,7 +11,7 @@ function HuskTankCopDamage:damage_bullet(attack_data, ...)
 end
 function HuskTankCopDamage:damage_melee(attack_data)
 	local tweak_data = tweak_data.blackmarket.melee_weapons[attack_data.name_id]
-	if tweak_data and (tweak_data.type == "knife" or attack_data.name_id == "boxing_gloves") then
+	if tweak_data and (tweak_data.type == "knife" or tweak_data.type == "sword" or attack_data.name_id == "boxing_gloves") then
 		return HuskTankCopDamage.super.damage_melee(self, attack_data)
 	else
 		return
