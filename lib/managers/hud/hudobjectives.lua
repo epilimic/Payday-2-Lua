@@ -1,6 +1,7 @@
 function HUDBGBox_create(panel, params, config)
 	local box_panel = panel:panel(params)
 	local color = config and config.color
+	local bg_color = config and config.bg_color or Color(1, 0, 0, 0)
 	local blend_mode = config and config.blend_mode
 	box_panel:rect({
 		name = "bg",
@@ -8,10 +9,11 @@ function HUDBGBox_create(panel, params, config)
 		valign = "grow",
 		blend_mode = "normal",
 		alpha = 0.25,
-		color = Color(1, 0, 0, 0),
+		color = bg_color,
 		layer = -1
 	})
 	local left_top = box_panel:bitmap({
+		name = "left_top",
 		halign = "left",
 		valign = "top",
 		name = "left_top",
@@ -24,6 +26,7 @@ function HUDBGBox_create(panel, params, config)
 		y = 0
 	})
 	local left_bottom = box_panel:bitmap({
+		name = "left_bottom",
 		halign = "left",
 		valign = "bottom",
 		color = color,
@@ -38,6 +41,7 @@ function HUDBGBox_create(panel, params, config)
 	})
 	left_bottom:set_bottom(box_panel:h())
 	local right_top = box_panel:bitmap({
+		name = "right_top",
 		halign = "right",
 		valign = "top",
 		color = color,
@@ -52,6 +56,7 @@ function HUDBGBox_create(panel, params, config)
 	})
 	right_top:set_right(box_panel:w())
 	local right_bottom = box_panel:bitmap({
+		name = "right_bottom",
 		halign = "right",
 		valign = "bottom",
 		color = color,
@@ -118,6 +123,7 @@ function HUDBGBox_animate_open_left(panel, wait_t, target_w, done_cb, config)
 	bg:stop()
 	bg:animate(callback(nil, _G, "HUDBGBox_animate_bg_attention"), {
 		color = config.attention_color,
+		attention_color_function = config.attention_color_function,
 		forever = config.attention_forever
 	})
 	local TOTAL_T = target_w / speed
@@ -198,6 +204,7 @@ function HUDBGBox_animate_close_center(panel, done_cb)
 end
 function HUDBGBox_animate_bg_attention(bg, config)
 	local color = config and config.color or Color.white
+	local attention_color_function = config and config.attention_color_function
 	local forever = config and config.forever or false
 	local TOTAL_T = 3
 	local t = TOTAL_T
@@ -205,7 +212,8 @@ function HUDBGBox_animate_bg_attention(bg, config)
 		local dt = coroutine.yield()
 		t = t - dt
 		local cv = math.abs((math.sin(t * 180 * 1)))
-		bg:set_color(Color(1, color.red * cv, color.green * cv, color.blue * cv))
+		local mod_color = attention_color_function and attention_color_function() or color
+		bg:set_color(Color(1, mod_color.red * cv, mod_color.green * cv, mod_color.blue * cv))
 	end
 	bg:set_color(Color(1, 0, 0, 0))
 end

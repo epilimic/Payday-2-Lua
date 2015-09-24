@@ -514,10 +514,79 @@ function SkillTreeManager:switch_skills(selected_skill_switch)
 	end
 	self:set_current_specialization(self:digest_value(data.specialization, false), 1)
 	MenuCallbackHandler:_update_outfit_information()
+	return true
 end
 function SkillTreeManager:analyze()
 end
 function SkillTreeManager:tree_stats()
+end
+function SkillTreeManager:switch_skills_to_next()
+	local selected_skill_switch = self._global.selected_skill_switch
+	local max_switches = #self._global.skill_switches
+	local switch_data
+	for skill_switch = selected_skill_switch + 1, max_switches do
+		switch_data = self._global.skill_switches[selected_skill_switch]
+		if switch_data and switch_data.unlocked then
+			return self:switch_skills(skill_switch)
+		end
+	end
+	for skill_switch = 1, selected_skill_switch - 1 do
+		switch_data = self._global.skill_switches[selected_skill_switch]
+		if switch_data and switch_data.unlocked then
+			return self:switch_skills(skill_switch)
+		end
+	end
+end
+function SkillTreeManager:switch_skills_to_previous()
+	local selected_skill_switch = self._global.selected_skill_switch
+	local max_switches = #self._global.skill_switches
+	local switch_data
+	for skill_switch = selected_skill_switch - 1, 1, -1 do
+		switch_data = self._global.skill_switches[selected_skill_switch]
+		if switch_data and switch_data.unlocked then
+			return self:switch_skills(skill_switch)
+		end
+	end
+	for skill_switch = max_switches, selected_skill_switch + 1, -1 do
+		switch_data = self._global.skill_switches[selected_skill_switch]
+		if switch_data and switch_data.unlocked then
+			return self:switch_skills(skill_switch)
+		end
+	end
+end
+function SkillTreeManager:next_specialization()
+	local current_specialization = managers.skilltree:get_specialization_value("current_specialization")
+	local max_specializations = #tweak_data.skilltree.specializations
+	local specialization_data
+	for tree = current_specialization + 1, max_specializations do
+		specialization_data = tweak_data.skilltree.specializations[tree]
+		if specialization_data and (not specialization_data.dlc or managers.dlc:is_dlc_unlocked(specialization_data.dlc)) then
+			return self:set_current_specialization(tree)
+		end
+	end
+	for tree = 1, current_specialization - 1 do
+		specialization_data = tweak_data.skilltree.specializations[tree]
+		if specialization_data and (not specialization_data.dlc or managers.dlc:is_dlc_unlocked(specialization_data.dlc)) then
+			return self:set_current_specialization(tree)
+		end
+	end
+end
+function SkillTreeManager:previous_specialization()
+	local current_specialization = managers.skilltree:get_specialization_value("current_specialization")
+	local max_specializations = #tweak_data.skilltree.specializations
+	local specialization_data
+	for tree = current_specialization - 1, 1, -1 do
+		specialization_data = tweak_data.skilltree.specializations[tree]
+		if specialization_data and (not specialization_data.dlc or managers.dlc:is_dlc_unlocked(specialization_data.dlc)) then
+			return self:set_current_specialization(tree)
+		end
+	end
+	for tree = max_specializations, current_specialization + 1, -1 do
+		specialization_data = tweak_data.skilltree.specializations[tree]
+		if specialization_data and (not specialization_data.dlc or managers.dlc:is_dlc_unlocked(specialization_data.dlc)) then
+			return self:set_current_specialization(tree)
+		end
+	end
 end
 function SkillTreeManager:increase_times_respeced(increase)
 	self._global.times_respeced = math.clamp(self._global.times_respeced + increase, 1, #tweak_data.money_manager.skilltree.respec.profile_cost_increaser_multiplier)
@@ -628,6 +697,37 @@ function SkillTreeManager:check_reset_message()
 		MenuCallbackHandler:save_progress()
 	end
 end
+function SkillTreeManager:get_tree_progress_new(tree, switch_data)
+	if type(tree) ~= "number" then
+		local string_to_number = {
+			mastermind = 1,
+			enforcer = 2,
+			technician = 3,
+			ghost = 4,
+			hoxton = 5
+		}
+		tree = string_to_number[tree]
+	end
+	local td = tweak_data.skilltree.trees[tree]
+	local skill_id = td.skill
+	local step = managers.skilltree:next_skill_step(skill_id, switch_data)
+	local unlocked = managers.skilltree:skill_unlocked(nil, skill_id, switch_data)
+	local completed = managers.skilltree:skill_completed(skill_id, switch_data)
+	local owned = step > 1 and 1 or 0
+	local aced = 0
+	if owned > 0 then
+		for _, tier in ipairs(td.tiers) do
+			for _, skill_id in ipairs(tier) do
+				step = managers.skilltree:next_skill_step(skill_id, switch_data)
+				unlocked = managers.skilltree:skill_unlocked(nil, skill_id, switch_data)
+				completed = managers.skilltree:skill_completed(skill_id, switch_data)
+				aced = aced + (completed and 1 or 0)
+				owned = owned + (step > 1 and 1 or 0)
+			end
+		end
+	end
+	return self:points_spent(tree, switch_data), owned, aced
+end
 function SkillTreeManager:get_tree_progress(tree, switch_data)
 	if type(tree) ~= "number" then
 		local string_to_number = {
@@ -663,7 +763,7 @@ function SkillTreeManager:get_most_progressed_tree()
 	local max_tree = 1
 	local max_points = 0
 	for tree, _ in ipairs(tweak_data.skilltree.trees) do
-		local points = self:get_tree_progress(tree)
+		local points, num_skills = self:get_tree_progress(tree)
 		if max_points < points then
 			max_tree = tree
 			max_points = points
@@ -1161,6 +1261,7 @@ function SkillTreeManager:set_current_specialization(tree)
 	if SystemInfo:platform() == Idstring("WIN32") then
 		managers.statistics:publish_skills_to_steam()
 	end
+	return true
 end
 function SkillTreeManager:debug_print_specialization_data(data, times)
 	data = data or self._global.specializations

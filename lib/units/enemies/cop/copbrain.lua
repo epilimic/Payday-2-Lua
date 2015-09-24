@@ -9,6 +9,8 @@ require("lib/units/enemies/cop/logics/CopLogicGuard")
 require("lib/units/enemies/cop/logics/CopLogicFlee")
 require("lib/units/enemies/cop/logics/CopLogicSniper")
 require("lib/units/enemies/cop/logics/CopLogicTrade")
+require("lib/units/enemies/cop/logics/CopLogicPhalanxMinion")
+require("lib/units/enemies/cop/logics/CopLogicPhalanxVip")
 require("lib/units/enemies/tank/logics/TankCopLogicAttack")
 require("lib/units/enemies/shield/logics/ShieldLogicAttack")
 require("lib/units/enemies/spooc/logics/SpoocLogicIdle")
@@ -26,7 +28,8 @@ local logic_variants = {
 		guard = CopLogicGuard,
 		flee = CopLogicFlee,
 		sniper = CopLogicSniper,
-		trade = CopLogicTrade
+		trade = CopLogicTrade,
+		phalanx = CopLogicPhalanxMinion
 	}
 }
 local security_variant = logic_variants.security
@@ -59,6 +62,9 @@ end
 logic_variants.shield.attack = ShieldLogicAttack
 logic_variants.shield.intimidated = nil
 logic_variants.shield.flee = nil
+logic_variants.phalanx_minion = clone(logic_variants.shield)
+logic_variants.phalanx_vip = clone(logic_variants.shield)
+logic_variants.phalanx_vip.phalanx = CopLogicPhalanxVip
 logic_variants.tank.attack = TankCopLogicAttack
 logic_variants.tank_hw = logic_variants.tank
 logic_variants.spooc.idle = SpoocLogicIdle
@@ -248,6 +254,9 @@ function CopBrain:set_logic(name, enter_params)
 	self._current_logic = logic
 	self._current_logic_name = name
 	logic.enter(l_data, name, enter_params)
+end
+function CopBrain:get_logic_by_name(name)
+	return self._logics[name]
 end
 function CopBrain:search_for_path_to_unit(search_id, other_unit, access_neg)
 	local enemy_tracker = other_unit:movement():nav_tracker()

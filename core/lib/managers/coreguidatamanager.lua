@@ -211,7 +211,7 @@ function GuiDataManager:full_1280_size()
 	return self._fullrect_1280_data
 end
 function GuiDataManager:full_to_full_16_9(in_x, in_y)
-	return self._fullrect_16_9_data.convert_x + in_x, self._fullrect_16_9_data.convert_y + in_y
+	return self:safe_to_full_16_9(self:full_to_safe(in_x, in_y))
 end
 function GuiDataManager:safe_to_full_16_9(in_x, in_y)
 	return self._fullrect_16_9_data.convert_x + in_x, self._fullrect_16_9_data.convert_y + in_y

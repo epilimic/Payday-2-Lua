@@ -847,3 +847,57 @@ function MenuManager:show_buy_weapon(params, weapon, cost)
 	dialog_data.button_list = {yes_button, no_button}
 	managers.system_menu:show(dialog_data)
 end
+function MenuCallbackHandler:on_visit_fbi_files()
+	Steam:overlay_activate("url", tweak_data.gui.fbi_files_webpage)
+end
+function MenuCallbackHandler:on_visit_fbi_files_suspect(item)
+	if item then
+		Steam:overlay_activate("url", tweak_data.gui.fbi_files_webpage .. (item and "/suspect/" .. item:name() .. "/" or ""))
+	end
+end
+FbiFilesInitiator = FbiFilesInitiator or class()
+function FbiFilesInitiator:modify_node(node, up)
+	node:clean_items()
+	local params = {
+		name = "on_visit_fbi_files",
+		text_id = "menu_visit_fbi_files",
+		help_id = "menu_visit_fbi_files_help",
+		callback = "on_visit_fbi_files"
+	}
+	local new_item = node:create_item(nil, params)
+	node:add_item(new_item)
+	if managers.network:session() then
+		local peer = managers.network:session():local_peer()
+		local params = {
+			name = peer:user_id(),
+			text_id = peer:name() .. " (" .. (managers.experience:current_rank() > 0 and managers.experience:rank_string(managers.experience:current_rank()) .. "-" or "") .. (managers.experience:current_level() or "") .. ")",
+			callback = "on_visit_fbi_files_suspect",
+			to_upper = false,
+			rpc = peer:rpc(),
+			peer = peer,
+			localize = false,
+			localize_help = false
+		}
+		local new_item = node:create_item(nil, params)
+		node:add_item(new_item)
+		for _, peer in pairs(managers.network:session():peers()) do
+			local params = {
+				name = peer:user_id(),
+				text_id = peer:name() .. " (" .. (0 < peer:rank() and managers.experience:rank_string(peer:rank()) .. "-" or "") .. (peer:level() or "") .. ")",
+				callback = "on_visit_fbi_files_suspect",
+				to_upper = false,
+				rpc = peer:rpc(),
+				peer = peer,
+				localize = false,
+				localize_help = false
+			}
+			local new_item = node:create_item(nil, params)
+			node:add_item(new_item)
+		end
+	end
+	managers.menu:add_back_button(node)
+	return node
+end
+function FbiFilesInitiator:refresh_node(node)
+	return self:modify_node(node)
+end

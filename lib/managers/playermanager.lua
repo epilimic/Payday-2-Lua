@@ -1886,6 +1886,12 @@ function PlayerManager:add_special(params)
 		end
 	end
 	local is_cable_tie = name == "cable_tie"
+	local quantity
+	if is_cable_tie or not params.transfer then
+		quantity = self:has_category_upgrade(name, "quantity_unlimited") and -1 or equipment.quantity and math.min(amount + extra, (equipment.max_quantity or equipment.quantity or 1) + extra)
+	else
+		quantity = params.amount
+	end
 	if is_cable_tie then
 		managers.hud:set_cable_tie(HUDManager.PLAYER_PANEL, {
 			icon = icon,
@@ -1893,13 +1899,12 @@ function PlayerManager:add_special(params)
 		})
 		self:update_synced_cable_ties_to_peers(quantity)
 	else
-		local new_amount = params.transfer and params.amount or quantity
 		managers.hud:add_special_equipment({
 			id = name,
 			icon = icon,
-			amount = new_amount or equipment.transfer_quantity and 1 or nil
+			amount = quantity or equipment.transfer_quantity and 1 or nil
 		})
-		self:update_equipment_possession_to_peers(name, new_amount)
+		self:update_equipment_possession_to_peers(name, quantity)
 	end
 	self._equipment.specials[name] = {
 		amount = quantity and Application:digest_value(quantity, true) or nil,
@@ -2347,6 +2352,9 @@ function PlayerManager:_verify_loaded_data()
 		print("PlayerManager:_verify_loaded_data()", inspect(self._global.equipment))
 		self._global.kit.equipment_slots[1] = nil
 		self:_verify_equipment_kit(true)
+	end
+	if managers.menu_scene then
+		managers.menu_scene:set_character_deployable(Global.player_manager.kit.equipment_slots[1], false, 0)
 	end
 end
 function PlayerManager:sync_save(data)

@@ -425,6 +425,7 @@ end
 function GamePlayCentralManager:on_simulation_ended()
 	self:set_flashlights_on(false)
 	self:set_flashlights_on_player_on(false)
+	self:stop_heist_timer()
 end
 function GamePlayCentralManager:set_flashlights_on_player_on(flashlights_on_player_on)
 	if self._flashlights_on_player_on == flashlights_on_player_on then
@@ -610,6 +611,12 @@ function GamePlayCentralManager:_update_projectile_trails(t, dt)
 			end
 		end
 	end
+end
+function GamePlayCentralManager:announcer_say(event)
+	if not self._announcer_sound_source then
+		self._announcer_sound_source = SoundDevice:create_source("announcer")
+	end
+	self._announcer_sound_source:post_event(event)
 end
 function GamePlayCentralManager:save(data)
 	local state = {

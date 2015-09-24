@@ -3863,6 +3863,17 @@ function DLCTweakData:init(tweak_data)
 			amount = 1
 		}
 	}
+	self.dragon_maskfix = {}
+	self.dragon_maskfix.dlc = "has_dragon"
+	self.dragon_maskfix.content = {}
+	self.dragon_maskfix.content.loot_global_value = "dragon"
+	self.dragon_maskfix.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "jiro",
+			amount = 1
+		}
+	}
 	self.steel = {}
 	self.steel.dlc = "has_steel"
 	self.steel.content = {}

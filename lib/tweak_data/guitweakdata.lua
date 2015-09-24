@@ -417,6 +417,14 @@ function GuiTweakData:init()
 		store = 401650,
 		image = "guis/dlcs/steel/textures/pd2/content_updates/steel"
 	}
+	local gordon = {
+		id = "gordon",
+		name_id = "menu_content_gordon",
+		desc_id = "menu_content_gordon_desc",
+		date_id = "menu_content_gordon_date",
+		webpage = "http://www.overkillsoftware.com/fbifiles/",
+		image = "guis/dlcs/gordon/textures/pd2/content_updates/gordon"
+	}
 	self.content_updates = {
 		title_id = "menu_content_updates",
 		choice_id = "menu_content_updates_previous",
@@ -473,7 +481,8 @@ function GuiTweakData:init()
 			character_pack_sokol,
 			turtles,
 			dragon,
-			steel
+			steel,
+			gordon
 		}
 	elseif SystemInfo:platform() == Idstring("PS3") then
 		self.content_updates.item_list = {
@@ -544,8 +553,17 @@ function GuiTweakData:init()
 	self.mouse_pointer.controller.acceleration_speed = 4
 	self.mouse_pointer.controller.max_acceleration = 3
 	self.mouse_pointer.controller.mouse_pointer_speed = 125
-	self.MAX_MASK_ROWS = math.round(24)
-	self.MAX_WEAPON_ROWS = math.round(24)
+	local min_amount_masks = 72
+	self.MASK_ROWS_PER_PAGE = 4
+	self.MASK_COLUMNS_PER_PAGE = 4
+	self.MAX_MASK_PAGES = math.ceil(min_amount_masks / (self.MASK_ROWS_PER_PAGE * self.MASK_COLUMNS_PER_PAGE))
+	self.MAX_MASK_SLOTS = self.MAX_MASK_PAGES * self.MASK_ROWS_PER_PAGE * self.MASK_COLUMNS_PER_PAGE
+	local min_amount_weapons = 72
+	self.WEAPON_ROWS_PER_PAGE = 4
+	self.WEAPON_COLUMNS_PER_PAGE = 4
+	self.MAX_WEAPON_PAGES = math.ceil(min_amount_weapons / (self.WEAPON_ROWS_PER_PAGE * self.WEAPON_COLUMNS_PER_PAGE))
+	self.MAX_WEAPON_SLOTS = self.MAX_WEAPON_PAGES * self.WEAPON_ROWS_PER_PAGE * self.WEAPON_COLUMNS_PER_PAGE
+	self.fbi_files_webpage = "http://fbi.overkillsoftware.com/"
 	self.crime_net = {}
 	self.crime_net.controller = {}
 	self.crime_net.controller.snap_distance = 50

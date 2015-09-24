@@ -14,7 +14,10 @@ function HUDAssaultCorner:init(hud, full_hud)
 	})
 	assault_panel:set_top(0)
 	assault_panel:set_right(self._hud_panel:w())
+	self._assault_mode = "normal"
 	self._assault_color = Color(1, 1, 1, 0)
+	self._vip_assault_color = Color(1, 1, 0.5019608, 0)
+	self._current_assault_color = self._assault_color
 	local icon_assaultbox = assault_panel:bitmap({
 		halign = "right",
 		valign = "top",
@@ -65,13 +68,23 @@ function HUDAssaultCorner:init(hud, full_hud)
 		h = size,
 		x = self._hud_panel:w() - size
 	})
+	local hostages_icon = hostages_panel:bitmap({
+		name = "hostages_icon",
+		texture = "guis/textures/pd2/hud_icon_hostage",
+		valign = "top",
+		layer = 1,
+		x = 0,
+		y = 0
+	})
 	self._hostages_bg_box = HUDBGBox_create(hostages_panel, {
 		w = 38,
 		h = 38,
 		x = 0,
 		y = 0
 	}, {})
-	self._hostages_bg_box:set_right(hostages_panel:w())
+	hostages_icon:set_right(hostages_panel:w() + 5)
+	hostages_icon:set_center_y(self._hostages_bg_box:h() / 2)
+	self._hostages_bg_box:set_right(hostages_icon:left())
 	local num_hostages = self._hostages_bg_box:text({
 		name = "num_hostages",
 		text = "0",
@@ -87,16 +100,6 @@ function HUDAssaultCorner:init(hud, full_hud)
 		font = tweak_data.hud_corner.assault_font,
 		font_size = tweak_data.hud_corner.numhostages_size
 	})
-	local hostages_icon = hostages_panel:bitmap({
-		name = "hostages_icon",
-		texture = "guis/textures/pd2/hud_icon_hostage",
-		valign = "top",
-		layer = 1,
-		x = 0,
-		y = 0
-	})
-	hostages_icon:set_right(self._hostages_bg_box:left())
-	hostages_icon:set_center_y(self._hostages_bg_box:h() / 2)
 	if self._hud_panel:child("point_of_no_return_panel") then
 		self._hud_panel:remove(self._hud_panel:child("point_of_no_return_panel"))
 	end
@@ -214,22 +217,45 @@ function HUDAssaultCorner:init(hud, full_hud)
 		layer = 1,
 		w = yellow_tape:w()
 	}):set_center(yellow_tape:center())
-end
-function HUDAssaultCorner:_animate_assault(bg_box)
-	local assault_panel = self._hud_panel:child("assault_panel")
-	local icon_assaultbox = assault_panel:child("icon_assaultbox")
-	icon_assaultbox:stop()
-	icon_assaultbox:animate(callback(self, self, "_show_icon_assaultbox"))
-	self._bg_box:animate(callback(nil, _G, "HUDBGBox_animate_open_left"), 0.75, 242, function()
-	end, {
-		attention_color = self._assault_color,
-		attention_forever = true
+	if self._hud_panel:child("buffs_panel") then
+		self._hud_panel:remove(self._hud_panel:child("buffs_panel"))
+	end
+	local width = 200
+	local x = assault_panel:left() + self._bg_box:left() - 3 - width
+	local buffs_panel = self._hud_panel:panel({
+		visible = false,
+		name = "buffs_panel",
+		w = width,
+		h = 38,
+		x = x
 	})
-	local text_panel = self._bg_box:child("text_panel")
-	text_panel:stop()
-	text_panel:animate(callback(self, self, "_animate_text"))
+	self._vip_bg_box_bg_color = Color(1, 0, 0.6666667, 1)
+	self._vip_bg_box = HUDBGBox_create(buffs_panel, {
+		w = 38,
+		h = 38,
+		x = width - 38,
+		y = 0
+	}, {
+		color = Color.white,
+		bg_color = self._vip_bg_box_bg_color
+	})
+	local vip_icon = self._vip_bg_box:bitmap({
+		halign = "center",
+		valign = "center",
+		color = Color.white,
+		name = "vip_icon",
+		blend_mode = "add",
+		visible = true,
+		layer = 0,
+		texture = "guis/textures/pd2/hud_buff_shield",
+		x = 0,
+		y = 0,
+		w = 38,
+		h = 38
+	})
+	vip_icon:set_center(self._vip_bg_box:w() / 2, self._vip_bg_box:h() / 2)
 end
-function HUDAssaultCorner:_animate_text(text_panel, bg_box, color)
+function HUDAssaultCorner:_animate_text(text_panel, bg_box, color, color_function)
 	local text_list = bg_box or self._bg_box:script().text_list
 	local text_index = 0
 	local texts = {}
@@ -248,13 +274,14 @@ function HUDAssaultCorner:_animate_text(text_panel, bg_box, color)
 				text_string = text_string .. managers.localization:get_default_macro("BTN_SKULL")
 			end
 		end
+		local mod_color = color_function and color_function() or color or self._assault_color
 		local text = text_panel:text({
 			text = text_string,
 			layer = 1,
 			align = "center",
 			vertical = "center",
 			blend_mode = "add",
-			color = color or self._assault_color,
+			color = mod_color,
 			font_size = tweak_data.hud_corner.assault_size,
 			font = tweak_data.hud_corner.assault_font,
 			w = 10,
@@ -288,37 +315,106 @@ function HUDAssaultCorner:_animate_text(text_panel, bg_box, color)
 				if 0 > data.x + data.text:w() * 0.5 then
 					text_panel:remove(data.text)
 					data.text = nil
+				elseif color_function then
+					data.text:set_color(color_function())
 				end
 			end
 		end
 	end
 end
+function HUDAssaultCorner:set_buff_enabled(buff_name, enabled)
+	self._hud_panel:child("buffs_panel"):set_visible(enabled)
+	local bg = self._vip_bg_box:child("bg")
+	bg:stop()
+	if enabled then
+		bg:animate(callback(nil, _G, "HUDBGBox_animate_bg_attention"), {
+			color = self._vip_bg_box_bg_color,
+			forever = true
+		})
+	end
+end
+function HUDAssaultCorner:get_assault_mode()
+	return self._assault_mode
+end
+function HUDAssaultCorner:sync_set_assault_mode(mode)
+	if self._assault_mode == mode then
+		return
+	end
+	self._assault_mode = mode
+	local color = self._assault_color
+	if mode == "phalanx" then
+		color = self._vip_assault_color
+	end
+	self._current_assault_color = color
+	self._bg_box:child("left_top"):set_color(color)
+	self._bg_box:child("left_bottom"):set_color(color)
+	self._bg_box:child("right_top"):set_color(color)
+	self._bg_box:child("right_bottom"):set_color(color)
+	self:_set_text_list(self:_get_assault_strings())
+	local assault_panel = self._hud_panel:child("assault_panel")
+	local icon_assaultbox = assault_panel:child("icon_assaultbox")
+	local image = mode == "phalanx" and "guis/textures/pd2/hud_icon_padlockbox" or "guis/textures/pd2/hud_icon_assaultbox"
+	icon_assaultbox:set_image(image)
+	icon_assaultbox:set_color(color)
+end
 function HUDAssaultCorner:sync_start_assault(data)
 	if self._point_of_no_return or self._casing then
 		return
 	end
-	self:_hide_hostages()
-	if managers.job:current_difficulty_stars() > 0 then
-		local ids_risk = Idstring("risk")
-		self:_start_assault({
-			"hud_assault_assault",
-			"hud_assault_end_line",
-			ids_risk,
-			"hud_assault_end_line",
-			"hud_assault_assault",
-			"hud_assault_end_line",
-			ids_risk,
-			"hud_assault_end_line"
-		})
-	else
-		self:_start_assault({
-			"hud_assault_assault",
-			"hud_assault_end_line",
-			"hud_assault_assault",
-			"hud_assault_end_line",
-			"hud_assault_assault",
-			"hud_assault_end_line"
-		})
+	self._start_assault_after_hostage_offset = true
+	self:_set_hostage_offseted(true)
+end
+function HUDAssaultCorner:start_assault_callback()
+	self:_start_assault(self:_get_assault_strings())
+end
+function HUDAssaultCorner:_get_assault_strings()
+	if self._assault_mode == "normal" then
+		if managers.job:current_difficulty_stars() > 0 then
+			local ids_risk = Idstring("risk")
+			return {
+				"hud_assault_assault",
+				"hud_assault_end_line",
+				ids_risk,
+				"hud_assault_end_line",
+				"hud_assault_assault",
+				"hud_assault_end_line",
+				ids_risk,
+				"hud_assault_end_line"
+			}
+		else
+			return {
+				"hud_assault_assault",
+				"hud_assault_end_line",
+				"hud_assault_assault",
+				"hud_assault_end_line",
+				"hud_assault_assault",
+				"hud_assault_end_line"
+			}
+		end
+	end
+	if self._assault_mode == "phalanx" then
+		if managers.job:current_difficulty_stars() > 0 then
+			local ids_risk = Idstring("risk")
+			return {
+				"hud_assault_vip",
+				"hud_assault_padlock",
+				ids_risk,
+				"hud_assault_padlock",
+				"hud_assault_vip",
+				"hud_assault_padlock",
+				ids_risk,
+				"hud_assault_padlock"
+			}
+		else
+			return {
+				"hud_assault_vip",
+				"hud_assault_padlock",
+				"hud_assault_vip",
+				"hud_assault_padlock",
+				"hud_assault_vip",
+				"hud_assault_padlock"
+			}
+		end
 	end
 end
 function HUDAssaultCorner:sync_end_assault(result)
@@ -327,16 +423,27 @@ function HUDAssaultCorner:sync_end_assault(result)
 	end
 	self:_end_assault()
 end
-function HUDAssaultCorner:_start_assault(text_list)
-	text_list = text_list or {""}
+function HUDAssaultCorner:_set_text_list(text_list)
 	local assault_panel = self._hud_panel:child("assault_panel")
 	local text_panel = assault_panel:child("text_panel")
-	text_panel:script().text_list = {}
-	self._bg_box:script().text_list = {}
+	text_panel:script().text_list = text_panel:script().text_list or {}
+	while #text_panel:script().text_list > 0 do
+		table.remove(text_panel:script().text_list)
+	end
+	self._bg_box:script().text_list = self._bg_box:script().text_list or {}
+	while 0 < #self._bg_box:script().text_list do
+		table.remove(self._bg_box:script().text_list)
+	end
 	for _, text_id in ipairs(text_list) do
 		table.insert(text_panel:script().text_list, text_id)
 		table.insert(self._bg_box:script().text_list, text_id)
 	end
+end
+function HUDAssaultCorner:_start_assault(text_list)
+	text_list = text_list or {""}
+	local assault_panel = self._hud_panel:child("assault_panel")
+	local text_panel = assault_panel:child("text_panel")
+	self:_set_text_list(text_list)
 	self._assault = true
 	if self._bg_box:child("text_panel") then
 		self._bg_box:child("text_panel"):stop()
@@ -345,24 +452,44 @@ function HUDAssaultCorner:_start_assault(text_list)
 		self._bg_box:panel({name = "text_panel"})
 	end
 	self._bg_box:child("bg"):stop()
-	self._bg_box:stop()
 	assault_panel:set_visible(true)
-	self._bg_box:animate(callback(self, self, "_animate_assault"))
+	local icon_assaultbox = assault_panel:child("icon_assaultbox")
+	icon_assaultbox:stop()
+	icon_assaultbox:animate(callback(self, self, "_show_icon_assaultbox"))
+	local config = {
+		attention_color = self._assault_color,
+		attention_forever = true,
+		attention_color_function = callback(self, self, "assault_attention_color_function")
+	}
+	self._bg_box:stop()
+	self._bg_box:animate(callback(nil, _G, "HUDBGBox_animate_open_left"), 0.75, 242, function()
+	end, config)
+	local box_text_panel = self._bg_box:child("text_panel")
+	box_text_panel:stop()
+	box_text_panel:animate(callback(self, self, "_animate_text"), nil, nil, callback(self, self, "assault_attention_color_function"))
 	self:_set_feedback_color(self._assault_color)
+end
+function HUDAssaultCorner:assault_attention_color_function()
+	return self._current_assault_color
 end
 function HUDAssaultCorner:_end_assault()
 	if not self._assault then
+		self._start_assault_after_hostage_offset = nil
 		return
 	end
 	self:_set_feedback_color(nil)
 	self._assault = false
 	self._bg_box:child("text_panel"):stop()
 	self._bg_box:child("text_panel"):clear()
+	self._remove_hostage_offset = true
+	self._start_assault_after_hostage_offset = nil
+	local icon_assaultbox = self._hud_panel:child("assault_panel"):child("icon_assaultbox")
+	icon_assaultbox:stop()
 	local function close_done()
 		self._bg_box:set_visible(false)
-		local icon_assaultbox = self._hud_panel:child("assault_panel"):child("icon_assaultbox")
 		icon_assaultbox:stop()
 		icon_assaultbox:animate(callback(self, self, "_hide_icon_assaultbox"))
+		self:sync_set_assault_mode("normal")
 	end
 	self._bg_box:stop()
 	self._bg_box:animate(callback(nil, _G, "HUDBGBox_animate_close_left"), close_done)
@@ -386,6 +513,12 @@ function HUDAssaultCorner:_hide_icon_assaultbox(icon_assaultbox)
 		t = t - dt
 		local alpha = math.round(math.abs((math.cos(t * 360 * 2))))
 		icon_assaultbox:set_alpha(alpha)
+		if self._remove_hostage_offset and t < 0.03 then
+			self:_set_hostage_offseted(false)
+		end
+	end
+	if self._remove_hostage_offset then
+		self:_set_hostage_offseted(false)
 	end
 	icon_assaultbox:set_alpha(0)
 	if not self._casing then
@@ -399,6 +532,33 @@ function HUDAssaultCorner:_show_hostages()
 end
 function HUDAssaultCorner:_hide_hostages()
 	self._hud_panel:child("hostages_panel"):hide()
+end
+function HUDAssaultCorner:_set_hostage_offseted(is_offseted)
+	local hostage_panel = self._hud_panel:child("hostages_panel")
+	self._remove_hostage_offset = nil
+	hostage_panel:stop()
+	hostage_panel:animate(callback(self, self, "_offset_hostage", is_offseted))
+end
+function HUDAssaultCorner:_offset_hostage(is_offseted, hostage_panel)
+	local TOTAL_T = 0.18
+	local OFFSET = self._bg_box:h() + 8
+	local from_y = is_offseted and 0 or OFFSET
+	local target_y = is_offseted and OFFSET or 0
+	local t = (1 - math.abs(hostage_panel:y() - target_y) / OFFSET) * TOTAL_T
+	while TOTAL_T > t do
+		local dt = coroutine.yield()
+		t = math.min(t + dt, TOTAL_T)
+		local lerp = t / TOTAL_T
+		hostage_panel:set_y(math.lerp(from_y, target_y, lerp))
+		if self._start_assault_after_hostage_offset and lerp > 0.4 then
+			self._start_assault_after_hostage_offset = nil
+			self:start_assault_callback()
+		end
+	end
+	if self._start_assault_after_hostage_offset then
+		self._start_assault_after_hostage_offset = nil
+		self:start_assault_callback()
+	end
 end
 function HUDAssaultCorner:set_control_info(data)
 	self._hostages_bg_box:child("num_hostages"):set_text("" .. data.nr_hostages)
@@ -417,7 +577,7 @@ function HUDAssaultCorner:show_point_of_no_return_timer()
 	local delay_time = self._assault and 1.2 or 0
 	self:_end_assault()
 	local point_of_no_return_panel = self._hud_panel:child("point_of_no_return_panel")
-	self._hud_panel:child("hostages_panel"):set_visible(false)
+	self:_hide_hostages()
 	point_of_no_return_panel:stop()
 	point_of_no_return_panel:animate(callback(self, self, "_animate_show_noreturn"), delay_time)
 	self:_set_feedback_color(self._noreturn_color)
@@ -426,8 +586,8 @@ end
 function HUDAssaultCorner:hide_point_of_no_return_timer()
 	self._noreturn_bg_box:stop()
 	self._hud_panel:child("point_of_no_return_panel"):set_visible(false)
-	self._hud_panel:child("hostages_panel"):set_visible(true)
 	self._point_of_no_return = false
+	self:_show_hostages()
 	self:_set_feedback_color(nil)
 end
 function HUDAssaultCorner:flash_point_of_no_return_timer(beep)
@@ -480,7 +640,7 @@ function HUDAssaultCorner:show_casing(mode)
 		self._casing_bg_box:panel({name = "text_panel"})
 	end
 	self._casing_bg_box:child("bg"):stop()
-	self._hud_panel:child("hostages_panel"):set_visible(false)
+	self:_hide_hostages()
 	casing_panel:stop()
 	casing_panel:animate(callback(self, self, "_animate_show_casing"), delay_time)
 	self._casing = true

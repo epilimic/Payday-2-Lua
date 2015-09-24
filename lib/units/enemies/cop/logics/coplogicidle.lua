@@ -355,6 +355,8 @@ function CopLogicIdle.on_new_objective(data, old_objective)
 			CopLogicBase._exit(data.unit, "idle")
 		elseif objective_type == "sniper" then
 			CopLogicBase._exit(data.unit, "sniper")
+		elseif objective_type == "phalanx" then
+			CopLogicBase._exit(data.unit, "phalanx")
 		elseif objective_type == "surrender" then
 			CopLogicBase._exit(data.unit, "intimidated", new_objective.params)
 		elseif objective_type == "free" and my_data.exiting then

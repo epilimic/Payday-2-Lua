@@ -213,6 +213,15 @@ function UnitNetworkHandler:damage_dot(subject_unit, attacker_unit, damage, deat
 	end
 	subject_unit:character_damage():sync_damage_dot(attacker_unit, damage, death, variant, hurt_animation)
 end
+function UnitNetworkHandler:damage_tase(subject_unit, attacker_unit, damage, variant, death, sender)
+	if not self._verify_character_and_sender(subject_unit, sender) or not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	if not alive(attacker_unit) or attacker_unit:key() == subject_unit:key() then
+		attacker_unit = nil
+	end
+	subject_unit:character_damage():sync_damage_tase(attacker_unit, damage, variant, death)
+end
 function UnitNetworkHandler:damage_melee(subject_unit, attacker_unit, damage, damage_effect, i_body, height_offset, variant, death, sender)
 	if not self._verify_character_and_sender(subject_unit, sender) or not self._verify_gamestate(self._gamestate_filter.any_ingame) then
 		return
@@ -1850,12 +1859,13 @@ function UnitNetworkHandler:sync_run_sequence_char(unit, seq, sender)
 	end
 	ElementSequenceCharacter.sync_function(unit, seq)
 end
-function UnitNetworkHandler:sync_player_kill_statistic(tweak_table_name, is_headshot, weapon_unit, variant, sender)
+function UnitNetworkHandler:sync_player_kill_statistic(tweak_table_name, is_headshot, weapon_unit, variant, stats_name, sender)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not self._verify_sender(sender) or not alive(weapon_unit) then
 		return
 	end
 	local data = {
 		name = tweak_table_name,
+		stats_name = stats_name,
 		head_shot = is_headshot,
 		weapon_unit = weapon_unit,
 		variant = variant
@@ -2199,4 +2209,20 @@ end
 function UnitNetworkHandler:sync_vehicle_interact_trunk(vehicle, peer_id)
 	Application:debug("[DRIVING_NET] sync_vehicle_interact_trunk")
 	vehicle:vehicle_driving():_interact_trunk(vehicle)
+end
+function UnitNetworkHandler:sync_damage_reduction_buff(damage_reduction)
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	if not damage_reduction then
+		debug_pause("[UnitNetworkHandler:sync_damage_reduction_buff] invalid params", damage_reduction)
+		return
+	end
+	managers.groupai:state():set_phalanx_damage_reduction_buff(damage_reduction)
+end
+function UnitNetworkHandler:sync_assault_endless(enabled)
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	managers.groupai:state():set_assault_endless(enabled)
 end

@@ -4075,7 +4075,6 @@ function TweakData:set_hud_values()
 	self.hud.upgrade_awarded_font_size = 26 * self.scale.hud_default_font_multiplier
 	self.hud.next_upgrade_font_size = 14 * self.scale.next_upgrade_font_multiplier
 	self.hud.level_up_font_size = 32 * self.scale.level_up_font_multiplier
-	self.hud.next_player_font_size = 24 * self.scale.hud_default_font_multiplier * lang_mods.next_player_font_size
 	self.hud.stats_challenges_font_size = 32 * self.scale.hud_default_font_multiplier * lang_mods.stats_challenges_font_size
 	self.hud.chatinput_size = 22 * self.scale.hud_default_font_multiplier
 	self.hud.chatoutput_size = 14 * self.scale.small_font_multiplier

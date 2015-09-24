@@ -35,9 +35,12 @@ function PlayerProfileGuiObject:init(ws)
 		font = tweak_data.menu.pd2_medium_font,
 		font_size = tweak_data.menu.pd2_medium_font_size + (is_infamous and -5 or 0),
 		text = level_string,
-		color = tweak_data.screen_colors.text
+		color = tweak_data.screen_colors.text,
+		align = "center",
+		vertical = "center"
 	})
 	self:_make_fine_text(level_text)
+	level_text:set_font_size(level_text:font_size() * math.min(font_size * 2 / level_text:w(), 1))
 	level_text:set_center(exp_ring:center())
 	max_left_len = math.max(max_left_len, level_text:w())
 	local player_text = panel:text({

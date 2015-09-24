@@ -124,11 +124,13 @@ function MenuInput:mouse_moved(o, x, y, mouse_ws)
 	x, y = self:_modified_mouse_pos(x, y)
 	if self._slider_marker then
 		local row_item = self._slider_marker.row_item
-		local where = (x - row_item.gui_slider:world_left()) / (row_item.gui_slider:world_right() - row_item.gui_slider:world_left())
-		local item = self._slider_marker.item
-		item:set_value_by_percentage(where * 100)
-		self._logic:trigger_item(true, item)
-		managers.mouse_pointer:set_pointer_image("grab")
+		if alive(row_item.gui_slider) then
+			local where = (x - row_item.gui_slider:world_left()) / (row_item.gui_slider:world_right() - row_item.gui_slider:world_left())
+			local item = self._slider_marker.item
+			item:set_value_by_percentage(where * 100)
+			self._logic:trigger_item(true, item)
+			managers.mouse_pointer:set_pointer_image("grab")
+		end
 		return
 	end
 	local node_gui = managers.menu:active_menu().renderer:active_node_gui()
@@ -489,6 +491,7 @@ function MenuInput:update(t, dt)
 			end
 			if self._controller then
 				local special_btns = {
+					"menu_toggle_voice_message",
 					"menu_respec_tree",
 					"menu_switch_skillset",
 					"menu_modify_item",

@@ -64,45 +64,6 @@ function HUDPlayerCustody:init(hud)
 		font = tweak_data.hud_custody.custody_font,
 		font_size = tweak_data.hud_custody.small_font_size
 	})
-	self._hud_panel:script().text_title = self._hud_panel:child("text_title") or self._hud_panel:text({
-		name = "text_title",
-		color = Color.white,
-		font_size = 28,
-		font = "fonts/font_medium_shadow_mf",
-		text = "",
-		align = "right",
-		vertical = "top",
-		h = "32"
-	})
-	self._hud_panel:script().text_next_player = self._hud_panel:child("text_next_player") or self._hud_panel:text({
-		name = "text_next_player",
-		color = Color.white,
-		font_size = 28,
-		font = "fonts/font_medium_shadow_mf",
-		text = "",
-		align = "right",
-		vertical = "top",
-		h = "32"
-	})
-	local text_next_player = self._hud.text_next_player
-	text_next_player:set_font(Idstring(tweak_data.hud_custody.custody_font))
-	text_next_player:set_font_size(tweak_data.hud.next_player_font_size)
-	local primary_attack, secondary_attack = self:_next_player_text()
-	local next_player = managers.localization:text("menu_spectator_next_player", {BTN_PRIMARY = primary_attack, BTN_SECONDARY = secondary_attack})
-	text_next_player:set_text(utf8.to_upper(next_player))
-	local _, _, w, h = text_next_player:text_rect()
-	text_next_player:set_h(h)
-	text_next_player:set_right(text_next_player:parent():w())
-	text_next_player:set_top(68)
-	local text_title = self._hud.text_title
-	text_title:set_visible(true)
-	text_title:set_text(utf8.to_upper(managers.localization:text("menu_spectator_spactating")))
-	local _, _, w, h = text_title:text_rect()
-	text_title:set_h(h)
-	text_title:set_font(Idstring(tweak_data.hud_custody.custody_font))
-	text_title:set_font_size(tweak_data.hud.next_player_font_size)
-	text_title:set_rightbottom(text_next_player:righttop())
-	text_title:set_bottom(text_title:bottom() + 4)
 	local trade_text1 = self._hud.trade_text1
 	trade_text1:set_font(Idstring(tweak_data.hud_custody.custody_font))
 	trade_text1:set_font_size(tweak_data.hud_custody.font_size)
@@ -131,15 +92,6 @@ function HUDPlayerCustody:init(hud)
 	trade_delay:set_h(h)
 	trade_delay:set_right(trade_delay:parent():w())
 	trade_delay:set_y(civilians_killed:bottom())
-end
-function HUDPlayerCustody:_next_player_text()
-	if not managers.menu:is_pc_controller() then
-		return nil, nil
-	end
-	local type = managers.controller:get_default_wrapper_type()
-	local primary_attack = "[" .. managers.controller:get_settings(type):get_connection("primary_attack"):get_input_name_list()[1] .. "]"
-	local secondary_attack = "[" .. managers.controller:get_settings(type):get_connection("secondary_attack"):get_input_name_list()[1] .. "]"
-	return primary_attack, secondary_attack
 end
 function HUDPlayerCustody:set_timer_visibility(visible)
 	self._timer:set_visible(visible)

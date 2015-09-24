@@ -167,6 +167,55 @@ function StatisticsManager:_setup(reset)
 			explosion = 0,
 			tied = 0
 		},
+		tank_green = {
+			count = 0,
+			head_shots = 0,
+			melee = 0,
+			explosion = 0,
+			tied = 0
+		},
+		tank_black = {
+			count = 0,
+			head_shots = 0,
+			melee = 0,
+			explosion = 0,
+			tied = 0
+		},
+		tank_skull = {
+			count = 0,
+			head_shots = 0,
+			melee = 0,
+			explosion = 0,
+			tied = 0
+		},
+		hostage_rescue = {
+			count = 0,
+			head_shots = 0,
+			melee = 0,
+			explosion = 0,
+			tied = 0
+		},
+		murkywater = {
+			count = 0,
+			head_shots = 0,
+			melee = 0,
+			explosion = 0,
+			tied = 0
+		},
+		phalanx_minion = {
+			count = 0,
+			head_shots = 0,
+			melee = 0,
+			explosion = 0,
+			tied = 0
+		},
+		phalanx_vip = {
+			count = 0,
+			head_shots = 0,
+			melee = 0,
+			explosion = 0,
+			tied = 0
+		},
 		other = {
 			count = 0,
 			head_shots = 0,
@@ -590,6 +639,14 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 		for weapon_name, weapon_data in pairs(session.shots_by_weapon) do
 			if 0 < weapon_data.total and table.contains(weapon_list, weapon_name) then
 				stats["weapon_used_" .. weapon_name] = {type = "int", value = 1}
+				stats["weapon_shots_" .. weapon_name] = {
+					type = "int",
+					value = weapon_data.total
+				}
+				stats["weapon_hits_" .. weapon_name] = {
+					type = "int",
+					value = weapon_data.hits
+				}
 			end
 		end
 		local melee_name = managers.blackmarket:equipped_melee_weapon()
@@ -746,6 +803,93 @@ function StatisticsManager:publish_level_to_steam()
 		method = "set",
 		value = 1
 	}
+	managers.network.account:publish_statistics(stats)
+end
+function StatisticsManager:_table_contains(list, item)
+	for index, name in pairs(list) do
+		if name == item then
+			return index
+		end
+	end
+end
+function StatisticsManager:publish_equipped_to_steam()
+	if Application:editor() then
+		return
+	end
+	local stats = {}
+	local level_list, job_list, mask_list, weapon_list, melee_list, grenade_list, enemy_list, armor_list, character_list, deployable_list = tweak_data.statistics:statistics_table()
+	local mask_name = managers.blackmarket:equipped_mask().mask_id
+	local mask_index = self:_table_contains(mask_list, mask_name)
+	if mask_index then
+		stats.equipped_mask = {
+			type = "int",
+			method = "set",
+			value = mask_index
+		}
+	end
+	local primary_name = managers.blackmarket:equipped_primary().weapon_id
+	local primary_index = self:_table_contains(weapon_list, primary_name)
+	if primary_index then
+		stats.equipped_primary = {
+			type = "int",
+			method = "set",
+			value = primary_index
+		}
+	end
+	local secondary_name = managers.blackmarket:equipped_secondary().weapon_id
+	local secondary_index = self:_table_contains(weapon_list, secondary_name)
+	if secondary_index then
+		stats.equipped_secondary = {
+			type = "int",
+			method = "set",
+			value = secondary_index
+		}
+	end
+	local melee_name = managers.blackmarket:equipped_melee_weapon()
+	local melee_index = self:_table_contains(melee_list, melee_name)
+	if melee_index then
+		stats.equipped_melee = {
+			type = "int",
+			method = "set",
+			value = melee_index
+		}
+	end
+	local grenade_name = managers.blackmarket:equipped_grenade()
+	local grenade_index = self:_table_contains(grenade_list, grenade_name)
+	if grenade_index then
+		stats.equipped_grenade = {
+			type = "int",
+			method = "set",
+			value = grenade_index
+		}
+	end
+	local armor_name = managers.blackmarket:equipped_armor()
+	local armor_index = self:_table_contains(armor_list, armor_name)
+	if armor_index then
+		stats.equipped_armor = {
+			type = "int",
+			method = "set",
+			value = armor_index
+		}
+	end
+	local character_name = managers.blackmarket:get_preferred_character()
+	local character_index = self:_table_contains(character_list, character_name)
+	if character_index then
+		stats.equipped_character = {
+			type = "int",
+			method = "set",
+			value = character_index
+		}
+	end
+	local deployable_name = managers.blackmarket:equipped_deployable()
+	local deployable_index = self:_table_contains(deployable_list, deployable_name)
+	if deployable_index then
+		stats.equipped_deployable = {
+			type = "int",
+			method = "set",
+			value = deployable_index
+		}
+	end
 	managers.network.account:publish_statistics(stats)
 end
 function StatisticsManager:publish_skills_to_steam(skip_version_check)
@@ -924,16 +1068,17 @@ function StatisticsManager:killed_by_anyone(data)
 	end
 end
 function StatisticsManager:killed(data)
+	local stats_name = data.stats_name or data.name
 	data.type = tweak_data.character[data.name] and tweak_data.character[data.name].challenges.type
-	if not self._global.killed[data.name] or not self._global.session.killed[data.name] then
-		Application:error("Bad name id applied to killed, " .. tostring(data.name) .. ". Defaulting to 'other'")
-		data.name = "other"
+	if not self._global.killed[stats_name] or not self._global.session.killed[stats_name] then
+		Application:error("Bad name id applied to killed, " .. tostring(stats_name) .. ". Defaulting to 'other'")
+		stats_name = "other"
 	end
 	local by_bullet = data.variant == "bullet"
 	local by_melee = data.variant == "melee"
 	local by_explosion = data.variant == "explosion"
 	local by_other_variant = not by_bullet and not by_melee and not by_explosion
-	local type = self._global.killed[data.name]
+	local type = self._global.killed[stats_name]
 	type.count = type.count + 1
 	type.head_shots = type.head_shots + (data.head_shot and 1 or 0)
 	type.melee = type.melee + (by_melee and 1 or 0)
@@ -942,7 +1087,7 @@ function StatisticsManager:killed(data)
 	self._global.killed.total.head_shots = self._global.killed.total.head_shots + (data.head_shot and 1 or 0)
 	self._global.killed.total.melee = self._global.killed.total.melee + (by_melee and 1 or 0)
 	self._global.killed.total.explosion = self._global.killed.total.explosion + (by_explosion and 1 or 0)
-	local type = self._global.session.killed[data.name]
+	local type = self._global.session.killed[stats_name]
 	type.count = type.count + 1
 	type.head_shots = type.head_shots + (data.head_shot and 1 or 0)
 	type.melee = type.melee + (by_melee and 1 or 0)

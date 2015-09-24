@@ -199,7 +199,7 @@ function MissionEndState:at_enter(old_state, params)
 				if not pass_skills then
 					num_skills = 0
 					for tree, data in ipairs(tweak_data.skilltree.trees) do
-						local points, _ = managers.skilltree:get_tree_progress(tree)
+						local points = managers.skilltree:get_tree_progress(tree)
 						num_skills = num_skills + points
 					end
 					pass_skills = num_skills <= achievement_data.num_skills

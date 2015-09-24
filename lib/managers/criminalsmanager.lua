@@ -55,9 +55,51 @@ function CriminalsManager:get_any_unit()
 		end
 	end
 end
+function CriminalsManager:get_valid_player_spawn_pos_rot()
+	local server_unit = managers.network:session():local_peer():unit()
+	if alive(server_unit) then
+		return self:_get_unit_pos_rot(server_unit, true)
+	end
+	for u_key, u_data in pairs(managers.groupai:state():all_player_criminals()) do
+		if u_data and alive(u_data.unit) then
+			return self:_get_unit_pos_rot(u_data.unit, true)
+		end
+	end
+	if self._last_valid_player_spawn_pos_rot then
+		return self._last_valid_player_spawn_pos_rot
+	end
+	for u_key, u_data in pairs(managers.groupai:state():all_AI_criminals()) do
+		if u_data and alive(u_data.unit) then
+			return self:_get_unit_pos_rot(u_data.unit, false)
+		end
+	end
+	return nil
+end
+function CriminalsManager:_get_unit_pos_rot(unit, check_zipline)
+	if check_zipline then
+		local zipline_unit = unit:movement():zipline_unit()
+		if zipline_unit then
+			unit = zipline_unit
+		end
+	end
+	if unit:in_slot(managers.slot:get_mask("players")) and not unit:base().is_husk_player then
+		local rot = unit:camera():rotation()
+		return {
+			unit:position(),
+			Rotation(rot:yaw())
+		}
+	else
+		return {
+			unit:position(),
+			Rotation(unit:rotation():yaw())
+		}
+	end
+end
+function CriminalsManager:on_last_valid_player_spawn_point_updated(unit)
+	self._last_valid_player_spawn_pos_rot = self:_get_unit_pos_rot(unit, true)
+end
 function CriminalsManager:_remove(id)
 	local data = self._characters[id]
-	print("[CriminalsManager:_remove]", inspect(data))
 	if data.name == self._local_character then
 		self._local_character = nil
 	end
@@ -73,7 +115,6 @@ function CriminalsManager:_remove(id)
 end
 function CriminalsManager:add_character(name, unit, peer_id, ai)
 	print("[CriminalsManager:add_character]", name, unit, peer_id, ai)
-	Application:stack_dump()
 	for id, data in pairs(self._characters) do
 		if data.name == name then
 			if data.taken then

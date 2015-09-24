@@ -18,6 +18,8 @@ function MenuSceneManager:init()
 	self._item_rot_temp = Rotation()
 	self._use_item_grab = false
 	self._use_character_grab = false
+	self._use_character_grab2 = false
+	self._one_frame_delayed_clbks = {}
 	self._current_scene_template = ""
 	self._global_poses = {}
 	self._global_poses.generic = {
@@ -101,6 +103,7 @@ function MenuSceneManager:init()
 	self._mask_units = {}
 	self._weapon_units = {}
 	self._character_visibilities = {}
+	self._deployable_equipped = {}
 	self:_setup_bg()
 	self:_set_up_templates()
 	self:_setup_gui()
@@ -126,6 +129,12 @@ function MenuSceneManager:_setup_gui()
 	})
 	self._character_grab = self._main_panel:panel({
 		w = 550,
+		h = self._main_panel:h() - 64
+	})
+	self._character_grab2 = self._main_panel:panel({
+		x = self._main_panel:w() * 0.25,
+		w = self._main_panel:w() * 0.45,
+		y = 20,
 		h = self._main_panel:h() - 64
 	})
 end
@@ -172,6 +181,7 @@ function MenuSceneManager:_set_up_templates()
 	self._scene_templates.blackmarket.lights = {}
 	self._scene_templates.blackmarket_item = {}
 	self._scene_templates.blackmarket_item.fov = 40
+	self._scene_templates.blackmarket_item.can_change_fov = true
 	self._scene_templates.blackmarket_item.use_item_grab = true
 	self._scene_templates.blackmarket_item.camera_pos = offset:rotate_with(Rotation(45)) + Vector3(0, 0, 200)
 	self._scene_templates.blackmarket_item.target_pos = target_pos + Vector3(0, 0, 200)
@@ -214,6 +224,7 @@ function MenuSceneManager:_set_up_templates()
 	}
 	self._scene_templates.blackmarket_mask = {}
 	self._scene_templates.blackmarket_mask.fov = 40
+	self._scene_templates.blackmarket_mask.can_change_fov = true
 	self._scene_templates.blackmarket_mask.use_item_grab = true
 	self._scene_templates.blackmarket_mask.camera_pos = offset:rotate_with(Rotation(45)) + Vector3(0, 0, 200)
 	self._scene_templates.blackmarket_mask.target_pos = target_pos + Vector3(0, 0, 200)
@@ -261,6 +272,7 @@ function MenuSceneManager:_set_up_templates()
 	self._scene_templates.lobby.camera_pos = offset:rotate_with(Rotation(90))
 	self._scene_templates.lobby.target_pos = target_pos
 	self._scene_templates.lobby.character_pos = c_ref:position() + Vector3(0, 500, 0)
+	self._scene_templates.lobby.lobby_characters_visible = true
 	self._scene_templates.lobby.fov = 40
 	self._scene_templates.lobby.lights = {
 		self:_create_light({
@@ -283,33 +295,82 @@ function MenuSceneManager:_set_up_templates()
 	}
 	self._scene_templates.lobby1 = {}
 	self._scene_templates.lobby1.use_character_grab = false
+	self._scene_templates.lobby1.lobby_characters_visible = true
 	self._scene_templates.lobby1.camera_pos = Vector3(-90.5634, -157.226, -28.6729)
 	self._scene_templates.lobby1.target_pos = Vector3(-90.5634, -157.226, -28.6729) + Vector3(-0.58315, 0.781811, 0.220697) * 100
 	self._scene_templates.lobby1.fov = 30
 	self._scene_templates.lobby1.lights = clone(self._scene_templates.lobby.lights)
 	self._scene_templates.lobby2 = {}
 	self._scene_templates.lobby2.use_character_grab = false
+	self._scene_templates.lobby2.lobby_characters_visible = true
 	self._scene_templates.lobby2.camera_pos = Vector3(-21.2779, -264.36, -56.7304)
 	self._scene_templates.lobby2.target_pos = Vector3(-21.2779, -264.36, -56.7304) + Vector3(-0.633319, 0.758269, 0.154709) * 100
 	self._scene_templates.lobby2.fov = 30
 	self._scene_templates.lobby2.lights = clone(self._scene_templates.lobby.lights)
 	self._scene_templates.lobby3 = {}
 	self._scene_templates.lobby3.use_character_grab = false
+	self._scene_templates.lobby3.lobby_characters_visible = true
 	self._scene_templates.lobby3.camera_pos = Vector3(149.695, -363.069, -110.613)
 	self._scene_templates.lobby3.target_pos = Vector3(149.695, -363.069, -110.613) + Vector3(-0.648856, 0.748553, 0.136579) * 100
 	self._scene_templates.lobby3.fov = 30
 	self._scene_templates.lobby3.lights = clone(self._scene_templates.lobby.lights)
 	self._scene_templates.lobby4 = {}
 	self._scene_templates.lobby4.use_character_grab = false
+	self._scene_templates.lobby4.lobby_characters_visible = true
 	self._scene_templates.lobby4.camera_pos = Vector3(210.949, -449.61, -126.709)
 	self._scene_templates.lobby4.target_pos = Vector3(210.949, -449.61, -126.709) + Vector3(-0.668524, 0.734205, 0.118403) * 100
 	self._scene_templates.lobby4.fov = 30
 	self._scene_templates.lobby4.lights = clone(self._scene_templates.lobby.lights)
+	self._scene_templates.inventory = {}
+	self._scene_templates.inventory.fov = 50
+	self._scene_templates.inventory.can_change_fov = true
+	self._scene_templates.inventory.change_fov_sensitivity = 3
+	self._scene_templates.inventory.use_character_grab2 = true
+	self._scene_templates.inventory.use_character_pan = true
+	self._scene_templates.inventory.character_visible = true
+	self._scene_templates.inventory.lobby_characters_visible = false
+	self._scene_templates.inventory.hide_menu_logo = true
+	self._scene_templates.inventory.camera_pos = ref:position()
+	self._scene_templates.inventory.target_pos = target_pos - self._camera_start_rot:x() * 40 - self._camera_start_rot:z() * 5
+	self._scene_templates.inventory.character_pos = c_ref:position()
+	self._scene_templates.inventory.remove_infamy_card = true
+	if not managers.menu:is_pc_controller() then
+	end
+	local l_pos = self._scene_templates.inventory.camera_pos
+	local rot = Rotation(self._scene_templates.inventory.target_pos - l_pos, math.UP)
+	local l1_pos = l_pos + rot:x() * -200 + rot:y() * 200
+	self._scene_templates.inventory.lights = {
+		self:_create_light({
+			far_range = 400,
+			color = Vector3(0.86, 0.37, 0.21) * 4,
+			position = Vector3(80, 33, 20)
+		}),
+		self:_create_light({
+			far_range = 180,
+			color = Vector3(0.3, 0.5, 0.8) * 6,
+			position = Vector3(-120, -6, 32),
+			specular_multiplier = 8
+		}),
+		self:_create_light({
+			far_range = 800,
+			color = Vector3(1, 1, 1) * 0.35,
+			position = Vector3(160, -250, -40),
+			specular_multiplier = 0
+		})
+	}
+end
+function MenuSceneManager:add_one_frame_delayed_clbk(clbk)
+	table.insert(self._one_frame_delayed_clbks, clbk)
+end
+function MenuSceneManager:input_focus()
+	return self._character_grabbed or self._item_grabbed and true or false
 end
 function MenuSceneManager:update(t, dt)
-	if self._one_frame_delayed_clbk then
-		self:_one_frame_delayed_clbk()
-		self._one_frame_delayed_clbk = nil
+	if self._one_frame_delayed_clbks and #self._one_frame_delayed_clbks > 0 then
+		for _, clbk in ipairs(self._one_frame_delayed_clbks) do
+			clbk()
+		end
+		self._one_frame_delayed_clbks = {}
 	end
 	if self._delayed_callbacks then
 		local callbacks = self._delayed_callbacks
@@ -341,6 +402,9 @@ function MenuSceneManager:update(t, dt)
 		if self._character_values and not self._transition_time and 0 < #self._character_dynamic_bodies then
 			self._enabled_character_dynamic_bodies = math.max(self._enabled_character_dynamic_bodies and self._enabled_character_dynamic_bodies or 0, 1)
 		end
+	elseif self._character_values and not mvector3.equal(self._character_values.pos_current, self._character_values.pos_target) then
+		mvector3.lerp(self._character_values.pos_current, self._character_values.pos_current, self._character_values.pos_target, dt * 20)
+		self._character_unit:set_position(self._character_values.pos_current)
 	end
 	if self._enabled_character_dynamic_bodies then
 		self._enabled_character_dynamic_bodies = self._enabled_character_dynamic_bodies - 1
@@ -427,7 +491,7 @@ function MenuSceneManager:_setup_bg()
 	World:spawn_unit(Idstring("units/menu/menu_scene/menu_smokecylinder1"), Vector3(0, 0, 0), Rotation(yaw, 0, 0))
 	World:spawn_unit(Idstring("units/menu/menu_scene/menu_smokecylinder2"), Vector3(0, 0, 0), Rotation(yaw, 0, 0))
 	World:spawn_unit(Idstring("units/menu/menu_scene/menu_smokecylinder3"), Vector3(0, 0, 0), Rotation(yaw, 0, 0))
-	World:spawn_unit(Idstring("units/menu/menu_scene/menu_logo"), Vector3(0, 0, 0), Rotation(yaw, 0, 0))
+	self._menu_logo = World:spawn_unit(Idstring("units/menu/menu_scene/menu_logo"), Vector3(0, 0, 0), Rotation(yaw, 0, 0))
 	for character_id, data in pairs(tweak_data.blackmarket.characters) do
 		if Global.blackmarket_manager.characters[character_id].equipped then
 			self:set_character(character_id)
@@ -477,22 +541,67 @@ function MenuSceneManager:_set_character_unit(unit_name, unit)
 	self._character_yaw = rot or a:rotation():yaw()
 	self._character_pitch = rot or a:rotation():pitch()
 	self:_set_character_unit_pose("husk_rifle1", unit)
+	self._character_unit_need_pose = true
 	return unit
 end
 function MenuSceneManager:_set_character_unit_pose(pose, unit)
 	local state = unit:play_redirect(Idstring("idle_menu"))
 	unit:anim_state_machine():set_parameter(state, pose, 1)
+	if self._character_unit == unit then
+		self:add_one_frame_delayed_clbk(callback(self, self, "_character_unit_pose_updated"))
+	end
 end
-function MenuSceneManager:_select_character_pose()
-	if managers.experience:current_rank() > 0 and self._card_units and self._card_units[self._character_unit:key()] then
+function MenuSceneManager:_character_unit_pose_updated()
+	self._character_unit_need_pose = false
+	self:_chk_character_visibility(self._character_unit)
+end
+function MenuSceneManager:_select_character_pose(unit)
+	unit = unit or self._character_unit
+	if self._scene_templates and self._scene_templates[self._current_scene_template] and self._scene_templates[self._current_scene_template].poses then
+		local poses = self._scene_templates[self._current_scene_template].poses
+		local pose
+		local primary = managers.blackmarket:equipped_primary()
+		if primary then
+			local weapon_id_poses = poses[primary.weapon_id]
+			if weapon_id_poses then
+				pose = weapon_id_poses[math.random(#weapon_id_poses)]
+			else
+				local category = tweak_data.weapon[primary.weapon_id].category
+				if poses[category] then
+					pose = poses[category][math.random(#poses[category])]
+				end
+			end
+			if pose then
+				self:_set_character_unit_pose(pose, unit)
+				return
+			end
+		end
+		local secondary = managers.blackmarket:equipped_secondary()
+		if secondary then
+			local weapon_id_poses = poses[secondary.weapon_id]
+			if weapon_id_poses then
+				pose = weapon_id_poses[math.random(#weapon_id_poses)]
+			else
+				local category = tweak_data.weapon[secondary.weapon_id].category
+				if poses[category] then
+					pose = poses[category][math.random(#poses[category])]
+				end
+			end
+			if pose then
+				self:_set_character_unit_pose(pose, unit)
+				return
+			end
+		end
+	end
+	if managers.experience:current_rank() > 0 and self._card_units and self._card_units[unit:key()] then
 		local pose = self._global_poses.infamous[math.random(#self._global_poses.infamous)]
-		self:_set_character_unit_pose(pose, self._character_unit)
+		self:_set_character_unit_pose(pose, unit)
 		return
 	end
 	local pose
 	if math.rand(1) < 0.25 then
 		pose = self._global_poses.generic[math.random(#self._global_poses.generic)]
-		self:_set_character_unit_pose(pose, self._character_unit)
+		self:_set_character_unit_pose(pose, unit)
 		return
 	end
 	if math.rand(1) < 0.12 then
@@ -503,7 +612,7 @@ function MenuSceneManager:_select_character_pose()
 				pose = self._global_poses.pistol[math.random(#self._global_poses.pistol)]
 			end
 			if pose then
-				self:_set_character_unit_pose(pose, self._character_unit)
+				self:_set_character_unit_pose(pose, unit)
 				return
 			end
 		end
@@ -530,12 +639,12 @@ function MenuSceneManager:_select_character_pose()
 			end
 		end
 		if pose then
-			self:_set_character_unit_pose(pose, self._character_unit)
+			self:_set_character_unit_pose(pose, unit)
 			return
 		end
 	end
 	pose = self._global_poses.generic[math.random(#self._global_poses.generic)]
-	self:_set_character_unit_pose(pose, self._character_unit)
+	self:_set_character_unit_pose(pose, unit)
 end
 function MenuSceneManager:_set_character_equipment()
 	local equipped_mask = managers.blackmarket:equipped_mask()
@@ -549,7 +658,8 @@ function MenuSceneManager:_set_character_equipment()
 		end
 	end
 	local rank = managers.experience:current_rank()
-	if rank > 0 then
+	local ignore_infamy_card = self._scene_templates and self._scene_templates[self._current_scene_template] and self._scene_templates[self._current_scene_template].remove_infamy_card and true or false
+	if rank > 0 and not ignore_infamy_card then
 		self:set_character_equipped_card(nil, rank - 1)
 	else
 		local secondary = managers.blackmarket:equipped_secondary()
@@ -565,6 +675,7 @@ function MenuSceneManager:_set_character_equipment()
 	else
 		self:_delete_character_weapon(self._character_unit, "primary")
 	end
+	self:set_character_deployable(Global.player_manager.kit.equipment_slots[1], false, 0)
 end
 function MenuSceneManager:_setup_lobby_characters()
 	if self._lobby_characters then
@@ -679,6 +790,9 @@ end
 function MenuSceneManager:set_lobby_character_visible(i, visible, no_state)
 	local unit = self._lobby_characters[i]
 	self._character_visibilities[unit:key()] = visible
+	if not visible then
+		self._deployable_equipped[i] = nil
+	end
 	self:_chk_character_visibility(unit)
 	if self._current_profile_slot == i then
 		managers.menu_component:close_lobby_profile_gui()
@@ -709,6 +823,7 @@ function MenuSceneManager:set_lobby_character_out_fit(i, outfit_string, rank)
 	local mask_blueprint = managers.blackmarket:mask_blueprint_from_outfit_string(outfit_string)
 	self:set_character_mask_by_id(outfit.mask.mask_id, outfit.mask.blueprint, unit, i)
 	self:set_character_armor(outfit.armor, unit)
+	self:set_character_deployable(outfit.deployable, unit, i)
 	self:set_character_card(i, rank, unit)
 	local is_me = i == managers.network:session():local_peer():id()
 	local mvec = Vector3()
@@ -728,6 +843,20 @@ function MenuSceneManager:set_lobby_character_out_fit(i, outfit_string, rank)
 	unit:set_position(pos)
 	unit:set_rotation(rot)
 	self:set_lobby_character_visible(i, true)
+end
+function MenuSceneManager:set_character_deployable(deployable_id, unit, peer_id)
+	unit = unit or self._character_unit
+	if self._deployable_equipped[peer_id] and self._deployable_equipped[peer_id] ~= "nil" then
+		local tweak_data = tweak_data.equipments[self._deployable_equipped[peer_id]]
+		local object_name = tweak_data.visual_object
+		unit:get_object(Idstring(object_name)):set_visibility(false)
+	end
+	if deployable_id and deployable_id ~= "nil" then
+		local tweak_data = tweak_data.equipments[deployable_id]
+		local object_name = tweak_data.visual_object
+		unit:get_object(Idstring(object_name)):set_visibility(self._characters_deployable_visible)
+	end
+	self._deployable_equipped[peer_id] = deployable_id
 end
 function MenuSceneManager:set_character_mask_by_id(mask_id, blueprint, unit, peer_id)
 	mask_id = managers.blackmarket:get_real_mask_id(mask_id, peer_id)
@@ -864,7 +993,16 @@ function MenuSceneManager:_chk_character_visibility(char_unit)
 		self:_set_character_and_outfit_visibility(char_unit, false)
 		return
 	end
-	if char_unit == self._character_unit and self._current_scene_template ~= "" and not self._scene_templates[self._current_scene_template].character_visible then
+	if char_unit == self._character_unit then
+		if self._character_unit_need_pose then
+			self:_set_character_and_outfit_visibility(char_unit, false)
+			return
+		end
+		if self._current_scene_template ~= "" and not self._scene_templates[self._current_scene_template].character_visible then
+			self:_set_character_and_outfit_visibility(char_unit, false)
+			return
+		end
+	elseif self._current_scene_template ~= "" and not self._scene_templates[self._current_scene_template].lobby_characters_visible then
 		self:_set_character_and_outfit_visibility(char_unit, false)
 		return
 	end
@@ -1151,10 +1289,33 @@ function MenuSceneManager:set_scene_template(template, data, custom_name, skip_t
 		template_data = data or self._scene_templates[template]
 		self._current_scene_template = custom_name or template
 		self._character_values = self._character_values or {}
-		self._character_values.pos_current = self._character_values.pos_target or template_data.character_pos
-		self._character_values.pos_target = template_data.character_pos or self._character_values.pos_current
+		if template_data.character_pos then
+			self._character_values.pos_current = self._character_values.pos_current or Vector3()
+			mvector3.set(self._character_values.pos_current, template_data.character_pos)
+		elseif self._character_values.pos_target then
+			self._character_values.pos_current = self._character_values.pos_current or Vector3()
+			mvector3.set(self._character_values.pos_current, self._character_values.pos_target)
+		end
+		local set_character_position = false
+		if template_data.character_pos then
+			self._character_values.pos_target = self._character_values.pos_target or Vector3()
+			mvector3.set(self._character_values.pos_target, template_data.character_pos)
+			set_character_position = true
+		elseif self._character_values.pos_current then
+			self._character_values.pos_target = self._character_values.pos_target or Vector3()
+			mvector3.set(self._character_values.pos_target, self._character_values.pos_current)
+			set_character_position = true
+		end
+		if set_character_position and self._character_values.pos_target then
+			self._character_unit:set_position(self._character_values.pos_target)
+		end
 		self:_chk_character_visibility(self._character_unit)
 		self:_chk_complete_overkill_pack_safe_visibility()
+		if self._lobby_characters then
+			for _, unit in pairs(self._lobby_characters) do
+				self:_chk_character_visibility(unit)
+			end
+		end
 		self._camera_values.camera_pos_current = self._camera_values.camera_pos_target
 		self._camera_values.target_pos_current = self._camera_values.target_pos_target
 		self._camera_values.fov_current = self._camera_values.fov_target
@@ -1169,6 +1330,23 @@ function MenuSceneManager:set_scene_template(template, data, custom_name, skip_t
 		self:_release_character_grab()
 		self._use_item_grab = template_data.use_item_grab
 		self._use_character_grab = template_data.use_character_grab
+		self._use_character_grab2 = template_data.use_character_grab2
+		self._use_character_pan = template_data.use_character_pan
+		self._disable_rotate = template_data.disable_rotate or false
+		self._can_change_fov = template_data.can_change_fov or false
+		self._change_fov_sensitivity = template_data.change_fov_sensitivity or 1
+		self._characters_deployable_visible = template_data.characters_deployable_visible or false
+		self:set_character_deployable(Global.player_manager.kit.equipment_slots[1], false, 0)
+		if template_data.remove_infamy_card and self._card_units and self._card_units[self._character_unit:key()] then
+			local secondary = managers.blackmarket:equipped_secondary()
+			if secondary then
+				self:set_character_equipped_weapon(nil, secondary.factory_id, secondary.blueprint, "secondary")
+			end
+		end
+		self:_select_character_pose()
+		if alive(self._menu_logo) then
+			self._menu_logo:set_visible(not template_data.hide_menu_logo)
+		end
 	end
 	if template_data and template_data.upgrade_object then
 		self._temp_upgrade_object = template_data.upgrade_object
@@ -1318,7 +1496,7 @@ function MenuSceneManager:remove_item()
 	end
 end
 function MenuSceneManager:spawn_infamy_card(rank)
-	self._one_frame_delayed_clbk = callback(self, self, "_spawn_infamy_card", rank - 1)
+	self:add_one_frame_delayed_clbk(callback(self, self, "_spawn_infamy_card", rank - 1))
 	return
 end
 function MenuSceneManager:infamy_card_shown()
@@ -1355,7 +1533,7 @@ function MenuSceneManager:spawn_grenade(grenade_id)
 	if not grenade.unit_dummy then
 		return
 	end
-	self._one_frame_delayed_clbk = callback(self, self, "spawn_grenade_clbk", grenade.unit_dummy)
+	self:add_one_frame_delayed_clbk(callback(self, self, "spawn_grenade_clbk", grenade.unit_dummy))
 	return
 end
 function MenuSceneManager:spawn_grenade_clbk(grenade_unit)
@@ -1380,7 +1558,15 @@ function MenuSceneManager:spawn_melee_weapon(melee_weapon_id)
 	if not melee_weapon.unit then
 		return
 	end
-	self._one_frame_delayed_clbk = callback(self, self, "spawn_melee_weapon_clbk", melee_weapon_id)
+	self:add_one_frame_delayed_clbk(callback(self, self, "spawn_melee_weapon_clbk", melee_weapon_id))
+	return
+end
+function MenuSceneManager:spawn_deployable(deployable_id)
+	local deployable = tweak_data.equipments[deployable_id]
+	if not deployable.dummy_unit then
+		return
+	end
+	self:add_one_frame_delayed_clbk(callback(self, self, "spawn_grenade_clbk", deployable.dummy_unit))
 	return
 end
 function MenuSceneManager:spawn_melee_weapon_clbk(melee_weapon_id)
@@ -1607,6 +1793,10 @@ function MenuSceneManager:clbk_mask_item_unit_loaded(status, asset_type, asset_n
 	self._item_unit = item
 	self._item_unit.unit = new_unit
 	new_unit:set_enabled(false)
+	new_unit:set_visible(false)
+	for _, linked_unit in ipairs(new_unit:children()) do
+		linked_unit:set_visible(false)
+	end
 	local default_blueprint = managers.blackmarket:get_mask_default_blueprint(self._item_unit.mask_id)
 	self._item_unit.unit:base():apply_blueprint(self._item_unit.blueprint or default_blueprint, callback(self, self, "clbk_mask_item_unit_assembled"))
 	mrotation.set_yaw_pitch_roll(self._item_rot_mod, 0, 90, 0)
@@ -1622,6 +1812,12 @@ function MenuSceneManager:clbk_mask_item_unit_assembled()
 	end
 	self._item_unit.unit:set_enabled(true)
 	self._item_unit.unit:set_moving()
+	self:add_one_frame_delayed_clbk(function()
+		self._item_unit.unit:set_visible(true)
+		for _, linked_unit in ipairs(self._item_unit.unit:children()) do
+			linked_unit:set_visible(true)
+		end
+	end)
 end
 function MenuSceneManager:spawn_or_update_mask(mask_id, blueprint)
 	if self._item_unit then
@@ -1705,7 +1901,7 @@ function MenuSceneManager:stop_controller_move()
 end
 function MenuSceneManager:controller_zoom(x, y)
 	self:change_fov("out", y * 20)
-	if self._use_character_grab and alive(self._character_unit) then
+	if (self._use_character_grab or self._use_character_grab2) and alive(self._character_unit) then
 		self._character_yaw = (self._character_yaw + x * 95) % 360
 		self._character_unit:set_rotation(Rotation(self._character_yaw, self._character_pitch))
 		self._character_grabbed = true
@@ -1715,16 +1911,16 @@ function MenuSceneManager:stop_controller_zoom()
 	self._character_grabbed = false
 end
 function MenuSceneManager:change_fov(zoom, amount)
-	if self._current_scene_template == "blackmarket_item" or self._current_scene_template == "blackmarket_mask" then
+	if self._can_change_fov then
 		if zoom == "in" then
-			self._fov_mod = math.clamp((self._fov_mod or 0) + (amount or 0.45), tweak_data.gui.mod_preview_min_fov, tweak_data.gui.mod_preview_max_fov)
+			self._fov_mod = math.clamp((self._fov_mod or 0) + (amount or 0.45) * (self._change_fov_sensitivity or 1), tweak_data.gui.mod_preview_min_fov, tweak_data.gui.mod_preview_max_fov)
 		elseif zoom == "out" then
-			self._fov_mod = math.clamp((self._fov_mod or 0) - (amount or 0.45), tweak_data.gui.mod_preview_min_fov, tweak_data.gui.mod_preview_max_fov)
+			self._fov_mod = math.clamp((self._fov_mod or 0) - (amount or 0.45) * (self._change_fov_sensitivity or 1), tweak_data.gui.mod_preview_min_fov, tweak_data.gui.mod_preview_max_fov)
 		end
 	end
 end
 function MenuSceneManager:mouse_pressed(o, button, x, y)
-	if managers.menu_component:input_focus() then
+	if managers.menu_component:input_focus() == true or managers.menu_component:input_focus() == 1 then
 		return
 	end
 	if button == Idstring("mouse wheel down") then
@@ -1760,6 +1956,12 @@ function MenuSceneManager:mouse_pressed(o, button, x, y)
 			self._character_grabbed_current_y = y
 			return true
 		end
+		if self._use_character_grab2 and self._character_grab2:inside(x, y) then
+			self._character_grabbed = true
+			self._character_grabbed_current_x = x
+			self._character_grabbed_current_y = y
+			return true
+		end
 	end
 	if not self._use_item_grab or self._disable_dragging then
 		return
@@ -1778,11 +1980,17 @@ function MenuSceneManager:mouse_released(o, button, x, y)
 	end
 end
 function MenuSceneManager:mouse_moved(o, x, y)
-	if managers.menu_component:input_focus() then
+	if managers.menu_component:input_focus() == true or managers.menu_component:input_focus() == 1 then
 		return false, "arrow"
 	end
 	if self._character_grabbed then
 		self._character_yaw = self._character_yaw + (x - self._character_grabbed_current_x) / 4
+		if self._use_character_pan and self._character_values and self._scene_templates and self._scene_templates[self._current_scene_template] then
+			local new_z = mvector3.z(self._character_values.pos_target) - (y - self._character_grabbed_current_y) / 12
+			local default_z = mvector3.z(self._scene_templates and self._scene_templates[self._current_scene_template].character_pos or self._character_values.pos_current)
+			new_z = math.clamp(new_z, default_z - 20, default_z + 10)
+			mvector3.set_z(self._character_values.pos_target, new_z)
+		end
 		self._character_unit:set_rotation(Rotation(self._character_yaw, self._character_pitch))
 		self._character_grabbed_current_x = x
 		self._character_grabbed_current_y = y
@@ -1821,6 +2029,9 @@ function MenuSceneManager:mouse_moved(o, x, y)
 		return true, "hand"
 	end
 	if self._use_character_grab and self._character_grab:inside(x, y) then
+		return true, "hand"
+	end
+	if self._use_character_grab2 and self._character_grab2:inside(x, y) then
 		return true, "hand"
 	end
 end

@@ -666,7 +666,10 @@ function SkillTreeGui:init(ws, fullscreen_ws, node)
 	self._prerequisites_links = {}
 	managers.menu_component:close_contract_gui()
 	managers.features:announce_feature("perk_deck")
-	self:_setup()
+	local menu_components_data = node:parameters().menu_component_data or {}
+	local add_skilltree = not menu_components_data.hide_skilltree
+	local add_specialization = not menu_components_data.hide_specialization
+	self:_setup(add_skilltree, add_specialization)
 	self:set_layer(5)
 end
 function SkillTreeGui:make_fine_text(text)
@@ -674,7 +677,7 @@ function SkillTreeGui:make_fine_text(text)
 	text:set_size(w, h)
 	text:set_position(math.round(text:x()), math.round(text:y()))
 end
-function SkillTreeGui:_setup()
+function SkillTreeGui:_setup(add_skilltree, add_specialization)
 	if alive(self._panel) then
 		self._ws:panel():remove(self._panel)
 	end
@@ -1367,6 +1370,15 @@ function SkillTreeGui:_setup()
 	self:_set_active_skill_page(managers.skilltree:get_most_progressed_tree())
 	self:_set_active_spec_tree(managers.skilltree:get_specialization_value("current_specialization"))
 	self:set_selected_item(self._active_page:item(), true)
+	self._use_skilltree = add_skilltree or false
+	self._use_specialization = add_specialization or false
+	if not self._use_skilltree then
+		skilltree_text:hide()
+		specialization_text:set_left(skilltree_text:left())
+	end
+	separator:set_visible(self._use_skilltree and self._use_specialization)
+	specialization_text:set_visible(self._use_specialization)
+	self:set_skilltree_page_active(self._use_skilltree)
 	self:_rec_round_object(self._panel)
 end
 function SkillTreeGui:check_spec_grab_scroll_bar(x, y)
@@ -1970,7 +1982,7 @@ function SkillTreeGui:mouse_moved(o, x, y)
 	end
 	local inside = false
 	local pointer = "arrow"
-	if self._is_skilltree_page_active then
+	if self._is_skilltree_page_active and self._use_specialization then
 		local specialization_text = self._panel:child("specialization_text")
 		if specialization_text:inside(x, y) then
 			if not self._specialization_text_highlighted then
@@ -1984,7 +1996,7 @@ function SkillTreeGui:mouse_moved(o, x, y)
 			self._specialization_text_highlighted = false
 			specialization_text:set_color(tweak_data.screen_colors.button_stage_3)
 		end
-	else
+	elseif not self._is_skilltree_page_active and self._use_skilltree then
 		local skilltree_text = self._panel:child("skilltree_text")
 		if skilltree_text:inside(x, y) then
 			if not self._skilltree_text_highlighted then
@@ -1999,7 +2011,7 @@ function SkillTreeGui:mouse_moved(o, x, y)
 			skilltree_text:set_color(tweak_data.screen_colors.button_stage_3)
 		end
 	end
-	if self._is_skilltree_page_active then
+	if self._is_skilltree_page_active and self._use_skilltree then
 		if self:check_respec_button(x, y) then
 			inside = true
 			pointer = "link"
@@ -2024,7 +2036,7 @@ function SkillTreeGui:mouse_moved(o, x, y)
 				pointer = same_tab_item and "arrow" or "link"
 			end
 		end
-	else
+	elseif not self._is_skilltree_page_active and self._use_specialization then
 		local inside2, pointer2 = self:moved_scroll_bar(x, y)
 		if inside2 then
 			return inside2, pointer2
@@ -2117,21 +2129,25 @@ function SkillTreeGui:mouse_pressed(button, x, y)
 		return
 	end
 	if button == Idstring("mouse wheel down") then
-		if self._is_skilltree_page_active then
+		if self._is_skilltree_page_active and self._use_skilltree then
 			self:activate_next_tree_panel()
-		elseif self._spec_scroll_bar_panel:inside(x, y) or self._specialization_panel:child("spec_box_panel"):inside(x, y) then
-			self:set_spec_scroll_indicators(self._specialization_scroll_y + 1)
-		elseif self._specialization_panel:child("spec_tabs_panel"):inside(x, y) then
-			self:activate_next_spec_panel()
+		elseif not self._is_skilltree_page_active and self._use_specialization then
+			if self._spec_scroll_bar_panel:inside(x, y) or self._specialization_panel:child("spec_box_panel"):inside(x, y) then
+				self:set_spec_scroll_indicators(self._specialization_scroll_y + 1)
+			elseif self._specialization_panel:child("spec_tabs_panel"):inside(x, y) then
+				self:activate_next_spec_panel()
+			end
 		end
 		return
 	elseif button == Idstring("mouse wheel up") then
-		if self._is_skilltree_page_active then
+		if self._is_skilltree_page_active and self._use_skilltree then
 			self:activate_prev_tree_panel()
-		elseif self._spec_scroll_bar_panel:inside(x, y) or self._specialization_panel:child("spec_box_panel"):inside(x, y) then
-			self:set_spec_scroll_indicators(self._specialization_scroll_y - 1)
-		elseif self._specialization_panel:child("spec_tabs_panel"):inside(x, y) then
-			self:activate_prev_spec_panel()
+		elseif not self._is_skilltree_page_active and self._use_specialization then
+			if self._spec_scroll_bar_panel:inside(x, y) or self._specialization_panel:child("spec_box_panel"):inside(x, y) then
+				self:set_spec_scroll_indicators(self._specialization_scroll_y - 1)
+			elseif self._specialization_panel:child("spec_tabs_panel"):inside(x, y) then
+				self:activate_prev_spec_panel()
+			end
 		end
 		return
 	end
@@ -2139,12 +2155,12 @@ function SkillTreeGui:mouse_pressed(button, x, y)
 		local specialization_text = self._panel:child("specialization_text")
 		local skilltree_text = self._panel:child("skilltree_text")
 		local title_bg = self._fullscreen_panel:child("title_bg")
-		if self._is_skilltree_page_active then
+		if self._is_skilltree_page_active and self._use_specialization then
 			if specialization_text:inside(x, y) then
 				self:set_skilltree_page_active(false)
 				return
 			end
-		elseif skilltree_text:inside(x, y) then
+		elseif not self._is_skilltree_page_active and self._use_skilltree and skilltree_text:inside(x, y) then
 			self:set_skilltree_page_active(true)
 			return
 		end
@@ -2152,7 +2168,7 @@ function SkillTreeGui:mouse_pressed(button, x, y)
 			managers.menu:back()
 			return
 		end
-		if self._is_skilltree_page_active then
+		if self._is_skilltree_page_active and self._use_skilltree then
 			if self._skill_tree_panel:child("respec_tree_button"):inside(x, y) then
 				self:respec_active_tree()
 				return
@@ -2181,7 +2197,7 @@ function SkillTreeGui:mouse_pressed(button, x, y)
 					return true
 				end
 			end
-		else
+		elseif not self._is_skilltree_page_active and self._use_specialization then
 			if self._specialization_panel:child("spec_tabs_panel"):inside(x, y) then
 				for _, tab_item in ipairs(self._spec_tab_items) do
 					if tab_item:inside(x, y) then
@@ -2255,13 +2271,13 @@ function SkillTreeGui:move_up()
 	if self._spec_placing_points then
 		return
 	end
-	if self._is_skilltree_page_active then
+	if self._is_skilltree_page_active and self._use_skilltree then
 		if not self._selected_item and self._active_page then
 			self:set_selected_item(self._active_page:item())
 		elseif self._selected_item and self._selected_item._up_item then
 			self:set_selected_item(self._selected_item._up_item)
 		end
-	else
+	elseif not self._is_skilltree_page_active and self._use_specialization then
 		self:move_spec_item(0, -1)
 	end
 end
@@ -2272,13 +2288,13 @@ function SkillTreeGui:move_down()
 	if self._spec_placing_points then
 		return
 	end
-	if self._is_skilltree_page_active then
+	if self._is_skilltree_page_active and self._use_skilltree then
 		if not self._selected_item and self._active_page then
 			self:set_selected_item(self._active_page:item())
 		elseif self._selected_item and self._selected_item._down_item then
 			self:set_selected_item(self._selected_item._down_item)
 		end
-	else
+	elseif not self._is_skilltree_page_active and self._use_specialization then
 		self:move_spec_item(0, 1)
 	end
 end
@@ -2289,13 +2305,13 @@ function SkillTreeGui:move_left()
 	if self._spec_placing_points then
 		return
 	end
-	if self._is_skilltree_page_active then
+	if self._is_skilltree_page_active and self._use_skilltree then
 		if not self._selected_item and self._active_page then
 			self:set_selected_item(self._active_page:item())
 		elseif self._selected_item and self._selected_item._left_item then
 			self:set_selected_item(self._selected_item._left_item)
 		end
-	else
+	elseif not self._is_skilltree_page_active and self._use_specialization then
 		self:move_spec_item(-1, 0)
 	end
 end
@@ -2306,13 +2322,13 @@ function SkillTreeGui:move_right()
 	if self._spec_placing_points then
 		return
 	end
-	if self._is_skilltree_page_active then
+	if self._is_skilltree_page_active and self._use_skilltree then
 		if not self._selected_item and self._active_page then
 			self:set_selected_item(self._active_page:item())
 		elseif self._selected_item and self._selected_item._right_item then
 			self:set_selected_item(self._selected_item._right_item)
 		end
-	else
+	elseif not self._is_skilltree_page_active and self._use_specialization then
 		self:move_spec_item(1, 0)
 	end
 end
@@ -2323,11 +2339,11 @@ function SkillTreeGui:next_page(play_sound)
 	if self._spec_placing_points then
 		return
 	end
-	if self._is_skilltree_page_active then
+	if self._is_skilltree_page_active and self._use_skilltree then
 		if self:activate_next_tree_panel(play_sound) then
 			self:set_selected_item(self._active_page:item(), true)
 		end
-	elseif self:activate_next_spec_panel(play_sound) then
+	elseif not self._is_skilltree_page_active and self._use_specialization and self:activate_next_spec_panel(play_sound) then
 		self:set_selected_item(self._spec_tab_items[self._active_spec_tree], true)
 	end
 end
@@ -2338,11 +2354,11 @@ function SkillTreeGui:previous_page(play_sound)
 	if self._spec_placing_points then
 		return
 	end
-	if self._is_skilltree_page_active then
+	if self._is_skilltree_page_active and self._use_skilltree then
 		if self:activate_prev_tree_panel(play_sound) then
 			self:set_selected_item(self._active_page:item(), true)
 		end
-	elseif self:activate_prev_spec_panel(play_sound) then
+	elseif not self._is_skilltree_page_active and self._use_specialization and self:activate_prev_spec_panel(play_sound) then
 		self:set_selected_item(self._spec_tab_items[self._active_spec_tree], true)
 	end
 end
@@ -2354,7 +2370,7 @@ function SkillTreeGui:confirm_pressed()
 	if not self._enabled then
 		return
 	end
-	if self._is_skilltree_page_active and self._selected_item and self._selected_item._skill_panel then
+	if self._is_skilltree_page_active and self._use_skilltree and self._selected_item and self._selected_item._skill_panel then
 		self:place_point(self._selected_item)
 		return true
 	end
@@ -2367,16 +2383,16 @@ function SkillTreeGui:special_btn_pressed(button)
 	if self._spec_placing_points then
 		return
 	end
-	if button == Idstring("trigger_left") and not self._is_skilltree_page_active then
+	if button == Idstring("trigger_left") and not self._is_skilltree_page_active and self._use_skilltree then
 		self:set_skilltree_page_active(true)
 		managers.menu_component:post_event("highlight")
 		return true
-	elseif button == Idstring("trigger_right") and self._is_skilltree_page_active then
+	elseif button == Idstring("trigger_right") and self._is_skilltree_page_active and self._use_specialization then
 		self:set_skilltree_page_active(false)
 		managers.menu_component:post_event("highlight")
 		return true
 	end
-	if self._is_skilltree_page_active then
+	if self._is_skilltree_page_active and self._use_skilltree then
 		if button == Idstring("menu_respec_tree") then
 			self:respec_active_tree()
 			return true
@@ -2384,7 +2400,7 @@ function SkillTreeGui:special_btn_pressed(button)
 			managers.menu:open_node("skill_switch", {})
 			return
 		end
-	else
+	elseif not self._is_skilltree_page_active and self._use_specialization then
 		return self:press_pc_button(button)
 	end
 	return false

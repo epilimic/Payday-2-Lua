@@ -334,8 +334,7 @@ function MousePointerManager:convert_fullscreen_mouse_pos(x, y)
 	return x, y
 end
 function MousePointerManager:convert_fullscreen_16_9_mouse_pos(x, y)
-	y = y - managers.gui_data:full_16_9_size().y
-	return x, y
+	return managers.gui_data:full_to_full_16_9(x, y)
 end
 function MousePointerManager:modified_fullscreen_mouse_pos(x, y)
 	local x, y = self._mouse:world_position()

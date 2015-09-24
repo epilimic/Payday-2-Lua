@@ -297,6 +297,20 @@ function GroupAITweakData:_init_unit_categories(difficulty_index)
 			special_type = "tank"
 		}
 	end
+	self.unit_categories.Phalanx_minion = {
+		units = {
+			Idstring("units/pd2_dlc_vip/characters/ene_phalanx_1/ene_phalanx_1")
+		},
+		access = access_type_walk_only,
+		special_type = "shield"
+	}
+	self.unit_categories.Phalanx_vip = {
+		units = {
+			Idstring("units/pd2_dlc_vip/characters/ene_vip_1/ene_vip_1")
+		},
+		access = access_type_walk_only,
+		special_type = "shield"
+	}
 end
 function GroupAITweakData:_init_enemy_spawn_groups(difficulty_index)
 	self._tactics = {
@@ -420,6 +434,22 @@ function GroupAITweakData:_init_enemy_spawn_groups(difficulty_index)
 			"deathguard"
 		},
 		FBI_shield = {
+			"smoke_grenade",
+			"charge",
+			"provide_coverfire",
+			"provide_support",
+			"shield",
+			"deathguard"
+		},
+		Phalanx_minion = {
+			"smoke_grenade",
+			"charge",
+			"provide_coverfire",
+			"provide_support",
+			"shield",
+			"deathguard"
+		},
+		Phalanx_vip = {
 			"smoke_grenade",
 			"charge",
 			"provide_coverfire",
@@ -1036,6 +1066,29 @@ function GroupAITweakData:_init_enemy_spawn_groups(difficulty_index)
 			}
 		}
 	end
+	self.enemy_spawn_groups.Phalanx = {
+		amount = {
+			self.phalanx.minions.amount + 1,
+			self.phalanx.minions.amount + 1
+		},
+		spawn = {
+			{
+				unit = "Phalanx_vip",
+				freq = 1,
+				amount_min = 1,
+				amount_max = 1,
+				tactics = self._tactics.Phalanx_vip,
+				rank = 2
+			},
+			{
+				unit = "Phalanx_minion",
+				freq = 1,
+				amount_min = 1,
+				tactics = self._tactics.Phalanx_minion,
+				rank = 1
+			}
+		}
+	}
 	self.enemy_spawn_groups.single_spooc = {
 		amount = {1, 1},
 		spawn = {
@@ -1358,11 +1411,6 @@ function GroupAITweakData:_init_task_data(difficulty_index, difficulty)
 				0,
 				0,
 				0.15
-			},
-			single_spooc = {
-				0,
-				0,
-				0
 			}
 		}
 	elseif difficulty_index == 3 then
@@ -1391,11 +1439,6 @@ function GroupAITweakData:_init_task_data(difficulty_index, difficulty)
 				0,
 				0.01,
 				0.05
-			},
-			single_spooc = {
-				0,
-				0,
-				0
 			}
 		}
 	elseif difficulty_index == 4 then
@@ -1429,11 +1472,6 @@ function GroupAITweakData:_init_task_data(difficulty_index, difficulty)
 				0.05,
 				0.15,
 				0.2
-			},
-			single_spooc = {
-				0,
-				0,
-				0
 			}
 		}
 	elseif difficulty_index == 5 then
@@ -1462,11 +1500,6 @@ function GroupAITweakData:_init_task_data(difficulty_index, difficulty)
 				0.1,
 				0.25,
 				0.25
-			},
-			single_spooc = {
-				0,
-				0,
-				0
 			}
 		}
 	else
@@ -1500,14 +1533,19 @@ function GroupAITweakData:_init_task_data(difficulty_index, difficulty)
 				0,
 				0.45,
 				0.45
-			},
-			single_spooc = {
-				0,
-				0,
-				0
 			}
 		}
 	end
+	self.besiege.assault.groups.single_spooc = {
+		0,
+		0,
+		0
+	}
+	self.besiege.assault.groups.Phalanx = {
+		0,
+		0,
+		0
+	}
 	self.besiege.reenforce.interval = {
 		10,
 		20,
@@ -1649,11 +1687,6 @@ function GroupAITweakData:_init_task_data(difficulty_index, difficulty)
 				0,
 				1,
 				1
-			},
-			single_spooc = {
-				0,
-				0,
-				0
 			}
 		}
 	elseif difficulty_index == 3 then
@@ -1677,11 +1710,6 @@ function GroupAITweakData:_init_task_data(difficulty_index, difficulty)
 				0,
 				0,
 				0.1
-			},
-			single_spooc = {
-				0,
-				0,
-				0
 			}
 		}
 	elseif difficulty_index == 4 then
@@ -1695,11 +1723,6 @@ function GroupAITweakData:_init_task_data(difficulty_index, difficulty)
 				0,
 				0,
 				1
-			},
-			single_spooc = {
-				0,
-				0,
-				0
 			}
 		}
 	elseif difficulty_index == 5 then
@@ -1713,11 +1736,6 @@ function GroupAITweakData:_init_task_data(difficulty_index, difficulty)
 				0.25,
 				0.5,
 				1
-			},
-			single_spooc = {
-				0,
-				0,
-				0
 			}
 		}
 	else
@@ -1731,14 +1749,19 @@ function GroupAITweakData:_init_task_data(difficulty_index, difficulty)
 				0.25,
 				0.5,
 				1
-			},
-			single_spooc = {
-				0,
-				0,
-				0
 			}
 		}
 	end
+	self.besiege.recon.groups.single_spooc = {
+		0,
+		0,
+		0
+	}
+	self.besiege.recon.groups.Phalanx = {
+		0,
+		0,
+		0
+	}
 	self.besiege.cloaker.groups = {
 		single_spooc = {
 			1,
@@ -1747,6 +1770,51 @@ function GroupAITweakData:_init_task_data(difficulty_index, difficulty)
 		}
 	}
 	self.street = deep_clone(self.besiege)
+	self.phalanx.minions.min_count = 4
+	self.phalanx.minions.amount = 10
+	self.phalanx.minions.distance = 100
+	self.phalanx.vip.health_ratio_flee = 0.2
+	self.phalanx.vip.damage_reduction = {
+		start = 0.1,
+		increase = 0.05,
+		max = 0.5,
+		increase_intervall = 5
+	}
+	self.phalanx.check_spawn_intervall = 120
+	self.phalanx.chance_increase_intervall = 120
+	if difficulty_index == 4 then
+		self.phalanx.spawn_chance = {
+			start = 0,
+			increase = 0.05,
+			decrease = 0.7,
+			max = 1,
+			respawn_delay = 300000
+		}
+	elseif difficulty_index == 5 then
+		self.phalanx.spawn_chance = {
+			start = 0.01,
+			increase = 0.09,
+			decrease = 0.7,
+			max = 1,
+			respawn_delay = 300000
+		}
+	elseif difficulty_index == 6 then
+		self.phalanx.spawn_chance = {
+			start = 0.05,
+			increase = 0.09,
+			decrease = 1,
+			max = 1,
+			respawn_delay = 300000
+		}
+	else
+		self.phalanx.spawn_chance = {
+			start = 0,
+			increase = 0,
+			decrease = 0,
+			max = 0,
+			respawn_delay = 120
+		}
+	end
 end
 function GroupAITweakData:_read_mission_preset(tweak_data)
 	if not Global.game_settings then
@@ -1766,6 +1834,11 @@ function GroupAITweakData:_create_table_structure()
 		recon = {},
 		rescue = {},
 		cloaker = {}
+	}
+	self.phalanx = {
+		minions = {},
+		vip = {},
+		spawn_chance = {}
 	}
 	self.street = {
 		blockade = {

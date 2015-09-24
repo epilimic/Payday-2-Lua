@@ -549,7 +549,14 @@ function StatisticsTweakData:statistics_table()
 		"mobster_boss",
 		"tank_hw",
 		"hector_boss",
-		"hector_boss_no_armor"
+		"hector_boss_no_armor",
+		"tank_green",
+		"tank_black",
+		"tank_skull",
+		"hostage_rescue",
+		"murkywater",
+		"phalanx_vip",
+		"phalanx_minion"
 	}
 	local armor_list = {
 		"level_1",
@@ -574,7 +581,17 @@ function StatisticsTweakData:statistics_table()
 		"sokol",
 		"dragon"
 	}
-	return level_list, job_list, mask_list, weapon_list, melee_list, grenade_list, enemy_list, armor_list, character_list
+	local deployable_list = {
+		"ammo_bag",
+		"doctor_bag",
+		"trip_mine",
+		"sentry_gun",
+		"ecm_jammer",
+		"first_aid_kit",
+		"bodybags_bag",
+		"armor_kit"
+	}
+	return level_list, job_list, mask_list, weapon_list, melee_list, grenade_list, enemy_list, armor_list, character_list, deployable_list
 end
 function StatisticsTweakData:resolution_statistics_table()
 	return {

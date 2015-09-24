@@ -1393,6 +1393,7 @@ function HUDManager:on_simulation_ended()
 	self:end_assault()
 	self._teammate_panels[HUDManager.PLAYER_PANEL]:remove_panel()
 	self._teammate_panels[HUDManager.PLAYER_PANEL]:add_panel()
+	self._hud_heist_timer:reset()
 end
 function HUDManager:debug_show_coordinates()
 	if self._debug then
@@ -1422,7 +1423,8 @@ end
 function HUDManager:save(data)
 	local state = {
 		waypoints = {},
-		in_assault = self._hud.in_assault
+		in_assault = self._hud.in_assault,
+		assault_mode = self._hud_assault_corner:get_assault_mode()
 	}
 	for id, data in pairs(self._hud.waypoints) do
 		if not data.no_sync then
@@ -1441,6 +1443,9 @@ function HUDManager:load(data)
 	end
 	if state.in_assault then
 		self:sync_start_assault()
+		if state.assault_mode then
+			managers.hud:sync_set_assault_mode(state.assault_mode)
+		end
 	end
 end
 require("lib/managers/HUDManagerPD2")

@@ -106,7 +106,7 @@ function CopLogicTravel.enter(data, new_logic_name, enter_params)
 	my_data.attitude = data.objective.attitude or "avoid"
 	my_data.weapon_range = data.char_tweak.weapon[data.unit:inventory():equipped_unit():base():weapon_tweak_data().usage].range
 	my_data.path_safely = data.team.foes[tweak_data.levels:get_default_team_ID("player")]
-	my_data.path_ahead = data.team.id == tweak_data.levels:get_default_team_ID("player")
+	my_data.path_ahead = data.objective.path_ahead or data.team.id == tweak_data.levels:get_default_team_ID("player")
 	data.unit:brain():set_update_enabled_state(false)
 	if Application:production_build() then
 		my_data.pathing_debug = {
@@ -622,6 +622,16 @@ function CopLogicTravel._determine_destination_occupation(data, objective)
 				}
 			end
 		end
+	elseif objective.type == "phalanx" then
+		local logic = data.unit:brain():get_logic_by_name(objective.type)
+		logic.register_in_group_ai(data.unit)
+		local phalanx_circle_pos = logic.calc_initial_phalanx_pos(data.m_pos, objective)
+		occupation = {
+			type = "defend",
+			seg = objective.nav_seg,
+			pos = phalanx_circle_pos,
+			radius = objective.radius
+		}
 	elseif objective.type == "act" then
 		occupation = {
 			type = "act",
@@ -1020,7 +1030,7 @@ end
 function CopLogicTravel.get_pathing_prio(data)
 	local prio
 	local objective = data.objective
-	if objective and objective.follow_unit and (objective.follow_unit:base().is_local_player or objective.follow_unit:base().is_husk_player) then
+	if objective and (objective.follow_unit and (objective.follow_unit:base().is_local_player or objective.follow_unit:base().is_husk_player) or objective.type == "phalanx") then
 		prio = 4
 		if data.team.id == tweak_data.levels:get_default_team_ID("player") then
 			prio = prio + 1
@@ -1115,6 +1125,10 @@ function CopLogicTravel._on_destination_reached(data)
 			data.objective_complete_clbk(data.unit, objective)
 			return
 		end
+	elseif objective.type == "flee" then
+		data.unit:brain():set_active(false)
+		data.unit:base():set_slot(data.unit, 0)
+		return
 	elseif objective.type == "defend_area" then
 		if objective.grp_objective and objective.grp_objective.type == "retire" then
 			data.unit:brain():set_active(false)

@@ -4,7 +4,7 @@ function ElementSpawnEnemyGroup:init(...)
 	ElementSpawnEnemyGroup.super.init(self, ...)
 	self._group_data = {}
 	self._group_data.amount = self._values.amount
-	self._group_data.random = self._values.random
+	self._group_data.spawn_type = self._values.spawn_type
 	self._group_data.ignore_disabled = self._values.ignore_disabled
 	self._group_data.spawn_points = {}
 	self._unused_randoms = {}
@@ -51,26 +51,31 @@ function ElementSpawnEnemyGroup:on_executed(instigator)
 	end
 	self:_check_spawn_points()
 	if #self._spawn_points > 0 then
-		for i = 1, self._group_data.amount do
-			local element = self._spawn_points[self:_get_spawn_point(i)]
-			element:produce({
-				team = self._values.team
-			})
+		if self._group_data.spawn_type == "group" then
+			local spawn_group_data = managers.groupai:state():create_spawn_group(self._id, self, self._spawn_points)
+			managers.groupai:state():force_spawn_group(spawn_group_data, self._values.preferred_spawn_groups)
+		else
+			for i = 1, self:get_random_table_value(self._group_data.amount) do
+				local element = self._spawn_points[self:_get_spawn_point(i)]
+				element:produce({
+					team = self._values.team
+				})
+			end
 		end
 	end
 	ElementSpawnEnemyGroup.super.on_executed(self, instigator)
 end
 function ElementSpawnEnemyGroup:_get_spawn_point(i)
-	if self._group_data.random then
-		if #self._unused_randoms == 0 then
-			for i = 1, #self._spawn_points do
-				table.insert(self._unused_randoms, i)
-			end
-		end
-		local rand = math.random(#self._unused_randoms)
-		return table.remove(self._unused_randoms, rand)
+	if self._group_data.spawn_type == "ordered" then
+		return 1 + math.mod(i, #self._spawn_points)
 	end
-	return 1 + math.mod(i, #self._spawn_points)
+	if #self._unused_randoms == 0 then
+		for i = 1, #self._spawn_points do
+			table.insert(self._unused_randoms, i)
+		end
+	end
+	local rand = math.random(#self._unused_randoms)
+	return table.remove(self._unused_randoms, rand)
 end
 function ElementSpawnEnemyGroup:units()
 	local all_units = {}

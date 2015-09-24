@@ -566,16 +566,39 @@ function ContractBoxGui:mouse_pressed(button, x, y)
 		return
 	end
 	if button == Idstring("0") then
+		local used = false
+		local pointer = "arrow"
+		if self._peers and SystemInfo:platform() == Idstring("WIN32") then
+			for peer_id, object in pairs(self._peers) do
+				if alive(object) and object:inside(x, y) then
+					local peer = managers.network:session() and managers.network:session():peer(peer_id)
+					if peer then
+						Steam:overlay_activate("url", tweak_data.gui.fbi_files_webpage .. "/suspect/" .. peer:user_id() .. "/")
+						return
+					end
+				end
+			end
+		end
 	end
 end
 function ContractBoxGui:mouse_moved(x, y)
 	if not self:can_take_input() then
 		return
 	end
-	return false, nil
+	local used = false
+	local pointer = "arrow"
+	if self._peers then
+		for peer_id, object in pairs(self._peers) do
+			if alive(object) and object:inside(x, y) then
+				used = true
+				pointer = "link"
+			end
+		end
+	end
+	return used, pointer
 end
 function ContractBoxGui:can_take_input()
-	return false
+	return true
 end
 function ContractBoxGui:moved_scroll_bar()
 end

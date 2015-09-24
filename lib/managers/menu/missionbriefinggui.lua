@@ -1946,137 +1946,14 @@ function NewLoadoutTab:init(panel, text, i, menu_component_data)
 	NewLoadoutTab.super.init(self, panel, text, i)
 	self._panel:move(0, 5)
 	self._panel:grow(0, -5)
-	local primary_texture = "guis/textures/pd2/endscreen/what_is_this"
-	local secondary_texture = "guis/textures/pd2/endscreen/what_is_this"
-	local melee_weapon_texture = "guis/textures/pd2/endscreen/what_is_this"
-	local grenade_texture = "guis/textures/pd2/endscreen/what_is_this"
-	local armor_texture = "guis/textures/pd2/endscreen/what_is_this"
-	local deployable_texture = "guis/textures/pd2/endscreen/what_is_this"
-	local empty_string = managers.localization:to_upper_text("menu_loadout_empty")
-	local primary_string = empty_string
-	local secondary_string = empty_string
-	local melee_weapon_string = empty_string
-	local grenade_string = empty_string
-	local armor_string = empty_string
-	local deployable_string = empty_string
-	local primary_perks = {}
-	local secondary_perks = {}
-	local primary = managers.blackmarket:equipped_primary()
-	local secondary = managers.blackmarket:equipped_secondary()
-	local melee_weapon = managers.blackmarket:equipped_melee_weapon()
-	local grenade, grenade_amount = managers.blackmarket:equipped_grenade()
-	local armor = managers.blackmarket:equipped_armor()
-	local deployable = managers.player:equipment_in_slot(1)
-	if primary then
-		local guis_catalog = "guis/"
-		local weapon_id = primary.weapon_id
-		local bundle_folder = tweak_data.weapon[weapon_id] and tweak_data.weapon[weapon_id].texture_bundle_folder
-		if bundle_folder then
-			guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
-		end
-		local texture_name = tweak_data.weapon[weapon_id].texture_name or tostring(weapon_id)
-		primary_texture = guis_catalog .. "textures/pd2/blackmarket/icons/weapons/" .. texture_name
-		local equipped_weapon = managers.blackmarket:equipped_primary()
-		local equipped_slot = managers.blackmarket:equipped_weapon_slot("primaries")
-		primary_string = managers.blackmarket:get_weapon_name_by_category_slot("primaries", equipped_slot)
-		if equipped_weapon and equipped_slot then
-			local icon_list = {}
-			for i, icon in ipairs(managers.menu_component:create_weapon_mod_icon_list(equipped_weapon.weapon_id, "primaries", equipped_weapon.factory_id, equipped_slot)) do
-				if icon.equipped then
-					table.insert(icon_list, icon)
-				end
-			end
-			primary_perks = icon_list
-		end
-	end
-	if secondary then
-		local guis_catalog = "guis/"
-		local weapon_id = secondary.weapon_id
-		local bundle_folder = tweak_data.weapon[weapon_id] and tweak_data.weapon[weapon_id].texture_bundle_folder
-		if bundle_folder then
-			guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
-		end
-		local texture_name = tweak_data.weapon[secondary.weapon_id].texture_name or tostring(secondary.weapon_id)
-		secondary_texture = guis_catalog .. "textures/pd2/blackmarket/icons/weapons/" .. texture_name
-		local equipped_weapon = managers.blackmarket:equipped_secondary()
-		local equipped_slot = managers.blackmarket:equipped_weapon_slot("secondaries")
-		secondary_string = managers.blackmarket:get_weapon_name_by_category_slot("secondaries", equipped_slot)
-		if equipped_weapon and equipped_slot then
-			local icon_list = {}
-			for i, icon in ipairs(managers.menu_component:create_weapon_mod_icon_list(equipped_weapon.weapon_id, "secondaries", equipped_weapon.factory_id, equipped_slot)) do
-				if icon.equipped then
-					table.insert(icon_list, icon)
-				end
-			end
-			secondary_perks = icon_list
-		end
-	end
-	if melee_weapon then
-		local guis_catalog = "guis/"
-		local bundle_folder = tweak_data.blackmarket.melee_weapons[melee_weapon] and tweak_data.blackmarket.melee_weapons[melee_weapon].texture_bundle_folder
-		if bundle_folder then
-			guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
-		end
-		if melee_weapon == "weapon" then
-			melee_weapon_texture = nil
-		else
-			melee_weapon_texture = guis_catalog .. "textures/pd2/blackmarket/icons/melee_weapons/" .. tostring(melee_weapon)
-		end
-		melee_weapon_string = managers.localization:text(tweak_data.blackmarket.melee_weapons[melee_weapon].name_id)
-	end
-	if grenade and grenade_amount > 0 then
-		local guis_catalog = "guis/"
-		local bundle_folder = tweak_data.blackmarket.projectiles[grenade] and tweak_data.blackmarket.projectiles[grenade].texture_bundle_folder
-		if bundle_folder then
-			guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
-		end
-		grenade_texture = guis_catalog .. "textures/pd2/blackmarket/icons/grenades/" .. tostring(grenade)
-		grenade_string = managers.localization:text(tweak_data.blackmarket.projectiles[grenade].name_id)
-	end
-	if armor then
-		local guis_catalog = "guis/"
-		local bundle_folder = tweak_data.blackmarket.armors[armor] and tweak_data.blackmarket.armors[armor].texture_bundle_folder
-		if bundle_folder then
-			guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
-		end
-		armor_texture = guis_catalog .. "textures/pd2/blackmarket/icons/armors/" .. tostring(armor)
-		armor_string = managers.localization:text(tweak_data.blackmarket.armors[armor].name_id)
-	end
-	if deployable then
-		local guis_catalog = "guis/"
-		local bundle_folder = tweak_data.blackmarket.deployables[deployable] and tweak_data.blackmarket.deployables[deployable].texture_bundle_folder
-		if bundle_folder then
-			guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
-		end
-		deployable_texture = guis_catalog .. "textures/pd2/blackmarket/icons/deployables/" .. tostring(deployable)
-		deployable_string = managers.localization:text(tweak_data.upgrades.definitions[deployable].name_id)
-	end
-	local primary = {
-		item_texture = primary_texture,
-		info_text = primary_string,
-		info_icons = primary_perks
-	}
-	local secondary = {
-		item_texture = secondary_texture,
-		info_text = secondary_string,
-		info_icons = secondary_perks
-	}
-	local melee_weapon = {
-		item_texture = melee_weapon_texture,
-		info_text = melee_weapon_string,
-		dual_texture_1 = primary_texture,
-		dual_texture_2 = secondary_texture
-	}
-	local grenade = {item_texture = grenade_texture, info_text = grenade_string}
-	local armor = {item_texture = armor_texture, info_text = armor_string}
-	local deployable = {item_texture = deployable_texture, info_text = deployable_string}
+	local player_loadout_data = managers.blackmarket:player_loadout_data()
 	local items = {
-		primary,
-		secondary,
-		melee_weapon,
-		grenade,
-		armor,
-		deployable
+		player_loadout_data.primary,
+		player_loadout_data.secondary,
+		player_loadout_data.melee_weapon,
+		player_loadout_data.grenade,
+		player_loadout_data.armor,
+		player_loadout_data.deployable
 	}
 	local selected = self._my_menu_component_data.selected or 1
 	self._items = {}
@@ -2176,65 +2053,69 @@ end
 function NewLoadoutTab:deselect()
 	NewLoadoutTab.super.deselect(self)
 end
-function NewLoadoutTab:populate_category(category, data)
+function NewLoadoutTab:populate_category(data)
+	local category = data.category
 	local crafted_category = managers.blackmarket:get_crafted_category(category) or {}
 	local new_data = {}
 	local index = 0
-	local max_items = data.override_slots and data.override_slots[1] * data.override_slots[2] or 9
-	local max_rows = tweak_data.gui.MAX_WEAPON_ROWS or 3
-	max_items = max_rows * (data.override_slots and data.override_slots[2] or 3)
+	local max_rows = tweak_data.gui.WEAPON_ROWS_PER_PAGE or 3
+	local max_items = max_rows * (data.override_slots and data.override_slots[2] or 3)
 	for i = 1, max_items do
 		data[i] = nil
 	end
 	local weapon_data = Global.blackmarket_manager.weapons
 	local guis_catalog = "guis/"
-	for i, crafted in pairs(crafted_category) do
-		guis_catalog = "guis/"
-		local bundle_folder = tweak_data.weapon[crafted.weapon_id] and tweak_data.weapon[crafted.weapon_id].texture_bundle_folder
-		if bundle_folder then
-			guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
+	local start_i = data.start_i
+	local crafted
+	for i, index in pairs(data.on_create_data) do
+		crafted = crafted_category[index]
+		if crafted then
+			guis_catalog = "guis/"
+			local bundle_folder = tweak_data.weapon[crafted.weapon_id] and tweak_data.weapon[crafted.weapon_id].texture_bundle_folder
+			if bundle_folder then
+				guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
+			end
+			new_data = {}
+			new_data.name = crafted.weapon_id
+			new_data.name_localized = managers.blackmarket:get_weapon_name_by_category_slot(category, index)
+			new_data.category = category
+			new_data.custom_name_text = managers.blackmarket:get_crafted_custom_name(category, index, true)
+			new_data.slot = index
+			new_data.unlocked = managers.blackmarket:weapon_unlocked(crafted.weapon_id)
+			new_data.lock_texture = not new_data.unlocked and "guis/textures/pd2/lock_level"
+			new_data.equipped = crafted.equipped
+			new_data.can_afford = true
+			new_data.skill_based = weapon_data[crafted.weapon_id].skill_based
+			new_data.skill_name = new_data.skill_based and "bm_menu_skill_locked_" .. new_data.name
+			new_data.level = managers.blackmarket:weapon_level(crafted.weapon_id)
+			local texture_name = tweak_data.weapon[crafted.weapon_id].texture_name or tostring(crafted.weapon_id)
+			new_data.bitmap_texture = guis_catalog .. "textures/pd2/blackmarket/icons/weapons/" .. texture_name
+			new_data.comparision_data = new_data.unlocked and managers.blackmarket:get_weapon_stats(category, index)
+			new_data.stream = false
+			new_data.global_value = tweak_data.weapon[new_data.name] and tweak_data.weapon[new_data.name].global_value or "normal"
+			new_data.dlc_locked = tweak_data.lootdrop.global_values[new_data.global_value].unlock_id or nil
+			new_data.lock_texture = BlackMarketGui.get_lock_icon(self, new_data)
+			if not new_data.equipped and new_data.unlocked then
+				table.insert(new_data, "lo_w_equip")
+			end
+			local icon_list = managers.menu_component:create_weapon_mod_icon_list(crafted.weapon_id, category, crafted.factory_id, index)
+			local icon_index = 1
+			new_data.mini_icons = {}
+			for _, icon in pairs(icon_list) do
+				table.insert(new_data.mini_icons, {
+					texture = icon.texture,
+					right = (icon_index - 1) * 18,
+					bottom = 0,
+					layer = 1,
+					w = 16,
+					h = 16,
+					stream = false,
+					alpha = icon.equipped and 1 or 0.25
+				})
+				icon_index = icon_index + 1
+			end
+			data[i] = new_data
 		end
-		new_data = {}
-		new_data.name = crafted.weapon_id
-		new_data.name_localized = managers.blackmarket:get_weapon_name_by_category_slot(category, i)
-		new_data.category = category
-		new_data.custom_name_text = managers.blackmarket:get_crafted_custom_name(category, i, true)
-		new_data.slot = i
-		new_data.unlocked = managers.blackmarket:weapon_unlocked(crafted.weapon_id)
-		new_data.lock_texture = not new_data.unlocked and "guis/textures/pd2/lock_level"
-		new_data.equipped = crafted.equipped
-		new_data.can_afford = true
-		new_data.skill_based = weapon_data[crafted.weapon_id].skill_based
-		new_data.skill_name = new_data.skill_based and "bm_menu_skill_locked_" .. new_data.name
-		new_data.level = managers.blackmarket:weapon_level(crafted.weapon_id)
-		local texture_name = tweak_data.weapon[crafted.weapon_id].texture_name or tostring(crafted.weapon_id)
-		new_data.bitmap_texture = guis_catalog .. "textures/pd2/blackmarket/icons/weapons/" .. texture_name
-		new_data.comparision_data = new_data.unlocked and managers.blackmarket:get_weapon_stats(category, i)
-		new_data.stream = false
-		new_data.global_value = tweak_data.weapon[new_data.name] and tweak_data.weapon[new_data.name].global_value or "normal"
-		new_data.dlc_locked = tweak_data.lootdrop.global_values[new_data.global_value].unlock_id or nil
-		new_data.lock_texture = BlackMarketGui.get_lock_icon(self, new_data)
-		if not new_data.equipped and new_data.unlocked then
-			table.insert(new_data, "lo_w_equip")
-		end
-		local icon_list = managers.menu_component:create_weapon_mod_icon_list(crafted.weapon_id, category, crafted.factory_id, i)
-		local icon_index = 1
-		new_data.mini_icons = {}
-		for _, icon in pairs(icon_list) do
-			table.insert(new_data.mini_icons, {
-				texture = icon.texture,
-				right = (icon_index - 1) * 18,
-				bottom = 0,
-				layer = 1,
-				w = 16,
-				h = 16,
-				stream = false,
-				alpha = icon.equipped and 1 or 0.25
-			})
-			icon_index = icon_index + 1
-		end
-		data[i] = new_data
-		index = i
 	end
 	for i = 1, max_items do
 		if not data[i] then
@@ -2343,37 +2224,54 @@ function NewLoadoutTab:populate_deployables(data)
 		end
 	end
 end
-function NewLoadoutTab:create_primaries_loadout()
-	local data = {}
-	table.insert(data, {
-		name = "bm_menu_primaries",
-		category = "primaries",
-		on_create_func = callback(self, self, "populate_primaries"),
-		override_slots = {3, 3},
-		identifier = Idstring("weapon")
-	})
-	data.topic_id = "menu_loadout_blackmarket"
-	data.topic_params = {
-		category = managers.localization:text("bm_menu_primaries")
+function NewLoadoutTab:create_weapon_loadout(category)
+	local crafted_category = managers.blackmarket:get_crafted_category(category) or {}
+	local new_node_data = {category = category}
+	local rows = tweak_data.gui.WEAPON_ROWS_PER_PAGE or 3
+	local columns = tweak_data.gui.WEAPON_COLUMNS_PER_PAGE or 3
+	local max_pages = tweak_data.gui.MAX_WEAPON_PAGES or 8
+	local items_per_page = rows * columns
+	local item_data, selected_tab
+	for page = 1, max_pages do
+		local index = 1
+		local start_i = 1 + items_per_page * (page - 1)
+		item_data = {}
+		for i = start_i, items_per_page * page do
+			item_data[index] = i
+			index = index + 1
+			if crafted_category[i] and crafted_category[i].equipped then
+				selected_tab = page
+			end
+		end
+		local name_id = managers.localization:to_upper_text("bm_menu_page", {
+			page = tostring(page)
+		})
+		table.insert(new_node_data, {
+			name = category,
+			category = category,
+			prev_node_data = false,
+			start_i = start_i,
+			allow_preview = false,
+			name_localized = name_id,
+			on_create_func = callback(self, self, "populate_category"),
+			on_create_data = item_data,
+			identifier = BlackMarketGui.identifiers.weapon,
+			override_slots = {columns, rows}
+		})
+	end
+	new_node_data.is_loadout = true
+	new_node_data.selected_tab = selected_tab
+	new_node_data.topic_id = "menu_loadout_blackmarket"
+	new_node_data.topic_params = {
+		category = managers.localization:text("bm_menu_" .. category)
 	}
-	data.is_loadout = true
-	return data
+	return new_node_data
+end
+function NewLoadoutTab:create_primaries_loadout()
+	return self:create_weapon_loadout("primaries")
 end
 function NewLoadoutTab:create_secondaries_loadout()
-	local data = {}
-	table.insert(data, {
-		name = "bm_menu_secondaries",
-		category = "secondaries",
-		on_create_func = callback(self, self, "populate_secondaries"),
-		override_slots = {3, 3},
-		identifier = Idstring("weapon")
-	})
-	data.topic_id = "menu_loadout_blackmarket"
-	data.topic_params = {
-		category = managers.localization:text("bm_menu_secondaries")
-	}
-	data.is_loadout = true
-	return data
+	return self:create_weapon_loadout("secondaries")
 end
 function NewLoadoutTab:create_deployable_loadout()
 	local data = {}
@@ -2392,20 +2290,40 @@ function NewLoadoutTab:create_deployable_loadout()
 	return data
 end
 function NewLoadoutTab:create_melee_weapon_loadout()
-	local data = {}
-	table.insert(data, {
-		name = "bm_menu_melee_weapons",
-		category = "melee_weapons",
-		on_create_func_name = "populate_melee_weapons",
-		override_slots = {3, 3},
-		identifier = Idstring("melee_weapon")
-	})
-	data.topic_id = "menu_loadout_blackmarket"
-	data.topic_params = {
-		category = managers.localization:text("bm_menu_melee_weapons")
+	local sorted_categories, item_categories = managers.blackmarket:get_sorted_melee_weapons()
+	local new_node_data = {}
+	local item_data, selected_tab
+	for page, category in ipairs(sorted_categories) do
+		local items = item_categories[category]
+		item_data = {}
+		for _, item in ipairs(items) do
+			table.insert(item_data, item)
+			if item[2] and item[2].equipped then
+				selected_tab = page
+			end
+		end
+		local name_id = managers.localization:to_upper_text("bm_menu_page", {
+			page = tostring(page)
+		})
+		table.insert(new_node_data, {
+			name = category,
+			category = "melee_weapons",
+			prev_node_data = false,
+			allow_preview = false,
+			name_localized = name_id,
+			on_create_func_name = "populate_melee_weapons_new",
+			on_create_data = item_data,
+			override_slots = {4, 4},
+			identifier = BlackMarketGui.identifiers.melee_weapon
+		})
+	end
+	new_node_data.selected_tab = selected_tab
+	new_node_data.is_loadout = true
+	new_node_data.topic_id = "bm_menu_melee_weapons"
+	new_node_data.topic_params = {
+		weapon_category = managers.localization:text("bm_menu_melee_weapons")
 	}
-	data.is_loadout = true
-	return data
+	return new_node_data
 end
 function NewLoadoutTab:create_grenade_loadout()
 	local data = {}
@@ -2870,6 +2788,16 @@ function MissionBriefingGui:mouse_pressed(button, x, y)
 	if button ~= Idstring("0") then
 		return
 	end
+	local fx, fy = managers.mouse_pointer:modified_fullscreen_16_9_mouse_pos()
+	for peer_id = 1, CriminalsManager.MAX_NR_CRIMINALS do
+		if managers.hud:is_inside_mission_briefing_slot(peer_id, "name", fx, fy) then
+			local peer = managers.network:session() and managers.network:session():peer(peer_id)
+			if peer then
+				Steam:overlay_activate("url", tweak_data.gui.fbi_files_webpage .. "/suspect/" .. peer:user_id() .. "/")
+				return
+			end
+		end
+	end
 	for index, tab in ipairs(self._items) do
 		local pressed, cost = tab:mouse_pressed(button, x, y)
 		if pressed == true then
@@ -2914,6 +2842,12 @@ function MissionBriefingGui:mouse_moved(x, y)
 	end
 	if mouse_over_tab then
 		return true, "link"
+	end
+	local fx, fy = managers.mouse_pointer:modified_fullscreen_16_9_mouse_pos()
+	for peer_id = 1, CriminalsManager.MAX_NR_CRIMINALS do
+		if managers.hud:is_inside_mission_briefing_slot(peer_id, "name", fx, fy) then
+			return true, "link"
+		end
 	end
 	if self._ready_button:inside(x, y) or self._ready_tick_box:inside(x, y) then
 		if not self._ready_highlighted then

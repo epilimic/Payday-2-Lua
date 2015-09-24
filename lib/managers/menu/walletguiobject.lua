@@ -41,22 +41,22 @@ function WalletGuiObject.set_wallet(panel, layer)
 		font = tweak_data.menu.pd2_small_font,
 		color = tweak_data.screen_colors.text
 	})
-	money_icon:set_leftbottom(2, Global.wallet_panel:h() - 2)
-	level_icon:set_leftbottom(2, money_icon:top() - 2)
-	skillpoint_icon:set_leftbottom(2, level_icon:top() - 2)
 	local mw, mh = WalletGuiObject.make_fine_text(money_text)
 	local lw, lh = WalletGuiObject.make_fine_text(level_text)
 	local sw, sh = WalletGuiObject.make_fine_text(skillpoint_text)
+	money_icon:set_leftbottom(2, Global.wallet_panel:h() - 2)
 	money_text:set_left(money_icon:right() + 2)
 	money_text:set_center_y(money_icon:center_y())
 	money_text:set_y(math.round(money_text:y()))
+	level_icon:set_leftbottom(money_text:right() + 10, Global.wallet_panel:h() - 2)
 	level_text:set_left(level_icon:right() + 2)
 	level_text:set_center_y(level_icon:center_y())
 	level_text:set_y(math.round(level_text:y()))
+	skillpoint_icon:set_leftbottom(level_text:right() + 10, Global.wallet_panel:h() - 2)
 	skillpoint_text:set_left(skillpoint_icon:right() + 2)
 	skillpoint_text:set_center_y(skillpoint_icon:center_y())
 	skillpoint_text:set_y(math.round(skillpoint_text:y()))
-	local max_w = math.max(mw, lw, sw)
+	local max_w = skillpoint_text:right()
 	local bg_blur = Global.wallet_panel:bitmap({
 		name = "bg_blur",
 		texture = "guis/textures/test_blur_df",
@@ -65,9 +65,9 @@ function WalletGuiObject.set_wallet(panel, layer)
 		render_template = "VertexColorTexturedBlur3D",
 		layer = -1
 	})
-	bg_blur:set_leftbottom(money_icon:leftbottom())
-	bg_blur:set_w(max_w + money_icon:w() + 2)
-	bg_blur:set_h(Global.wallet_panel:h() - skillpoint_icon:top())
+	bg_blur:set_leftbottom(0, Global.wallet_panel:h())
+	bg_blur:set_w(max_w + 2)
+	bg_blur:set_h(Global.wallet_panel:h() - money_icon:top())
 	WalletGuiObject.set_object_visible("wallet_skillpoint_icon", 0 < managers.skilltree:points())
 	WalletGuiObject.set_object_visible("wallet_skillpoint_text", 0 < managers.skilltree:points())
 end
@@ -81,19 +81,24 @@ function WalletGuiObject.refresh()
 		local skillpoint_text = Global.wallet_panel:child("wallet_skillpoint_text")
 		money_text:set_text(managers.money:total_string_no_currency())
 		WalletGuiObject.make_fine_text(money_text)
+		money_icon:set_leftbottom(2, Global.wallet_panel:h() - 2)
 		money_text:set_left(money_icon:right() + 2)
 		money_text:set_center_y(money_icon:center_y())
 		money_text:set_y(math.round(money_text:y()))
 		level_text:set_text(tostring(managers.experience:current_level()))
 		WalletGuiObject.make_fine_text(level_text)
+		level_icon:set_leftbottom(money_text:right() + 10, Global.wallet_panel:h() - 2)
 		level_text:set_left(level_icon:right() + 2)
 		level_text:set_center_y(level_icon:center_y())
 		level_text:set_y(math.round(level_text:y()))
 		skillpoint_text:set_text(tostring(managers.skilltree:points()))
 		WalletGuiObject.make_fine_text(skillpoint_text)
+		skillpoint_icon:set_leftbottom(level_text:right() + 10, Global.wallet_panel:h() - 2)
 		skillpoint_text:set_left(skillpoint_icon:right() + 2)
 		skillpoint_text:set_center_y(skillpoint_icon:center_y())
 		skillpoint_text:set_y(math.round(skillpoint_text:y()))
+		WalletGuiObject.set_object_visible("wallet_skillpoint_icon", managers.skilltree:points() > 0)
+		WalletGuiObject.set_object_visible("wallet_skillpoint_text", managers.skilltree:points() > 0)
 	end
 end
 function WalletGuiObject.make_fine_text(text)
@@ -121,13 +126,13 @@ function WalletGuiObject.set_object_visible(object, visible)
 	Global.wallet_panel:child(object):set_visible(visible)
 	local bg_blur = Global.wallet_panel:child("bg_blur")
 	if Global.wallet_panel:child("wallet_skillpoint_icon"):visible() then
-		bg_blur:set_h(Global.wallet_panel:h() - Global.wallet_panel:child("wallet_skillpoint_icon"):top())
+		bg_blur:set_w(Global.wallet_panel:child("wallet_skillpoint_text"):right())
 	elseif Global.wallet_panel:child("wallet_level_icon"):visible() then
-		bg_blur:set_h(Global.wallet_panel:h() - Global.wallet_panel:child("wallet_level_icon"):top())
+		bg_blur:set_w(Global.wallet_panel:child("wallet_level_text"):right())
 	elseif Global.wallet_panel:child("wallet_money_icon"):visible() then
-		bg_blur:set_h(Global.wallet_panel:h() - Global.wallet_panel:child("wallet_money_icon"):top())
+		bg_blur:set_w(Global.wallet_panel:child("wallet_money_text"):right())
 	else
-		bg_blur:set_h(0)
+		bg_blur:set_w(0)
 	end
 	bg_blur:set_leftbottom(Global.wallet_panel:child("wallet_money_icon"):leftbottom())
 end

@@ -14,6 +14,7 @@ require("lib/managers/menu/IngameContractGui")
 require("lib/managers/menu/IngameManualGui")
 require("lib/managers/menu/PrePlanningMapGui")
 require("lib/managers/menu/GameInstallingGui")
+require("lib/managers/menu/PlayerInventoryGui")
 require("lib/managers/hud/HUDLootScreen")
 MenuComponentManager = MenuComponentManager or class()
 function MenuComponentManager:init()
@@ -149,6 +150,10 @@ function MenuComponentManager:init()
 	self._active_components.game_installing = {
 		create = callback(self, self, "create_game_installing_gui"),
 		close = callback(self, self, "close_game_installing_gui")
+	}
+	self._active_components.inventory = {
+		create = callback(self, self, "create_inventory_gui"),
+		close = callback(self, self, "close_inventory_gui")
 	}
 end
 function MenuComponentManager:save(data)
@@ -415,6 +420,9 @@ function MenuComponentManager:input_focus()
 	if self._ingame_manual_gui then
 		return self._ingame_manual_gui:input_focus()
 	end
+	if self._player_inventory_gui then
+		return self._player_inventory_gui:input_focus()
+	end
 end
 function MenuComponentManager:scroll_up()
 	if self._game_chat_gui and self._game_chat_gui:input_focus() == true then
@@ -483,6 +491,9 @@ function MenuComponentManager:move_up()
 	if self._lootdrop_casino_gui and self._lootdrop_casino_gui:move_up() then
 		return true
 	end
+	if self._player_inventory_gui and self._player_inventory_gui:move_up() then
+		return true
+	end
 end
 function MenuComponentManager:move_down()
 	if self._game_chat_gui and self._game_chat_gui:input_focus() == true then
@@ -507,6 +518,9 @@ function MenuComponentManager:move_down()
 		return true
 	end
 	if self._lootdrop_casino_gui and self._lootdrop_casino_gui:move_down() then
+		return true
+	end
+	if self._player_inventory_gui and self._player_inventory_gui:move_down() then
 		return true
 	end
 end
@@ -535,6 +549,9 @@ function MenuComponentManager:move_left()
 	if self._lootdrop_casino_gui and self._lootdrop_casino_gui:move_left() then
 		return true
 	end
+	if self._player_inventory_gui and self._player_inventory_gui:move_left() then
+		return true
+	end
 end
 function MenuComponentManager:move_right()
 	if self._game_chat_gui and self._game_chat_gui:input_focus() == true then
@@ -559,6 +576,9 @@ function MenuComponentManager:move_right()
 		return true
 	end
 	if self._lootdrop_casino_gui and self._lootdrop_casino_gui:move_right() then
+		return true
+	end
+	if self._player_inventory_gui and self._player_inventory_gui:move_right() then
 		return true
 	end
 end
@@ -593,6 +613,9 @@ function MenuComponentManager:next_page()
 	if self._ingame_manual_gui and self._ingame_manual_gui:next_page() then
 		return true
 	end
+	if self._player_inventory_gui and self._player_inventory_gui:next_page() then
+		return true
+	end
 end
 function MenuComponentManager:previous_page()
 	if self._game_chat_gui and self._game_chat_gui:input_focus() == true then
@@ -625,6 +648,9 @@ function MenuComponentManager:previous_page()
 	if self._ingame_manual_gui and self._ingame_manual_gui:previous_page() then
 		return true
 	end
+	if self._player_inventory_gui and self._player_inventory_gui:previous_page() then
+		return true
+	end
 end
 function MenuComponentManager:confirm_pressed()
 	if self._game_chat_gui and self._game_chat_gui:input_focus() == true then
@@ -655,6 +681,9 @@ function MenuComponentManager:confirm_pressed()
 		return true
 	end
 	if self._lootdrop_casino_gui and self._lootdrop_casino_gui:confirm_pressed() then
+		return true
+	end
+	if self._player_inventory_gui and self._player_inventory_gui:confirm_pressed() then
 		return true
 	end
 	if Application:production_build() and self._debug_font_gui then
@@ -713,6 +742,9 @@ function MenuComponentManager:special_btn_pressed(...)
 		return true
 	end
 	if self._stage_endscreen_gui and self._stage_endscreen_gui:special_btn_pressed(...) then
+		return true
+	end
+	if self._player_inventory_gui and self._player_inventory_gui:special_btn_pressed(...) then
 		return true
 	end
 end
@@ -944,6 +976,9 @@ function MenuComponentManager:mouse_pressed(o, button, x, y)
 		elseif button == Idstring("mouse wheel up") and self._weapon_text_box:mouse_wheel_up(x, y) then
 			return true
 		end
+	end
+	if self._player_inventory_gui and self._player_inventory_gui:mouse_pressed(button, x, y) then
+		return true
 	end
 end
 function MenuComponentManager:mouse_clicked(o, button, x, y)
@@ -1233,6 +1268,13 @@ function MenuComponentManager:mouse_moved(o, x, y)
 	end
 	if self._weapon_text_box and self._weapon_text_box:moved_scroll_bar(x, y) then
 		return true, wanted_pointer
+	end
+	if self._player_inventory_gui then
+		local used, pointer = self._player_inventory_gui:mouse_moved(o, x, y)
+		wanted_pointer = pointer or wanted_pointer
+		if used then
+			return true, wanted_pointer
+		end
 	end
 	return false, wanted_pointer
 end
@@ -1659,8 +1701,8 @@ function MenuComponentManager:close_contract_gui()
 		self._contract_gui = nil
 	end
 end
-function MenuComponentManager:_create_skilltree_gui()
-	self:create_skilltree_gui()
+function MenuComponentManager:_create_skilltree_gui(node)
+	self:create_skilltree_gui(node)
 end
 function MenuComponentManager:create_skilltree_gui(node)
 	self:close_skilltree_gui()
@@ -2385,6 +2427,27 @@ function MenuComponentManager:close_game_installing_gui()
 		self._game_installing = nil
 	end
 end
+function MenuComponentManager:create_inventory_gui(node)
+	self:_create_inventory_gui(node)
+end
+function MenuComponentManager:_create_inventory_gui(node)
+	self:close_inventory_gui()
+	self._player_inventory_gui = PlayerInventoryGui:new(self._ws, self._fullscreen_ws, node)
+	local active_menu = managers.menu:active_menu()
+	if active_menu then
+		active_menu.input:set_force_input(true)
+	end
+end
+function MenuComponentManager:close_inventory_gui()
+	if self._player_inventory_gui then
+		self._player_inventory_gui:close()
+		self._player_inventory_gui = nil
+		local active_menu = managers.menu:active_menu()
+		if active_menu then
+			active_menu.input:set_force_input(false)
+		end
+	end
+end
 function MenuComponentManager:_create_newsfeed_gui()
 	if self._newsfeed_gui then
 		return
@@ -2826,9 +2889,13 @@ end
 function MenuComponentManager:request_texture(texture, done_cb)
 	if self._block_texture_requests then
 		debug_pause(string.format("[MenuComponentManager:request_texture] Requesting texture is blocked! %s", texture))
-		return
+		return false
 	end
 	local texture_ids = Idstring(texture)
+	if not DB:has(Idstring("texture"), texture_ids) then
+		Application:error(string.format("[MenuComponentManager:request_texture] No texture entry named \"%s\" in database.", texture))
+		return false
+	end
 	local key = texture_ids:key()
 	local entry = self._requested_textures[key]
 	if not entry then

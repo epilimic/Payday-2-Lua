@@ -407,7 +407,6 @@ function IngameWaitingForRespawnState:cb_next_player()
 	end
 	watch_u_key = self._spectator_data.teammate_list[i_watch]
 	self._spectator_data.watch_u_key = watch_u_key
-	self:_upd_hud_watch_character_name()
 	self._dis_curr = nil
 end
 function IngameWaitingForRespawnState:cb_prev_player()
@@ -424,17 +423,7 @@ function IngameWaitingForRespawnState:cb_prev_player()
 	end
 	watch_u_key = self._spectator_data.teammate_list[i_watch]
 	self._spectator_data.watch_u_key = watch_u_key
-	self:_upd_hud_watch_character_name()
 	self._dis_curr = nil
-end
-function IngameWaitingForRespawnState:_upd_hud_watch_character_name()
-	local new_text
-	if self._spectator_data.watch_u_key then
-		new_text = managers.localization:text("menu_spectator_spactating") .. " " .. self._spectator_data.teammate_records[self._spectator_data.watch_u_key].unit:base():nick_name()
-	else
-		new_text = ""
-	end
-	managers.hud:script(self.GUI_SPECTATOR).text_title:set_text(utf8.to_upper(new_text))
 end
 function IngameWaitingForRespawnState:trade_death(respawn_delay, hostages_killed)
 	managers.hud:set_custody_can_be_trade_visible(false)

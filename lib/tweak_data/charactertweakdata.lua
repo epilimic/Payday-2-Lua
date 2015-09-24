@@ -23,6 +23,8 @@ function CharacterTweakData:init(tweak_data)
 	self:_init_tank(presets)
 	self:_init_spooc(presets)
 	self:_init_shield(presets)
+	self:_init_phalanx_minion(presets)
+	self:_init_phalanx_vip(presets)
 	self:_init_taser(presets)
 	self:_init_civilian(presets)
 	self:_init_bank_manager(presets)
@@ -323,6 +325,7 @@ function CharacterTweakData:_init_sniper(presets)
 	self.sniper.no_arrest = true
 	self.sniper.chatter = presets.enemy_chatter.no_chatter
 	self.sniper.steal_loot = nil
+	self.sniper.rescue_hostages = false
 end
 function CharacterTweakData:_init_gangster(presets)
 	self.gangster = deep_clone(presets.base)
@@ -583,6 +586,10 @@ end
 function CharacterTweakData:_init_tank(presets)
 	self.tank = deep_clone(presets.base)
 	self.tank.experience = {}
+	self.tank.damage.tased_response = {
+		light = {tased_time = 1, down_time = 0},
+		heavy = {tased_time = 2, down_time = 0}
+	}
 	self.tank.weapon = deep_clone(presets.weapon.good)
 	self.tank.weapon.r870.FALLOFF[1].dmg_mul = 6.5
 	self.tank.weapon.r870.FALLOFF[2].dmg_mul = 4.5
@@ -1101,6 +1108,29 @@ function CharacterTweakData:_init_shield(presets)
 	self.shield.steal_loot = nil
 	self.shield.use_animation_on_fire_damage = false
 end
+function CharacterTweakData:_init_phalanx_minion(presets)
+	self.phalanx_minion = deep_clone(self.shield)
+	self.phalanx_minion.experience = {}
+	self.phalanx_minion.weapon = deep_clone(presets.weapon.normal)
+	self.phalanx_minion.detection = presets.detection.normal
+	self.phalanx_minion.headshot_dmg_mul = 5
+	self.phalanx_minion.HEALTH_INIT = 150
+	self.phalanx_minion.DAMAGE_CLAMP_BULLET = 70
+	self.phalanx_minion.DAMAGE_CLAMP_EXPLOSION = self.phalanx_minion.DAMAGE_CLAMP_BULLET
+	self.phalanx_minion.damage.explosion_damage_mul = 6
+	self.phalanx_minion.damage.hurt_severity = presets.hurt_severities.no_hurts_no_tase
+	self.phalanx_minion.damage.shield_knocked = false
+	self.phalanx_minion.ecm_vulnerability = nil
+	self.phalanx_minion.ecm_hurts = {}
+	self.phalanx_minion.priority_shout = "f44"
+end
+function CharacterTweakData:_init_phalanx_vip(presets)
+	self.phalanx_vip = deep_clone(self.phalanx_minion)
+	self.phalanx_vip.LOWER_HEALTH_PERCENTAGE_LIMIT = 0.2
+	self.phalanx_vip.HEALTH_INIT = 300
+	self.phalanx_vip.DAMAGE_CLAMP_BULLET = 100
+	self.phalanx_vip.DAMAGE_CLAMP_EXPLOSION = self.phalanx_vip.DAMAGE_CLAMP_BULLET
+end
 function CharacterTweakData:_init_taser(presets)
 	self.taser = deep_clone(presets.base)
 	self.taser.experience = {}
@@ -1617,8 +1647,11 @@ function CharacterTweakData:_presets(tweak_data)
 			zones = {
 				{none = 1}
 			}
-		}
+		},
+		tase = true
 	}
+	presets.hurt_severities.no_hurts_no_tase = deep_clone(presets.hurt_severities.no_hurts)
+	presets.hurt_severities.no_hurts_no_tase.tase = false
 	presets.hurt_severities.only_light_hurt = {
 		bullet = {
 			health_reference = 1,
@@ -1649,7 +1682,8 @@ function CharacterTweakData:_presets(tweak_data)
 			zones = {
 				{none = 1}
 			}
-		}
+		},
+		tase = true
 	}
 	presets.hurt_severities.only_light_hurt_and_fire = {
 		bullet = {
@@ -1681,7 +1715,8 @@ function CharacterTweakData:_presets(tweak_data)
 			zones = {
 				{none = 1}
 			}
-		}
+		},
+		tase = true
 	}
 	presets.hurt_severities.light_hurt_fire_poison = deep_clone(presets.hurt_severities.only_light_hurt_and_fire)
 	presets.hurt_severities.light_hurt_fire_poison.poison = {
@@ -1720,7 +1755,8 @@ function CharacterTweakData:_presets(tweak_data)
 			zones = {
 				{none = 1}
 			}
-		}
+		},
+		tase = true
 	}
 	presets.hurt_severities.only_fire_and_poison_hurts = {
 		bullet = {
@@ -1752,7 +1788,8 @@ function CharacterTweakData:_presets(tweak_data)
 			zones = {
 				{poison = 1}
 			}
-		}
+		},
+		tase = true
 	}
 	presets.hurt_severities.base = {
 		bullet = {
@@ -1878,6 +1915,10 @@ function CharacterTweakData:_presets(tweak_data)
 	presets.base.damage.hurt_severity = presets.hurt_severities.base
 	presets.base.damage.death_severity = 0.5
 	presets.base.damage.explosion_damage_mul = 1
+	presets.base.damage.tased_response = {
+		light = {tased_time = 5, down_time = 5},
+		heavy = {tased_time = 5, down_time = 10}
+	}
 	presets.gang_member_damage = {}
 	presets.gang_member_damage.HEALTH_INIT = 75
 	presets.gang_member_damage.REGENERATE_TIME = 2
@@ -5577,6 +5618,12 @@ function CharacterTweakData:_set_overkill()
 	}
 	self.hector_boss.HEALTH_INIT = 300
 	self.mobster_boss.HEALTH_INIT = 300
+	self.phalanx_minion.HEALTH_INIT = 150
+	self.phalanx_minion.DAMAGE_CLAMP_BULLET = 15
+	self.phalanx_minion.DAMAGE_CLAMP_EXPLOSION = self.phalanx_minion.DAMAGE_CLAMP_BULLET
+	self.phalanx_vip.HEALTH_INIT = 300
+	self.phalanx_vip.DAMAGE_CLAMP_BULLET = 30
+	self.phalanx_vip.DAMAGE_CLAMP_EXPLOSION = self.phalanx_vip.DAMAGE_CLAMP_BULLET
 	self.presets.gang_member_damage.REGENERATE_TIME = 2
 	self.presets.gang_member_damage.REGENERATE_TIME_AWAY = 0.6
 	self.presets.gang_member_damage.HEALTH_INIT = 200
@@ -5693,6 +5740,12 @@ function CharacterTweakData:_set_overkill_145()
 	}
 	self.hector_boss.HEALTH_INIT = 600
 	self.mobster_boss.HEALTH_INIT = 600
+	self.phalanx_minion.HEALTH_INIT = 300
+	self.phalanx_minion.DAMAGE_CLAMP_BULLET = 30
+	self.phalanx_minion.DAMAGE_CLAMP_EXPLOSION = self.phalanx_minion.DAMAGE_CLAMP_BULLET
+	self.phalanx_vip.HEALTH_INIT = 600
+	self.phalanx_vip.DAMAGE_CLAMP_BULLET = 60
+	self.phalanx_vip.DAMAGE_CLAMP_EXPLOSION = self.phalanx_vip.DAMAGE_CLAMP_BULLET
 	self:_multiply_all_speeds(1.05, 1.05)
 	self:_multiply_weapon_delay(self.presets.weapon.normal, 0)
 	self:_multiply_weapon_delay(self.presets.weapon.good, 0)
@@ -6191,6 +6244,12 @@ function CharacterTweakData:_set_overkill_290()
 	self.shield.weapon.mp9.focus_dis = 200
 	self.tank.weapon.saiga.focus_dis = 200
 	self.tank.weapon.r870.focus_dis = 200
+	self.phalanx_minion.HEALTH_INIT = 400
+	self.phalanx_minion.DAMAGE_CLAMP_BULLET = 40
+	self.phalanx_minion.DAMAGE_CLAMP_EXPLOSION = self.phalanx_minion.DAMAGE_CLAMP_BULLET
+	self.phalanx_vip.HEALTH_INIT = 800
+	self.phalanx_vip.DAMAGE_CLAMP_BULLET = 80
+	self.phalanx_vip.DAMAGE_CLAMP_EXPLOSION = self.phalanx_vip.DAMAGE_CLAMP_BULLET
 	self.flashbang_multiplier = 2
 end
 function CharacterTweakData:_multiply_weapon_delay(weap_usage_table, mul)
@@ -6213,6 +6272,8 @@ function CharacterTweakData:_multiply_all_hp(hp_mul, hs_mul)
 	self.tank.HEALTH_INIT = self.tank.HEALTH_INIT * hp_mul
 	self.spooc.HEALTH_INIT = self.spooc.HEALTH_INIT * hp_mul
 	self.shield.HEALTH_INIT = self.shield.HEALTH_INIT * hp_mul
+	self.phalanx_minion.HEALTH_INIT = self.phalanx_minion.HEALTH_INIT * hp_mul
+	self.phalanx_vip.HEALTH_INIT = self.phalanx_vip.HEALTH_INIT * hp_mul
 	self.taser.HEALTH_INIT = self.taser.HEALTH_INIT * hp_mul
 	self.biker_escape.HEALTH_INIT = self.biker_escape.HEALTH_INIT * hp_mul
 	if self.security.headshot_dmg_mul then
@@ -6247,6 +6308,12 @@ function CharacterTweakData:_multiply_all_hp(hp_mul, hs_mul)
 	end
 	if self.shield.headshot_dmg_mul then
 		self.shield.headshot_dmg_mul = self.shield.headshot_dmg_mul * hs_mul
+	end
+	if self.phalanx_minion.headshot_dmg_mul then
+		self.phalanx_minion.headshot_dmg_mul = self.phalanx_minion.headshot_dmg_mul * hs_mul
+	end
+	if self.phalanx_vip.headshot_dmg_mul then
+		self.phalanx_vip.headshot_dmg_mul = self.phalanx_vip.headshot_dmg_mul * hs_mul
 	end
 	if self.taser.headshot_dmg_mul then
 		self.taser.headshot_dmg_mul = self.taser.headshot_dmg_mul * hs_mul
@@ -6450,6 +6517,8 @@ function CharacterTweakData:character_map()
 				"ene_security_8",
 				"ene_shield_1",
 				"ene_shield_2",
+				"ene_phalanx_1",
+				"ene_vip_1",
 				"ene_sniper_1",
 				"ene_sniper_2",
 				"ene_spook_1",
@@ -6530,6 +6599,13 @@ function CharacterTweakData:character_map()
 				"civ_female_casino_2",
 				"civ_female_casino_3",
 				"civ_male_casino_pitboss"
+			}
+		},
+		vip = {
+			path = "units/pd2_dlc_vip/characters/",
+			list = {
+				"ene_vip_1",
+				"ene_phalanx_1"
 			}
 		}
 	}

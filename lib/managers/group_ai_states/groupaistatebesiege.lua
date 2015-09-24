@@ -110,6 +110,9 @@ function GroupAIStateBesiege:_upd_police_activity()
 	if self._ai_enabled then
 		self:_upd_SO()
 		self:_upd_grp_SO()
+		self:_check_spawn_phalanx()
+		self:_check_phalanx_group_has_spawned()
+		self:_check_phalanx_damage_reduction_increase()
 		if self._enemy_weapons_hot then
 			self:_claculate_drama_value()
 			self:_upd_regroup_task()
@@ -395,14 +398,24 @@ function GroupAIStateBesiege:_upd_assault_task()
 			task_data.phase_end_t = t + tweak_data.group_ai.besiege.assault.fade_duration
 		end
 	else
+		local end_assault = false
 		local enemies_left = self:_count_police_force("assault")
-		if enemies_left < 7 or t > task_data.phase_end_t + 350 then
-			if t > task_data.phase_end_t - 8 and not task_data.said_retreat then
-				if self._drama_data.amount < tweak_data.drama.assault_fade_end then
-					task_data.said_retreat = true
-					self:_police_announce_retreat()
+		if not self._hunt_mode then
+			local min_enemies_left = 7
+			if enemies_left < min_enemies_left or t > task_data.phase_end_t + 350 then
+				if t > task_data.phase_end_t - 8 and not task_data.said_retreat then
+					if self._drama_data.amount < tweak_data.drama.assault_fade_end then
+						task_data.said_retreat = true
+						self:_police_announce_retreat()
+					end
+				elseif t > task_data.phase_end_t and self._drama_data.amount < tweak_data.drama.assault_fade_end and self:_count_criminals_engaged_force(4) <= 3 then
+					end_assault = true
 				end
-			elseif t > task_data.phase_end_t and self._drama_data.amount < tweak_data.drama.assault_fade_end and self:_count_criminals_engaged_force(4) <= 3 then
+			else
+				print("kill more enemies to end fade phase: ", min_enemies_left - enemies_left)
+			end
+			if task_data.force_end or end_assault then
+				print("assault task clear")
 				task_data.active = nil
 				task_data.phase = nil
 				task_data.said_retreat = nil
@@ -414,6 +427,7 @@ function GroupAIStateBesiege:_upd_assault_task()
 				return
 			end
 		else
+			print("disable hunt mode to end fade phase")
 		end
 	end
 	if self._drama_data.amount <= tweak_data.drama.low then
@@ -782,30 +796,38 @@ function GroupAIStateBesiege:_find_spawn_group_near_area(target_area, allowed_gr
 		my_wgt = math.lerp(1, 0.2, math.min(1, my_wgt / dis_limit))
 		local my_spawn_group = valid_spawn_groups[i]
 		local my_group_types = my_spawn_group.mission_element:spawn_groups()
-		for _, group_type in ipairs(my_group_types) do
-			if tweak_data.group_ai.enemy_spawn_groups[group_type] then
-				local cat_weights = allowed_groups[group_type]
-				if cat_weights then
-					local cat_weight = self:_get_difficulty_dependent_value(cat_weights)
-					local mod_weight = my_wgt * cat_weight
-					table.insert(candidate_groups, {
-						group = my_spawn_group,
-						group_type = group_type,
-						wght = mod_weight
-					})
-					total_weight = total_weight + mod_weight
-				end
-			else
-				debug_pause("[GroupAIStateBesiege:_find_spawn_group_near_area] inexistent spawn_group:", group_type, ". element id:", my_spawn_group.mission_element._id)
-			end
-		end
+		total_weight = total_weight + self:_choose_best_groups(candidate_groups, my_spawn_group, my_group_types, allowed_groups, my_wgt)
 	end
 	if total_weight == 0 then
 		return
 	end
+	return self:_choose_best_group(candidate_groups, total_weight)
+end
+function GroupAIStateBesiege:_choose_best_groups(best_groups, group, group_types, allowed_groups, weight)
+	local total_weight = 0
+	for _, group_type in ipairs(group_types) do
+		if tweak_data.group_ai.enemy_spawn_groups[group_type] then
+			local cat_weights = allowed_groups[group_type]
+			if cat_weights then
+				local cat_weight = self:_get_difficulty_dependent_value(cat_weights)
+				local mod_weight = weight * cat_weight
+				table.insert(best_groups, {
+					group = group,
+					group_type = group_type,
+					wght = mod_weight
+				})
+				total_weight = total_weight + mod_weight
+			end
+		else
+			debug_pause("[GroupAIStateBesiege:_find_spawn_group_near_area] inexistent spawn_group:", group_type, ". element id:", my_spawn_group.mission_element._id)
+		end
+	end
+	return total_weight
+end
+function GroupAIStateBesiege:_choose_best_group(best_groups, total_weight)
 	local rand_wgt = total_weight * math.random()
 	local best_grp, best_grp_type
-	for i, candidate in ipairs(candidate_groups) do
+	for i, candidate in ipairs(best_groups) do
 		rand_wgt = rand_wgt - candidate.wght
 		if rand_wgt <= 0 then
 			best_grp = candidate.group
@@ -815,6 +837,29 @@ function GroupAIStateBesiege:_find_spawn_group_near_area(target_area, allowed_gr
 		end
 	end
 	return best_grp, best_grp_type
+end
+function GroupAIStateBesiege:force_spawn_group(group, group_types)
+	local best_groups = {}
+	local total_weight = self:_choose_best_groups(best_groups, group, group_types, tweak_data.group_ai.besiege[self._task_data.assault.active and "assault" or "recon"].groups, 1)
+	if total_weight > 0 then
+		local spawn_group, spawn_group_type = self:_choose_best_group(best_groups, total_weight)
+		if spawn_group then
+			local grp_objective = {
+				type = "assault_area",
+				area = spawn_group.area,
+				coarse_path = {
+					{
+						spawn_group.area.pos_nav_seg,
+						spawn_group.area.pos
+					}
+				},
+				attitude = "avoid",
+				pose = "crouch",
+				stance = "hos"
+			}
+			self:_spawn_in_group(spawn_group, spawn_group_type, grp_objective)
+		end
+	end
 end
 function GroupAIStateBesiege:_spawn_in_individual_groups(grp_objective, spawn_points, task)
 	for i_sp, spawn_point in ipairs(spawn_points) do
@@ -2405,12 +2450,25 @@ function GroupAIStateBesiege._create_objective_from_group_objective(grp_objectiv
 		objective.scan = true
 		objective.interrupt_dis = 200
 		objective.interrupt_suppression = true
+	elseif grp_objective.type == "create_phalanx" then
+		objective.type = "phalanx"
+		objective.stance = "hos"
+		objective.interrupt_dis = nil
+		objective.interrupt_health = nil
+		objective.interrupt_suppression = nil
+		objective.attitude = "avoid"
+		objective.path_ahead = true
+	elseif grp_objective.type == "hunt" then
+		objective.type = "hunt"
+		objective.stance = "hos"
+		objective.scan = true
+		objective.interrupt_dis = 200
 	end
 	objective.stance = grp_objective.stance or objective.stance
 	objective.pose = grp_objective.pose or objective.pose
 	objective.area = grp_objective.area
 	objective.nav_seg = grp_objective.nav_seg or objective.area.pos_nav_seg
-	objective.attitude = grp_objective.attitude
+	objective.attitude = grp_objective.attitude or objective.attitude
 	objective.interrupt_dis = grp_objective.interrupt_dis or objective.interrupt_dis
 	objective.interrupt_health = grp_objective.interrupt_health or objective.interrupt_health
 	objective.interrupt_suppression = grp_objective.interrupt_suppression or objective.interrupt_suppression
@@ -2922,4 +2980,186 @@ function GroupAIStateBesiege:set_team_relation(team1_id, team2_id, relation, mut
 		local relation_code = relation == "neutral" and 1 or relation == "friend" and 2 or 3
 		managers.network:session():send_to_peers_synched("sync_team_relation", team1_index, team2_index, relation_code)
 	end
+end
+function GroupAIStateBesiege:_check_spawn_phalanx()
+	if not Global.game_settings.single_player and self._task_data and self._task_data.assault.active and self._phalanx_center_pos and not self._phalanx_spawn_group then
+		local now = TimerManager:game():time()
+		local respawn_delay = tweak_data.group_ai.phalanx.spawn_chance.respawn_delay
+		if not self._phalanx_despawn_time or now >= self._phalanx_despawn_time + respawn_delay then
+			local spawn_chance_start = tweak_data.group_ai.phalanx.spawn_chance.start
+			self._phalanx_current_spawn_chance = self._phalanx_current_spawn_chance or spawn_chance_start
+			self._phalanx_last_spawn_check = self._phalanx_last_spawn_check or now
+			self._phalanx_last_chance_increase = self._phalanx_last_chance_increase or now
+			local spawn_chance_increase = tweak_data.group_ai.phalanx.spawn_chance.increase
+			local spawn_chance_max = tweak_data.group_ai.phalanx.spawn_chance.max
+			if spawn_chance_max > self._phalanx_current_spawn_chance and spawn_chance_increase > 0 then
+				local chance_increase_intervall = tweak_data.group_ai.phalanx.chance_increase_intervall
+				if now >= self._phalanx_last_chance_increase + chance_increase_intervall then
+					self._phalanx_last_chance_increase = now
+					self._phalanx_current_spawn_chance = math.min(spawn_chance_max, self._phalanx_current_spawn_chance + spawn_chance_increase)
+					print("Phalanx spawn chance increased to ", self._phalanx_current_spawn_chance)
+				end
+			else
+			end
+			if self._phalanx_current_spawn_chance > 0 then
+				local check_spawn_intervall = tweak_data.group_ai.phalanx.check_spawn_intervall
+				if now >= self._phalanx_last_spawn_check + check_spawn_intervall then
+					self._phalanx_last_spawn_check = now
+					print("Spawn chance roll...")
+					if math.random() <= self._phalanx_current_spawn_chance then
+						self:_spawn_phalanx()
+					else
+						print("Spawn chance roll failed!")
+					end
+				end
+			end
+		end
+	else
+	end
+end
+function GroupAIStateBesiege:_spawn_phalanx()
+	if self._phalanx_center_pos then
+		local phalanx_center_pos = self._phalanx_center_pos
+		local phalanx_center_nav_seg = managers.navigation:get_nav_seg_from_pos(phalanx_center_pos)
+		local phalanx_area = self:get_area_from_nav_seg_id(phalanx_center_nav_seg)
+		local phalanx_group = {
+			Phalanx = {
+				1,
+				1,
+				1
+			}
+		}
+		local spawn_group, spawn_group_type = self:_find_spawn_group_near_area(phalanx_area, phalanx_group, nil, nil, nil)
+		if spawn_group.spawn_pts[1] and spawn_group.spawn_pts[1].pos then
+			local spawn_pos = spawn_group.spawn_pts[1].pos
+			local spawn_nav_seg = managers.navigation:get_nav_seg_from_pos(spawn_pos)
+			local spawn_area = self:get_area_from_nav_seg_id(spawn_nav_seg)
+			if spawn_group then
+				local grp_objective = {
+					type = "defend_area",
+					area = spawn_area,
+					nav_seg = spawn_nav_seg
+				}
+				print("Phalanx spawn started!")
+				self._phalanx_spawn_group = self:_spawn_in_group(spawn_group, spawn_group_type, grp_objective, nil)
+				managers.game_play_central:announcer_say("cpa_a02_01")
+				managers.network:session():send_to_peers_synched("group_ai_event", self:get_sync_event_id("phalanx_spawned"), 0)
+			end
+		end
+	else
+		print("self._phalanx_center_pos NOT SET!!!")
+	end
+end
+function GroupAIStateBesiege:_check_phalanx_group_has_spawned()
+	if self._phalanx_spawn_group then
+		if self._phalanx_spawn_group.has_spawned then
+			if not self._phalanx_spawn_group.set_to_phalanx_group_obj then
+				local pos = self._phalanx_center_pos
+				local nav_seg = managers.navigation:get_nav_seg_from_pos(pos)
+				local area = self:get_area_from_nav_seg_id(nav_seg)
+				local grp_objective = {
+					type = "create_phalanx",
+					area = area,
+					nav_seg = nav_seg,
+					pos = pos
+				}
+				print("Phalanx spawn finished, setting phalanx objective!")
+				self:_set_objective_to_enemy_group(self._phalanx_spawn_group, grp_objective)
+				self._phalanx_spawn_group.set_to_phalanx_group_obj = true
+			end
+		else
+			print("Phalanx group has not yet spawned completely!")
+		end
+	end
+end
+function GroupAIStateBesiege:phalanx_damage_reduction_enable()
+	local law1team = self:_get_law1_team()
+	self:set_phalanx_damage_reduction_buff(law1team.damage_reduction or tweak_data.group_ai.phalanx.vip.damage_reduction.start)
+	self._phalanx_damage_reduction_last_increase = self._phalanx_damage_reduction_last_increase or TimerManager:game():time()
+	self:set_assault_endless(true)
+end
+function GroupAIStateBesiege:phalanx_damage_reduction_disable()
+	self:set_phalanx_damage_reduction_buff(-1)
+	self._phalanx_damage_reduction_last_increase = nil
+end
+function GroupAIStateBesiege:_get_law1_team()
+	local team_id = tweak_data.levels:get_default_team_ID("combatant")
+	return self:team_data(team_id)
+end
+function GroupAIStateBesiege:_check_phalanx_damage_reduction_increase()
+	local law1team = self:_get_law1_team()
+	local damage_reduction_max = tweak_data.group_ai.phalanx.vip.damage_reduction.max
+	if law1team.damage_reduction and damage_reduction_max > law1team.damage_reduction then
+		local now = TimerManager:game():time()
+		local increase_intervall = tweak_data.group_ai.phalanx.vip.damage_reduction.increase_intervall
+		local last_increase = self._phalanx_damage_reduction_last_increase
+		if now > last_increase + increase_intervall then
+			last_increase = now
+			local damage_reduction = math.min(damage_reduction_max, law1team.damage_reduction + tweak_data.group_ai.phalanx.vip.damage_reduction.increase)
+			self:set_phalanx_damage_reduction_buff(damage_reduction)
+			self._phalanx_damage_reduction_last_increase = last_increase
+			print("Phalanx damage reduction buff has been increased to ", law1team.damage_reduction, "%!")
+			if alive(self:phalanx_vip()) then
+				self:phalanx_vip():sound():say("cpw_a05", true, true)
+			end
+		end
+	end
+end
+function GroupAIStateBesiege:set_phalanx_damage_reduction_buff(damage_reduction)
+	local law1team = self:_get_law1_team()
+	damage_reduction = damage_reduction or -1
+	if law1team then
+		if damage_reduction > 0 then
+			law1team.damage_reduction = damage_reduction
+		else
+			law1team.damage_reduction = nil
+		end
+		self:set_damage_reduction_buff_hud()
+	end
+	if Network:is_server() then
+		managers.network:session():send_to_peers_synched("sync_damage_reduction_buff", damage_reduction)
+	end
+end
+function GroupAIStateBesiege:set_damage_reduction_buff_hud()
+	local law1team = self:_get_law1_team()
+	if law1team then
+		if law1team.damage_reduction then
+			print("Setting damage reduction buff icon to ENABLED!")
+			managers.hud:set_buff_enabled("vip", true)
+		else
+			print("Setting damage reduction buff icon to DISABLED!")
+			managers.hud:set_buff_enabled("vip", false)
+		end
+	else
+		debug_pause("LAW 1 TEAM NOT FOUND!!!!")
+	end
+end
+function GroupAIStateBesiege:set_assault_endless(enabled)
+	self._hunt_mode = enabled
+	if enabled then
+		managers.hud:sync_set_assault_mode("phalanx")
+	else
+		managers.hud:sync_set_assault_mode("normal")
+	end
+	if Network:is_server() then
+		managers.network:session():send_to_peers_synched("sync_assault_endless", enabled)
+	end
+end
+function GroupAIStateBesiege:phalanx_despawned()
+	self._phalanx_despawn_time = TimerManager:game():time()
+	self._phalanx_spawn_group = nil
+	local spawn_chance_decrease = tweak_data.group_ai.phalanx.spawn_chance.decrease
+	self._phalanx_current_spawn_chance = math.max(0, self._phalanx_current_spawn_chance or tweak_data.group_ai.phalanx.spawn_chance.start - spawn_chance_decrease)
+end
+function GroupAIStateBesiege:phalanx_spawn_group()
+	return self._phalanx_spawn_group
+end
+function GroupAIStateBesiege:force_end_assault_phase()
+	local task_data = self._task_data.assault
+	if task_data.active then
+		print("GroupAIStateBesiege:force_end_assault_phase()")
+		task_data.phase = "fade"
+		task_data.force_end = true
+	end
+	self:set_assault_endless(false)
 end

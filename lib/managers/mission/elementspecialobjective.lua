@@ -344,7 +344,10 @@ function ElementSpecialObjective:get_objective(instigator)
 		end
 		local objective_type = string.sub(self._values.so_action, 4)
 		local last_pos, nav_seg
-		if objective_type == "hunt" then
+		if objective_type == "phalanx" then
+			objective.nav_seg = managers.navigation:get_nav_seg_from_pos(objective.pos)
+			objective.type = objective_type
+		elseif objective_type == "hunt" then
 			nav_seg, last_pos = self:_get_hunt_location(instigator)
 			if not nav_seg then
 				return
@@ -370,7 +373,7 @@ function ElementSpecialObjective:get_objective(instigator)
 		elseif objective_type == "idle" then
 			objective.type = "free"
 			objective.nav_seg = nav_seg or last_pos and managers.navigation:get_nav_seg_from_pos(last_pos)
-		else
+		elseif objective_type ~= "phalanx" then
 			objective.type = objective_type
 			objective.nav_seg = nav_seg or pos and last_pos and managers.navigation:get_nav_seg_from_pos(last_pos)
 			if objective_type == "sniper" then
@@ -531,6 +534,9 @@ function ElementSpecialObjective:get_objective_trigger()
 	return self._values.trigger_on
 end
 function ElementSpecialObjective:_administer_objective(unit, objective)
+	if objective.type == "phalanx" then
+		GroupAIStateBase:register_phalanx_unit(unit)
+	end
 	if objective.trigger_on == "interact" then
 		if not unit:brain():objective() then
 			local idle_objective = {type = "free", followup_objective = objective}

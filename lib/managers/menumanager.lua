@@ -2754,9 +2754,15 @@ end
 function MenuCallbackHandler:_dialog_clear_progress_no()
 end
 function MenuCallbackHandler:set_default_controller(item)
-	managers.controller:load_settings("settings/controller_settings")
-	managers.controller:clear_user_mod()
-	managers.menu:back(true)
+	local params = {
+		text = managers.localization:text("dialog_use_default_keys_message"),
+		callback = function()
+			managers.controller:load_settings("settings/controller_settings")
+			managers.controller:clear_user_mod()
+			managers.menu:back(true)
+		end
+	}
+	managers.menu:show_default_option_dialog(params)
 end
 function MenuCallbackHandler:debug_goto_custody()
 	local player = managers.player:player_unit()

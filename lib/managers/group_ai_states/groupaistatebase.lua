@@ -112,7 +112,8 @@ end
 GroupAIStateBase.EVENT_SYNC = {
 	"police_called",
 	"enemy_weapons_hot",
-	"cloaker_spawned"
+	"cloaker_spawned",
+	"phalanx_spawned"
 }
 function GroupAIStateBase:init()
 	self:_init_misc_data()
@@ -286,6 +287,10 @@ function GroupAIStateBase:_init_misc_data()
 	self._alert_listeners = {}
 	self:_init_unit_type_filters()
 	self:_init_team_tables()
+	self._phalanx_data = {
+		minions = {},
+		vip = nil
+	}
 end
 function GroupAIStateBase:_init_team_tables()
 	self._teams = tweak_data.levels:get_team_setup()
@@ -692,11 +697,16 @@ function GroupAIStateBase:on_hostage_state(state, key, police, skip_announcement
 		end
 		table.insert(self._hostage_keys, key)
 	else
+		local found = false
 		for i, h_key in ipairs(self._hostage_keys) do
 			if key == h_key then
 				table.remove(self._hostage_keys, i)
+				found = true
 			else
 			end
+		end
+		if not found then
+			return
 		end
 	end
 	self._hostage_headcount = self._hostage_headcount + d
@@ -1067,6 +1077,11 @@ function GroupAIStateBase:criminal_hurt_drama(unit, attacker, dmg_percent)
 	self:_add_drama(drama_amount)
 end
 function GroupAIStateBase:on_enemy_unregistered(unit)
+	if self:is_unit_in_phalanx_minion_data(unit:key()) then
+		self:unregister_phalanx_minion(unit:key())
+		CopLogicPhalanxMinion:chk_should_breakup()
+		CopLogicPhalanxMinion:chk_should_reposition()
+	end
 	self._police_force = self._police_force - 1
 	local u_key = unit:key()
 	self:_clear_character_criminal_suspicion_data(u_key)
@@ -1288,7 +1303,7 @@ function GroupAIStateBase:check_gameover_conditions()
 		end
 	end
 	local gameover = false
-	if not plrs_alive then
+	if not plrs_alive and (not self.LONELY2 or not self:LONELY2()) then
 		gameover = true
 	elseif plrs_disabled and not ai_alive then
 		gameover = true
@@ -1682,6 +1697,9 @@ function GroupAIStateBase:on_objective_failed(unit, objective)
 	end
 end
 function GroupAIStateBase:add_special_objective(id, objective_data)
+	if objective_data.objective.type == "phalanx" then
+		self._phalanx_center_pos = objective_data.objective.pos
+	end
 	if self._special_objectives[id] then
 		self:remove_special_objective(id)
 	end
@@ -1960,6 +1978,7 @@ function GroupAIStateBase:load(load_data)
 	self._teams = my_load_data.teams
 	self._endscreen_variant = my_load_data.endscreen_variant
 	self:_call_listeners("team_def")
+	self:set_damage_reduction_buff_hud()
 end
 function GroupAIStateBase:set_point_of_no_return_timer(time, point_of_no_return_id)
 	if time == nil or setup:has_queued_exec() then
@@ -2531,6 +2550,7 @@ function GroupAIStateBase:on_player_criminal_death(peer_id)
 	local criminal_name = managers.criminals:character_name_by_peer_id(peer_id)
 	local respawn_penalty = self._criminals[unit:key()].respawn_penalty or tweak_data.player.damage.base_respawn_time_penalty
 	managers.trade:on_player_criminal_death(criminal_name, respawn_penalty, self._criminals[unit:key()].hostages_killed or 0)
+	managers.criminals:on_last_valid_player_spawn_point_updated(unit)
 end
 function GroupAIStateBase:all_AI_criminals()
 	return self._ai_criminals
@@ -2697,6 +2717,7 @@ function GroupAIStateBase:sync_hostage_headcount(nr_hostages)
 		nr_hostages = self._hostage_headcount
 	})
 	managers.player:update_hostage_skills()
+	self:check_gameover_conditions()
 end
 function GroupAIStateBase:_set_rescue_state(state)
 	self._rescue_allowed = state
@@ -2877,7 +2898,7 @@ function GroupAIStateBase:_map_spawn_points_to_respective_areas(id, spawn_points
 	for _, new_spawn_point in ipairs(spawn_points) do
 		local pos = new_spawn_point:value("position")
 		local interval = new_spawn_point:value("interval")
-		local amount = new_spawn_point:value("amount")
+		local amount = new_spawn_point:get_random_table_value(new_spawn_point:value("amount"))
 		local nav_seg = nav_manager:get_nav_seg_from_pos(pos, true)
 		local area = self:get_area_from_nav_seg_id(nav_seg)
 		local accessibility = new_spawn_point:accessibility()
@@ -2902,52 +2923,11 @@ function GroupAIStateBase:_map_spawn_points_to_respective_areas(id, spawn_points
 	end
 end
 function GroupAIStateBase:_map_spawn_groups_to_respective_areas(id, spawn_groups)
-	local nav_manager = managers.navigation
 	for _, spawn_grp_element in ipairs(spawn_groups) do
 		local spawn_points = spawn_grp_element:spawn_points()
 		local spawn_group_names = spawn_grp_element:spawn_groups()
 		if spawn_points and next(spawn_points) and spawn_group_names and next(spawn_group_names) then
-			local interval = spawn_grp_element:value("interval")
-			local amount = spawn_grp_element:value("amount")
-			if amount <= 0 then
-				amount = nil
-			end
-			local pos = spawn_points[1]:value("position")
-			local nav_seg = nav_manager:get_nav_seg_from_pos(spawn_points[1]:value("position"), true)
-			local area = self:get_area_from_nav_seg_id(nav_seg)
-			local new_spawn_group_data = {
-				id = id,
-				pos = Vector3(),
-				nav_seg = nav_seg,
-				area = area,
-				mission_element = spawn_grp_element,
-				amount = amount,
-				interval = interval,
-				delay_t = -1,
-				spawn_pts = {},
-				team_id = spawn_grp_element:value("team")
-			}
-			local nr_elements = 0
-			for _, spawn_pt_element in ipairs(spawn_points) do
-				local interval = spawn_pt_element:value("interval")
-				local amount = spawn_pt_element:value("amount")
-				if amount <= 0 then
-					amount = nil
-				end
-				local accessibility = spawn_pt_element:accessibility()
-				local sp_data = {
-					pos = spawn_pt_element:value("position"),
-					interval = interval,
-					delay_t = -1,
-					amount = amount,
-					accessibility = accessibility,
-					mission_element = spawn_pt_element
-				}
-				table.insert(new_spawn_group_data.spawn_pts, sp_data)
-				mvector3.add(new_spawn_group_data.pos, spawn_pt_element:value("position"))
-				nr_elements = nr_elements + 1
-			end
-			mvector3.divide(new_spawn_group_data.pos, nr_elements)
+			local new_spawn_group_data, area = self:create_spawn_group(id, spawn_grp_element, spawn_points)
 			local area_spawn_groups = area.spawn_groups
 			if area_spawn_groups then
 				table.insert(area_spawn_groups, new_spawn_group_data)
@@ -2957,6 +2937,50 @@ function GroupAIStateBase:_map_spawn_groups_to_respective_areas(id, spawn_groups
 			end
 		end
 	end
+end
+function GroupAIStateBase:create_spawn_group(id, spawn_group, spawn_points)
+	local pos = spawn_points[1]:value("position")
+	local nav_seg = managers.navigation:get_nav_seg_from_pos(spawn_points[1]:value("position"), true)
+	local area = self:get_area_from_nav_seg_id(nav_seg)
+	local interval = spawn_group:value("interval")
+	local amount = spawn_group:get_random_table_value(spawn_group:value("amount"))
+	if amount <= 0 then
+		amount = nil
+	end
+	local new_spawn_group_data = {
+		id = id,
+		pos = Vector3(),
+		nav_seg = nav_seg,
+		area = area,
+		mission_element = spawn_group,
+		amount = amount,
+		interval = interval,
+		delay_t = -1,
+		spawn_pts = {},
+		team_id = spawn_group:value("team")
+	}
+	local nr_elements = 0
+	for _, spawn_pt_element in ipairs(spawn_points) do
+		local interval = spawn_pt_element:value("interval")
+		local amount = spawn_pt_element:get_random_table_value(spawn_pt_element:value("amount"))
+		if amount <= 0 then
+			amount = nil
+		end
+		local accessibility = spawn_pt_element:accessibility()
+		local sp_data = {
+			pos = spawn_pt_element:value("position"),
+			interval = interval,
+			delay_t = -1,
+			amount = amount,
+			accessibility = accessibility,
+			mission_element = spawn_pt_element
+		}
+		table.insert(new_spawn_group_data.spawn_pts, sp_data)
+		mvector3.add(new_spawn_group_data.pos, spawn_pt_element:value("position"))
+		nr_elements = nr_elements + 1
+	end
+	mvector3.divide(new_spawn_group_data.pos, nr_elements)
+	return new_spawn_group_data, area
 end
 function GroupAIStateBase:_remove_preferred_spawn_point_from_area(area, sp_data)
 	if not area.spawn_points then
@@ -3111,6 +3135,14 @@ function GroupAIStateBase:_remove_group_member(group, u_key, is_casualty)
 		u_data.leader_key = nil
 	end
 	group.units[u_key] = nil
+end
+function GroupAIStateBase:unit_leave_group(unit, is_casualty)
+	if alive(unit) then
+		local brain = unit:brain()
+		local group = brain._logic_data.group
+		self:_remove_group_member(group, unit:key(), is_casualty)
+		brain:set_group(nil)
+	end
 end
 function GroupAIStateBase:_add_group_member(group, u_key)
 	group.size = group.size + 1
@@ -3556,6 +3588,9 @@ function GroupAIStateBase:_set_converted_police(u_key, unit)
 			managers.achievment:award(achievement_data.award)
 		end
 	end
+	if not unit then
+		self:check_gameover_conditions()
+	end
 end
 function GroupAIStateBase:sync_converted_enemy(converted_enemy)
 	local u_data = self._police[converted_enemy:key()]
@@ -3750,6 +3785,8 @@ function GroupAIStateBase:sync_event(event_id, blame_id)
 		managers.enemy:set_corpse_disposal_enabled(true)
 	elseif event_name == "cloaker_spawned" then
 		managers.hud:post_event("cloaker_spawn")
+	elseif event_name == "phalanx_spawned" then
+		managers.game_play_central:announcer_say("cpa_a02_01")
 	end
 end
 function GroupAIStateBase:notify_bain_weapons_hot(called_reason)
@@ -4426,4 +4463,28 @@ function GroupAIStateBase:unregister_turret(unit)
 end
 function GroupAIStateBase:turrets()
 	return self._turret_units
+end
+function GroupAIStateBase:phalanx_minions()
+	return self._phalanx_data.minions
+end
+function GroupAIStateBase:phalanx_vip()
+	return self._phalanx_data.vip
+end
+function GroupAIStateBase:get_phalanx_minion_count()
+	return table.size(self._phalanx_data.minions or {})
+end
+function GroupAIStateBase:register_phalanx_minion(unit)
+	self._phalanx_data.minions[unit:key()] = unit
+end
+function GroupAIStateBase:register_phalanx_vip(unit)
+	self._phalanx_data.vip = unit
+end
+function GroupAIStateBase:unregister_phalanx_minion(unit_key)
+	self._phalanx_data.minions[unit_key] = nil
+end
+function GroupAIStateBase:unregister_phalanx_vip()
+	self._phalanx_data.vip = nil
+end
+function GroupAIStateBase:is_unit_in_phalanx_minion_data(unit_key)
+	return self._phalanx_data and self._phalanx_data.minions and self._phalanx_data.minions[unit_key] and true
 end
