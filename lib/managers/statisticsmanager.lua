@@ -763,22 +763,44 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 		end
 	end
 	if (completion == "win_begin" or completion == "win_dropin") and job_id == "shoutout_raid" then
+		print("Crimefest Challenge: crimefest_challenge_dallas_1", 1)
 		stats.crimefest_challenge_dallas_1 = {type = "int", value = 1}
 	end
 	for melee_name, melee_kill in pairs(session.killed_by_melee) do
 		if melee_kill > 0 and melee_name == "whiskey" then
+			print("Crimefest Challenge: crimefest_challenge_chains_1", melee_kill)
 			stats.crimefest_challenge_chains_1 = {type = "int", value = melee_kill}
 		else
 		end
 	end
+	local civilian_kills = 0
 	for enemy_name, enemy_data in pairs(session.killed) do
-		if 0 < enemy_data.count and enemy_name == "spooc" then
+		if enemy_name == "spooc" and 0 < enemy_data.count then
+			print("Crimefest Challenge: crimefest_challenge_clover_1", enemy_data.count)
 			stats.crimefest_challenge_clover_1 = {
 				type = "int",
 				value = enemy_data.count
 			}
-		else
+		elseif enemy_name == "civilian" or enemy_name == "civilian_female" then
+			civilian_kills = civilian_kills + enemy_data.count
 		end
+	end
+	local enemy_kills = session.killed.total.count - civilian_kills
+	if enemy_kills > 0 then
+		print("Crimefest Challenge: crimefest_challenge_houston_2", enemy_kills)
+		stats.crimefest_challenge_houston_2 = {type = "int", value = enemy_kills}
+	end
+	managers.network.account:publish_statistics(stats)
+end
+function StatisticsManager:publish_xp_to_steam(total_xp)
+	if Application:editor() then
+		return
+	end
+	local stats = {}
+	local xp = math.round(total_xp / 100)
+	if xp > 0 then
+		print("Crimefest Challenge: crimefest_challenge_clover_2", xp)
+		stats.crimefest_challenge_clover_2 = {type = "int", value = xp}
 	end
 	managers.network.account:publish_statistics(stats)
 end

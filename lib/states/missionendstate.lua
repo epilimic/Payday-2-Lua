@@ -777,8 +777,11 @@ function MissionEndState:update(t, dt)
 			local data = managers.experience:give_experience(self._total_xp_bonus)
 			data.bonuses = self._bonuses
 			managers.hud:send_xp_data_endscreen_hud(data, callback(self, self, "set_completion_bonus_done"))
-			if SystemInfo:platform() == Idstring("WIN32") and level ~= managers.experience:current_level() then
-				managers.statistics:publish_level_to_steam()
+			if SystemInfo:platform() == Idstring("WIN32") then
+				managers.statistics:publish_xp_to_steam(self._total_xp_bonus)
+				if level ~= managers.experience:current_level() then
+					managers.statistics:publish_level_to_steam()
+				end
 			end
 		else
 			self:set_completion_bonus_done(true)

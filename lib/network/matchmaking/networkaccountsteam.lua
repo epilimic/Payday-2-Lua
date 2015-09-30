@@ -204,7 +204,6 @@ function NetworkAccountSTEAM:publish_statistics(stats, force_store)
 			end
 		end
 		if err then
-			Application:throw_exception("[NetworkAccountSTEAM:publish_statistics] Missing statistics, needs to be added!!")
 		end
 		if not force_store then
 			return
