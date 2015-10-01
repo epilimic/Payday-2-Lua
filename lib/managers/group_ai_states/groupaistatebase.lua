@@ -716,6 +716,8 @@ function GroupAIStateBase:on_hostage_state(state, key, police, skip_announcement
 	end
 	if police then
 		self._police_hostage_headcount = self._police_hostage_headcount + d
+	else
+		managers.statistics:crimefest_stats("chains_2")
 	end
 	if state and self._hstg_hint_clbk then
 		managers.enemy:remove_delayed_clbk("_hostage_hint_clbk")

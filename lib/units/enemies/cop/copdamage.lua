@@ -312,6 +312,9 @@ function CopDamage:damage_bullet(attack_data)
 				end
 			end
 			self:_check_damage_achievements(attack_data, head)
+			if self._unit:base()._tweak_table == "tank" and attack_data.weapon_unit:base():weapon_tweak_data().category == "smg" then
+				managers.statistics:crimefest_stats("dallas_2")
+			end
 			if not CopDamage.is_civilian(self._unit:base()._tweak_table) and managers.player:has_category_upgrade("temporary", "overkill_damage_multiplier") and not attack_data.weapon_unit:base().thrower_unit then
 				local weapon_category = attack_data.weapon_unit:base():weapon_tweak_data().category
 				if weapon_category == "shotgun" or weapon_category == "saw" then
