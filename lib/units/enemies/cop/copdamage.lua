@@ -1004,6 +1004,9 @@ function CopDamage:damage_melee(attack_data)
 			if not is_civlian and managers.groupai:state():whisper_mode() and managers.blackmarket:equipped_mask().mask_id == tweak_data.achievement.cant_hear_you_scream.mask then
 				managers.achievment:award_progress(tweak_data.achievement.cant_hear_you_scream.stat)
 			end
+			if is_gangster and (attack_data.name_id == "barbedwire" or attack_data.name_id == "baseballbat") then
+				managers.statistics:crimefest_stats("houston_3")
+			end
 			mvector3.set(mvec_1, self._unit:position())
 			mvector3.subtract(mvec_1, attack_data.attacker_unit:position())
 			mvector3.normalize(mvec_1)

@@ -415,6 +415,8 @@ function StatisticsManager:stop_session(data)
 					self._global.sessions.jobs[job_stat .. "_completed_dropin"] = (self._global.sessions.jobs[job_stat .. "_completed_dropin"] or 0) + 1
 					completion = "win_dropin"
 				end
+			else
+				completion = "done"
 			end
 		elseif data.type == "gameover" then
 			if Global.statistics_manager.playing_from_start then
@@ -639,7 +641,7 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 		type = "int",
 		value = session.misc.deploy_armorbag or 0
 	}
-	if completion == "win_begin" or completion == "win_dropin" or completion == "fail" then
+	if completion then
 		for weapon_name, weapon_data in pairs(session.shots_by_weapon) do
 			if 0 < weapon_data.total and table.contains(weapon_list, weapon_name) then
 				stats["weapon_used_" .. weapon_name] = {type = "int", value = 1}
@@ -744,8 +746,8 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 		method = "set",
 		value = 0
 	}
-	if completion == "win_begin" or completion == "win_dropin" or completion == "fail" then
-		local level_id = managers.job:current_level_id()
+	local level_id = managers.job:current_level_id()
+	if completion then
 		if table.contains(level_list, level_id) then
 			stats["level_" .. level_id] = {type = "int", value = 1}
 		end
@@ -775,6 +777,10 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 			stats.crimefest_challenge_houston_1 = {type = "int", value = 1}
 		end
 	end
+	if completion == "done" and (level_id == "alex_1" or level_id == "rat" or level_id == "mia_1") then
+		print("Crimefest Challenge: crimefest_challenge_chains_3", 1)
+		stats.crimefest_challenge_chains_3 = {type = "int", value = 1}
+	end
 	for melee_name, melee_kill in pairs(session.killed_by_melee) do
 		if melee_kill > 0 and melee_name == "whiskey" then
 			print("Crimefest Challenge: crimefest_challenge_chains_1", melee_kill)
@@ -792,6 +798,9 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 			}
 		elseif enemy_name == "civilian" or enemy_name == "civilian_female" then
 			civilian_kills = civilian_kills + enemy_data.count
+		elseif (enemy_name == "hector_boss" or enemy_name == "hector_boss_no_armor") and 0 < enemy_data.count then
+			print("Crimefest Challenge: crimefest_challenge_clover_3", 1)
+			stats.crimefest_challenge_clover_3 = {type = "int", value = 1}
 		end
 	end
 	local enemy_kills = session.killed.total.count - civilian_kills
@@ -816,6 +825,18 @@ function StatisticsManager:publish_xp_to_steam(total_xp)
 	if xp > 0 then
 		print("Crimefest Challenge: crimefest_challenge_clover_2", xp)
 		stats.crimefest_challenge_clover_2 = {type = "int", value = xp}
+	end
+	managers.network.account:publish_statistics(stats)
+end
+function StatisticsManager:publish_cash_to_steam(total_cash)
+	if Application:editor() then
+		return
+	end
+	local stats = {}
+	local cash = math.round(total_cash / 10000)
+	if cash > 0 then
+		print("Crimefest Challenge: crimefest_challenge_dallas_3", cash * 10000)
+		stats.crimefest_challenge_dallas_3 = {type = "int", value = cash}
 	end
 	managers.network.account:publish_statistics(stats)
 end
