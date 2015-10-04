@@ -775,11 +775,38 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 		elseif job_id == "hox" or job_id == "hox_prof" then
 			print("Crimefest Challenge: crimefest_challenge_houston_1", 1)
 			stats.crimefest_challenge_houston_1 = {type = "int", value = 1}
+		elseif job_id == "framing_frame" or job_id == "framing_frame_prof" then
+			print("Crimefest Challenge: crimefest_challenge_clover_4", 1)
+			stats.crimefest_challenge_clover_4 = {type = "int", value = 1}
 		end
 	end
-	if completion == "done" and (level_id == "alex_1" or level_id == "rat" or level_id == "mia_1") then
-		print("Crimefest Challenge: crimefest_challenge_chains_3", 1)
-		stats.crimefest_challenge_chains_3 = {type = "int", value = 1}
+	if completion == "done" or completion == "win_begin" or completion == "win_dropin" then
+		if level_id == "alex_1" or level_id == "rat" or level_id == "mia_1" then
+			print("Crimefest Challenge: crimefest_challenge_chains_3", 1)
+			stats.crimefest_challenge_chains_3 = {type = "int", value = 1}
+		end
+		local vault_levels = {
+			"branchbank",
+			"big",
+			"election_day_3_skip1",
+			"election_day_3_skip2",
+			"framing_frame_3",
+			"crojob3",
+			"crojob3_night",
+			"shoutout_raid",
+			"arm_for",
+			"firestarter_3",
+			"kosugi",
+			"roberts",
+			"arena",
+			"mia_2",
+			"kenaz",
+			"hox_3"
+		}
+		if table.contains(vault_levels, level_id) then
+			print("Crimefest Challenge: crimefest_challenge_chains_4", 1)
+			stats.crimefest_challenge_chains_4 = {type = "int", value = 1}
+		end
 	end
 	for melee_name, melee_kill in pairs(session.killed_by_melee) do
 		if melee_kill > 0 and melee_name == "whiskey" then
@@ -801,6 +828,12 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 		elseif (enemy_name == "hector_boss" or enemy_name == "hector_boss_no_armor") and 0 < enemy_data.count then
 			print("Crimefest Challenge: crimefest_challenge_clover_3", 1)
 			stats.crimefest_challenge_clover_3 = {type = "int", value = 1}
+		elseif enemy_name == "taser" and 0 < enemy_data.count then
+			print("Crimefest Challenge: crimefest_challenge_houston_4", enemy_data.count)
+			stats.crimefest_challenge_houston_4 = {
+				type = "int",
+				value = enemy_data.count
+			}
 		end
 	end
 	local enemy_kills = session.killed.total.count - civilian_kills
