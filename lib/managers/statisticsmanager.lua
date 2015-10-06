@@ -778,6 +778,16 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 		elseif job_id == "framing_frame" or job_id == "framing_frame_prof" then
 			print("Crimefest Challenge: crimefest_challenge_clover_4", 1)
 			stats.crimefest_challenge_clover_4 = {type = "int", value = 1}
+		elseif job_id == "roberts" and (managers.blackmarket:equipped_primary().weapon_id == "ak74" or managers.blackmarket:equipped_primary().weapon_id == "new_m4") then
+			print("Crimefest Challenge: crimefest_challenge_chains_5", 1)
+			stats.crimefest_challenge_chains_5 = {type = "int", value = 1}
+		elseif job_id == "pines" then
+			print("Crimefest Challenge: crimefest_challenge_clover_5", 1)
+			stats.crimefest_challenge_clover_5 = {type = "int", value = 1}
+		end
+		if Global.game_settings.difficulty == "overkill_290" then
+			print("Crimefest Challenge: crimefest_challenge_houston_5", 1)
+			stats.crimefest_challenge_houston_5 = {type = "int", value = 1}
 		end
 	end
 	if completion == "done" or completion == "win_begin" or completion == "win_dropin" then
@@ -831,6 +841,12 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 		elseif enemy_name == "taser" and 0 < enemy_data.count then
 			print("Crimefest Challenge: crimefest_challenge_houston_4", enemy_data.count)
 			stats.crimefest_challenge_houston_4 = {
+				type = "int",
+				value = enemy_data.count
+			}
+		elseif enemy_name == "phalanx_minion" and 0 < enemy_data.count then
+			print("Crimefest Challenge: crimefest_challenge_dallas_5", enemy_data.count)
+			stats.crimefest_challenge_dallas_5 = {
 				type = "int",
 				value = enemy_data.count
 			}

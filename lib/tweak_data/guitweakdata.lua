@@ -564,6 +564,7 @@ function GuiTweakData:init()
 	self.MAX_WEAPON_PAGES = math.ceil(min_amount_weapons / (self.WEAPON_ROWS_PER_PAGE * self.WEAPON_COLUMNS_PER_PAGE))
 	self.MAX_WEAPON_SLOTS = self.MAX_WEAPON_PAGES * self.WEAPON_ROWS_PER_PAGE * self.WEAPON_COLUMNS_PER_PAGE
 	self.fbi_files_webpage = "http://fbi.overkillsoftware.com/"
+	self.crimefest_challenges_webpage = "http://www.overkillsoftware.com/games/roadtocrimefest/"
 	self.crime_net = {}
 	self.crime_net.controller = {}
 	self.crime_net.controller.snap_distance = 50
