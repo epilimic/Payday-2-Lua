@@ -143,6 +143,17 @@ function MissionEndState:at_enter(old_state, params)
 					managers.achievment:award(shotgun_one_o_one.award)
 				end
 			end
+			if self._type == "victory" and managers.statistics:session_hit_accuracy() > 70 then
+				local job_list = {
+					watchdogs = true,
+					watchdogs_prof = true,
+					watchdogs_night = true,
+					watchdogs_night_prof = true
+				}
+				if job_list[managers.job:current_job_id()] then
+					managers.statistics:crimefest_stats("chains_6")
+				end
+			end
 			local mask_pass, diff_pass, no_shots_pass, contract_pass, job_pass, jobs_pass, level_pass, levels_pass, stealth_pass, loud_pass, equipped_pass, equipped_team_pass, timer_pass, num_players_pass, pass_skills, killed_by_weapons_pass, killed_by_melee_pass, killed_by_grenade_pass, civilians_killed_pass, complete_job_pass, all_pass, weapon_data, memory, level_id, stage, num_skills
 			local killed_by_weapons = managers.statistics:session_killed_by_weapons()
 			local killed_by_melee = managers.statistics:session_killed_by_melee()

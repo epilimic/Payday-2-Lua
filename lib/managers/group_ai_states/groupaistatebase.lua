@@ -3506,6 +3506,7 @@ function GroupAIStateBase:convert_hostage_to_criminal(unit, peer_unit)
 	if not peer_unit then
 		managers.player:count_up_player_minions()
 	end
+	managers.statistics:crimefest_stats("clover_6")
 end
 function GroupAIStateBase:clbk_minion_destroyed(player_key, minion_unit)
 	local minion_key = minion_unit:key()
