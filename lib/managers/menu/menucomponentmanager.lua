@@ -2030,6 +2030,9 @@ function MenuComponentManager:create_lootdrop_casino_gui(node)
 		if not managers.menu:is_pc_controller() then
 			managers.menu:active_menu().input:deactivate_controller_mouse()
 		end
+		if SystemInfo:platform() == Idstring("WIN32") then
+			managers.statistics:publish_lootdrop_to_steam()
+		end
 	end
 	if self._lootdrop_casino_gui then
 		self:disable_crimenet()

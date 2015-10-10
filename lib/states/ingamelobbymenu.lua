@@ -174,6 +174,9 @@ function IngameLobbyMenuState:set_lootdrop(drop_category, drop_item_id)
 		local global_index = global_values[global_value] or 1
 		managers.network:session():send_to_peers("feed_lootdrop", global_index, item_category, item_id, max_pc, item_pc, card_left_pc, card_right_pc)
 	end
+	if SystemInfo:platform() == Idstring("WIN32") then
+		managers.statistics:publish_lootdrop_to_steam()
+	end
 end
 function IngameLobbyMenuState:at_exit()
 	print("[IngameLobbyMenuState:at_exit()]")

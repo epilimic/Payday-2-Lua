@@ -889,6 +889,15 @@ function StatisticsManager:publish_cash_to_steam(total_cash)
 	end
 	managers.network.account:publish_statistics(stats)
 end
+function StatisticsManager:publish_lootdrop_to_steam()
+	if Application:editor() then
+		return
+	end
+	local stats = {}
+	print("Crimefest Challenge: crimefest_challenge_final", 1)
+	stats.crimefest_challenge_final = {type = "int", value = 1}
+	managers.network.account:publish_statistics(stats)
+end
 function StatisticsManager:publish_level_to_steam()
 	if Application:editor() then
 		return
