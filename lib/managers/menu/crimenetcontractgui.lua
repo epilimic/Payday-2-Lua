@@ -1119,7 +1119,8 @@ function CrimeNetContractGui:set_potential_rewards(show_max)
 	}))
 	self:make_fine_text(gui_panel:child("payday_text"))
 	local can_afford = managers.money:can_afford_buy_premium_contract(job_data.job_id, job_data.difficulty_id)
-	local text_string = managers.localization:to_upper_text("menu_cn_premium_buy_fee", {
+	local text_id = MenuCallbackHandler:bang_active() and "menu_cn_premium_buy_fee_short" or "menu_cn_premium_buy_fee"
+	local text_string = managers.localization:to_upper_text(text_id, {
 		contract_fee = "##" .. managers.experience:cash_string(managers.money:get_cost_of_premium_contract(job_data.job_id, job_data.difficulty_id)) .. "##"
 	})
 	local text_dissected = utf8.characters(text_string)
@@ -1244,7 +1245,8 @@ function CrimeNetContractGui:set_all(t, dt)
 	}))
 	self:make_fine_text(gui_panel:child("payday_text"))
 	local can_afford = managers.money:can_afford_buy_premium_contract(job_data.job_id, job_data.difficulty_id)
-	local text_string = managers.localization:to_upper_text("menu_cn_premium_buy_fee", {
+	local text_id = MenuCallbackHandler:bang_active() and "menu_cn_premium_buy_fee_short" or "menu_cn_premium_buy_fee"
+	local text_string = managers.localization:to_upper_text(text_id, {
 		contract_fee = "##" .. managers.experience:cash_string(managers.money:get_cost_of_premium_contract(job_data.job_id, job_data.difficulty_id)) .. "##"
 	})
 	local text_dissected = utf8.characters(text_string)

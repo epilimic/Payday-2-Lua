@@ -17,6 +17,10 @@ function CoreEditor:build_configuration()
 	reset_camera_on_new:set_value(self._reset_camera_on_new)
 	self._config._reset_camera_on_new = reset_camera_on_new
 	general_sizer:add(reset_camera_on_new, 0, 0, "EXPAND")
+	local use_bet_undo = EWS:CheckBox(page_general, "Use Beta Undo", "")
+	use_bet_undo:set_value(self._use_beta_undo)
+	self._config._use_beta_undo = use_bet_undo
+	general_sizer:add(use_bet_undo, 0, 0, "EXPAND")
 	notebook:add_page(page_general, "General", true)
 	local page_backup = EWS:Panel(notebook, "_backup", "")
 	local backup_sizer = EWS:BoxSizer("VERTICAL")

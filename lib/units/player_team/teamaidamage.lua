@@ -224,7 +224,11 @@ function TeamAIDamage:damage_mission(attack_data)
 	self:_send_explosion_attack_result(attack_data)
 	return result
 end
-function TeamAIDamage:damage_tase()
+function TeamAIDamage:damage_tase(attack_data)
+	if attack_data ~= nil and PlayerDamage.is_friendly_fire(self, attack_data.attacker_unit) then
+		self:friendly_fire_hit()
+		return
+	end
 	if self:_cannot_take_damage() then
 		return
 	end

@@ -44,3 +44,6 @@ function HUDHeistTimer:set_time(time)
 	local text = text .. (minutes < 10 and "0" .. minutes or minutes) .. ":" .. (seconds < 10 and "0" .. seconds or seconds)
 	self._timer_text:set_text(text)
 end
+function HUDHeistTimer:reset()
+	self._last_time = 0
+end

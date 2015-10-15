@@ -133,14 +133,6 @@ function MenuNodeBaseGui:create_gui_box(panel, params)
 		table.insert(self._gui_boxes, box)
 	end
 end
-function MenuNodeBaseGui:_align_marker(row_item)
-	MenuNodeBaseGui.super._align_marker(self, row_item)
-	if row_item.item:parameters().pd2_corner then
-		self._marker_data.marker:set_world_right(row_item.gui_panel:world_right())
-		return
-	end
-	self._marker_data.marker:set_world_right(self.item_panel:world_right())
-end
 function MenuNodeBaseGui:mouse_moved(o, x, y)
 	local used, icon = false, "arrow"
 	for _, button in ipairs(self._text_buttons) do
@@ -192,11 +184,15 @@ function MenuNodeBaseGui:move_left()
 end
 function MenuNodeBaseGui:move_right()
 end
-function MenuNodeBaseGui:request_texture(texture_path, panel, keep_aspect_ratio)
+function MenuNodeBaseGui:request_texture(texture_path, panel, keep_aspect_ratio, blend_mode)
 	if not managers.menu_component then
 		return
 	end
-	local texture_count = managers.menu_component:request_texture(texture_path, callback(self, self, "texture_done_clbk", {panel = panel, keep_aspect_ratio = keep_aspect_ratio}))
+	local texture_count = managers.menu_component:request_texture(texture_path, callback(self, self, "texture_done_clbk", {
+		panel = panel,
+		keep_aspect_ratio = keep_aspect_ratio,
+		blend_mode = blend_mode
+	}))
 	table.insert(self._requested_textures, {texture_count = texture_count, texture = texture_path})
 end
 function MenuNodeBaseGui:unretrieve_textures()

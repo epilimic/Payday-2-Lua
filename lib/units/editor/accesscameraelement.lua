@@ -68,15 +68,12 @@ function AccessCameraUnitElement:_set_text()
 	self._text:set_value(managers.localization:text(self._hed.text_id))
 end
 function AccessCameraUnitElement:add_camera_uid()
-	print("AccessCameraUnitElement:add_camera_uid")
 	local unit = SecurityCameraUnitElement._find_camera_raycast(self)
 	if unit then
 		if self._hed.camera_u_id and self._hed.camera_u_id == unit:unit_data().unit_id then
-			self._hed.camera_u_id = nil
-			self._camera_unit = nil
+			self:_remove_camera_unit()
 		else
-			self._hed.camera_u_id = unit:unit_data().unit_id
-			self._camera_unit = unit
+			self:_add_camera_unit(unit)
 		end
 	end
 end
@@ -89,10 +86,35 @@ end
 function AccessCameraUnitElement:add_triggers(vc)
 	vc:add_trigger(Idstring("lmb"), callback(self, self, "add_camera_uid"))
 end
+function AccessCameraUnitElement:_add_camera_filter(unit)
+	local id = unit:unit_data().unit_id
+	if self._hed.camera_u_id == id then
+		return false
+	end
+	return unit:base() and unit:base().security_camera
+end
+function AccessCameraUnitElement:_remove_camera_filter(unit)
+	return self._hed.camera_u_id == unit:unit_data().unit_id
+end
+function AccessCameraUnitElement:_add_camera_unit(unit)
+	self._hed.camera_u_id = unit:unit_data().unit_id
+	self._camera_unit = unit
+end
+function AccessCameraUnitElement:_remove_camera_unit()
+	self._hed.camera_u_id = nil
+	self._camera_unit = nil
+end
 function AccessCameraUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	self:_build_add_remove_static_unit_from_list(panel, panel_sizer, {
+		single = true,
+		add_filter = callback(self, self, "_add_camera_filter"),
+		add_result = callback(self, self, "_add_camera_unit"),
+		remove_filter = callback(self, self, "_remove_camera_filter"),
+		remove_result = callback(self, self, "_remove_camera_unit")
+	})
 	self:_build_value_combobox(panel, panel_sizer, "text_id", self._text_options, "Select a text id from the combobox")
 	local text_sizer = EWS:BoxSizer("HORIZONTAL")
 	text_sizer:add(EWS:StaticText(panel, "Text: ", "", ""), 1, 2, "ALIGN_CENTER_VERTICAL,RIGHT,EXPAND")
@@ -153,14 +175,15 @@ function AccessCameraOperatorUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local exact_names = {
+		"units/dev_tools/mission_elements/point_access_camera/point_access_camera",
+		"units/dev_tools/mission_elements/ai_security_camera/ai_security_camera"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, nil, exact_names)
 	self:_build_value_combobox(panel, panel_sizer, "operation", {"none", "destroy"}, "Select an operation for the selected elements")
 	self:_add_help_text("This element can modify point_access_camera element. Select elements to modify using insert and clicking on them.")
 end
 AccessCameraTriggerUnitElement = AccessCameraTriggerUnitElement or class(MissionElement)
-CounterTriggerUnitElement = CounterTriggerUnitElement or class(AccessCameraTriggerUnitElement)
-function CounterTriggerUnitElement:init(...)
-	CounterTriggerUnitElement.super.init(self, ...)
-end
 function AccessCameraTriggerUnitElement:init(unit)
 	AccessCameraTriggerUnitElement.super.init(self, unit)
 	self._hed.trigger_type = "accessed"
@@ -211,6 +234,11 @@ function AccessCameraTriggerUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local exact_names = {
+		"units/dev_tools/mission_elements/point_access_camera/point_access_camera",
+		"units/dev_tools/mission_elements/ai_security_camera/ai_security_camera"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, nil, exact_names)
 	self:_build_value_combobox(panel, panel_sizer, "trigger_type", {
 		"accessed",
 		"destroyed",

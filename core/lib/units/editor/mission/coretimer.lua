@@ -118,43 +118,26 @@ end
 function CoreTimerUnitElement:add_triggers(vc)
 	vc:add_trigger(Idstring("lmb"), callback(self, self, "select_unit"))
 end
-function CoreTimerUnitElement:add_unit_list_btn()
-	local function f(unit)
-		if self._digital_gui_units[unit:unit_data().unit_id] then
-			return false
-		end
-		return unit:digital_gui() and unit:digital_gui():is_timer()
+function CoreTimerUnitElement:_add_unit_filter(unit)
+	if self._digital_gui_units[unit:unit_data().unit_id] then
+		return false
 	end
-	local dialog = SelectUnitByNameModal:new("Add Unit", f)
-	for _, unit in ipairs(dialog:selected_units()) do
-		if not self._digital_gui_units[unit:unit_data().unit_id] then
-			self:_add_unit(unit)
-		end
-	end
+	return unit:digital_gui() and unit:digital_gui():is_timer()
 end
-function CoreTimerUnitElement:remove_unit_list_btn()
-	local function f(unit)
-		return self._digital_gui_units[unit:unit_data().unit_id]
-	end
-	local dialog = SelectUnitByNameModal:new("Remove Unit", f)
-	for _, unit in ipairs(dialog:selected_units()) do
-		if self._digital_gui_units[unit:unit_data().unit_id] then
-			self:_remove_unit(unit)
-		end
-	end
+function CoreTimerUnitElement:_remove_unit_filter(unit)
+	return self._digital_gui_units[unit:unit_data().unit_id]
 end
 function CoreTimerUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	self:_build_add_remove_static_unit_from_list(panel, panel_sizer, {
+		add_filter = callback(self, self, "_add_unit_filter"),
+		add_result = callback(self, self, "_add_unit"),
+		remove_filter = callback(self, self, "_remove_unit_filter"),
+		remove_result = callback(self, self, "_remove_unit")
+	})
 	self:_build_value_number(panel, panel_sizer, "timer", {floats = 1, min = 0}, "Specifies how long time (in seconds) to wait before execute")
-	local toolbar = EWS:ToolBar(panel, "", "TB_FLAT,TB_NODIVIDER")
-	toolbar:add_tool("ADD_UNIT_LIST", "Add unit from unit list", CoreEws.image_path("world_editor\\unit_by_name_list.png"), nil)
-	toolbar:connect("ADD_UNIT_LIST", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "add_unit_list_btn"), nil)
-	toolbar:add_tool("REMOVE_UNIT_LIST", "Remove unit from unit list", CoreEws.image_path("toolbar\\delete_16x16.png"), nil)
-	toolbar:connect("REMOVE_UNIT_LIST", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "remove_unit_list_btn"), nil)
-	toolbar:realize()
-	panel_sizer:add(toolbar, 0, 1, "EXPAND,LEFT")
 	self:_add_help_text("Creates a timer element. When the timer runs out, execute will be run. The timer element can be operated on using the logic_timer_operator")
 end
 CoreTimerOperatorUnitElement = CoreTimerOperatorUnitElement or class(MissionElement)
@@ -218,6 +201,10 @@ function CoreTimerOperatorUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local names = {
+		"logic_timer/logic_timer"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, names)
 	self:_build_value_combobox(panel, panel_sizer, "operation", {
 		"none",
 		"pause",
@@ -289,6 +276,10 @@ function CoreTimerTriggerUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local names = {
+		"logic_timer/logic_timer"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, names)
 	self:_build_value_number(panel, panel_sizer, "time", {floats = 1, min = 0}, "Specify how much time should be left on the timer to trigger.")
 	self:_add_help_text("This element is a trigger to logic_timer element.")
 end

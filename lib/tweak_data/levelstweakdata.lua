@@ -463,6 +463,26 @@ function LevelsTweakData:init()
 	self.escape_garage.music = "heist"
 	self.escape_garage.package = "packages/escape_garage"
 	self.escape_garage.cube = "cube_apply_heist_bank"
+	self.driving_escapes_industry_day = {}
+	self.driving_escapes_industry_day.name_id = "heist_driving_escapes_industry_hl"
+	self.driving_escapes_industry_day.briefing_id = "heist_driving_escapes_industry_briefing"
+	self.driving_escapes_industry_day.briefing_dialog = "nothing"
+	self.driving_escapes_industry_day.world_name = "wip/driving_escapes_industry"
+	self.driving_escapes_industry_day.intro_event = "Play_dr1_a01"
+	self.driving_escapes_industry_day.outro_event = "nothing"
+	self.driving_escapes_industry_day.music = "heist"
+	self.driving_escapes_industry_day.package = "packages/escape_2_industry"
+	self.driving_escapes_industry_day.cube = "cube_apply_heist_bank"
+	self.driving_escapes_city_day = {}
+	self.driving_escapes_city_day.name_id = "heist_driving_escapes_city_hl"
+	self.driving_escapes_city_day.briefing_id = "heist_driving_escapes_city_briefing"
+	self.driving_escapes_city_day.briefing_dialog = "nothing"
+	self.driving_escapes_city_day.world_name = "wip/driving_escapes_city"
+	self.driving_escapes_city_day.intro_event = "Play_dr1_a01"
+	self.driving_escapes_city_day.outro_event = "nothing"
+	self.driving_escapes_city_day.music = "heist"
+	self.driving_escapes_city_day.package = "packages/escape_2_city"
+	self.driving_escapes_city_day.cube = "cube_apply_heist_bank"
 	self.safehouse = {}
 	self.safehouse.name_id = "heist_safehouse_hl"
 	self.safehouse.briefing_id = "heist_safehouse_briefing"
@@ -706,37 +726,44 @@ function LevelsTweakData:init()
 				mobster1 = true,
 				law1 = true,
 				mobster_boss = true
-			}
+			},
+			friends = {converted_enemy = true}
 		},
 		law1 = {
 			foes = {
 				mobster1 = true,
 				criminal1 = true,
 				converted_enemy = true
-			}
+			},
+			friends = {}
 		},
 		mobster1 = {
 			foes = {
 				law1 = true,
 				criminal1 = true,
 				converted_enemy = true
-			}
+			},
+			friends = {}
 		},
 		mobster_boss = {
-			foes = {criminal1 = true, converted_enemy = true}
+			foes = {criminal1 = true, converted_enemy = true},
+			friends = {}
 		},
 		converted_enemy = {
 			foes = {
 				mobster1 = true,
 				law1 = true,
 				mobster_boss = true
-			}
+			},
+			friends = {criminal1 = true}
 		},
 		neutral1 = {
-			foes = {}
+			foes = {},
+			friends = {}
 		},
 		hacked_turret = {
-			foes = {mobster1 = true, law1 = true}
+			foes = {mobster1 = true, law1 = true},
+			friends = {}
 		}
 	}
 	self.mia2_new = {}
@@ -978,7 +1005,9 @@ function LevelsTweakData:init()
 		"rat",
 		"shoutout_raid",
 		"arena",
-		"kenaz"
+		"kenaz",
+		"driving_escapes_industry_day",
+		"driving_escapes_city_day"
 	}
 	if SystemInfo:platform() == Idstring("WIN32") then
 		table.insert(self._level_index, "roberts")
@@ -995,7 +1024,9 @@ function LevelsTweakData:init()
 		"election_day_3",
 		"arm_for",
 		"escape_hell",
-		"blueharvest_3"
+		"blueharvest_3",
+		"driving_escapes_industry_day",
+		"driving_escapes_city_day"
 	}
 end
 function LevelsTweakData:get_level_index()
@@ -1134,30 +1165,36 @@ function LevelsTweakData:get_team_setup()
 	else
 		teams = {
 			criminal1 = {
-				foes = {mobster1 = true, law1 = true}
+				foes = {mobster1 = true, law1 = true},
+				friends = {converted_enemy = true}
 			},
 			law1 = {
 				foes = {
 					mobster1 = true,
 					criminal1 = true,
 					converted_enemy = true
-				}
+				},
+				friends = {}
 			},
 			mobster1 = {
 				foes = {
 					law1 = true,
 					criminal1 = true,
 					converted_enemy = true
-				}
+				},
+				friends = {}
 			},
 			converted_enemy = {
-				foes = {mobster1 = true, law1 = true}
+				foes = {mobster1 = true, law1 = true},
+				friends = {criminal1 = true}
 			},
 			neutral1 = {
-				foes = {}
+				foes = {},
+				friends = {}
 			},
 			hacked_turret = {
-				foes = {mobster1 = true, law1 = true}
+				foes = {mobster1 = true, law1 = true},
+				friends = {}
 			}
 		}
 		for id, team in pairs(teams) do

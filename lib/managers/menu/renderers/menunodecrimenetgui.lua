@@ -2530,3 +2530,416 @@ function MenuNodeChooseWeaponRewardGui:_reposition_items(highlighted_row_item)
 		self._owned_text:set_world_left(self.row_items[3].gui_text:world_left())
 	end
 end
+MenuNodeChooseWeaponCosmeticGui = MenuNodeChooseWeaponCosmeticGui or class(MenuNodeCrimenetFiltersGui)
+function MenuNodeChooseWeaponCosmeticGui:init(node, layer, parameters)
+	parameters.font = tweak_data.menu.pd2_small_font
+	parameters.font_size = tweak_data.menu.pd2_small_font_size
+	parameters.align = "left"
+	parameters.row_item_blend_mode = "add"
+	parameters.row_item_color = tweak_data.screen_colors.button_stage_3
+	parameters.row_item_hightlight_color = tweak_data.screen_colors.button_stage_2
+	parameters.marker_alpha = 1
+	parameters.to_upper = true
+	self.static_y = node:parameters().static_y
+	MenuNodeChooseWeaponCosmeticGui.super.init(self, node, layer, parameters)
+end
+function MenuNodeChooseWeaponCosmeticGui:_setup_item_panel(safe_rect, res)
+	MenuNodeChooseWeaponCosmeticGui.super._setup_item_panel(self, safe_rect, res)
+	local max_layer = 10000
+	local min_layer = 0
+	local child_layer = 0
+	for _, child in ipairs(self.item_panel:children()) do
+		child:set_halign("right")
+		child_layer = child:layer()
+		if child_layer > 0 then
+			min_layer = math.min(min_layer, child_layer)
+		end
+		max_layer = math.max(max_layer, child_layer)
+	end
+	for _, child in ipairs(self.item_panel:children()) do
+	end
+	self.item_panel:set_w(safe_rect.width * (1 - self._align_line_proportions))
+	self.item_panel:set_right(self.item_panel:parent():w() - 10)
+	self.item_panel:set_top(103)
+	local static_y = self.static_y and safe_rect.height * self.static_y
+	if static_y and static_y < self.item_panel:y() then
+		self.item_panel:set_y(static_y)
+	end
+	self.item_panel:set_position(math.round(self.item_panel:x()), math.round(self.item_panel:y()))
+	self:_rec_round_object(self.item_panel)
+	if alive(self.box_panel) then
+		self.item_panel:parent():remove(self.box_panel)
+		self.box_panel = nil
+	end
+	self.box_panel = self.item_panel:parent():panel()
+	self.box_panel:set_x(self.item_panel:x())
+	self.box_panel:set_w(self.item_panel:w())
+	if self.item_panel:h() > self._align_data.panel:h() then
+		self.box_panel:set_y(0)
+		self.box_panel:set_h(self.item_panel:parent():h())
+	else
+		self.box_panel:set_y(self.item_panel:top())
+		self.box_panel:set_h(self.item_panel:h())
+	end
+	self.box_panel:grow(20, 20)
+	self.box_panel:move(-10, -10)
+	self.box_panel:set_layer(51)
+	self.boxgui = BoxGuiObject:new(self.box_panel, {
+		sides = {
+			1,
+			1,
+			1,
+			1
+		}
+	})
+	self.boxgui:set_clipping(false)
+	self.boxgui:set_layer(1000)
+	self.box_panel:rect({
+		color = Color.black,
+		alpha = 0.6,
+		rotation = 360
+	})
+	if alive(self.blur_panel) then
+		self.item_panel:parent():remove(self.blur_panel)
+		self.blur_panel = nil
+	end
+	self.blur_panel = self.item_panel:parent():panel()
+	local blur = self.blur_panel:bitmap({
+		texture = "guis/textures/test_blur_df",
+		w = self.box_panel:w(),
+		h = self.blur_panel:h() - 70 - self.box_panel:top(),
+		render_template = "VertexColorTexturedBlur3D"
+	})
+	blur:set_top(self.box_panel:top())
+	blur:set_left(self.box_panel:left())
+	local func = function(o)
+		local start_blur = 0
+		over(0.6, function(p)
+			o:set_alpha(math.lerp(start_blur, 1, p))
+		end)
+	end
+	blur:animate(func)
+	local blur2 = self.blur_panel:bitmap({
+		texture = "guis/textures/test_blur_df",
+		w = self.blur_panel:w() - blur:width(),
+		h = self.blur_panel:h() / 4,
+		render_template = "VertexColorTexturedBlur3D"
+	})
+	blur2:set_bottom(blur:bottom())
+	blur2:set_left(0)
+	blur2:animate(func)
+	self.blur_panel:set_layer(50)
+	self._align_data.panel:set_left(self.box_panel:left())
+	self._list_arrows.up:set_world_left(self._align_data.panel:world_left())
+	self._list_arrows.up:set_world_top(self._align_data.panel:world_top() - 10)
+	self._list_arrows.up:set_width(self.box_panel:width())
+	self._list_arrows.up:set_rotation(360)
+	self._list_arrows.up:set_layer(1050)
+	self._list_arrows.down:set_world_left(self._align_data.panel:world_left())
+	self._list_arrows.down:set_world_bottom(self._align_data.panel:world_bottom() + 10)
+	self._list_arrows.down:set_width(self.box_panel:width())
+	self._list_arrows.down:set_rotation(360)
+	self._list_arrows.down:set_layer(1050)
+	self:_set_topic_position()
+end
+function MenuNodeChooseWeaponCosmeticGui:_reposition_items(highlighted_row_item)
+	MenuNodeChooseWeaponCosmeticGui.super._reposition_items(self, highlighted_row_item)
+	if alive(self._owned_text) then
+		self._owned_text:set_world_top(self.row_items[3].gui_text:world_bottom())
+		self._owned_text:set_world_left(self.row_items[3].gui_text:world_left())
+	end
+end
+function MenuNodeChooseWeaponCosmeticGui:close(...)
+	MenuNodeEconomySafe.super.close(self, ...)
+	managers.environment_controller:set_dof_distance(10, false)
+end
+MenuNodeDOFGui = MenuNodeDOFGui or class(MenuNodeGui)
+function MenuNodeDOFGui:init(...)
+	MenuNodeDOFGui.super.init(self, ...)
+	managers.environment_controller:set_dof_setting("standard")
+	managers.environment_controller:set_dof_distance(100, true)
+end
+function MenuNodeDOFGui:close(...)
+	MenuNodeDOFGui.super.close(self, ...)
+	managers.environment_controller:set_dof_distance(10, false)
+end
+MenuNodeOpenContainerGui = MenuNodeOpenContainerGui or class(MenuNodeBaseGui)
+function MenuNodeOpenContainerGui:init(node, layer, parameters)
+	parameters.font = tweak_data.menu.pd2_small_font
+	parameters.font_size = tweak_data.menu.pd2_small_font_size
+	parameters.align = "left"
+	parameters.halign = "left"
+	parameters.row_item_blend_mode = "add"
+	parameters.row_item_color = tweak_data.screen_colors.button_stage_3
+	parameters.row_item_hightlight_color = tweak_data.screen_colors.button_stage_2
+	parameters.marker_alpha = 1
+	parameters.to_upper = true
+	MenuNodeOpenContainerGui.super.init(self, node, layer, parameters)
+end
+function MenuNodeOpenContainerGui:refresh_gui(...)
+	MenuNodeOpenContainerGui.super.refresh_gui(self, ...)
+	self:setup(true)
+end
+function MenuNodeOpenContainerGui:setup(half_fade)
+	local container_data = self.node:parameters().container_data
+	if not container_data or not tweak_data.economy.contents[container_data.content] then
+		managers.menu:back()
+		return
+	end
+	local drill_amount = managers.blackmarket:get_inventory_tradable_item_amount("drills", container_data.drill)
+	local safe_amount = managers.blackmarket:get_inventory_tradable_item_amount("safes", container_data.safe)
+	local padding = 10
+	local content_padding = 0
+	if self._drill_amount == drill_amount and self._safe_amount == safe_amount then
+		self.item_panel:set_world_left(self._safe_panel:world_right() + padding - self.node:parameters().align_line_proportions * self.item_panel:w())
+		self.item_panel:set_world_center_y(self._safe_panel:world_center_y())
+		return
+	end
+	self:unretrieve_textures()
+	MenuNodeOpenContainerGui.super.setup(self)
+	self._drill_amount = drill_amount
+	self._safe_amount = safe_amount
+	local content_td = tweak_data.economy.contents[container_data.content]
+	if alive(self.safe_rect_panel:child("open_safe_panel")) then
+		self.safe_rect_panel:remove(self.safe_rect_panel:child("open_safe_panel"))
+	end
+	if alive(self._fullscreen_panel) then
+		self._fullscreen_panel:parent():remove(self._fullscreen_panel)
+	end
+	self._panel = self.safe_rect_panel:panel({
+		name = "open_safe_panel",
+		layer = 151
+	})
+	local safe_w = self._panel:w() - 20 - 40
+	local safe_h = self._panel:h() - 20 - 40
+	local wanted_width = (3 * safe_h - padding) / 2.5
+	local wanted_height = (2.5 * safe_w + padding) / 3
+	local w = safe_w
+	local h = safe_h
+	if wanted_width < wanted_height then
+		w = wanted_width
+		h = (2.5 * wanted_width + padding) / 3
+	else
+		h = wanted_height
+		w = (3 * wanted_height - padding) / 2.5
+	end
+	local mc_full_ws = managers.menu_component:fullscreen_ws()
+	self._fullscreen_panel = mc_full_ws:panel():panel({
+		name = "open_contatiner",
+		layer = 150
+	})
+	local bg = self._fullscreen_panel:rect({
+		color = Color.black,
+		alpha = 0
+	})
+	bg:animate(function(o)
+		over(0.25, function(p)
+			o:set_alpha(math.sin(p * 90) * 0.5 * (half_fade and 0.5 or 1) + (half_fade and 0.25 or 0))
+		end)
+	end)
+	self._panel:animate(function(o)
+		over(0.15, function(p)
+			o:set_alpha(math.sin(p * 90) * (half_fade and 0.5 or 1) + (half_fade and 0.5 or 0))
+		end)
+	end)
+	self._panel:set_size(w + 20, h + 20)
+	self._panel:set_center(self.safe_rect_panel:w() / 2, self.safe_rect_panel:h() / 2)
+	self.boxgui = BoxGuiObject:new(self._panel, {
+		sides = {
+			1,
+			1,
+			1,
+			1
+		}
+	})
+	self._panel:rect({
+		color = Color.black,
+		alpha = 0.75
+	})
+	local data = self.node:parameters().container_data
+	local panel = self._panel:panel({
+		x = 10,
+		y = 10,
+		w = self._panel:w() - 20,
+		h = self._panel:h() - 20,
+		layer = 1
+	})
+	local title_text = managers.localization:to_upper_text("menu_ti_steam_open_safe_title", {
+		name = managers.localization:text(tweak_data.economy.safes[data.safe].name_id),
+		type = managers.localization:text("bm_menu_safe")
+	})
+	local title = panel:text({
+		text = title_text,
+		font = tweak_data.menu.pd2_small_font,
+		font_size = tweak_data.menu.pd2_small_font_size
+	})
+	managers.menu_component:add_colors_to_text_object(title, unpack({
+		tweak_data.screen_colors.text,
+		tweak_data.screen_colors.text
+	}))
+	local content_height = w / 2
+	local drill_safe_size = h - content_height - padding
+	local drill_panel = panel:panel({
+		name = "drill",
+		w = drill_safe_size,
+		h = drill_safe_size
+	})
+	do
+		local td = tweak_data.economy.drills[container_data.drill]
+		local guis_catalog = "guis/"
+		local bundle_folder = td.texture_bundle_folder
+		if bundle_folder then
+			guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
+		end
+		local path = "drills/"
+		local bitmap_texture = guis_catalog .. path .. container_data.drill
+		local drill_bitmap_panel = drill_panel:panel()
+		drill_bitmap_panel:set_size(drill_panel:width() * 0.65, drill_panel:height() * 0.65)
+		drill_bitmap_panel:set_center(drill_panel:width() / 2, drill_panel:width() / 2)
+		local blend_mode = "add"
+		if not managers.blackmarket:have_inventory_tradable_item("drills", data.drill) then
+			drill_bitmap_panel:set_alpha(0.5)
+			local blend_mode = "add"
+		end
+		self:request_texture(bitmap_texture, drill_bitmap_panel, true, blend_mode)
+		local amount_text = drill_panel:text({
+			text = "x" .. tostring(drill_amount),
+			font = tweak_data.menu.pd2_small_font,
+			font_size = tweak_data.menu.pd2_small_font_size
+		})
+		make_fine_text(amount_text)
+		amount_text:set_center_x(drill_panel:w() / 2)
+		amount_text:set_bottom(drill_panel:h() - 10)
+	end
+	local safe_panel = panel:panel({
+		name = "safe",
+		w = drill_safe_size,
+		h = drill_safe_size
+	})
+	safe_panel:set_center_x(panel:w() / 2)
+	self._safe_panel = safe_panel
+	do
+		local td = tweak_data.economy.safes[container_data.safe]
+		local guis_catalog = "guis/"
+		local bundle_folder = td.texture_bundle_folder
+		if bundle_folder then
+			guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
+		end
+		local path = "safes/"
+		local bitmap_texture = guis_catalog .. path .. container_data.safe
+		local safe_bitmap_panel = safe_panel:panel()
+		safe_bitmap_panel:set_size(safe_panel:width() * 0.8, safe_panel:height() * 0.8)
+		safe_bitmap_panel:set_center(safe_panel:width() / 2, safe_panel:width() / 2)
+		self:request_texture(bitmap_texture, safe_bitmap_panel, true, "add")
+		local amount_text = safe_panel:text({
+			text = "x" .. tostring(safe_amount),
+			font = tweak_data.menu.pd2_small_font,
+			font_size = tweak_data.menu.pd2_small_font_size
+		})
+		make_fine_text(amount_text)
+		amount_text:set_center_x(safe_panel:w() / 2)
+		amount_text:set_bottom(safe_panel:h() - 10)
+	end
+	local contents = {}
+	for category, content_data in pairs(content_td.contains) do
+		for _, entry in ipairs(content_data) do
+			table.insert(contents, {category = category, entry = entry})
+		end
+	end
+	local x_td, y_td, x_rtd, y_rtd
+	local function sort_func(x, y)
+		if x.category ~= "weapon_skins" or not tweak_data.blackmarket.weapon_skins then
+		end
+		x_td = tweak_data.economy[x.category][x.entry]
+		if y.category ~= "weapon_skins" or not tweak_data.blackmarket.weapon_skins then
+		end
+		y_td = tweak_data.economy[y.category][y.entry]
+		x_rtd = tweak_data.economy.rarities[x_td.rarity or "common"]
+		y_rtd = tweak_data.economy.rarities[y_td.rarity or "common"]
+		if x_rtd.index ~= y_rtd.index then
+			return x_rtd.index < y_rtd.index
+		end
+		return x.entry < y.entry
+	end
+	table.sort(contents, sort_func)
+	local content_panel = panel:panel({name = "content", h = content_height})
+	content_panel:set_top(safe_panel:bottom() + padding)
+	local num_of_items = #contents
+	local num_per_row = math.ceil(num_of_items ^ 0.5)
+	local size = (content_panel:w() - (num_per_row + 1) * content_padding) / num_per_row
+	local x = content_padding
+	local y = content_padding
+	local new_content, c_td
+	for i, content in ipairs(contents) do
+		if content.category ~= "weapon_skins" or not tweak_data.blackmarket.weapon_skins then
+		end
+		c_td = tweak_data.economy[content.category][content.entry]
+		new_content = content_panel:panel({
+			name = i,
+			x = x,
+			y = y,
+			w = size,
+			h = size / 2,
+			layer = 1
+		})
+		if content.category == "weapon_skins" then
+			local texture_path, rarity_path = managers.blackmarket:get_weapon_icon_path(c_td.weapon_id, {
+				id = content.entry
+			})
+			self:request_texture(texture_path, new_content, true)
+			local rarity_bitmap = new_content:bitmap({
+				name = i .. "_bg",
+				texture = rarity_path,
+				x = x,
+				y = y,
+				blend_mode = "add",
+				layer = -1
+			})
+			local texture_width = rarity_bitmap:texture_width()
+			local texture_height = rarity_bitmap:texture_height()
+			local panel_width = new_content:w()
+			local panel_height = new_content:h()
+			local tw = texture_width
+			local th = texture_height
+			local pw = panel_width
+			local ph = panel_height
+			if tw == 0 or th == 0 then
+				Application:error("[MenuNodeOpenContainerGui] BG Texture size error!:", "width", tw, "height", th)
+				tw = 1
+				th = 1
+			end
+			local sw = math.min(pw, ph * (tw / th))
+			local sh = math.min(ph, pw / (tw / th))
+			rarity_bitmap:set_size(math.round(sw), math.round(sh))
+			rarity_bitmap:set_center(new_content:w() * 0.5, new_content:h() * 0.5)
+		else
+			if content.category == "contents" and c_td.rarity == "legendary" then
+				self:request_texture(content.texute_path or "guis/dlcs/cash/textures/pd2/safe_raffle/icon_legendary", new_content, true)
+			else
+			end
+		end
+		x = i % num_per_row * size + content_padding * (i % num_per_row + 1)
+		y = math.floor(i / num_per_row) * (size / 2) + content_padding / 2 * (math.floor(i / num_per_row) + 1)
+	end
+	local divider_panel = panel:panel({
+		name = "divider_panel",
+		h = 4
+	})
+	divider_panel:set_top(safe_panel:bottom() + padding * 0.5)
+	BoxGuiObject:new(divider_panel, {
+		sides = {
+			0,
+			0,
+			2,
+			0
+		}
+	})
+	self.item_panel:set_world_left(safe_panel:world_right() + padding - self.node:parameters().align_line_proportions * self.item_panel:w())
+	self.item_panel:set_world_center_y(safe_panel:world_center_y())
+end
+function MenuNodeOpenContainerGui:close()
+	MenuNodeOpenContainerGui.super.close(self)
+	if alive(self._fullscreen_panel) then
+		self._fullscreen_panel:parent():remove(self._fullscreen_panel)
+	end
+end

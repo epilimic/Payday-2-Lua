@@ -14,10 +14,19 @@ function ElementAreaTrigger:project_instigators()
 	end
 	if self._values.instigator == "player" then
 		table.insert(instigators, managers.player:player_unit())
+	elseif self._values.instigator == "player_not_in_vehicle" then
+		table.insert(instigators, managers.player:player_unit())
 	elseif self._values.instigator == "vehicle" then
 		local vehicles = managers.vehicle:get_all_vehicles()
 		for _, v in pairs(vehicles) do
 			if not v:npc_vehicle_driving() then
+				table.insert(instigators, v)
+			end
+		end
+	elseif self._values.instigator == "npc_vehicle" then
+		local vehicles = managers.vehicle:get_all_vehicles()
+		for _, v in pairs(vehicles) do
+			if v:npc_vehicle_driving() then
 				table.insert(instigators, v)
 			end
 		end
@@ -124,6 +133,18 @@ function ElementAreaTrigger:project_amount_inside()
 				counter = vehicle:num_players_inside()
 			end
 		end
+	elseif self._values.instigator == "player_not_in_vehicle" then
+		counter = 0
+		local vehicles = managers.vehicle:get_all_vehicles()
+		for _, instigator in pairs(self._inside) do
+			local in_vehicle = false
+			for _, vehicle in pairs(vehicles) do
+				in_vehicle = in_vehicle or vehicle:vehicle_driving():find_seat_for_player(instigator)
+			end
+			if not in_vehicle then
+				counter = counter + 1
+			end
+		end
 	end
 	return counter
 end
@@ -137,6 +158,15 @@ function ElementAreaTrigger:is_instigator_valid(unit)
 			result = true
 		end
 		return result
+	elseif self._values.instigator == "player_not_in_vehicle" then
+		local vehicles = managers.vehicle:get_all_vehicles()
+		for _, instigator in pairs(self._inside) do
+			for _, vehicle in pairs(vehicles) do
+				if vehicle:vehicle_driving():find_seat_for_player(instigator) then
+					return false
+				end
+			end
+		end
 	end
 	return true
 end

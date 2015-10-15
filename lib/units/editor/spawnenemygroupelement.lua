@@ -1,23 +1,25 @@
 SpawnEnemyGroupUnitElement = SpawnEnemyGroupUnitElement or class(MissionElement)
 SpawnEnemyGroupUnitElement.SAVE_UNIT_POSITION = false
 SpawnEnemyGroupUnitElement.SAVE_UNIT_ROTATION = false
+SpawnEnemyGroupUnitElement.RANDOMS = {"amount"}
 function SpawnEnemyGroupUnitElement:init(unit)
 	MissionElement.init(self, unit)
-	self._hed.random = false
-	self._hed.ignore_disabled = false
-	self._hed.amount = 0
+	self._hed.spawn_type = "ordered"
+	self._hed.ignore_disabled = true
+	self._hed.amount = {0, 0}
 	self._hed.elements = {}
 	self._hed.interval = 0
 	self._hed.team = "default"
 	table.insert(self._save_values, "elements")
-	table.insert(self._save_values, "random")
+	table.insert(self._save_values, "spawn_type")
 	table.insert(self._save_values, "ignore_disabled")
 	table.insert(self._save_values, "amount")
 	table.insert(self._save_values, "preferred_spawn_groups")
 	table.insert(self._save_values, "interval")
 	table.insert(self._save_values, "team")
 end
-function SpawnEnemyGroupUnitElement:post_init()
+function SpawnEnemyGroupUnitElement:post_init(...)
+	SpawnEnemyGroupUnitElement.super.post_init(self, ...)
 	if self._hed.preferred_spawn_groups then
 		local i = 1
 		while i <= #self._hed.preferred_spawn_groups do
@@ -30,6 +32,10 @@ function SpawnEnemyGroupUnitElement:post_init()
 		if not next(self._hed.preferred_spawn_groups) then
 			self._hed.preferred_spawn_groups = nil
 		end
+	end
+	if self._hed.random ~= nil then
+		self._hed.spawn_type = self._hed.random and "random" or "ordered"
+		self._hed.random = nil
 	end
 end
 function SpawnEnemyGroupUnitElement:draw_links(t, dt, selected_unit, all_units)
@@ -70,6 +76,10 @@ function SpawnEnemyGroupUnitElement:remove_links(unit)
 		end
 	end
 end
+function SpawnEnemyGroupUnitElement:get_links_to_unit(...)
+	SpawnEnemyGroupUnitElement.super.get_links_to_unit(self, ...)
+	self:_get_links_of_type_from_elements(self._hed.elements, "spawn_point", ...)
+end
 function SpawnEnemyGroupUnitElement:add_triggers(vc)
 	vc:add_trigger(Idstring("lmb"), callback(self, self, "add_element"))
 end
@@ -77,9 +87,13 @@ function SpawnEnemyGroupUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
-	self:_build_value_checkbox(panel, panel_sizer, "random", "Select spawn points randomly")
+	local names = {
+		"ai_spawn_enemy"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, names)
+	self:_build_value_combobox(panel, panel_sizer, "spawn_type", table.list_add({"ordered"}, {"random", "group"}), "Specify how the enemy will be spawned.")
 	self:_build_value_checkbox(panel, panel_sizer, "ignore_disabled", "Select if disabled spawn points should be ignored or not")
-	self:_build_value_number(panel, panel_sizer, "amount", {floats = 0, min = 0}, "Specify amount of enemies to spawn from group")
+	self:_build_value_random_number(panel, panel_sizer, "amount", {floats = 0, min = 0}, "Specify amount of enemies to spawn from group")
 	self:_build_value_number(panel, panel_sizer, "interval", {floats = 0, min = 0}, "Used to specify how often this spawn can be used. 0 means no interval")
 	self:_build_value_combobox(panel, panel_sizer, "team", table.list_add({"default"}, tweak_data.levels:get_team_names_indexed()), "Select the group's team (overrides character team).")
 	local opt_sizer = panel_sizer

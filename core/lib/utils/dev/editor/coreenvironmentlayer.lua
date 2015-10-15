@@ -81,6 +81,7 @@ function EnvironmentLayer:init(owner)
 		description = "Hurricane"
 	})
 	self._draw_wind = false
+	self._draw_occ_shape = true
 	self._wind_speed = 6
 	self._wind_speed_variation = 1
 	self._environment_area_unit = "core/units/environment_area/environment_area"
@@ -305,7 +306,7 @@ function EnvironmentLayer:update(t, dt)
 			Application:draw(unit, r, g, b)
 			unit:unit_data().environment_area:draw(t, dt, r, g, b)
 		end
-		if unit:name() == Idstring(self._dome_occ_shape_unit) then
+		if self._draw_occ_shape and unit:name() == Idstring(self._dome_occ_shape_unit) then
 			local r, g, b = 0.5, 0, 0.5
 			if alive(self._selected_unit) and unit == self._selected_unit then
 				r, g, b = 1, 0, 1
@@ -447,6 +448,13 @@ function EnvironmentLayer:build_panel(notebook)
 	self._environment_area_ctrls.permanent_cb = permanent_cb
 	self._env_sizer:add(self._environment_sizer, 0, 0, "EXPAND")
 	self._dome_occ_sizer = EWS:StaticBoxSizer(self._env_panel, "VERTICAL", "Dome Occlusion Shape")
+	local draw_occ_cb = EWS:CheckBox(self._env_panel, "Draw", "")
+	draw_occ_cb:set_value(self._draw_occ_shape)
+	self._dome_occ_sizer:add(draw_occ_cb, 0, 0, "EXPAND")
+	draw_occ_cb:connect("EVT_COMMAND_CHECKBOX_CLICKED", callback(self, self, "cb_toogle"), {
+		cb = draw_occ_cb,
+		value = "_draw_occ_shape"
+	})
 	local generate_dome_occ = EWS:Button(self._env_panel, "Generate", "", "BU_EXACTFIT,NO_BORDER")
 	self._dome_occ_sizer:add(generate_dome_occ, 1, 5, "EXPAND,TOP,RIGHT")
 	generate_dome_occ:connect("EVT_COMMAND_BUTTON_CLICKED", callback(self, self, "generate_dome_occ"), "all")

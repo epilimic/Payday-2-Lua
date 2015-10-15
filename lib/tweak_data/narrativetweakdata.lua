@@ -187,6 +187,8 @@ function NarrativeTweakData:init()
 	self.contacts.bain.description_id = "heist_contact_bain_description"
 	self.contacts.bain.package = "packages/contact_bain"
 	self.contacts.bain.assets_gui = Idstring("guis/mission_briefing/preload_contact_bain")
+	self.contacts.bain_no_variation = deep_clone(self.contacts.bain)
+	self.contacts.bain_no_variation.assets_gui = Idstring("guis/mission_briefing/preload_contact_bain_no_variation")
 	self.contacts.the_dentist = {}
 	self.contacts.the_dentist.name_id = "heist_contact_the_dentist"
 	self.contacts.the_dentist.description_id = "heist_contact_the_dentist_description"
@@ -1417,7 +1419,12 @@ function NarrativeTweakData:init()
 	self.jobs.safehouse = {}
 	self.jobs.safehouse.name_id = "heist_safehouse"
 	self.jobs.safehouse.briefing_id = "heist_safehouse_crimenet"
-	self.jobs.safehouse.contact = "bain"
+	local platform = SystemInfo:platform()
+	if platform == Idstring("XB1") or platform == Idstring("PS4") then
+		self.jobs.safehouse.contact = "bain_no_variation"
+	else
+		self.jobs.safehouse.contact = "bain"
+	end
 	self.jobs.safehouse.jc = 5
 	self.jobs.safehouse.chain = {
 		{

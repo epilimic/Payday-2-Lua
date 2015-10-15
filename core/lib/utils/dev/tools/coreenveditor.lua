@@ -31,18 +31,18 @@ function CoreEnvEditor:init(env_file_name)
 	self._reported_data_path_map = {}
 	if self._simple_mode then
 		self:read_templates()
-		self:create_tab("Global illumination")
-		self:create_tab("Skydome")
-		self:create_simple_interface()
-		self:build_tab("Global illumination")
-		self:build_tab("Skydome")
-	else
-		self:create_tab("Global illumination")
-		self:create_tab("Skydome")
-		self:create_interface()
-		self:build_tab("Global illumination")
-		self:build_tab("Skydome")
 	end
+	self:create_tab("Global illumination")
+	self:create_tab("Skydome")
+	self:create_tab("Global textures")
+	if self._simple_mode then
+		self:create_simple_interface()
+	else
+		self:create_interface()
+	end
+	self:build_tab("Global illumination")
+	self:build_tab("Skydome")
+	self:build_tab("Global textures")
 	self._skies_to_remove = {}
 	self._posteffects_to_remove = {}
 	self._underlays_to_remove = {}

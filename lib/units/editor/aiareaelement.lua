@@ -5,7 +5,8 @@ function AIAreaElement:init(unit)
 	self._nav_seg_units = {}
 	table.insert(self._save_values, "nav_segs")
 end
-function AIAreaElement:post_init()
+function AIAreaElement:post_init(...)
+	AIAreaElement.super.post_init(self, ...)
 end
 function AIAreaElement:layer_finished()
 	AIAreaElement.super.layer_finished(self)

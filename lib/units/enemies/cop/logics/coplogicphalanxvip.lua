@@ -135,24 +135,26 @@ function CopLogicPhalanxVip.breakup(remote_call)
 	if phalanx_vip and alive(phalanx_vip) then
 		groupai:unit_leave_group(phalanx_vip, false)
 		managers.groupai:state():unregister_phalanx_vip()
-		local pos = phalanx_vip:movement():m_pos()
-		local duration = tweak_data.group_ai.flash_grenade_lifetime
 		local nav_seg = phalanx_vip:movement():nav_tracker():nav_segment()
 		local flee_pos = managers.groupai:state():flee_point(nav_seg)
-		local flee_nav_seg = managers.navigation:get_nav_seg_from_pos(flee_pos)
-		local new_objective = {
-			type = "flee",
-			pos = flee_pos,
-			nav_seg = flee_nav_seg,
-			interrupt_dis = nil,
-			interrupt_health = nil,
-			interrupt_suppression = nil,
-			attitude = "avoid"
-		}
-		if phalanx_vip:brain():objective() then
-			print("Setting VIP flee objective!")
-			phalanx_vip:brain():set_objective(new_objective)
-			phalanx_vip:sound():say("cpw_a04", true, true)
+		if flee_pos then
+			local flee_nav_seg = managers.navigation:get_nav_seg_from_pos(flee_pos)
+			local new_objective = {
+				type = "flee",
+				pos = flee_pos,
+				nav_seg = flee_nav_seg,
+				interrupt_dis = nil,
+				interrupt_health = nil,
+				interrupt_suppression = nil,
+				attitude = "avoid"
+			}
+			if phalanx_vip:brain():objective() then
+				print("Setting VIP flee objective!")
+				phalanx_vip:brain():set_objective(new_objective)
+				phalanx_vip:sound():say("cpw_a04", true, true)
+			end
+		else
+			print("No flee_pos for VIP found, cannot set flee objective!")
 		end
 	end
 	if not remote_call then

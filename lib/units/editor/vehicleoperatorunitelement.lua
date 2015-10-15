@@ -8,7 +8,8 @@ VehicleOperatorUnitElement.ACTIONS = {
 	"repair",
 	"damage",
 	"activate",
-	"deactivate"
+	"deactivate",
+	"block"
 }
 function VehicleOperatorUnitElement:init(unit)
 	VehicleOperatorUnitElement.super.init(self, unit)

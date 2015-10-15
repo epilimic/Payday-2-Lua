@@ -9,6 +9,13 @@ function AkimboWeaponBase:_create_second_gun()
 	local ids_unit_name = Idstring(factory_weapon.unit)
 	local new_unit = World:spawn_unit(ids_unit_name, Vector3(), Rotation())
 	new_unit:base():set_factory_data(self._factory_id)
+	if self._cosmetics_id then
+		new_unit:base():set_cosmetics_data({
+			id = self._cosmetics_id,
+			quality = self._cosmetics_quality,
+			bonus = self._cosmetics_bonus
+		})
+	end
 	if self._blueprint then
 		new_unit:base():assemble_from_blueprint(self._factory_id, self._blueprint)
 	else

@@ -12,6 +12,10 @@ function all_lights()
 	return lights
 end
 function get_editable_lights(unit)
+	local has_lights = #unit:get_objects_by_type(Idstring("light")) > 0
+	if not has_lights then
+		return nil
+	end
 	local lights = {}
 	local object_file = unit:model_filename()
 	local node = DB:has("object", object_file) and DB:load_node("object", object_file)
@@ -29,9 +33,14 @@ function get_editable_lights(unit)
 	return lights
 end
 function has_editable_lights(unit)
-	return #get_editable_lights(unit) > 0
+	local lights = get_editable_lights(unit)
+	return lights and #lights > 0
 end
 function has_any_projection_light(unit)
+	local has_lights = #unit:get_objects_by_type(Idstring("light")) > 0
+	if not has_lights then
+		return nil
+	end
 	return has_projection_light(unit, "shadow_projection") or has_projection_light(unit, "projection")
 end
 function has_projection_light(unit, type)

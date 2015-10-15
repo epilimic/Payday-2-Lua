@@ -8,8 +8,9 @@ function EnemyPreferedAddUnitElement:init(unit)
 end
 function EnemyPreferedAddUnitElement:draw_links(t, dt, selected_unit, all_units)
 	EnemyPreferedRemoveUnitElement.super.draw_links(self, t, dt, selected_unit, all_units)
+	self:_private_draw_links(t, dt, selected_unit, all_units)
 end
-function EnemyPreferedAddUnitElement:update_selected(t, dt, selected_unit, all_units)
+function EnemyPreferedAddUnitElement:_private_draw_links(t, dt, selected_unit, all_units)
 	local function _draw_func(element_ids)
 		if not element_ids then
 			return
@@ -83,6 +84,15 @@ function EnemyPreferedAddUnitElement:remove_links(unit)
 	end
 	_rem_func(self._hed.spawn_points)
 	_rem_func(self._hed.spawn_groups)
+end
+function EnemyPreferedAddUnitElement:get_links_to_unit(...)
+	EnemyPreferedAddUnitElement.super.get_links_to_unit(self, ...)
+	if self._hed.spawn_groups then
+		self:_get_links_of_type_from_elements(self._hed.spawn_groups, "spawn_group", ...)
+	end
+	if self._hed.spawn_points then
+		self:_get_links_of_type_from_elements(self._hed.spawn_points, "spawn_point", ...)
+	end
 end
 function EnemyPreferedAddUnitElement:add_triggers(vc)
 	vc:add_trigger(Idstring("lmb"), callback(self, self, "add_element"))
@@ -184,49 +194,21 @@ function EnemyPreferedRemoveUnitElement:remove_links(unit)
 		end
 	end
 end
+function EnemyPreferedRemoveUnitElement:get_links_to_unit(...)
+	EnemyPreferedRemoveUnitElement.super.get_links_to_unit(self, ...)
+	if self._hed.elements then
+		self:_get_links_of_type_from_elements(self._hed.elements, "operator", ...)
+	end
+end
 function EnemyPreferedRemoveUnitElement:add_triggers(vc)
 	vc:add_trigger(Idstring("lmb"), callback(self, self, "add_element"))
-end
-function EnemyPreferedRemoveUnitElement:add_unit_list_btn()
-	local script = self._unit:mission_element_data().script
-	local function f(unit)
-		if not unit:mission_element_data() or unit:mission_element_data().script ~= script then
-			return
-		end
-		local id = unit:unit_data().unit_id
-		if table.contains(self._hed.elements, id) then
-			return false
-		end
-		if string.find(unit:name():s(), "ai_enemy_prefered_add", 1, true) then
-			return true
-		end
-		return false
-	end
-	local dialog = SelectUnitByNameModal:new("Add Unit", f)
-	for _, unit in ipairs(dialog:selected_units()) do
-		local id = unit:unit_data().unit_id
-		table.insert(self._hed.elements, id)
-	end
-end
-function EnemyPreferedRemoveUnitElement:remove_unit_list_btn()
-	local function f(unit)
-		return table.contains(self._hed.elements, unit:unit_data().unit_id)
-	end
-	local dialog = SelectUnitByNameModal:new("Remove Unit", f)
-	for _, unit in ipairs(dialog:selected_units()) do
-		local id = unit:unit_data().unit_id
-		table.delete(self._hed.elements, id)
-	end
 end
 function EnemyPreferedRemoveUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
-	local toolbar = EWS:ToolBar(panel, "", "TB_FLAT,TB_NODIVIDER")
-	toolbar:add_tool("ADD_UNIT_LIST", "Add unit from unit list", CoreEws.image_path("world_editor\\unit_by_name_list.png"), nil)
-	toolbar:connect("ADD_UNIT_LIST", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "add_unit_list_btn"), nil)
-	toolbar:add_tool("REMOVE_UNIT_LIST", "Remove unit from unit list", CoreEws.image_path("toolbar\\delete_16x16.png"), nil)
-	toolbar:connect("REMOVE_UNIT_LIST", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "remove_unit_list_btn"), nil)
-	toolbar:realize()
-	panel_sizer:add(toolbar, 0, 1, "EXPAND,LEFT")
+	local names = {
+		"ai_enemy_prefered_add"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, names)
 end

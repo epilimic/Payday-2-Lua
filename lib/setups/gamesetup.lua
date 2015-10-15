@@ -139,6 +139,7 @@ require("lib/units/weapons/grenades/FlashGrenade")
 require("lib/units/weapons/grenades/SmokeGrenade")
 require("lib/units/weapons/grenades/QuickSmokeGrenade")
 require("lib/units/weapons/grenades/QuickFlashGrenade")
+require("lib/units/weapons/grenades/QuickCsGrenade")
 require("lib/units/equipment/repel_rope/RepelRopeBase")
 require("lib/units/weapons/ProjectileWeaponBase")
 require("lib/units/weapons/GrenadeLauncherBase")
@@ -180,20 +181,25 @@ require("lib/units/cameras/CinematicStateCamera")
 GameSetup = GameSetup or class(Setup)
 function GameSetup:load_packages()
 	Setup.load_packages(self)
-	if not PackageManager:loaded("packages/game_base") then
-		PackageManager:load("packages/game_base")
+	if not PackageManager:loaded("packages/game_base_init") then
+		PackageManager:load("packages/game_base_init")
 	end
-	if PackageManager:package_exists("packages/wip/game_base") and not PackageManager:loaded("packages/wip/game_base") then
-		PackageManager:load("packages/wip/game_base")
-	end
-	local prefix = "packages/dlcs/"
-	local sufix = "/game_base"
-	local package = ""
-	for dlc_package, bundled in pairs(tweak_data.BUNDLED_DLC_PACKAGES) do
-		package = prefix .. tostring(dlc_package) .. sufix
-		Application:debug("[MenuSetup:load_packages] DLC package: " .. package, "Is package OK to load?: " .. tostring(bundled))
-		if bundled and (bundled == true or bundled == 2) and PackageManager:package_exists(package) and not PackageManager:loaded(package) then
-			PackageManager:load(package)
+	if not managers.dlc:is_installing() then
+		if not PackageManager:loaded("packages/game_base") and PackageManager:package_exists("packages/game_base") then
+			PackageManager:load("packages/game_base")
+		end
+		if not PackageManager:loaded("packages/wip/game_base") and PackageManager:package_exists("packages/wip/game_base") then
+			PackageManager:load("packages/wip/game_base")
+		end
+		local prefix = "packages/dlcs/"
+		local sufix = "/game_base"
+		local package = ""
+		for dlc_package, bundled in pairs(tweak_data.BUNDLED_DLC_PACKAGES) do
+			package = prefix .. tostring(dlc_package) .. sufix
+			Application:debug("[MenuSetup:load_packages] DLC package: " .. package, "Is package OK to load?: " .. tostring(bundled))
+			if bundled and (bundled == true or bundled == 2) and PackageManager:package_exists(package) and not PackageManager:loaded(package) then
+				PackageManager:load(package)
+			end
 		end
 	end
 	local level_package

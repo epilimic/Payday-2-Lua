@@ -5036,7 +5036,9 @@ function TriggerElement:init(node, unit_element)
 end
 function TriggerElement:activate_callback(env)
 	local name = self:run_parsed_func(env, self._name)
-	local trigger_data_list = env.dest_unit:damage():get_trigger_data_list(name)
+	local dest_unit_damage_ext = env.dest_unit:damage()
+	dest_unit_damage_ext:on_trigger_callback(name, env)
+	local trigger_data_list = dest_unit_damage_ext:get_trigger_data_list(name)
 	if trigger_data_list then
 		for _, trigger_data in ipairs(trigger_data_list) do
 			if trigger_data.params then

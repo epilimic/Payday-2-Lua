@@ -638,7 +638,7 @@ function Layer:prepare_replace(names, rules)
 	for _, name in ipairs(names) do
 		local slot = CoreEngineAccess._editor_unit_data(name:id()):slot()
 		for _, unit in ipairs(World:find_units_quick("disabled", "all", slot)) do
-			if unit:name() == name:id() then
+			if unit:name() == name:id() and managers.editor:unit_in_layer(unit) == self then
 				local continent = unit:unit_data().continent
 				if not rules.only_current_continent or not continent or managers.editor:current_continent() == continent then
 					local unit_params = {
@@ -1065,11 +1065,11 @@ end
 function Layer:delete_unit(unit)
 	if self._selected_unit == unit then
 		self:set_reference_unit(nil)
+		self:update_unit_settings()
 	end
 	table.delete(self._created_units, unit)
 	self._created_units_pairs[unit:unit_data().unit_id] = nil
 	self:remove_unit(unit)
-	self:update_unit_settings()
 end
 function Layer:_on_unit_created(unit)
 end
@@ -1140,7 +1140,7 @@ function Layer:clone_edited_values(unit, source)
 	if unit:name() ~= source:name() then
 		return
 	end
-	local lights = CoreEditorUtils.get_editable_lights(source)
+	local lights = CoreEditorUtils.get_editable_lights(source) or {}
 	for _, light in ipairs(lights) do
 		local new_light = unit:get_object(light:name())
 		new_light:set_near_range(light:near_range())
@@ -1283,23 +1283,28 @@ function Layer:_add_project_save_data(data)
 end
 function Layer:_add_project_unit_save_data(unit, data)
 end
+function Layer:selected_amount_string()
+	return "Selected " .. self._save_name .. ": " .. #self._selected_units
+end
+local idstring_wpn = Idstring("wpn")
 function Layer:save()
 	for _, unit in ipairs(self._created_units) do
-		if not unit:unit_data().instance then
+		local unit_data = unit:unit_data()
+		if not unit_data.instance then
 			local t = {
 				entry = self._save_name,
-				continent = unit:unit_data().continent and unit:unit_data().continent:name(),
+				continent = unit_data.continent and unit_data.continent:name(),
 				data = {
 					unit_data = CoreEditorSave.save_data_table(unit)
 				}
 			}
 			self:_add_project_unit_save_data(unit, t.data)
 			managers.editor:add_save_data(t)
-			if unit:type() ~= Idstring("wpn") then
+			if unit:type() ~= idstring_wpn then
 				managers.editor:add_to_world_package({
 					category = "units",
 					name = unit:name():s(),
-					continent = unit:unit_data().continent
+					continent = unit_data.continent
 				})
 			end
 		end

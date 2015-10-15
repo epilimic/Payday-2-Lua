@@ -14,6 +14,7 @@ function FeatureManager:_setup()
 	self._default.announcements.perk_deck = 3
 	self._default.announcements.freed_old_hoxton = 1
 	self._default.announcements.infamy_2_0 = 1
+	self._default.announcements.thq_feature = 1
 	if not Global.feature_manager then
 		Global.feature_manager = {}
 		Global.feature_manager.announcements = {}
@@ -159,6 +160,29 @@ function FeatureManager:infamy_2_0()
 	managers.menu:show_new_message_dialog({
 		title = "menu_feature_infamy_2_0",
 		text = "menu_feature_infamy_2_0_desc"
+	})
+	return true
+end
+function FeatureManager:thq_feature()
+	print("FeatureManager:thq_feature()")
+	if managers.user:get_setting("use_thq_weapon_parts") then
+		return
+	end
+	local yes_function = function()
+		managers.user:set_setting("use_thq_weapon_parts", true)
+		managers.savefile:save_setting(true)
+	end
+	local button_list = {}
+	local yes_button = {}
+	yes_button.text = managers.localization:text("dialog_yes")
+	yes_button.callback_func = yes_function
+	local no_button = {}
+	no_button.text = managers.localization:text("dialog_no")
+	button_list = {yes_button, no_button}
+	managers.menu:show_new_message_dialog({
+		title = "dialog_feature_thq_title",
+		text = "dialog_feature_thq",
+		button_list = button_list
 	})
 	return true
 end

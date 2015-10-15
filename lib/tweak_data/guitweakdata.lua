@@ -1574,18 +1574,20 @@ function GuiTweakData:init()
 			icon = "guis/textures/pd2/crimenet_challenge"
 		}
 	}
-	table.insert(self.crime_net.special_contracts, {
-		id = "casino",
-		name_id = "menu_cn_casino",
-		desc_id = "menu_cn_casino_desc",
-		menu_node = "crimenet_contract_casino",
-		x = 125,
-		y = 790,
-		icon = "guis/textures/pd2/crimenet_casino",
-		unlock = "unlock_level",
-		pulse = true,
-		pulse_color = Color(204, 255, 209, 32) / 255
-	})
+	if Application:production_build() or SystemInfo:platform() == Idstring("PS4") or SystemInfo:platform() == Idstring("XB1") then
+		table.insert(self.crime_net.special_contracts, {
+			id = "casino",
+			name_id = "menu_cn_casino",
+			desc_id = "menu_cn_casino_desc",
+			menu_node = "crimenet_contract_casino",
+			x = 125,
+			y = 790,
+			icon = "guis/textures/pd2/crimenet_casino",
+			unlock = "unlock_level",
+			pulse = true,
+			pulse_color = Color(204, 255, 209, 32) / 255
+		})
+	end
 	self.crime_net.codex = {
 		{
 			id = "contacts",
@@ -4319,6 +4321,14 @@ function GuiTweakData:init()
 		}
 	}
 	self.weapon_texture_switches = wts
+	self.tradable_inventory_sort_list = {
+		"aquired",
+		"alphabetic",
+		"quality",
+		"rarity",
+		"category",
+		"bonus"
+	}
 end
 function GuiTweakData:_create_location_bounding_boxes()
 	for _, location in ipairs(self.crime_net.locations) do
@@ -4453,4 +4463,110 @@ function GuiTweakData:serializeTable(val, name, skipnewlines, depth)
 		tmp = tmp .. "\"[inserializeable datatype:" .. type(val) .. "]\""
 	end
 	return tmp
+end
+function GuiTweakData:tradable_inventory_sort_func(index)
+	if type(index) == "string" then
+		index = self:tradable_inventory_sort_index(index)
+	end
+	if index == 1 then
+		return function(x, y)
+			return y < x
+		end
+	elseif index == 2 then
+		do
+			local inventory_tradable = managers.blackmarket:get_inventory_tradable()
+			local x_item, y_item, x_td, y_td, x_loc, y_loc
+			local localization_cache = {}
+			return function(x, y)
+				x_item = inventory_tradable[x]
+				y_item = inventory_tradable[y]
+				x_td = tweak_data.economy[x_item.category] or tweak_data.blackmarket[x_item.category][x_item.entry]
+				y_td = tweak_data.economy[y_item.category] or tweak_data.blackmarket[y_item.category][y_item.entry]
+				if x_td.name_id ~= y_td.name_id then
+					localization_cache[x_td.name_id] = localization_cache[x_td.name_id] or managers.localization:to_upper_text(x_td.name_id)
+					localization_cache[y_td.name_id] = localization_cache[y_td.name_id] or managers.localization:to_upper_text(y_td.name_id)
+					x_loc = localization_cache[x_td.name_id]
+					y_loc = localization_cache[y_td.name_id]
+					return x_loc < y_loc
+				end
+				return y < x
+			end
+		end
+	elseif index == 3 then
+		do
+			local inventory_tradable = managers.blackmarket:get_inventory_tradable()
+			local x_item, y_item, x_quality, y_quality
+			return function(x, y)
+				x_item = inventory_tradable[x]
+				y_item = inventory_tradable[y]
+				x_quality = tweak_data.economy.qualities[x_item.quality]
+				y_quality = tweak_data.economy.qualities[y_item.quality]
+				if not x_quality then
+					return false
+				end
+				if not y_quality then
+					return not x_quality
+				end
+				if x_quality.index ~= y_quality.index then
+					return x_quality.index > y_quality.index
+				end
+				return y < x
+			end
+		end
+	elseif index == 4 then
+		do
+			local inventory_tradable = managers.blackmarket:get_inventory_tradable()
+			local x_item, y_item, x_td, y_td, x_rarity, y_rarity
+			return function(x, y)
+				x_item = inventory_tradable[x]
+				y_item = inventory_tradable[y]
+				x_td = tweak_data.economy[x_item.category] or tweak_data.blackmarket[x_item.category][x_item.entry]
+				y_td = tweak_data.economy[y_item.category] or tweak_data.blackmarket[y_item.category][y_item.entry]
+				x_rarity = tweak_data.economy.rarities[x_td.rarity or "common"]
+				y_rarity = tweak_data.economy.rarities[y_td.rarity or "common"]
+				if x_rarity.index ~= y_rarity.index then
+					return x_rarity.index > y_rarity.index
+				end
+				return y < x
+			end
+		end
+	elseif index == 5 then
+		do
+			local inventory_tradable = managers.blackmarket:get_inventory_tradable()
+			local x_item, y_item
+			return function(x, y)
+				x_item = inventory_tradable[x]
+				y_item = inventory_tradable[y]
+				if x_item.category ~= y_item.category then
+					return x_item.category > y_item.category
+				end
+				return y < x
+			end
+		end
+	elseif index == 6 then
+		do
+			local inventory_tradable = managers.blackmarket:get_inventory_tradable()
+			local x_item, y_item
+			return function(x, y)
+				x_item = inventory_tradable[x]
+				y_item = inventory_tradable[y]
+				if x_item.bonus ~= y_item.bonus then
+					return x_item.bonus
+				end
+				return y < x
+			end
+		end
+	end
+	return nil
+end
+function GuiTweakData:tradable_inventory_sort_name(index)
+	return self.tradable_inventory_sort_list[index] or "none"
+end
+function GuiTweakData:tradable_inventory_sort_index(name)
+	for index, n in ipairs(self.tradable_inventory_sort_list) do
+		if n == name then
+			return index
+		end
+	end
+	return 0
 end

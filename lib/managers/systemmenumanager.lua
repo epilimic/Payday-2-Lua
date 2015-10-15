@@ -145,6 +145,13 @@ function GenericSystemMenuManager:force_close_all()
 	if self._active_dialog and self._active_dialog:blocks_exec() then
 		self._active_dialog:fade_out_close()
 	end
+	if self._dialog_queue then
+		for i, dialog in ipairs(self._dialog_queue) do
+			if self._active_dialog and self._active_dialog ~= dialog then
+				dialog:force_close()
+			end
+		end
+	end
 	self._dialog_queue = nil
 end
 function GenericSystemMenuManager:get_dialog(id)

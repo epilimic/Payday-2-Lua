@@ -14,6 +14,7 @@ core:import("CoreEngineAccess")
 core:import("CoreInput")
 core:import("CoreEditorUtils")
 core:import("CoreEditorSave")
+core:import("CoreUnit")
 require("core/lib/utils/dev/editor/ews_classes/CoreEditorEwsClasses")
 require("core/lib/utils/dev/editor/ews_classes/UnitByName")
 require("core/lib/utils/dev/editor/ews_classes/SelectByName")
@@ -139,7 +140,6 @@ function CoreEditor:init(game_state_machine, session_state)
 	self:_init_mission_players()
 	self:_init_mission_platforms()
 	self:_init_title_messages()
-	self:_init_edit_unit_dialog()
 end
 function CoreEditor:_load_packages()
 	if not PackageManager:loaded("core/packages/editor") then
@@ -178,6 +178,20 @@ function CoreEditor:_init_gui()
 	self._workspace = Overlay:newgui():create_screen_workspace()
 	self._workspace:set_timer(TimerManager:main())
 	self._gui = self._workspace:panel():gui(Idstring("core/guis/core_editor"))
+	self._gui:child("camera"):text({
+		name = "select_units_amount",
+		text = "",
+		font = "core/fonts/nice_editor_font",
+		font_size = 20
+	})
+	self:_align_gui()
+end
+function CoreEditor:_align_gui()
+	for i, child in ipairs(self._gui:child("camera"):children()) do
+		local y_skip = i >= 4 and 10 or 0
+		child:set_y(y_skip + 20 * (i - 1))
+		child:set_color(Color(1, 0.8, 0.2 + 0.2 * (i - 1), 0))
+	end
 end
 function CoreEditor:_init_editor_data()
 	self._editor_data = {}
@@ -221,6 +235,7 @@ function CoreEditor:_init_configuration_values()
 	self._always_global_select_unit = false
 	self._use_timestamp = false
 	self._reset_camera_on_new = false
+	self._use_beta_undo = false
 	self._dialogs_stay_on_top = false
 	self._save_edit_setting_values = false
 	self._save_dialog_states = false
@@ -596,6 +611,7 @@ function CoreEditor:pickup_tool()
 		self._camera_transform_type_in = CameraTransformTypeIn:new()
 		self:load_layout()
 		self:check_news()
+		self:_init_edit_unit_dialog()
 	end
 	self._enabled = true
 	self:_set_vp_active(true)
@@ -643,6 +659,7 @@ function CoreEditor:run_simulation(with_mission)
 		})
 	end
 	if not Global.running_simulation then
+		self:_interupt_frustum_freeze()
 		self._saved_simulation_values = {}
 		self._error_log = {}
 		self._notebook:set_enabled(false)
@@ -1410,14 +1427,18 @@ function CoreEditor:show_replace_massunit()
 	end
 	return self._replace_massunit_dialog:result()
 end
-function CoreEditor:reload_units(unit_names, small_compile)
+function CoreEditor:reload_units(unit_names, small_compile, skip_replace_units)
 	if #unit_names <= 0 then
 		return
 	end
-	local reload_data = self._current_layer:prepare_replace(unit_names)
+	local reload_data
+	if not skip_replace_units then
+		reload_data = self._current_layer:prepare_replace(unit_names)
+	end
 	if small_compile == true then
 		local files = {}
 		for _, unit_name in ipairs(unit_names) do
+			CoreUnit.editor_load_unit(unit_name)
 			local unit_data = PackageManager:unit_data(unit_name)
 			local sequence_file = unit_data:sequence_manager_filename()
 			if sequence_file then
@@ -1451,7 +1472,9 @@ function CoreEditor:reload_units(unit_names, small_compile)
 		local material_config = CoreEngineAccess._editor_unit_data(unit_name:id()):material_config()
 		Application:reload_material_config(material_config:id())
 	end
-	self._current_layer:recreate_units(nil, reload_data)
+	if not skip_replace_units then
+		self._current_layer:recreate_units(nil, reload_data)
+	end
 end
 function CoreEditor:entering_window(user_data, event_object)
 	if Global.running_simulation then
@@ -1917,6 +1940,7 @@ function CoreEditor:update(time, rel_time)
 			self._gui:child("camera"):child("cam_pos"):set_text(string.format("Cam pos:   \"%.2f %.2f %.2f\" [cm]", cam_pos.x, cam_pos.y, cam_pos.z))
 			self._gui:child("camera"):child("cam_rot"):set_text(string.format("Cam rot:   \"%.2f %.2f %.2f\"", cam_rot:yaw(), cam_rot:pitch(), cam_rot:roll()))
 			self._gui:child("camera"):child("far_range"):set_text(string.format("Far range: %.2f [m]", far_range / 100))
+			self._gui:child("camera"):child("select_units_amount"):set_text("" .. self._current_layer:selected_amount_string())
 			self._light:set_local_position(cam_pos)
 			if not self._camera_locked or self._camera_controller:creating_cube_map() then
 				if not self._orthographic then
@@ -1928,6 +1952,9 @@ function CoreEditor:update(time, rel_time)
 				else
 					self._camera_controller:update_orthographic(time, rel_time)
 				end
+			end
+			if self._camera_locked then
+				self._camera_controller:update_locked(time, rel_time)
 			end
 			if self._draw_hidden_units then
 				for _, unit in ipairs(self._hidden_units) do
@@ -2226,7 +2253,7 @@ function CoreEditor:select_unit_ok_conditions(unit, layer, skip_instance_check)
 					return true
 				end
 			else
-				return true
+				return not layer or layer == self:unit_in_layer(unit)
 			end
 		else
 			return true
@@ -2457,12 +2484,14 @@ function CoreEditor:add_to_sound_package(params)
 	end
 end
 function CoreEditor:_save_packages(dir)
+	local chunk_name = managers.editor:layer("Level Settings"):get_setting("chunk_name")
+	local is_not_init_chunk = chunk_name ~= "init"
 	local streaming_options = {
 		win32 = {"texture"},
 		ps3 = {"texture"},
 		x360 = {"texture"},
-		ps4 = {"texture"},
-		xb1 = {"texture"}
+		ps4 = is_not_init_chunk and {"texture"} or {},
+		xb1 = is_not_init_chunk and {"texture"} or {}
 	}
 	local package = SystemFS:open(dir .. "\\world.package", "w")
 	self:_save_package(package, self._world_package_table, streaming_options)
@@ -2945,12 +2974,10 @@ function CoreEditor:add_unit_edit_page(name)
 	return self._dialogs.edit_unit:add_page(name)
 end
 function CoreEditor:toggle_edit_unit_dialog()
-	if self._dialogs.edit_unit then
-		if self._dialogs.edit_unit:visible() then
-			self:hide_dialog("edit_unit")
-		else
-			self:show_dialog("edit_unit")
-		end
+	if self._dialogs.edit_unit and self._dialogs.edit_unit:visible() then
+		self:hide_dialog("edit_unit")
+	else
+		self:show_dialog("edit_unit", "EditUnitDialog")
 	end
 end
 function CoreEditor:has_editables(unit, units)
@@ -3054,7 +3081,7 @@ function CoreEditor:change_layer_based_on_unit(unit)
 end
 function CoreEditor:unit_in_layer(unit)
 	for _, layer in pairs(self._layers) do
-		if table.contains(layer:created_units(), unit) then
+		if layer:created_units_pairs()[unit:unit_data().unit_id] then
 			return layer
 		end
 	end
@@ -3077,10 +3104,8 @@ function CoreEditor:delete_selected_unit()
 end
 function CoreEditor:unit_with_id(id)
 	for _, layer in pairs(self._layers) do
-		for _, unit in ipairs(layer:created_units()) do
-			if alive(unit) and unit:unit_data().unit_id == id then
-				return unit
-			end
+		if layer:created_units_pairs()[id] then
+			return layer:created_units_pairs()[id]
 		end
 	end
 end
@@ -3291,6 +3316,9 @@ function CoreEditor:destroy()
 		self._vp:destroy()
 		self._vp = nil
 	end
+end
+function CoreEditor:use_beta_undo()
+	return self._use_beta_undo
 end
 CoreEditorContinent = CoreEditorContinent or class()
 function CoreEditorContinent:init(name, values)

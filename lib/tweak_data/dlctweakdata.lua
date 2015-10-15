@@ -39,7 +39,8 @@ function DLCTweakData:init(tweak_data)
 		alienware_alpha = true,
 		humble_summer_2015 = 1,
 		season_pass = true,
-		animal = true
+		animal = true,
+		cash = true
 	}
 	self.starvr_free = {}
 	self.starvr_free.free = true
@@ -4022,4 +4023,22 @@ function DLCTweakData:init(tweak_data)
 			amount = 1
 		}
 	}
+	if SystemInfo:platform() == Idstring("XB1") then
+		self.xone_bonus = {}
+		self.xone_bonus.free = true
+		self.xone_bonus.content = {}
+		self.xone_bonus.content.loot_global_value = "infamous"
+		self.xone_bonus.content.loot_drops = {
+			{
+				type_items = "cash",
+				item_entry = "xone_bonus",
+				amount = 1
+			},
+			{
+				type_items = "masks",
+				item_entry = "unforsaken",
+				amount = 1
+			}
+		}
+	end
 end

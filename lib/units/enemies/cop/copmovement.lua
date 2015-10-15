@@ -122,6 +122,7 @@ action_variants.fbi_heavy_swat = security_variant
 action_variants.nathan = security_variant
 action_variants.sniper = security_variant
 action_variants.gangster = security_variant
+action_variants.biker = security_variant
 action_variants.mobster = security_variant
 action_variants.mobster_boss = security_variant
 action_variants.hector_boss = security_variant
@@ -139,6 +140,7 @@ action_variants.tank.walk = TankCopActionWalk
 action_variants.tank_hw = action_variants.tank
 action_variants.spooc = security_variant
 action_variants.taser = security_variant
+action_variants.inside_man = security_variant
 action_variants.civilian = {
 	idle = CopActionIdle,
 	act = CopActionAct,
@@ -1922,4 +1924,7 @@ function CopMovement:set_team(team_data)
 end
 function CopMovement:team()
 	return self._team
+end
+IgnoreAlertsMovement = IgnoreAlertsMovement or class(CopMovement)
+function IgnoreAlertsMovement:set_cool(state, giveaway)
 end

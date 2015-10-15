@@ -25,6 +25,8 @@ end
 function BaseDialog:fade_out()
 	self:close()
 end
+function BaseDialog:force_close()
+end
 function BaseDialog:close()
 	self._manager:event_dialog_closed(self)
 end

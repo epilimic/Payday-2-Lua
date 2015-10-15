@@ -17,6 +17,7 @@ function FFCEditorController:update(time, rel_time)
 			self:create_cube_map()
 			return
 		end
+		self:_draw_frustum_freeze(time, rel_time)
 		local speed = self._move_speed * rel_time
 		local turn_speed = self._turn_speed * 0.001
 		local altitude = Vector3(0, 0, speed * (self._controller:button(Idstring("altitude_up")) - self._controller:button(Idstring("altitude_down"))))
@@ -43,6 +44,37 @@ function FFCEditorController:update(time, rel_time)
 		self._camera:set_position(self._camera:position() + move + altitude)
 		self._camera:set_rotation(Rotation(self._yaw, self._pitch, 0))
 	end
+end
+function FFCEditorController:update_locked(time, rel_time)
+	self:_draw_frustum_freeze(time, rel_time)
+end
+function FFCEditorController:_draw_frustum_freeze(time, rel_time)
+	if not self._frustum_frozen then
+		return
+	end
+	local near = self._frozen_camera:near_range()
+	local far = self._frozen_camera:far_range()
+	local R, G, B = 1, 0, 1
+	local n1 = self._frozen_camera:screen_to_world(Vector3(-1, -1, near))
+	local n2 = self._frozen_camera:screen_to_world(Vector3(1, -1, near))
+	local n3 = self._frozen_camera:screen_to_world(Vector3(1, 1, near))
+	local n4 = self._frozen_camera:screen_to_world(Vector3(-1, 1, near))
+	local f1 = self._frozen_camera:screen_to_world(Vector3(-1, -1, far))
+	local f2 = self._frozen_camera:screen_to_world(Vector3(1, -1, far))
+	local f3 = self._frozen_camera:screen_to_world(Vector3(1, 1, far))
+	local f4 = self._frozen_camera:screen_to_world(Vector3(-1, 1, far))
+	Application:draw_line(n1, n2, R, G, B)
+	Application:draw_line(n2, n3, R, G, B)
+	Application:draw_line(n3, n4, R, G, B)
+	Application:draw_line(n4, n1, R, G, B)
+	Application:draw_line(n1, f1, R, G, B)
+	Application:draw_line(n2, f2, R, G, B)
+	Application:draw_line(n3, f3, R, G, B)
+	Application:draw_line(n4, f4, R, G, B)
+	Application:draw_line(f1, f2, R, G, B)
+	Application:draw_line(f2, f3, R, G, B)
+	Application:draw_line(f3, f4, R, G, B)
+	Application:draw_line(f4, f1, R, G, B)
 end
 function FFCEditorController:set_camera(cam)
 	self._camera = cam
@@ -82,6 +114,33 @@ function FFCEditorController:get_move_speed()
 end
 function FFCEditorController:get_turn_speed()
 	return self._turn_speed
+end
+function FFCEditorController:frustum_freeze(camera)
+	self._frustum_frozen = true
+	local old_cam = camera
+	local new_cam = World:create_camera()
+	new_cam:set_fov(old_cam:fov())
+	new_cam:set_position(old_cam:position())
+	new_cam:set_rotation(old_cam:rotation())
+	new_cam:set_far_range(old_cam:far_range())
+	new_cam:set_near_range(old_cam:near_range())
+	new_cam:set_aspect_ratio(old_cam:aspect_ratio())
+	new_cam:set_width_multiplier(old_cam:width_multiplier())
+	self:set_camera(new_cam)
+	Application:set_frustum_freeze_camera(old_cam, new_cam)
+	self._frozen_camera = old_cam
+end
+function FFCEditorController:frustum_unfreeze(camera)
+	self._frustum_frozen = false
+	local old_cam = camera
+	old_cam:set_position(self._camera:position())
+	old_cam:set_rotation(self._camera:rotation())
+	Application:set_frustum_freeze_camera(old_cam, old_cam)
+	self:set_camera(old_cam)
+	self._frozen_camera = nil
+end
+function FFCEditorController:frustum_frozen()
+	return self._frustum_frozen
 end
 function FFCEditorController:start_cube_map(params)
 	self._params = params

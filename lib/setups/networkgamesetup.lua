@@ -1,5 +1,6 @@
 require("lib/setups/GameSetup")
 require("lib/network/base/NetworkManager")
+require("lib/wip")
 NetworkGameSetup = NetworkGameSetup or class(GameSetup)
 function NetworkGameSetup:init_managers(managers)
 	GameSetup.init_managers(self, managers)

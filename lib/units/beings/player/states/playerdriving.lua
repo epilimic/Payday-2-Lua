@@ -6,7 +6,7 @@ PlayerDriving.IDS_STEER_RIGHT_STATE = Idstring("fps/wheel_turn_right")
 PlayerDriving.IDS_STEER_IDLE_REDIRECT = Idstring("steering_wheel_idle")
 PlayerDriving.IDS_PASSENGER_REDIRECT = Idstring("passenger_vehicle")
 PlayerDriving.IDS_EQUIP = Idstring("equip")
-PlayerDriving.EXIT_VEHICLE_TIMER = 1
+PlayerDriving.EXIT_VEHICLE_TIMER = 0.4
 PlayerDriving.STANCE_NORMAL = 0
 PlayerDriving.STANCE_SHOOTING = 1
 function PlayerDriving:init(unit)
@@ -109,8 +109,11 @@ function PlayerDriving:exit(state_data, new_state_name)
 	return exit_data
 end
 function PlayerDriving:update(t, dt)
-	if self._vehicle == nil or not self._vehicle:is_active() then
-		print("[DRIVING] No vehicle present or active")
+	if self._vehicle == nil then
+		print("[DRIVING] No in a vehicle")
+		return
+	elseif not self._vehicle:is_active() then
+		print("[DRIVING] The vehicle is not active")
 		return
 	end
 	if self._controller == nil then

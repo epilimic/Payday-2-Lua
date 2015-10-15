@@ -1,5 +1,4 @@
 CopDamage = CopDamage or class()
-CopDamage = CopDamage or class()
 CopDamage._all_event_types = {
 	"dmg_rcv",
 	"light_hurt",
@@ -313,13 +312,6 @@ function CopDamage:damage_bullet(attack_data)
 				end
 			end
 			self:_check_damage_achievements(attack_data, head)
-			if alive(attack_data.weapon_unit) and attack_data.weapon_unit:base() and attack_data.weapon_unit:base().weapon_tweak_data then
-				if self._unit:base()._tweak_table == "tank" and attack_data.weapon_unit:base():weapon_tweak_data().category == "smg" then
-					managers.statistics:crimefest_stats("dallas_2")
-				elseif self._unit:base()._tweak_table == "shield" and attack_data.weapon_unit:base():weapon_tweak_data().category == "shotgun" then
-					managers.statistics:crimefest_stats("dallas_6")
-				end
-			end
 			if not CopDamage.is_civilian(self._unit:base()._tweak_table) and managers.player:has_category_upgrade("temporary", "overkill_damage_multiplier") and not attack_data.weapon_unit:base().thrower_unit then
 				local weapon_category = attack_data.weapon_unit:base():weapon_tweak_data().category
 				if weapon_category == "shotgun" or weapon_category == "saw" then
@@ -457,7 +449,7 @@ function CopDamage.is_civilian(type)
 	return type == "civilian" or type == "civilian_female" or type == "bank_manager"
 end
 function CopDamage.is_gangster(type)
-	return type == "gangster" or type == "biker_escape" or type == "mobster" or type == "mobster_boss"
+	return type == "gangster" or type == "biker_escape" or type == "mobster" or type == "mobster_boss" or type == "biker"
 end
 function CopDamage.is_cop(type)
 	return not CopDamage.is_civilian(type) and not CopDamage.is_gangster(type)
@@ -1008,9 +1000,6 @@ function CopDamage:damage_melee(attack_data)
 			local is_cop = not is_civlian and not is_gangster
 			if not is_civlian and managers.groupai:state():whisper_mode() and managers.blackmarket:equipped_mask().mask_id == tweak_data.achievement.cant_hear_you_scream.mask then
 				managers.achievment:award_progress(tweak_data.achievement.cant_hear_you_scream.stat)
-			end
-			if is_gangster and (attack_data.name_id == "barbedwire" or attack_data.name_id == "baseballbat") then
-				managers.statistics:crimefest_stats("houston_3")
 			end
 			mvector3.set(mvec_1, self._unit:position())
 			mvector3.subtract(mvec_1, attack_data.attacker_unit:position())

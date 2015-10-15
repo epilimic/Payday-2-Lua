@@ -105,8 +105,14 @@ function CriminalsManager:_remove(id)
 	end
 	if data.unit then
 		managers.hud:remove_mugshot_by_character_name(data.name)
+		if not data.ai and alive(data.unit) then
+			self:on_last_valid_player_spawn_point_updated(data.unit)
+		end
 	else
 		managers.hud:remove_teammate_panel_by_name_id(data.name)
+	end
+	if not data.ai then
+		managers.trade:on_player_criminal_removed(data.name)
 	end
 	data.taken = false
 	data.unit = nil

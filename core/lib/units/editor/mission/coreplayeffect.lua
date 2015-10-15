@@ -82,20 +82,13 @@ function CoreStopEffectUnitElement:init(unit)
 	MissionElement.init(self, unit)
 	self._hed.operation = "fade_kill"
 	self._hed.elements = {}
-	self._elements_units = {}
 	table.insert(self._save_values, "operation")
 	table.insert(self._save_values, "elements")
 end
-function CoreStopEffectUnitElement:layer_finished(...)
-	MissionElement.layer_finished(self, ...)
-	for _, id in ipairs(self._hed.elements) do
-		local unit = managers.worlddefinition:get_mission_element_unit(id)
-		table.insert(self._elements_units, unit)
-	end
-end
-function CoreStopEffectUnitElement:draw_links(t, dt, selected_unit)
+function CoreStopEffectUnitElement:draw_links(t, dt, selected_unit, all_units)
 	MissionElement.draw_links(self, t, dt, selected_unit)
-	for _, unit in ipairs(self._elements_units) do
+	for _, id in ipairs(self._hed.elements) do
+		local unit = all_units[id]
 		local draw = not selected_unit or unit == selected_unit or self._unit == selected_unit
 		if draw then
 			self:_draw_link({
@@ -120,10 +113,8 @@ function CoreStopEffectUnitElement:add_element()
 		local id = ray.unit:unit_data().unit_id
 		if table.contains(self._hed.elements, id) then
 			table.delete(self._hed.elements, id)
-			table.delete(self._elements_units, ray.unit)
 		else
 			table.insert(self._hed.elements, id)
-			table.insert(self._elements_units, ray.unit)
 		end
 	end
 end
@@ -132,7 +123,6 @@ function CoreStopEffectUnitElement:remove_links(unit)
 	for _, id in ipairs(self._hed.elements) do
 		if id == unit:unit_data().unit_id then
 			table.delete(self._hed.elements, id)
-			table.delete(self._elements_units, unit)
 		end
 	end
 end
@@ -143,5 +133,9 @@ function CoreStopEffectUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local names = {
+		"env_effect_play"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, names)
 	self:_build_value_combobox(panel, panel_sizer, "operation", {"kill", "fade_kill"}, "Select a kind of operation to perform on the added effects")
 end

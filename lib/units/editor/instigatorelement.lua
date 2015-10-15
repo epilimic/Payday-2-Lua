@@ -69,6 +69,10 @@ function InstigatorOperatorUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local exact_names = {
+		"units/dev_tools/mission_elements/logic_instigator/logic_instigator"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, nil, exact_names)
 	self:_build_value_combobox(panel, panel_sizer, "operation", {
 		"none",
 		"set",
@@ -140,6 +144,10 @@ function InstigatorTriggerUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local exact_names = {
+		"units/dev_tools/mission_elements/logic_instigator/logic_instigator"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, nil, exact_names)
 	self:_build_value_combobox(panel, panel_sizer, "trigger_type", {
 		"death",
 		"set",

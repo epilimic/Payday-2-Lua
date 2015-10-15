@@ -717,7 +717,6 @@ function GroupAIStateBase:on_hostage_state(state, key, police, skip_announcement
 	if police then
 		self._police_hostage_headcount = self._police_hostage_headcount + d
 	else
-		managers.statistics:crimefest_stats("chains_2")
 	end
 	if state and self._hstg_hint_clbk then
 		managers.enemy:remove_delayed_clbk("_hostage_hint_clbk")
@@ -3506,7 +3505,6 @@ function GroupAIStateBase:convert_hostage_to_criminal(unit, peer_unit)
 	if not peer_unit then
 		managers.player:count_up_player_minions()
 	end
-	managers.statistics:crimefest_stats("clover_6")
 end
 function GroupAIStateBase:clbk_minion_destroyed(player_key, minion_unit)
 	local minion_key = minion_unit:key()
@@ -4132,6 +4130,9 @@ function GroupAIStateBase._create_hud_suspicion_icon(obs_key, u_observer, icon_n
 end
 function GroupAIStateBase:on_criminal_suspicion_progress(u_suspect, u_observer, status)
 	if not self._ai_enabled or not self._whisper_mode then
+		return
+	end
+	if u_observer:brain() and u_observer:brain()._ignore_suspicion then
 		return
 	end
 	local obs_key = u_observer:key()

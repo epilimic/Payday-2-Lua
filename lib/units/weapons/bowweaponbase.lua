@@ -109,7 +109,8 @@ function BowWeaponBase:enter_steelsight_speed_multiplier()
 	return self._steelsight_speed * BowWeaponBase.super.enter_steelsight_speed_multiplier(self)
 end
 function BowWeaponBase:reload_speed_multiplier()
-	return 3 * BowWeaponBase.super.reload_speed_multiplier(self)
+	local code_miss_multiplier = self:weapon_tweak_data().bow_reload_speed_multiplier or 1
+	return code_miss_multiplier * BowWeaponBase.super.reload_speed_multiplier(self)
 end
 function BowWeaponBase:set_ammo_max(ammo_max)
 	BowWeaponBase.super.set_ammo_max(self, ammo_max)

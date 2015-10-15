@@ -7,7 +7,7 @@ function AIAttentionElement:init(unit)
 	self._hed.local_pos = nil
 	self._hed.local_rot = nil
 	self._hed.use_instigator = nil
-	self._hed.instigator_ids = nil
+	self._hed.instigator_ids = {}
 	self._hed.parent_u_id = nil
 	self._hed.parent_obj_name = nil
 	self._hed.att_obj_u_id = nil
@@ -26,7 +26,13 @@ function AIAttentionElement:init(unit)
 	self._parent_obj = nil
 	self._att_obj_unit = nil
 end
-function AIAttentionElement:post_init()
+function AIAttentionElement:post_init(...)
+	AIAttentionElement.super.post_init(self, ...)
+end
+function AIAttentionElement:save(t)
+	if not next(self._hed.instigator_ids) then
+		t.instigator_ids = nil
+	end
 end
 function AIAttentionElement:layer_finished()
 	AIAttentionElement.super.layer_finished(self)
@@ -51,6 +57,19 @@ function AIAttentionElement:load_att_obj_unit(unit)
 end
 function AIAttentionElement:draw_links(t, dt, selected_unit, all_units)
 	AIAttentionElement.super.draw_links(self, t, dt, selected_unit)
+	for _, id in ipairs(self._hed.instigator_ids) do
+		local unit = all_units[id]
+		local draw = not selected_unit or unit == selected_unit or self._unit == selected_unit
+		if draw then
+			self:_draw_link({
+				from_unit = unit,
+				to_unit = self._unit,
+				r = 0,
+				g = 0,
+				b = 0.75
+			})
+		end
+	end
 	if selected_unit and self._parent_unit ~= selected_unit and self._parent_unit ~= selected_unit and self._unit ~= selected_unit then
 		return
 	end
@@ -71,18 +90,6 @@ function AIAttentionElement:draw_links(t, dt, selected_unit, all_units)
 			g = 0,
 			b = 0.75
 		})
-	end
-	if self._hed.instigator_ids then
-		for _, id in ipairs(self._hed.instigator_ids) do
-			local unit = all_units[id]
-			self:_draw_link({
-				from_unit = unit,
-				to_unit = self._unit,
-				r = 0,
-				g = 0,
-				b = 0.75
-			})
-		end
 	end
 end
 function AIAttentionElement:update_selected(t, dt, selected_unit, all_units)
@@ -108,17 +115,15 @@ function AIAttentionElement:update_selected(t, dt, selected_unit, all_units)
 			b = 0
 		})
 	end
-	if self._hed.instigator_ids then
-		for _, id in ipairs(self._hed.instigator_ids) do
-			local unit = all_units[id]
-			self:_draw_link({
-				from_unit = unit,
-				to_unit = self._unit,
-				r = 0,
-				g = 0,
-				b = 0.75
-			})
-		end
+	for _, id in ipairs(self._hed.instigator_ids) do
+		local unit = all_units[id]
+		self:_draw_link({
+			from_unit = unit,
+			to_unit = self._unit,
+			r = 0,
+			g = 0,
+			b = 0.75
+		})
 	end
 end
 function AIAttentionElement:update_unselected(t, dt, selected_unit, all_units)
@@ -202,18 +207,12 @@ function AIAttentionElement:_lmb()
 	end
 	local id = SpecialObjectiveUnitElement._spawn_raycast(self)
 	if id then
-		if self._hed.instigator_ids then
-			for i, si_id in ipairs(self._hed.instigator_ids) do
-				if si_id == id then
-					table.remove(self._hed.instigator_ids, i)
-					if not next(self._hed.instigator_ids) then
-						self._hed.instigator_ids = nil
-					end
-					return
-				end
+		for i, si_id in ipairs(self._hed.instigator_ids) do
+			if si_id == id then
+				table.remove(self._hed.instigator_ids, i)
+				return
 			end
 		end
-		self._hed.instigator_ids = self._hed.instigator_ids or {}
 		table.insert(self._hed.instigator_ids, id)
 		return
 	end
@@ -246,6 +245,13 @@ function AIAttentionElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local names = {
+		"ai_spawn_enemy",
+		"ai_spawn_civilian",
+		"ai_enemy_group",
+		"ai_civilian_group"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.instigator_ids, names)
 	self:_build_value_checkbox(panel, panel_sizer, "use_instigator")
 	self:_build_value_combobox(panel, panel_sizer, "preset", table.list_add({"none"}, tweak_data.attention.indexes), "Select the attention preset.")
 	self:_build_value_combobox(panel, panel_sizer, "operation", {

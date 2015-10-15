@@ -42,6 +42,10 @@ function CoreEnvEditor:create_interface()
 	self:add_gui_element(gui, "Skydome", "Sky")
 	gui = self:add_sky_param("global_texture", DBPickDialog:new(self, self:get_tab("Skydome"), "Global cubemap", "texture"))
 	self:add_gui_element(gui, "Skydome", "Sky")
+	gui = self:add_sky_param("global_world_overlay_texture", DBPickDialog:new(self, self:get_tab("Global textures"), "Global world overlay texture", "texture"))
+	self:add_gui_element(gui, "Global textures", "World")
+	gui = self:add_sky_param("global_world_overlay_mask_texture", DBPickDialog:new(self, self:get_tab("Global textures"), "Global world overlay mask texture", "texture"))
+	self:add_gui_element(gui, "Global textures", "World")
 end
 function CoreEnvEditor:create_simple_interface()
 end

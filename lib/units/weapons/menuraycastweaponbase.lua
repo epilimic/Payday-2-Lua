@@ -1,6 +1,25 @@
 NewRaycastWeaponBase = NewRaycastWeaponBase or class()
+require("lib/units/weapons/CosmeticsWeaponBase")
 function NewRaycastWeaponBase:init(unit)
 	self._unit = unit
+	self._name_id = self.name_id or "test_raycast_weapon"
+	self.name_id = nil
+	self._textures = {}
+	self._cosmetics_data = nil
+	self._materials = nil
+end
+function NewRaycastWeaponBase:_check_thq_align_anim()
+	if not self:is_npc() then
+		return
+	end
+	if not self:use_thq() then
+		return
+	end
+	local tweak_data = tweak_data.weapon[self._name_id]
+	local thq_anim_name = tweak_data.animations and tweak_data.animations.thq_align_anim
+	if thq_anim_name then
+		self._unit:anim_set_time(Idstring(thq_anim_name), self._unit:anim_length(Idstring(thq_anim_name)))
+	end
 end
 function NewRaycastWeaponBase:set_factory_data(factory_id)
 	self._factory_id = factory_id
@@ -14,10 +33,29 @@ end
 function NewRaycastWeaponBase:is_npc()
 	return self._npc or false
 end
+function NewRaycastWeaponBase:use_thq()
+	return true
+end
+function NewRaycastWeaponBase:skip_thq_parts()
+	return tweak_data.weapon.factory[self._factory_id .. "_npc"].skip_thq_parts
+end
+function NewRaycastWeaponBase:skip_queue()
+	return false
+end
+function NewRaycastWeaponBase:_third_person()
+	if not self:is_npc() then
+		return false
+	end
+	if not self:use_thq() then
+		return true
+	end
+	return self:skip_thq_parts() and true or false
+end
 function NewRaycastWeaponBase:assemble(factory_id, skip_queue)
-	local third_person = self:is_npc()
+	local third_person = self:_third_person()
 	self._parts, self._blueprint = managers.weapon_factory:assemble_default(factory_id, self._unit, third_person, callback(self, self, "_assemble_completed", function()
 	end), skip_queue)
+	self:_check_thq_align_anim()
 	self:_update_stats_values()
 	do return end
 	local third_person = self:is_npc()
@@ -26,9 +64,10 @@ function NewRaycastWeaponBase:assemble(factory_id, skip_queue)
 	self:_update_stats_values()
 end
 function NewRaycastWeaponBase:assemble_from_blueprint(factory_id, blueprint, skip_queue, clbk)
-	local third_person = self:is_npc()
+	local third_person = self:_third_person()
 	self._parts, self._blueprint = managers.weapon_factory:assemble_from_blueprint(factory_id, self._unit, blueprint, third_person, callback(self, self, "_assemble_completed", clbk or function()
 	end), skip_queue)
+	self:_check_thq_align_anim()
 	self:_update_stats_values()
 	do return end
 	local third_person = self:is_npc()
@@ -39,6 +78,8 @@ end
 function NewRaycastWeaponBase:_assemble_completed(clbk, parts, blueprint)
 	self._parts = parts
 	self._blueprint = blueprint
+	self:_apply_cosmetics(clbk or function()
+	end)
 	self:apply_texture_switches()
 	self:_update_fire_object()
 	self:_update_stats_values()
@@ -132,8 +173,10 @@ function NewRaycastWeaponBase:_update_stats_values()
 	end
 	for stat, _ in pairs(stats) do
 		if parts_stats[stat] then
-			stats[stat] = math_clamp(stats[stat] + parts_stats[stat], 1, #tweak_data[stat])
+			stats[stat] = stats[stat] + parts_stats[stat]
 		end
+		stats[stat] = stats[stat] + managers.player:upgrade_value("weapon", stat .. "_index_addend", 0)
+		stats[stat] = stats[stat] + managers.player:upgrade_value(self._name_id, stat .. "_index_addend", 0)
 		stats[stat] = math_clamp(stats[stat], 1, #tweak_data[stat])
 	end
 	self._current_stats = {}
@@ -284,7 +327,7 @@ function NewRaycastWeaponBase:spread_multiplier()
 	return multiplier
 end
 function NewRaycastWeaponBase:recoil_addend()
-	return managers.blackmarket:recoil_addend(self._name_id, self:weapon_tweak_data().category, self._silencer, self._blueprint)
+	return managers.blackmarket:recoil_addend(self._name_id, self:weapon_tweak_data().category, self._current_stats_indices and self._current_stats_indices.recoil, self._silencer, self._blueprint)
 end
 function NewRaycastWeaponBase:recoil_multiplier()
 	local multiplier = NewRaycastWeaponBase.super.recoil_multiplier(self)
@@ -307,6 +350,14 @@ function NewRaycastWeaponBase:destroy(unit)
 	if self._parts_texture_switches then
 		for part_id, texture_ids in pairs(self._parts_texture_switches) do
 			TextureCache:unretrieve(texture_ids)
+		end
+	end
+	if self._textures then
+		for tex_id, texture_data in pairs(self._textures) do
+			if not texture_data.applied then
+				texture_data.applied = true
+				TextureCache:unretrieve(texture_data.name)
+			end
 		end
 	end
 	managers.weapon_factory:disassemble(self._parts)

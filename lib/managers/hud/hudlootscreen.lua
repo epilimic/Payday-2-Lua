@@ -416,7 +416,12 @@ function HUDLootScreen:hide()
 end
 function HUDLootScreen:show()
 	if not self._video and SystemInfo:platform() ~= Idstring("X360") then
-		local variant = math.random(8)
+		local variant
+		if managers.dlc:is_installing() then
+			variant = 1
+		else
+			variant = math.random(8)
+		end
 		self._video = self._baselayer_two:video({
 			video = "movies/lootdrop" .. tostring(variant),
 			loop = false,
@@ -568,6 +573,26 @@ function HUDLootScreen:make_lootdrop(lootdrop_data)
 			texture_path = "guis/textures/pd2/blackmarket/cash_drop"
 		elseif category == "xp" then
 			texture_path = "guis/textures/pd2/blackmarket/xp_drop"
+		elseif category == "safes" then
+			local td = tweak_data.economy[category] and tweak_data.economy[category][item_id]
+			if td then
+				local guis_catalog = "guis/"
+				local bundle_folder = td.texture_bundle_folder
+				if bundle_folder then
+					guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
+				end
+				local path = category .. "/"
+				texture_path = guis_catalog .. path .. item_id
+				self._peer_data[peer_id].steam_drop = true
+				self._peer_data[peer_id].effects = {
+					flip_wait = "lootdrop_steam_drop_flip_wait",
+					flip_card = "lootdrop_steam_drop_flip_card",
+					show_wait = "lootdrop_steam_drop_show_wait",
+					show_item = "lootdrop_steam_drop_show_item"
+				}
+			else
+				texture_path = "guis/textures/pd2/endscreen/what_is_this"
+			end
 		else
 			local guis_catalog = "guis/"
 			local tweak_data_category = category == "mods" and "weapon_mods" or category
@@ -675,7 +700,8 @@ function HUDLootScreen:begin_choose_card(peer_id, card_id)
 		materials = 5,
 		colors = 6,
 		textures = 7,
-		xp = 4
+		xp = 4,
+		safes = 8
 	}
 	local card_nums = {
 		"upcard_mask",
@@ -684,7 +710,8 @@ function HUDLootScreen:begin_choose_card(peer_id, card_id)
 		"upcard_xp",
 		"upcard_material",
 		"upcard_color",
-		"upcard_pattern"
+		"upcard_pattern",
+		"upcard_safe"
 	}
 	for i, pc in ipairs(cards) do
 		local my_card = i == card_id
@@ -732,7 +759,8 @@ function HUDLootScreen:begin_flip_card(peer_id)
 		materials = 5,
 		colors = 6,
 		textures = 7,
-		xp = 4
+		xp = 4,
+		safes = 8
 	}
 	local card_nums = {
 		"upcard_mask",
@@ -741,7 +769,8 @@ function HUDLootScreen:begin_flip_card(peer_id)
 		"upcard_xp",
 		"upcard_material",
 		"upcard_color",
-		"upcard_pattern"
+		"upcard_pattern",
+		"upcard_safe"
 	}
 	local lootdrop_data = self._peer_data[peer_id].lootdrops
 	local item_category = lootdrop_data[3]
@@ -772,10 +801,11 @@ function HUDLootScreen:debug_flip()
 	local card = self._peers_panel:child("peer1"):child("card1")
 	card:animate(callback(self, self, "flipcard"), 1.5)
 end
-function HUDLootScreen:flipcard(card_panel, timer, done_clbk, peer_id)
+function HUDLootScreen:flipcard(card_panel, timer, done_clbk, peer_id, effects)
 	local downcard = card_panel:child("downcard")
 	local upcard = card_panel:child("upcard")
 	local bg = card_panel:child("bg")
+	effects = effects or {}
 	downcard:set_valign("scale")
 	downcard:set_halign("scale")
 	upcard:set_valign("scale")
@@ -793,7 +823,19 @@ function HUDLootScreen:flipcard(card_panel, timer, done_clbk, peer_id)
 	local diff = end_rotation - start_rotation
 	bg:set_rotation(downcard:rotation())
 	bg:set_shape(downcard:shape())
+	if effects.flip_wait then
+		local func = SimpleGUIEffectSpewer[effects.flip_wait]
+		if func then
+			func(card_panel)
+		end
+	end
 	wait(0.5)
+	if effects.flip_card then
+		local func = SimpleGUIEffectSpewer[effects.flip_card]
+		if func then
+			func(card_panel)
+		end
+	end
 	managers.menu_component:post_event("loot_flip_card")
 	over(0.25, function(p)
 		downcard:set_rotation(start_rotation + math.sin(p * 45) * diff)
@@ -838,7 +880,19 @@ function HUDLootScreen:flipcard(card_panel, timer, done_clbk, peer_id)
 			extra_time = 1.1
 		end
 	end
+	if effects.show_wait then
+		local func = SimpleGUIEffectSpewer[effects.show_wait]
+		if func then
+			func(card_panel)
+		end
+	end
 	wait(timer - 1.5 + extra_time)
+	if effects.show_item then
+		local func = SimpleGUIEffectSpewer[effects.show_item]
+		if func then
+			func(card_panel)
+		end
+	end
 	if not done_clbk then
 		managers.menu_component:post_event("loot_fold_cards")
 	end
@@ -883,6 +937,7 @@ function HUDLootScreen:show_item(peer_id)
 		local item_id = lootdrop_data[4]
 		local item_pc = lootdrop_data[6]
 		local loot_tweak = tweak_data.blackmarket[item_category] and tweak_data.blackmarket[item_category][item_id]
+		loot_tweak = loot_tweak or tweak_data.economy[item_category] and tweak_data.economy[item_category][item_id]
 		local item_text = managers.localization:text(loot_tweak and loot_tweak.name_id or "")
 		if item_category == "cash" then
 			local value_id = tweak_data.blackmarket[item_category][item_id].value_id
@@ -958,7 +1013,9 @@ function HUDLootScreen:update(t, dt)
 			if self._peer_data[peer_id].wait_t == 0 then
 				main_text:set_text(managers.localization:to_upper_text("menu_l_choose_card_chosen_suspense"))
 				local joker = self._peer_data[peer_id].joker
-				panel:child("card" .. self._peer_data[peer_id].selected):animate(callback(self, self, "flipcard"), joker and 7 or 2.5, callback(self, self, "show_item"), peer_id)
+				local steam_drop = self._peer_data[peer_id].steam_drop
+				local effects = self._peer_data[peer_id].effects
+				panel:child("card" .. self._peer_data[peer_id].selected):animate(callback(self, self, "flipcard"), steam_drop and 5.5 or 2.5, callback(self, self, "show_item"), peer_id, effects)
 				self._peer_data[peer_id].wait_t = false
 			end
 		end

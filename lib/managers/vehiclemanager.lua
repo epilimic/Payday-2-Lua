@@ -53,10 +53,22 @@ function VehicleManager:get_vehicle(animation_id)
 	return nil
 end
 function VehicleManager:on_player_entered_vehicle(vehicle_unit, player)
-	self._listener_holder:call("player_entered_vehicle", player)
+	self._listener_holder:call("on_enter", player)
+	if self:all_players_in_vehicles() then
+		self._listener_holder:call("on_all_inside", player)
+	end
+end
+function VehicleManager:all_players_in_vehicles()
+	local total_players = managers.network:session():amount_of_alive_players()
+	local players_in_vehicles = 0
+	for _, vehicle in pairs(self._vehicles) do
+		players_in_vehicles = players_in_vehicles + vehicle:vehicle_driving():num_players_inside()
+	end
+	local all_in = total_players == players_in_vehicles
+	return all_in
 end
 function VehicleManager:on_player_exited_vehicle(vehicle_unit, player)
-	self._listener_holder:call("player_exited_vehicle", player)
+	self._listener_holder:call("on_exit", player)
 end
 function VehicleManager:remove_player_from_all_vehicles(player)
 	Application:debug("[VehicleManager] Removing player from all vehicles")

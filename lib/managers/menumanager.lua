@@ -109,6 +109,7 @@ function MenuManager:init(is_start_menu)
 	managers.user:add_setting_changed_callback("net_forwarding", callback(self, self, "net_forwarding_changed"), true)
 	managers.user:add_setting_changed_callback("net_use_compression", callback(self, self, "net_use_compression_changed"), true)
 	managers.user:add_setting_changed_callback("flush_gpu_command_queue", callback(self, self, "flush_gpu_command_queue_changed"), true)
+	managers.user:add_setting_changed_callback("use_thq_weapon_parts", callback(self, self, "use_thq_weapon_parts_changed"), true)
 	managers.user:add_active_user_state_changed_callback(callback(self, self, "on_user_changed"))
 	managers.user:add_storage_changed_callback(callback(self, self, "on_storage_changed"))
 	managers.savefile:add_active_changed_callback(callback(self, self, "safefile_manager_active_changed"))
@@ -499,6 +500,19 @@ function MenuManager:net_use_compression_changed(name, old_value, new_value)
 end
 function MenuManager:flush_gpu_command_queue_changed(name, old_value, new_value)
 	RenderSettings.flush_gpu_command_queue = new_value
+end
+function MenuManager:use_thq_weapon_parts_changed(name, old_value, new_value)
+	if managers.weapon_factory then
+		managers.weapon_factory:set_use_thq_weapon_parts(managers.user:get_setting("use_thq_weapon_parts"))
+	end
+	if not game_state_machine or game_state_machine:current_state_name() ~= "menu_main" then
+		return
+	end
+	if managers.network and managers.network:session() then
+		for _, peer in ipairs(managers.network:session():peers()) do
+			peer:force_reload_outfit()
+		end
+	end
 end
 function MenuManager:subtitle_changed(name, old_value, new_value)
 	managers.subtitle:set_visible(new_value)
@@ -1149,6 +1163,15 @@ function MenuCallbackHandler:is_installed()
 end
 function MenuCallbackHandler:show_game_is_installing_menu()
 	managers.menu:show_game_is_installing_menu()
+end
+function MenuCallbackHandler:bang_active()
+	return false
+end
+function MenuCallbackHandler:choice_crimenet_lobby_job_plan(item)
+end
+function MenuCallbackHandler:choice_lobby_job_plan(item)
+end
+function MenuCallbackHandler:choice_job_plan_filter(item)
 end
 function MenuCallbackHandler:is_dlc_latest_locked(check_dlc)
 	local dlcs = {
@@ -2021,6 +2044,8 @@ function MenuCallbackHandler:get_matchmake_attributes()
 		table.insert(attributes.numbers, kick_option)
 		local job_class = managers.job:calculate_job_class(managers.job:current_real_job_id(), difficulty_id)
 		table.insert(attributes.numbers, job_class)
+		local job_plan = Global.game_settings.job_plan
+		table.insert(attributes.numbers, job_plan)
 	end
 	return attributes
 end
@@ -2182,6 +2207,9 @@ function MenuCallbackHandler:choice_choose_anim_lod(item)
 end
 function MenuCallbackHandler:toggle_vsync(item)
 	managers.viewport:set_vsync(item:value() == "on")
+end
+function MenuCallbackHandler:toggle_use_thq_weapon_parts(item)
+	managers.user:set_setting("use_thq_weapon_parts", item:value() == "on")
 end
 function MenuCallbackHandler:toggle_streaks(item)
 	managers.user:set_setting("video_streaks", item:value() == "on")
@@ -3798,6 +3826,10 @@ function LobbyOptionInitiator:modify_node(node)
 		print("reputation_permission_item", "set value", Global.game_settings.reputation_permission, type_name(Global.game_settings.reputation_permission))
 		reputation_permission_item:set_value(Global.game_settings.reputation_permission)
 	end
+	local item_lobby_job_plan = node:item("lobby_job_plan")
+	if item_lobby_job_plan then
+		item_lobby_job_plan:set_value(Global.game_settings.job_plan or -1)
+	end
 	return node
 end
 VerifyLevelOptionInitiator = VerifyLevelOptionInitiator or class()
@@ -3824,7 +3856,8 @@ MenuCustomizeControllerCreator.CONTROLS = {
 	"interact",
 	"use_item",
 	"toggle_chat",
-	"push_to_talk"
+	"push_to_talk",
+	"cash_inspect"
 }
 MenuCustomizeControllerCreator.AXIS_ORDERED = {
 	move = {
@@ -3901,6 +3934,9 @@ MenuCustomizeControllerCreator.CONTROLS_INFO.throw_grenade = {
 MenuCustomizeControllerCreator.CONTROLS_INFO.weapon_firemode = {
 	text_id = "menu_button_weapon_firemode"
 }
+MenuCustomizeControllerCreator.CONTROLS_INFO.cash_inspect = {
+	text_id = "menu_button_cash_inspect"
+}
 function MenuCustomizeControllerCreator:modify_node(node)
 	local new_node = deep_clone(node)
 	local connections = managers.controller:get_settings(managers.controller:get_default_wrapper_type()):get_connection_map()
@@ -3959,6 +3995,7 @@ function MenuCrimeNetContractInitiator:modify_node(original_node, data)
 	if Global.game_settings.single_player then
 		node:item("toggle_ai"):set_value(Global.game_settings.team_ai and "on" or "off")
 	elseif not data.server then
+		node:item("lobby_job_plan"):set_value(Global.game_settings.job_plan)
 		node:item("lobby_kicking_option"):set_value(Global.game_settings.kick_option)
 		node:item("lobby_permission"):set_value(Global.game_settings.permission)
 		node:item("lobby_reputation_permission"):set_value(Global.game_settings.reputation_permission)
@@ -6027,6 +6064,7 @@ function MenuCrimeNetFiltersInitiator:modify_node(original_node, data)
 		node:item("max_lobbies_filter"):set_value(managers.network.matchmake:get_lobby_return_count())
 		node:item("server_filter"):set_value(managers.network.matchmake:distance_filter())
 		node:item("difficulty_filter"):set_value(matchmake_filters.difficulty and matchmake_filters.difficulty.value or -1)
+		node:item("job_plan_filter"):set_value(matchmake_filters.job_plan and matchmake_filters.job_plan.value or -1)
 		self:add_filters(node)
 	end
 	if MenuCallbackHandler:is_win32() then
@@ -6039,6 +6077,7 @@ function MenuCrimeNetFiltersInitiator:modify_node(original_node, data)
 		node:item("difficulty_filter"):set_enabled(not_friends_only)
 		node:item("kick_option_filter"):set_enabled(not_friends_only)
 		node:item("job_id_filter"):set_enabled(not_friends_only)
+		node:item("job_plan_filter"):set_enabled(not_friends_only)
 	end
 	if data and data.back_callback then
 		table.insert(node:parameters().back_callback, data.back_callback)
@@ -6057,6 +6096,7 @@ function MenuCrimeNetFiltersInitiator:update_node(node)
 		node:item("difficulty_filter"):set_enabled(not_friends_only)
 		node:item("kick_option_filter"):set_enabled(not_friends_only)
 		node:item("job_id_filter"):set_enabled(not_friends_only)
+		node:item("job_plan_filter"):set_enabled(not_friends_only)
 	end
 end
 function MenuCrimeNetFiltersInitiator:refresh_node(node)
@@ -6070,6 +6110,7 @@ function MenuCrimeNetFiltersInitiator:refresh_node(node)
 		node:item("difficulty_filter"):set_enabled(not_friends_only)
 		node:item("kick_option_filter"):set_enabled(not_friends_only)
 		node:item("job_id_filter"):set_enabled(not_friends_only)
+		node:item("job_plan_filter"):set_enabled(not_friends_only)
 	end
 end
 function MenuCrimeNetFiltersInitiator:add_filters(node)
@@ -6216,6 +6257,9 @@ function MenuOptionInitiator:modify_adv_video(node)
 	node:item("choose_fps_cap"):set_value(managers.user:get_setting("fps_cap"))
 	node:item("use_headbob"):set_value(managers.user:get_setting("use_headbob") and "on" or "off")
 	node:item("max_streaming_chunk"):set_value(managers.user:get_setting("max_streaming_chunk"))
+	if node:item("toggle_use_thq_weapon_parts") then
+		node:item("toggle_use_thq_weapon_parts"):set_value(managers.user:get_setting("use_thq_weapon_parts") and "on" or "off")
+	end
 	local option_value = "off"
 	local dof_setting_item = node:item("toggle_dof")
 	if dof_setting_item then

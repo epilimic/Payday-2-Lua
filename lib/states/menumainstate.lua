@@ -13,7 +13,7 @@ function MenuMainState:at_enter(old_state)
 		self._sound_listener:activate(true)
 		managers.menu:open_menu("menu_main")
 		managers.music:post_event(managers.music:jukebox_menu_track("mainmenu"))
-		managers.menu:post_event("menu_main_ambience")
+		managers.menu_scene:post_ambience_event("menu_main_ambience")
 		if Global.load_start_menu_lobby then
 			if managers.network:session() and (Network:is_server() or managers.network:session():server_peer()) then
 				managers.overlay_effect:play_effect({

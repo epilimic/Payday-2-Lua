@@ -59,49 +59,16 @@ end
 function CoreOperatorUnitElement:add_triggers(vc)
 	vc:add_trigger(Idstring("lmb"), callback(self, self, "add_element"))
 end
-function CoreOperatorUnitElement:add_unit_list_btn()
-	local script = self._unit:mission_element_data().script
-	local function f(unit)
-		if not unit:mission_element_data() or unit:mission_element_data().script ~= script then
-			return
-		end
-		local id = unit:unit_data().unit_id
-		if table.contains(self._hed.elements, id) then
-			return false
-		end
-		return managers.editor:layer("Mission"):category_map()[unit:type():s()]
-	end
-	local dialog = SelectUnitByNameModal:new("Add Unit", f)
-	for _, unit in ipairs(dialog:selected_units()) do
-		local id = unit:unit_data().unit_id
-		table.insert(self._hed.elements, id)
-	end
-end
-function CoreOperatorUnitElement:remove_unit_list_btn()
-	local function f(unit)
-		return table.contains(self._hed.elements, unit:unit_data().unit_id)
-	end
-	local dialog = SelectUnitByNameModal:new("Remove Unit", f)
-	for _, unit in ipairs(dialog:selected_units()) do
-		local id = unit:unit_data().unit_id
-		table.delete(self._hed.elements, id)
-	end
-end
 function CoreOperatorUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local names
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, names)
 	self:_build_value_combobox(panel, panel_sizer, "operation", {
 		"none",
 		"add",
 		"remove"
 	}, "Select an operation for the selected elements")
-	local toolbar = EWS:ToolBar(panel, "", "TB_FLAT,TB_NODIVIDER")
-	toolbar:add_tool("ADD_UNIT_LIST", "Add unit from unit list", CoreEws.image_path("world_editor\\unit_by_name_list.png"), nil)
-	toolbar:connect("ADD_UNIT_LIST", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "add_unit_list_btn"), nil)
-	toolbar:add_tool("REMOVE_UNIT_LIST", "Remove unit from unit list", CoreEws.image_path("toolbar\\delete_16x16.png"), nil)
-	toolbar:connect("REMOVE_UNIT_LIST", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "remove_unit_list_btn"), nil)
-	toolbar:realize()
-	panel_sizer:add(toolbar, 0, 1, "EXPAND,LEFT")
 	self:_add_help_text("Choose an operation to perform on the selected elements. An element might not have the selected operation implemented and will then generate error when executed.")
 end

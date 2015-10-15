@@ -649,6 +649,7 @@ function CrimeNetManager:_find_online_games_win32(friends_only)
 				local difficulty = tweak_data:index_to_difficulty(difficulty_id)
 				local job_id = tweak_data.narrative:get_job_name_from_index(math.floor(attributes_numbers[1] / 1000))
 				local kick_option = attributes_numbers[8]
+				local job_plan = attributes_numbers[10]
 				local state_string_id = tweak_data:index_to_server_state(attributes_numbers[4])
 				local state_name = state_string_id and managers.localization:text("menu_lobby_server_state_" .. state_string_id) or "UNKNOWN"
 				local state = attributes_numbers[4]
@@ -679,7 +680,8 @@ function CrimeNetManager:_find_online_games_win32(friends_only)
 								level_name = level_name,
 								job_id = job_id,
 								is_friend = is_friend,
-								kick_option = kick_option
+								kick_option = kick_option,
+								job_plan = job_plan
 							})
 						end
 					else
@@ -696,7 +698,8 @@ function CrimeNetManager:_find_online_games_win32(friends_only)
 							level_name = level_name,
 							job_id = job_id,
 							is_friend = is_friend,
-							kick_option = kick_option
+							kick_option = kick_option,
+							job_plan = job_plan
 						})
 					end
 				end
@@ -1079,14 +1082,53 @@ function CrimeNetGui:init(ws, fullscreeen_ws, node)
 			blend_mode = "add"
 		})
 		mw = math.max(mw, self:make_fine_text(kick_vote_text))
+		local last_text = kick_vote_text
+		local job_plan_loud_icon, job_plan_loud_text, job_plan_stealth_icon, job_plan_stealth_text
+		if MenuCallbackHandler:bang_active() then
+			job_plan_loud_icon = legend_panel:bitmap({
+				texture = "guis/textures/pd2/cn_playstyle_loud",
+				x = 10,
+				y = kick_vote_text:bottom() + 2
+			})
+			job_plan_loud_text = legend_panel:text({
+				font = tweak_data.menu.pd2_small_font,
+				font_size = tweak_data.menu.pd2_small_font_size,
+				x = host_text:left(),
+				y = kick_vote_text:bottom(),
+				text = managers.localization:to_upper_text("menu_plan_loud"),
+				blend_mode = "add"
+			})
+			mw = math.max(mw, self:make_fine_text(job_plan_loud_text))
+			job_plan_stealth_icon = legend_panel:bitmap({
+				texture = "guis/textures/pd2/cn_playstyle_stealth",
+				x = 10,
+				y = job_plan_loud_text:bottom() + 2
+			})
+			job_plan_stealth_text = legend_panel:text({
+				font = tweak_data.menu.pd2_small_font,
+				font_size = tweak_data.menu.pd2_small_font_size,
+				x = host_text:left(),
+				y = job_plan_loud_text:bottom(),
+				text = managers.localization:to_upper_text("menu_plan_stealth"),
+				blend_mode = "add"
+			})
+			mw = math.max(mw, self:make_fine_text(job_plan_stealth_text))
+			last_text = job_plan_stealth_text
+		end
 		if managers.crimenet:no_servers() then
 			kick_none_icon:hide()
 			kick_none_text:hide()
 			kick_vote_icon:hide()
 			kick_vote_text:hide()
 			kick_vote_text:set_bottom(ghost_text:bottom())
+			if MenuCallbackHandler:bang_active() then
+				job_plan_loud_icon:hide()
+				job_plan_loud_text:hide()
+				job_plan_stealth_icon:hide()
+				job_plan_stealth_text:hide()
+			end
 		end
-		legend_panel:set_size(host_text:left() + mw + 10, kick_vote_text:bottom() + 10)
+		legend_panel:set_size(host_text:left() + mw + 10, last_text:bottom() + 10)
 		legend_panel:rect({
 			color = Color.black,
 			alpha = 0.4,
@@ -1435,6 +1477,9 @@ function CrimeNetGui:init(ws, fullscreeen_ws, node)
 	self._special_contracts_id = {}
 	self:add_special_contracts(node:parameters().no_casino)
 	managers.features:announce_feature("crimenet_welcome")
+	if is_win32 then
+		managers.features:announce_feature("thq_feature")
+	end
 	if is_win32 and Steam:logged_on() and not managers.dlc:has_pd2_clan() and math.random() < 0.2 then
 		managers.features:announce_feature("join_pd2_clan")
 	end
@@ -1911,6 +1956,22 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 		job_string = data.name_id and managers.localization:to_upper_text(data.name_id) or ""
 		info_string = data.desc_id and managers.localization:to_upper_text(data.desc_id) or ""
 	end
+	local job_plan_icon
+	if is_server and data.job_plan and data.job_plan ~= -1 then
+		local texture = data.job_plan == 1 and "guis/textures/pd2/cn_playstyle_loud" or "guis/textures/pd2/cn_playstyle_stealth"
+		job_plan_icon = side_panel:bitmap({
+			name = "job_plan_icon",
+			texture = texture,
+			x = 0,
+			y = 2,
+			w = 16,
+			h = 16,
+			alpha = 1,
+			blend_mode = "normal",
+			layer = 0,
+			color = Color.white
+		})
+	end
 	local host_name = side_panel:text({
 		name = "host_name",
 		text = host_string,
@@ -1961,9 +2022,10 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 		blend_mode = "add"
 	})
 	do
+		local x = job_plan_icon and job_plan_icon:right() + 2 or 0
 		local _, _, w, h = host_name:text_rect()
 		host_name:set_size(w, h)
-		host_name:set_position(0, 0)
+		host_name:set_position(x, 0)
 		if not is_server then
 		end
 	end
@@ -1980,26 +2042,26 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 	end
 	do
 		local _, _, w, h = info_name:text_rect()
-		info_name:set_size(w, h - 4)
-		info_name:set_top(contact_name:bottom() - 4)
+		info_name:set_size(w, h - 3)
+		info_name:set_top(contact_name:bottom() - 3)
 		info_name:set_right(0)
 	end
 	do
 		local _, _, w, h = difficulty_name:text_rect()
 		difficulty_name:set_size(w, h)
-		difficulty_name:set_top(info_name:bottom() - 4)
+		difficulty_name:set_top(info_name:bottom() - 3)
 		difficulty_name:set_right(0)
 	end
 	do
 		local _, _, w, h = heat_name:text_rect()
 		heat_name:set_size(w, h - 4)
-		heat_name:set_top(difficulty_name:bottom() - 4)
+		heat_name:set_top(difficulty_name:bottom() - 3)
 		heat_name:set_right(0)
 	end
 	if not got_heat_text then
 		heat_name:set_text(" ")
 		heat_name:set_w(1)
-		heat_name:set_position(0, host_name:bottom() - 4)
+		heat_name:set_position(0, host_name:bottom() - 3)
 	end
 	if is_special then
 		contact_name:set_text(" ")
@@ -2295,6 +2357,7 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 		marker_panel = marker_panel,
 		peers_panel = peers_panel,
 		kick_option = data.kick_option,
+		job_plan = data.job_plan,
 		container_panel = container_panel,
 		is_friend = data.is_friend,
 		timer_rect = timer_rect,
@@ -2429,7 +2492,8 @@ function CrimeNetGui:update_server_job(data, i)
 	local updated_difficulty_id = self:_update_job_variable(job_index, "difficulty_id", data.difficulty_id)
 	local updated_state = self:_update_job_variable(job_index, "state", data.state)
 	local updated_friend = self:_update_job_variable(job_index, "is_friend", data.is_friend)
-	local recreate_job = updated_room or updated_job or updated_level_id or updated_level_data or updated_difficulty or updated_difficulty_id or updated_state or updated_friend
+	local updated_job_plan = self:_update_job_variable(job_index, "job_plan", data.job_plan)
+	local recreate_job = updated_room or updated_job or updated_level_id or updated_level_data or updated_difficulty or updated_difficulty_id or updated_state or updated_friend or updated_job_plan
 	self:_update_job_variable(job_index, "state_name", data.state_name)
 	if self:_update_job_variable(job_index, "num_plrs", data.num_plrs) and job.peers_panel then
 		for i, peer_icon in ipairs(job.peers_panel:children()) do

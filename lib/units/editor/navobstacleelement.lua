@@ -67,10 +67,13 @@ end
 function NavObstacleElement:draw_links_unselected(...)
 	NavObstacleElement.super.draw_links_unselected(self, ...)
 end
+function NavObstacleElement:_select_unit_mask()
+	return managers.slot:get_mask("all") - managers.slot:get_mask("mission_elements")
+end
 function NavObstacleElement:update_editing()
 	local ray = managers.editor:unit_by_raycast({
 		sample = true,
-		mask = managers.slot:get_mask("all"),
+		mask = self:_select_unit_mask(),
 		ray_type = "body editor"
 	})
 	if ray and ray.unit then
@@ -80,7 +83,7 @@ end
 function NavObstacleElement:select_unit()
 	local ray = managers.editor:unit_by_raycast({
 		sample = true,
-		mask = managers.slot:get_mask("all"),
+		mask = self:_select_unit_mask(),
 		ray_type = "body editor"
 	})
 	if ray and ray.unit then

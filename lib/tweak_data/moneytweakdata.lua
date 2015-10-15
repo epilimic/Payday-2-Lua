@@ -500,6 +500,9 @@ function MoneyTweakData:init(tweak_data)
 	self.loot_drop_cash.cash90 = loot_drop_value * 13
 	self.loot_drop_cash.cash100 = loot_drop_value * 14
 	self.loot_drop_cash.cash_preorder = self.biggest_cashout / 10
+	if SystemInfo:platform() == Idstring("XB1") then
+		self.loot_drop_cash.xone_bonus = 5000000
+	end
 	self.unlock_new_mask_slot_value = self.biggest_cashout
 	self.unlock_new_weapon_slot_value = self.biggest_cashout
 end

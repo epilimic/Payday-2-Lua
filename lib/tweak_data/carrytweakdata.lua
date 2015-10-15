@@ -20,6 +20,9 @@ function CarryTweakData:init(tweak_data)
 	self.types.very_heavy.jump_modifier = 0.25
 	self.types.very_heavy.can_run = false
 	self.types.very_heavy.throw_distance_multiplier = 0.3
+	self.types.slightly_very_heavy = deep_clone(self.types.very_heavy)
+	self.types.slightly_very_heavy.throw_distance_multiplier = 0.65
+	self.types.slightly_very_heavy.move_speed_modifier = 0.5
 	self.types.heavy = {}
 	self.types.heavy.move_speed_modifier = 0.5
 	self.types.heavy.jump_modifier = 0.5

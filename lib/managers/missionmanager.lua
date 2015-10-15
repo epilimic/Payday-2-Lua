@@ -88,6 +88,7 @@ require("lib/managers/mission/ElementSlowMotion")
 require("lib/managers/mission/ElementInteraction")
 require("lib/managers/mission/ElementCharacterSequence")
 require("lib/managers/mission/ElementExperience")
+require("lib/managers/mission/ElementModifyPlayer")
 require("lib/managers/mission/ElementPlayerSpawner")
 require("lib/managers/mission/ElementAreaTrigger")
 require("lib/managers/mission/ElementSpawnEnemyDummy")
@@ -111,7 +112,9 @@ function MissionManager:init(...)
 	self:add_area_instigator_categories("loot")
 	self:add_area_instigator_categories("unique_loot")
 	self:add_area_instigator_categories("vehicle")
+	self:add_area_instigator_categories("npc_vehicle")
 	self:add_area_instigator_categories("vehicle_with_players")
+	self:add_area_instigator_categories("player_not_in_vehicle")
 	self:set_default_area_instigator("player")
 	self:set_global_event_list({
 		"bankmanager_key",
@@ -146,7 +149,8 @@ function MissionManager:init(...)
 		"ecm_jammer_on",
 		"ecm_jammer_off",
 		"pku_warhead",
-		"enemy_killed"
+		"enemy_killed",
+		"pku_rambo"
 	})
 	self._mission_filter = {}
 	if not Global.mission_manager then

@@ -86,6 +86,7 @@ require("lib/units/editor/SlowMotionElement")
 require("lib/units/editor/InteractionElement")
 require("lib/units/editor/CharacterSequenceElement")
 require("lib/units/editor/ExperienceElement")
+require("lib/units/editor/ModifyPlayerElement")
 require("lib/units/editor/SpawnPlayerElement")
 require("lib/units/editor/EnemyDummyTrigger")
 require("lib/units/editor/SpawnEnemyElement")
@@ -94,11 +95,25 @@ require("lib/units/editor/VehicleTriggerUnitElement")
 require("lib/units/editor/VehicleOperatorUnitElement")
 require("lib/units/editor/SpawnVehicleElement")
 require("lib/units/editor/EnvironmentOperatorElement")
+require("lib/utils/dev/tools/InventoryIconCreator")
 WorldEditor = WorldEditor or class(CoreEditor)
 function WorldEditor:init(game_state_machine)
 	WorldEditor.super.init(self, game_state_machine)
 	Network:set_multiplayer(true)
 	managers.network:host_game()
+	self._tool_updators = {}
+end
+function WorldEditor:update(...)
+	WorldEditor.super.update(self, ...)
+	for name, updator in pairs(self._tool_updators) do
+		updator(...)
+	end
+end
+function WorldEditor:add_tool_updator(name, updator)
+	self._tool_updators[name] = updator
+end
+function WorldEditor:remove_tool_updator(name)
+	self._tool_updators[name] = nil
 end
 function WorldEditor:_init_mission_difficulties()
 	self._mission_difficulties = {
@@ -161,6 +176,7 @@ function WorldEditor:project_run_simulation(with_mission)
 	managers.network:session():on_load_complete(true)
 	managers.network:session():spawn_players()
 	managers.mission:set_mission_filter(self:layer("Level Settings"):get_mission_filter())
+	managers.game_play_central:start_heist_timer()
 end
 function WorldEditor:_project_check_unit(unit)
 end
@@ -179,7 +195,7 @@ function WorldEditor:project_stop_simulation()
 	managers.player:soft_reset()
 	managers.vehicle:on_simulation_ended()
 	managers.statistics:stop_session()
-	managers.environment_controller:set_blurzone(0)
+	managers.environment_controller:set_all_blurzones(0)
 	managers.music:stop()
 	managers.game_play_central:on_simulation_ended()
 	managers.criminals:on_simulation_ended()
@@ -206,4 +222,12 @@ end
 function WorldEditor:project_clear_layers()
 end
 function WorldEditor:project_recreate_layers()
+end
+function WorldEditor:_project_add_left_upper_toolbar_tool()
+	self._left_upper_toolbar:add_tool("TB_INVENTORY_ICON_CREATOR", "Icon Creator", CoreEWS.image_path("world_editor/icon_creator_16x16.png"), "Material Editor")
+	self._left_upper_toolbar:connect("TB_INVENTORY_ICON_CREATOR", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "_open_inventory_icon_creator"), nil)
+end
+function WorldEditor:_open_inventory_icon_creator()
+	self._inventory_icon_creator = self._inventory_icon_creator or InventoryIconCreator:new()
+	self._inventory_icon_creator:show_ews()
 end

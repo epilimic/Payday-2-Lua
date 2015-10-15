@@ -275,7 +275,7 @@ function RaycastWeaponBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul
 	if spread then
 		mvector3.spread(mvec_spread_direction, spread * (spread_mul or 1))
 	end
-	local ray_distance = shoot_through_data and shoot_through_data.ray_distance or 20000
+	local ray_distance = shoot_through_data and shoot_through_data.ray_distance or self._weapon_range or 20000
 	mvector3.set(mvec_to, mvec_spread_direction)
 	mvector3.multiply(mvec_to, ray_distance)
 	mvector3.add(mvec_to, from_pos)

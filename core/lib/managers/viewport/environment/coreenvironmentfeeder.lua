@@ -183,7 +183,23 @@ CubeMapTextureFeeder.APPLY_GROUP_ID = Feeder.get_next_id()
 CubeMapTextureFeeder.IS_GLOBAL = true
 CubeMapTextureFeeder.FILTER_CATEGORY = "Cubemap"
 function CubeMapTextureFeeder:apply(handler, viewport, scene)
-	managers.global_texture:set_texture(self._current, "CUBEMAP")
+	managers.global_texture:set_texture("current_global_texture", self._current, "CUBEMAP")
+end
+WorldOverlayTextureFeeder = WorldOverlayTextureFeeder or CoreClass.class(StringFeeder)
+WorldOverlayTextureFeeder.DATA_PATH_KEY = Idstring("others/global_world_overlay_texture"):key()
+WorldOverlayTextureFeeder.APPLY_GROUP_ID = Feeder.get_next_id()
+WorldOverlayTextureFeeder.IS_GLOBAL = true
+WorldOverlayTextureFeeder.FILTER_CATEGORY = "GlobalTexture"
+function WorldOverlayTextureFeeder:apply(handler, viewport, scene)
+	managers.global_texture:set_texture("current_global_world_overlay_texture", self._current, "texture")
+end
+WorldOverlayMaskTextureFeeder = WorldOverlayMaskTextureFeeder or CoreClass.class(StringFeeder)
+WorldOverlayMaskTextureFeeder.DATA_PATH_KEY = Idstring("others/global_world_overlay_mask_texture"):key()
+WorldOverlayMaskTextureFeeder.APPLY_GROUP_ID = Feeder.get_next_id()
+WorldOverlayMaskTextureFeeder.IS_GLOBAL = true
+WorldOverlayMaskTextureFeeder.FILTER_CATEGORY = "GlobalTexture"
+function WorldOverlayMaskTextureFeeder:apply(handler, viewport, scene)
+	managers.global_texture:set_texture("current_global_world_overlay_mask_texture", self._current, "texture")
 end
 SkyRotationFeeder = SkyRotationFeeder or CoreClass.class(Feeder)
 SkyRotationFeeder.DATA_PATH_KEY = Idstring("sky_orientation/rotation"):key()

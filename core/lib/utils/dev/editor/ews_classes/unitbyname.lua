@@ -2,7 +2,7 @@ UnitByName = UnitByName or class(CoreEditorEwsDialog)
 function UnitByName:init(name, unit_filter_function, ...)
 	self._dialog_name = self._dialog_name or name or "UnitByName"
 	self._unit_filter_function = unit_filter_function
-	CoreEditorEwsDialog.init(self, nil, self._dialog_name, "", Vector3(300, 150, 0), Vector3(350, 500, 0), "DEFAULT_DIALOG_STYLE,RESIZE_BORDER,STAY_ON_TOP", ...)
+	CoreEditorEwsDialog.init(self, nil, self._dialog_name, "", Vector3(300, 150, 0), Vector3(350, 500, 0), "DEFAULT_DIALOG_STYLE,RESIZE_BORDER", ...)
 	self:create_panel("VERTICAL")
 	local panel = self._panel
 	local panel_sizer = self._panel_sizer
@@ -14,7 +14,7 @@ function UnitByName:init(name, unit_filter_function, ...)
 	list_sizer:add(self._filter, 0, 0, "EXPAND")
 	self._filter:connect("EVT_COMMAND_TEXT_UPDATED", callback(self, self, "update_filter"), nil)
 	self._filter:connect("EVT_KEY_DOWN", callback(self, self, "key_cancel"), "")
-	self._list = EWS:ListCtrl(panel, "", "LC_REPORT,LC_NO_HEADER,LC_SORT_ASCENDING")
+	self._list = EWS:ListCtrl(panel, "", self.STYLE or "LC_REPORT,LC_NO_HEADER,LC_SORT_ASCENDING")
 	self._list:clear_all()
 	self._list:append_column("Name")
 	list_sizer:add(self._list, 1, 0, "EXPAND")
@@ -183,18 +183,25 @@ function UnitByName:selected_units(units)
 	if self._blocked then
 		return
 	end
+	self._list:freeze()
 	for _, i in ipairs(self._list:selected_items()) do
 		self._list:set_item_selected(i, false)
 	end
+	local ukeys = {}
 	for _, unit in ipairs(units) do
-		for i = 0, self._list:item_count() - 1 do
-			if self._units[self._list:get_item_data(i)] == unit then
-				self._list:set_item_selected(i, true)
+		ukeys[unit:key()] = unit
+	end
+	local ensure_visible_key = #units > 0 and units[#units]:key()
+	for i = 0, self._list:item_count() - 1 do
+		local ukey = self._units[self._list:get_item_data(i)]:key()
+		if ukeys[ukey] then
+			self._list:set_item_selected(i, true)
+			if ukey == ensure_visible_key then
 				self._list:ensure_visible(i)
-				break
 			end
 		end
 	end
+	self._list:thaw()
 end
 function UnitByName:unit_name_changed(unit)
 	for i = 0, self._list:item_count() - 1 do
@@ -232,11 +239,12 @@ function UnitByName:fill_unit_list()
 	local layers = managers.editor:layers()
 	local j = 1
 	local filter = self._filter:get_value()
+	filter = utf8.to_lower(utf8.from_latin1(filter))
 	self._units = {}
 	for name, layer in pairs(layers) do
 		if self._layer_cbs[name]:get_value() then
 			for _, unit in ipairs(layer:created_units()) do
-				if string.find(self:_get_filter_string(unit), filter, 1, true) and self:_unit_condition(unit) then
+				if string.find(utf8.to_lower(utf8.from_latin1(self:_get_filter_string(unit))), filter, 1, true) and self:_unit_condition(unit) then
 					local i = self._list:append_item(unit:unit_data().name_id)
 					self._units[j] = unit
 					self._list:set_item_data(i, j)

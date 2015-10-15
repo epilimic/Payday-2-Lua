@@ -9,6 +9,10 @@ function CoreEditorEwsDialog:init(parent, caption, id, position, size, style, se
 	self._dialog:set_icon(CoreEWS.image_path("world_editor_16x16.png"))
 	self._dialog_sizer = EWS:BoxSizer("HORIZONTAL")
 	self._dialog:set_sizer(self._dialog_sizer)
+	self._dialog:connect("EVT_CLOSE_WINDOW", callback(self, self, "_evt_close_window"), nil)
+end
+function CoreEditorEwsDialog:_evt_close_window()
+	self:on_cancel()
 end
 function CoreEditorEwsDialog:create_panel(orientation)
 	self._panel = EWS:Panel(self._dialog, "", "TAB_TRAVERSAL")
@@ -662,6 +666,7 @@ function GlobalSelectUnit:init(...)
 	local layers_sizer = EWS:StaticBoxSizer(self._panel, "VERTICAL", "Type filter")
 	horizontal_ctrlr_sizer:add(layers_sizer, 1, 0, "EXPAND")
 	self._all_names = self:_all_unit_names()
+	self._names_as_ipairs = table.map_keys(self._all_names)
 	self._short_name = EWS:CheckBox(self._panel, "Short name", "", "ALIGN_LEFT")
 	self._short_name:set_value(true)
 	list_sizer:add(self._short_name, 0, 5, "TOP,LEFT,EXPAND")
@@ -770,7 +775,9 @@ function GlobalSelectUnit:on_reload()
 	local i = self._units:selected_item()
 	if i ~= -1 then
 		local name = managers.editor:get_real_name(self._units:get_item_data(i))
-		managers.editor:reload_units({name})
+		managers.editor:reload_units({
+			Idstring(name)
+		}, true)
 	end
 end
 function GlobalSelectUnit:on_select_unit_dialog(units)
@@ -797,7 +804,8 @@ function GlobalSelectUnit:update_list(current)
 			end
 		end
 	else
-		for name, type in pairs(self._all_names) do
+		for _, name in ipairs(self._names_as_ipairs) do
+			local type = self._all_names[name]
 			if self._layer_cbs[type]:get_value() then
 				local stripped_name = self._short_name:get_value() and self:_stripped_unit_name(name) or name
 				if string.find(stripped_name, filter, 1, true) then
@@ -873,17 +881,43 @@ function GlobalSelectUnit:on_layer_cb(data)
 end
 ReplaceUnit = ReplaceUnit or class(CoreEditorEwsDialog)
 function ReplaceUnit:init(name, types)
-	CoreEditorEwsDialog.init(self, nil, name, "", Vector3(300, 150, 0), Vector3(350, 500, 0), "DEFAULT_DIALOG_STYLE,RESIZE_BORDER,STAY_ON_TOP")
+	CoreEditorEwsDialog.init(self, nil, name, "", Vector3(300, 150, 0), Vector3(900, 500, 0), "DEFAULT_DIALOG_STYLE,RESIZE_BORDER")
 	self:create_panel("VERTICAL")
+	local horizontal_units_sizer = EWS:BoxSizer("HORIZONTAL")
+	self._panel_sizer:add(horizontal_units_sizer, 1, 0, "EXPAND")
 	local notebook = EWS:Notebook(self._panel, "", "NB_TOP,NB_MULTILINE")
-	self._panel_sizer:add(notebook, 1, 0, "EXPAND")
+	horizontal_units_sizer:add(notebook, 1, 0, "EXPAND")
+	self._all_unit_lists = {}
 	local category_map = {}
+	local unit_names = {}
 	for _, t in pairs(types) do
 		category_map[t] = {}
 		for _, unit_name in ipairs(managers.database:list_units_of_type(t)) do
-			category_map[t][unit_name] = CoreEngineAccess._editor_unit_data(unit_name:id())
+			table.insert(category_map[t], unit_name)
+			table.insert(unit_names, unit_name)
 		end
 	end
+	local panel = EWS:Panel(self._panel, "", "TAB_TRAVERSAL")
+	horizontal_units_sizer:add(panel, 1, 0, "EXPAND")
+	local units_sizer = EWS:BoxSizer("VERTICAL")
+	panel:set_sizer(units_sizer)
+	units_sizer:add(EWS:StaticText(panel, "Filter", 0, ""), 0, 0, "ALIGN_CENTER_HORIZONTAL")
+	local unit_filter = EWS:TextCtrl(panel, "", "", "TE_CENTRE")
+	units_sizer:add(unit_filter, 0, 0, "EXPAND")
+	local units = EWS:ListBox(panel, "", "LB_SINGLE,LB_HSCROLL,LB_NEEDED_SB,LB_SORT")
+	units:freeze()
+	for _, name in pairs(unit_names) do
+		units:append(name)
+	end
+	units_sizer:add(units, 1, 0, "EXPAND")
+	units:connect("EVT_COMMAND_LISTBOX_SELECTED", callback(self, self, "replace_unit_name"), units)
+	units:thaw()
+	unit_filter:connect("EVT_COMMAND_TEXT_UPDATED", callback(self, self, "update_filter"), {
+		filter = unit_filter,
+		units = units,
+		names = unit_names
+	})
+	table.insert(self._all_unit_lists, units)
 	for c, names in pairs(category_map) do
 		local panel = EWS:Panel(notebook, "", "TAB_TRAVERSAL")
 		local units_sizer = EWS:BoxSizer("VERTICAL")
@@ -892,17 +926,20 @@ function ReplaceUnit:init(name, types)
 		local unit_filter = EWS:TextCtrl(panel, "", "", "TE_CENTRE")
 		units_sizer:add(unit_filter, 0, 0, "EXPAND")
 		local units = EWS:ListBox(panel, "", "LB_SINGLE,LB_HSCROLL,LB_NEEDED_SB,LB_SORT")
-		for name, _ in pairs(names) do
+		units:freeze()
+		for _, name in ipairs(names) do
 			units:append(name)
 		end
 		units_sizer:add(units, 1, 0, "EXPAND")
 		units:connect("EVT_COMMAND_LISTBOX_SELECTED", callback(self, self, "replace_unit_name"), units)
+		units:thaw()
 		unit_filter:connect("EVT_COMMAND_TEXT_UPDATED", callback(self, self, "update_filter"), {
 			filter = unit_filter,
 			units = units,
 			names = names
 		})
 		notebook:add_page(panel, managers.editor:category_name(c), true)
+		table.insert(self._all_unit_lists, units)
 	end
 	local btn_sizer = EWS:BoxSizer("HORIZONTAL")
 	local ok_btn = EWS:Button(self._panel, "OK", "_ok_dialog", "BU_EXACTFIT,NO_BORDER")
@@ -916,6 +953,14 @@ function ReplaceUnit:init(name, types)
 	self:show_modal()
 end
 function ReplaceUnit:replace_unit_name(units)
+	for _, units_list in ipairs(self._all_unit_lists) do
+		if units_list ~= units then
+			local i = units_list:selected_index()
+			if i > -1 then
+				units_list:deselect_index(i)
+			end
+		end
+	end
 	local i = units:selected_index()
 	if i > -1 then
 		self._replace_unit_name = units:get_string(i)
@@ -923,12 +968,14 @@ function ReplaceUnit:replace_unit_name(units)
 end
 function ReplaceUnit:update_filter(data)
 	local filter = data.filter:get_value()
+	data.units:freeze()
 	data.units:clear()
-	for name, _ in pairs(data.names) do
+	for _, name in pairs(data.names) do
 		if string.find(name, filter) then
 			data.units:append(name)
 		end
 	end
+	data.units:thaw()
 end
 function ReplaceUnit:close_replace_unit(data)
 	self._made_replace_choice = data.value

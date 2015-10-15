@@ -8,97 +8,6 @@ SpawnEnemyUnitElement.INSTANCE_VAR_NAMES = {
 		value = "spawn_action"
 	}
 }
-SpawnEnemyUnitElement._options = {
-	"units/test/payday2/previs/previs_npc_chains/previs_npc_chains",
-	"units/test/payday2/previs/previs_npc_dallas/previs_npc_dallas",
-	"units/test/payday2/previs/previs_npc_wolf/previs_npc_wolf",
-	"units/payday2/characters/ene_biker_1/ene_biker_1",
-	"units/payday2/characters/ene_biker_2/ene_biker_2",
-	"units/payday2/characters/ene_biker_3/ene_biker_3",
-	"units/payday2/characters/ene_biker_4/ene_biker_4",
-	"units/payday2/characters/ene_bulldozer_1/ene_bulldozer_1",
-	"units/payday2/characters/ene_bulldozer_2/ene_bulldozer_2",
-	"units/payday2/characters/ene_bulldozer_3/ene_bulldozer_3",
-	"units/payday2/characters/ene_bulldozer_4/ene_bulldozer_4",
-	"units/payday2/characters/ene_city_swat_1/ene_city_swat_1",
-	"units/payday2/characters/ene_city_swat_2/ene_city_swat_2",
-	"units/payday2/characters/ene_city_swat_3/ene_city_swat_3",
-	"units/payday2/characters/ene_cop_1/ene_cop_1",
-	"units/payday2/characters/ene_cop_2/ene_cop_2",
-	"units/payday2/characters/ene_cop_3/ene_cop_3",
-	"units/payday2/characters/ene_cop_4/ene_cop_4",
-	"units/payday2/characters/ene_fbi_1/ene_fbi_1",
-	"units/payday2/characters/ene_fbi_2/ene_fbi_2",
-	"units/payday2/characters/ene_fbi_3/ene_fbi_3",
-	"units/payday2/characters/ene_fbi_boss_1/ene_fbi_boss_1",
-	"units/payday2/characters/ene_fbi_female_1/ene_fbi_female_1",
-	"units/payday2/characters/ene_fbi_female_2/ene_fbi_female_2",
-	"units/payday2/characters/ene_fbi_female_3/ene_fbi_female_3",
-	"units/payday2/characters/ene_fbi_female_4/ene_fbi_female_4",
-	"units/payday2/characters/ene_fbi_heavy_1/ene_fbi_heavy_1",
-	"units/payday2/characters/ene_fbi_office_1/ene_fbi_office_1",
-	"units/payday2/characters/ene_fbi_office_2/ene_fbi_office_2",
-	"units/payday2/characters/ene_fbi_office_3/ene_fbi_office_3",
-	"units/payday2/characters/ene_fbi_office_4/ene_fbi_office_4",
-	"units/payday2/characters/ene_fbi_swat_1/ene_fbi_swat_1",
-	"units/payday2/characters/ene_fbi_swat_2/ene_fbi_swat_2",
-	"units/payday2/characters/ene_gang_black_1/ene_gang_black_1",
-	"units/payday2/characters/ene_gang_black_2/ene_gang_black_2",
-	"units/payday2/characters/ene_gang_black_3/ene_gang_black_3",
-	"units/payday2/characters/ene_gang_black_4/ene_gang_black_4",
-	"units/payday2/characters/ene_gang_mexican_1/ene_gang_mexican_1",
-	"units/payday2/characters/ene_gang_mexican_2/ene_gang_mexican_2",
-	"units/payday2/characters/ene_gang_mexican_3/ene_gang_mexican_3",
-	"units/payday2/characters/ene_gang_mexican_4/ene_gang_mexican_4",
-	"units/payday2/characters/ene_gang_russian_1/ene_gang_russian_1",
-	"units/payday2/characters/ene_gang_russian_2/ene_gang_russian_2",
-	"units/payday2/characters/ene_gang_russian_3/ene_gang_russian_3",
-	"units/payday2/characters/ene_gang_russian_4/ene_gang_russian_4",
-	"units/payday2/characters/ene_gang_russian_5/ene_gang_russian_5",
-	"units/payday2/characters/ene_gang_mobster_1/ene_gang_mobster_1",
-	"units/payday2/characters/ene_gang_mobster_2/ene_gang_mobster_2",
-	"units/payday2/characters/ene_gang_mobster_3/ene_gang_mobster_3",
-	"units/payday2/characters/ene_gang_mobster_4/ene_gang_mobster_4",
-	"units/payday2/characters/ene_gang_mobster_boss/ene_gang_mobster_boss",
-	"units/payday2/characters/ene_male_tgt_1/ene_male_tgt_1",
-	"units/payday2/characters/ene_prisonguard_female_1/ene_prisonguard_female_1",
-	"units/payday2/characters/ene_prisonguard_male_1/ene_prisonguard_male_1",
-	"units/payday2/characters/ene_secret_service_1/ene_secret_service_1",
-	"units/payday2/characters/ene_secret_service_2/ene_secret_service_2",
-	"units/pd2_dlc_casino/characters/ene_secret_service_1_casino/ene_secret_service_1_casino",
-	"units/payday2/characters/ene_security_1/ene_security_1",
-	"units/payday2/characters/ene_security_2/ene_security_2",
-	"units/payday2/characters/ene_security_3/ene_security_3",
-	"units/payday2/characters/ene_shield_1/ene_shield_1",
-	"units/payday2/characters/ene_shield_2/ene_shield_2",
-	"units/payday2/characters/ene_sniper_1/ene_sniper_1",
-	"units/payday2/characters/ene_sniper_2/ene_sniper_2",
-	"units/payday2/characters/ene_spook_1/ene_spook_1",
-	"units/payday2/characters/ene_swat_1/ene_swat_1",
-	"units/payday2/characters/ene_swat_2/ene_swat_2",
-	"units/payday2/characters/ene_swat_heavy_1/ene_swat_heavy_1",
-	"units/payday2/characters/ene_tazer_1/ene_tazer_1",
-	"units/payday2/characters/ene_veteran_cop_1/ene_veteran_cop_1",
-	"units/payday2/characters/ene_biker_escape/ene_biker_escape",
-	"units/pd2_dlc1/characters/ene_security_gensec_1/ene_security_gensec_1",
-	"units/pd2_dlc1/characters/ene_security_gensec_2/ene_security_gensec_2",
-	"units/payday2/characters/npc_old_hoxton_prisonsuit_1/npc_old_hoxton_prisonsuit_1",
-	"units/payday2/characters/npc_old_hoxton_prisonsuit_2/npc_old_hoxton_prisonsuit_2",
-	"units/payday2/characters/ene_guard_national_1/ene_guard_national_1",
-	"units/payday2/characters/ene_murkywater_1/ene_murkywater_1",
-	"units/payday2/characters/ene_murkywater_2/ene_murkywater_2",
-	"units/payday2/characters/ene_security_4/ene_security_4",
-	"units/payday2/characters/ene_security_5/ene_security_5",
-	"units/payday2/characters/ene_security_6/ene_security_6",
-	"units/payday2/characters/ene_security_7/ene_security_7",
-	"units/payday2/characters/ene_security_8/ene_security_8",
-	"units/pd2_mcmansion/characters/ene_male_hector_1/ene_male_hector_1",
-	"units/pd2_mcmansion/characters/ene_male_hector_2/ene_male_hector_2",
-	"units/pd2_mcmansion/characters/ene_hoxton_breakout_guard_1/ene_hoxton_breakout_guard_1",
-	"units/pd2_mcmansion/characters/ene_hoxton_breakout_guard_2/ene_hoxton_breakout_guard_2",
-	"units/pd2_dlc_arena/characters/ene_guard_security_heavy_2/ene_guard_security_heavy_2",
-	"units/pd2_dlc_arena/characters/ene_guard_security_heavy_1/ene_guard_security_heavy_1"
-}
 function SpawnEnemyUnitElement:init(unit)
 	SpawnEnemyUnitElement.super.init(self, unit)
 	self._enemies = {}
@@ -132,6 +41,9 @@ function SpawnEnemyUnitElement:test_element()
 	end
 	if self._hed.enemy ~= "none" and managers.groupai:state():is_AI_enabled() then
 		local unit = safe_spawn_unit(Idstring(self._hed.enemy), self._unit:position(), self._unit:rotation())
+		if not unit then
+			return
+		end
 		table.insert(self._enemies, unit)
 		unit:brain():set_logic("inactive", nil)
 		local team_id = self:_resolve_team(unit)
@@ -156,11 +68,26 @@ function SpawnEnemyUnitElement:set_element_data(params, ...)
 		self:_load_pickup()
 	end
 end
+function SpawnEnemyUnitElement:_reload_unit_list_btn()
+	self:stop_test_element()
+	if self._hed.enemy ~= "none" then
+		managers.editor:reload_units({
+			Idstring(self._hed.enemy)
+		}, true, true)
+	end
+end
 function SpawnEnemyUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
-	self:_build_value_combobox(panel, panel_sizer, "enemy", self._options)
+	local enemy_sizer = EWS:BoxSizer("HORIZONTAL")
+	panel_sizer:add(enemy_sizer, 0, 0, "EXPAND")
+	self:_build_value_combobox(panel, enemy_sizer, "enemy", self._options, nil, nil, {horizontal_sizer_proportions = 1})
+	local toolbar = EWS:ToolBar(panel, "", "TB_FLAT,TB_NODIVIDER")
+	toolbar:add_tool("ADD_UNIT_LIST", "Reload unit", CoreEws.image_path("toolbar\\refresh_16x16.png"), nil)
+	toolbar:connect("ADD_UNIT_LIST", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "_reload_unit_list_btn"), nil)
+	toolbar:realize()
+	enemy_sizer:add(toolbar, 0, 0, "EXPAND,LEFT")
 	local participate_to_group_ai = EWS:CheckBox(panel, "Participate to group ai", "")
 	participate_to_group_ai:set_value(self._hed.participate_to_group_ai)
 	participate_to_group_ai:connect("EVT_COMMAND_CHECKBOX_CLICKED", callback(self, self, "set_element_data"), {

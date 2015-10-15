@@ -1,5 +1,6 @@
 core:import("CoreSequenceManager")
 CoreUnitDamage = CoreUnitDamage or class()
+CoreUnitDamage.ALL_TRIGGERS = "*"
 UnitDamage = UnitDamage or class(CoreUnitDamage)
 local ids_damage = Idstring("damage")
 function CoreUnitDamage:init(unit, default_body_extension_class, body_extension_class_map, ignore_body_collisions, ignore_mover_collisions, mover_collision_ignore_duration)
@@ -645,6 +646,62 @@ function CoreUnitDamage:run_editor_startup_sequences()
 			break
 		end
 	end
+end
+function CoreUnitDamage:add_trigger_callback(trigger_name, callback_func)
+	if not trigger_name or trigger_name == self.ALL_TRIGGERS then
+		for next_trigger_name in pairs(self._unit_element:get_trigger_name_map()) do
+			self:add_trigger_callback(next_trigger_name, callback_func)
+		end
+		return
+	end
+	if not self._trigger_callback_map_list then
+		self._trigger_callback_map_list = {}
+	end
+	local callback_list = self._trigger_callback_map_list[trigger_name]
+	if not callback_list then
+		callback_list = {}
+		self._trigger_callback_map_list[trigger_name] = callback_list
+	end
+	table.insert(callback_list, callback_func)
+end
+function CoreUnitDamage:remove_trigger_callback(trigger_name, callback_func)
+	if not trigger_name or trigger_name == self.ALL_TRIGGERS then
+		for next_trigger_name in pairs(self._unit_element:get_trigger_name_map()) do
+			self:remove_trigger_callback(next_trigger_name, callback_func)
+		end
+		return
+	end
+	local callback_list = self._trigger_callback_map_list[trigger_name]
+	for index, next_callback_func in ipairs(callback_list) do
+		if callback_func == next_callback_func then
+			table.remove(callback_list, index)
+		else
+		end
+	end
+	if #callback_list == 0 then
+		self._trigger_callback_map_list[trigger_name] = nil
+		if not next(self._trigger_callback_map_list) then
+			self._trigger_callback_map_list = nil
+		end
+	end
+	if self._current_trigger_callback_index then
+		self._current_trigger_callback_index = self._current_trigger_callback_index - 1
+	end
+end
+function CoreUnitDamage:on_trigger_callback(trigger_name, env)
+	if not self._trigger_callback_map_list then
+		return
+	end
+	local callback_list = self._trigger_callback_map_list[trigger_name]
+	if not callback_list then
+		return
+	end
+	self._current_trigger_callback_index = 0
+	while self._current_trigger_callback_index < #callback_list do
+		self._current_trigger_callback_index = self._current_trigger_callback_index + 1
+		callback_list[self._current_trigger_callback_index](trigger_name, env)
+	end
+	self._current_trigger_callback_index = nil
 end
 function CoreUnitDamage:remove_trigger_data(trigger_name, id)
 	if self._trigger_data_map and self._trigger_data_map[trigger_name] then

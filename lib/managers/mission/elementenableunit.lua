@@ -7,7 +7,6 @@ end
 function ElementEnableUnit:on_script_activated()
 	for _, id in ipairs(self._values.unit_ids) do
 		if Global.running_simulation then
-			print("Adding unit to units table with id", id)
 			table.insert(self._units, managers.editor:unit_with_id(id))
 		else
 			local unit = managers.worlddefinition:get_unit_on_load(id, callback(self, self, "_load_unit"))

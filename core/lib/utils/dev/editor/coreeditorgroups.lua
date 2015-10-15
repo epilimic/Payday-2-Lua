@@ -304,7 +304,7 @@ function CoreEditorGroup:save_edited_settings(...)
 	self:save_editable_gui(...)
 end
 function CoreEditorGroup:save_lights(file, t, unit, data_table)
-	local lights = CoreEditorUtils.get_editable_lights(unit)
+	local lights = CoreEditorUtils.get_editable_lights(unit) or {}
 	for _, light in ipairs(lights) do
 		local c_s = "" .. light:color().x .. " " .. light:color().y .. " " .. light:color().z
 		local as = light:spot_angle_start()

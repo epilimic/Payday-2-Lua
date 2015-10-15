@@ -215,8 +215,9 @@ function NetworkPeer:_verify_outfit_data()
 				return self:_verify_cheated_outfit("weapon", item.factory_id, 2)
 			end
 			local blueprint = managers.weapon_factory:get_default_blueprint_by_factory_id(item.factory_id)
+			local skin_blueprint = outfit[item_type].cosmetics and tweak_data.blackmarket.weapon_skins[outfit[item_type].cosmetics.id].default_blueprint or {}
 			for _, mod_item in pairs(item.blueprint) do
-				if not table.contains(blueprint, mod_item) and not self:_verify_content("weapon_mods", mod_item) then
+				if not table.contains(blueprint, mod_item) and not table.contains(skin_blueprint, mod_item) and not self:_verify_content("weapon_mods", mod_item) then
 					return self:_verify_cheated_outfit("weapon_mods", mod_item, 2)
 				end
 			end
@@ -247,6 +248,9 @@ function NetworkPeer:_verify_content(item_type, item_id)
 	else
 		local item = tweak_data.blackmarket[item_type]
 		item_data = item and item[item_id]
+		if item_data.unatainable then
+			return false
+		end
 		if item_type == "masks" and item_data.name_id == "bm_msk_cheat_error" then
 			return false
 		end
@@ -286,33 +290,27 @@ function NetworkPeer:verify_grenade(value)
 	self._grenades = self._grenades and self._grenades + value or value
 	return true
 end
-function NetworkPeer:verify_bag(carry_id, amount)
-	local cheating = false
-	if amount < 0 then
-		if self._carry_id ~= carry_id then
-			cheating = true
-		else
-			self._carry_id = nil
-		end
-	elseif self._carry_id then
-		cheating = true
-	else
-		self._carry_id = carry_id
-	end
-	if cheating then
-		if Network:is_client() and amount < 0 and not self._skipped_first_cheat then
-			self._skipped_first_cheat = true
+function NetworkPeer:verify_bag(carry_id, pickup)
+	if pickup then
+		if not self._carry_id then
+			self._carry_id = carry_id
 			return true
 		end
-		if Network:is_server() then
-			self:mark_cheater(amount < 0 and VoteManager.REASON.many_bags or VoteManager.REASON.many_bags_pickup, true)
-		else
-			managers.network:session():server_peer():mark_cheater(amount < 0 and VoteManager.REASON.many_bags or VoteManager.REASON.many_bags_pickup, Network:is_server())
-		end
-		print("[NetworkPeer:verify_bag]: Failed to place bag", self:id(), self._carry_id, carry_id, amount)
-		return false
+	elseif self._carry_id == carry_id then
+		self._carry_id = nil
+		return true
 	end
-	return true
+	if Network:is_client() and amount < 0 and not self._skipped_first_cheat then
+		self._skipped_first_cheat = true
+		return true
+	end
+	if Network:is_server() then
+		self:mark_cheater(amount < 0 and VoteManager.REASON.many_bags or VoteManager.REASON.many_bags_pickup, true)
+	else
+		managers.network:session():server_peer():mark_cheater(amount < 0 and VoteManager.REASON.many_bags or VoteManager.REASON.many_bags_pickup, Network:is_server())
+	end
+	print("[NetworkPeer:verify_bag]: Failed to place bag", self:id(), self._carry_id, carry_id, amount)
+	return false
 end
 function NetworkPeer:verify_deployable(id)
 	if tweak_data.equipments.max_amount[id] then
@@ -353,6 +351,57 @@ function NetworkPeer:mark_cheater(reason, auto_kick)
 		managers.vote:kick_auto(reason, self, self._begin_ticket_session_called)
 	elseif managers.hud then
 		managers.hud:mark_cheater(self._id)
+	end
+end
+function NetworkPeer:tradable_verify_outfit(signature)
+	if self._wait_for_verify_tradable_outfit then
+		return
+	end
+	local outfit = self:blackmarket_outfit()
+	if outfit.primary and outfit.primary.cosmetics or outfit.secondary and outfit.secondary.cosmetics then
+		self._wait_for_verify_tradable_outfit = true
+		managers.network.account:inventory_outfit_verify(self._user_id, signature, callback(self, self, "on_verify_tradable_outfit", self._outfit_version))
+	end
+end
+function NetworkPeer:on_verify_tradable_outfit(outfit_version, error, list)
+	self._wait_for_verify_tradable_outfit = nil
+	if outfit_version ~= self._outfit_version then
+		return
+	end
+	local outfit = self:blackmarket_outfit()
+	if error then
+		self:tradable_verification_failed(nil, outfit)
+		Application:error("[NetworkPeer:on_verify_tradable_outfit] Failed to verify tradable inventory (" .. tostring(error) .. ")")
+		return
+	end
+	if outfit.primary and outfit.primary.cosmetics and not managers.blackmarket:tradable_verify("weapon_skins", outfit.primary.cosmetics.id, outfit.primary.cosmetics.quality, outfit.primary.cosmetics.bonus, list) then
+		self:tradable_verification_failed("primary", outfit)
+	end
+	if outfit.secondary and outfit.secondary.cosmetics and not managers.blackmarket:tradable_verify("weapon_skins", outfit.secondary.cosmetics.id, outfit.secondary.cosmetics.quality, outfit.secondary.cosmetics.bonus, list) then
+		self:tradable_verification_failed("secondary", outfit)
+	end
+end
+function NetworkPeer:tradable_verification_failed(group, outfit)
+	Application:error("[NetworkPeer:tradable_verification_failed] Failed to verify peer " .. tostring(self._id) .. "'s tradable item.")
+	if not group or group == "primary" then
+		outfit.primary.cosmetics = nil
+	end
+	if not group or group == "secondary" then
+		outfit.secondary.cosmetics = nil
+	end
+	self._profile.outfit_string = managers.blackmarket:outfit_string_from_list(outfit)
+	self:_reload_outfit()
+	local local_peer = managers.network:session() and managers.network:session():local_peer()
+	local in_lobby = local_peer and local_peer:in_lobby() and game_state_machine:current_state_name() ~= "ingame_lobby_menu" and not setup:is_unloading()
+	if managers.menu_scene and in_lobby then
+		managers.menu_scene:set_lobby_character_out_fit(self._id, self._profile.outfit_string, self:rank())
+	end
+	local kit_menu = managers.menu:get_menu("kit_menu")
+	if kit_menu then
+		kit_menu.renderer:set_slot_outfit(self._id, self:character(), self._profile.outfit_string)
+	end
+	if managers.criminals then
+		managers.criminals:set_data(self:character())
 	end
 end
 function NetworkPeer:set_steam_rpc(rpc)
@@ -909,7 +958,6 @@ function NetworkPeer:set_profile(level, rank)
 end
 function NetworkPeer:set_outfit_string(outfit_string, outfit_version, outfit_signature)
 	print("[NetworkPeer:set_outfit_string] ID", self._id, outfit_string, outfit_version)
-	Application:stack_dump()
 	local old_outfit_string = self._profile.outfit_string
 	self._profile.outfit_string = outfit_string
 	if not self._ticket_wait_response then
@@ -921,8 +969,15 @@ function NetworkPeer:set_outfit_string(outfit_string, outfit_version, outfit_sig
 	self:_update_equipped_armor()
 	if self == managers.network:session():local_peer() then
 		self:_increment_outfit_version()
+		if old_outfit_string ~= outfit_string then
+			managers.network.account:inventory_outfit_refresh()
+		end
 	else
 		self._outfit_version = outfit_version or 0
+		if outfit_signature and old_outfit_string ~= outfit_string then
+			self._signature = outfit_signature
+			self:tradable_verify_outfit(outfit_signature)
+		end
 	end
 end
 function NetworkPeer:profile(data)
@@ -1063,6 +1118,9 @@ function NetworkPeer:_unload_outfit()
 		texture = {}
 	}
 end
+function NetworkPeer:force_reload_outfit()
+	self:_reload_outfit()
+end
 function NetworkPeer:_reload_outfit()
 	if self._profile.outfit_string == "" then
 		return
@@ -1103,18 +1161,22 @@ function NetworkPeer:_reload_outfit()
 		}
 		new_outfit_assets.unit.mask_backstraps = mask_backstraps_asset_data
 	end
-	local ids_primary_u_name = Idstring(tweak_data.weapon.factory[complete_outfit.primary.factory_id .. (is_local_peer and "" or "_npc")].unit)
+	local factory_id = complete_outfit.primary.factory_id .. (is_local_peer and "" or "_npc")
+	local ids_primary_u_name = Idstring(tweak_data.weapon.factory[factory_id].unit)
 	new_outfit_assets.unit.primary_w = {name = ids_primary_u_name}
-	local primary_w_parts = managers.weapon_factory:preload_blueprint(complete_outfit.primary.factory_id, complete_outfit.primary.blueprint, not is_local_peer, function()
+	local use_fps_parts = is_local_peer or managers.weapon_factory:use_thq_weapon_parts() and not tweak_data.weapon.factory[factory_id].skip_thq_parts
+	local primary_w_parts = managers.weapon_factory:preload_blueprint(complete_outfit.primary.factory_id, complete_outfit.primary.blueprint, not use_fps_parts, function()
 	end, true)
 	for part_id, part in pairs(primary_w_parts) do
 		new_outfit_assets.unit["prim_w_part_" .. tostring(part_id)] = {
 			name = part.name
 		}
 	end
-	local ids_secondary_u_name = Idstring(tweak_data.weapon.factory[complete_outfit.secondary.factory_id .. (is_local_peer and "" or "_npc")].unit)
+	local factory_id = complete_outfit.secondary.factory_id .. (is_local_peer and "" or "_npc")
+	local ids_secondary_u_name = Idstring(tweak_data.weapon.factory[factory_id].unit)
 	new_outfit_assets.unit.secondary_w = {name = ids_secondary_u_name}
-	local secondary_w_parts = managers.weapon_factory:preload_blueprint(complete_outfit.secondary.factory_id, complete_outfit.secondary.blueprint, not is_local_peer, function()
+	local use_fps_parts = is_local_peer or managers.weapon_factory:use_thq_weapon_parts() and not tweak_data.weapon.factory[factory_id].skip_thq_parts
+	local secondary_w_parts = managers.weapon_factory:preload_blueprint(complete_outfit.secondary.factory_id, complete_outfit.secondary.blueprint, not use_fps_parts, function()
 	end, true)
 	for part_id, part in pairs(secondary_w_parts) do
 		new_outfit_assets.unit["sec_w_part_" .. tostring(part_id)] = {
@@ -1203,7 +1265,6 @@ function NetworkPeer:_chk_outfit_loading_complete()
 	end
 	self._all_outfit_load_requests_sent = nil
 	self._loading_outfit_assets = nil
-	print("[NetworkPeer:_chk_outfit_loading_complete] Complete!", self == managers.network:session():local_peer() and "local_peer" or self._id, "\n", inspect(self._outfit_assets.unit), inspect(self._outfit_assets.texture))
 	managers.network:session():on_peer_outfit_loaded(self)
 end
 function NetworkPeer:set_other_peer_outfit_loaded_status(status)
@@ -1288,12 +1349,8 @@ function NetworkPeer:spawn_unit(spawn_point_id, is_drop_in, spawn_as)
 	self._spawn_unit_called = true
 	local pos_rot
 	if is_drop_in then
-		local spawn_on = self:_get_drop_in_spawn_on_unit()
-		if spawn_on then
-			local pos = spawn_on:position()
-			local rot = spawn_on:rotation()
-			pos_rot = {pos, rot}
-		else
+		pos_rot = managers.criminals:get_valid_player_spawn_pos_rot()
+		if not pos_rot then
 			local spawn_point = managers.network:session():get_next_spawn_point() or managers.network:spawn_point(1)
 			pos_rot = spawn_point.pos_rot
 		end
@@ -1375,28 +1432,6 @@ function NetworkPeer:_get_old_entry()
 		respawn_penalty = old_plr_entry.respawn_penalty
 	end
 	return member_downed, member_dead, health, used_deployable, used_cable_ties, used_body_bags, hostages_killed, respawn_penalty, old_plr_entry
-end
-function NetworkPeer:_get_drop_in_spawn_on_unit()
-	if alive(self._unit) then
-		if self._unit:movement():zipline_unit() then
-			return self._unit:movement():zipline_unit()
-		end
-		return self._unit
-	end
-	for u_key, u_data in pairs(managers.groupai:state():all_player_criminals()) do
-		if u_data and alive(u_data.unit) then
-			if u_data.unit:movement():zipline_unit() then
-				return u_data.unit:movement():zipline_unit()
-			end
-			return u_data.unit
-		end
-	end
-	for u_key, u_data in pairs(managers.groupai:state():all_AI_criminals()) do
-		if u_data and alive(u_data.unit) then
-			return u_data.unit
-		end
-	end
-	return nil
 end
 function NetworkPeer:spawn_unit_called()
 	return self._spawn_unit_called

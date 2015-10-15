@@ -598,12 +598,7 @@ function MenuManager:show_new_item_gained(params)
 	elseif category == "primaries" or category == "secondaries" then
 		local weapon_id = managers.weapon_factory:get_weapon_id_by_factory_id(id)
 		if weapon_id then
-			local bundle_folder = tweak_data.weapon[weapon_id] and tweak_data.weapon[weapon_id].texture_bundle_folder
-			if bundle_folder then
-				guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
-			end
-			local texture_name = tweak_data.weapon[weapon_id].texture_name or tostring(weapon_id)
-			texture = guis_catalog .. "textures/pd2/blackmarket/icons/weapons/" .. texture_name
+			texture = managers.blackmarket:get_weapon_icon_path(weapon_id, nil)
 		end
 	elseif category == "textures" then
 		texture = _G.tweak_data.blackmarket.textures[id].texture
@@ -619,6 +614,106 @@ function MenuManager:show_new_item_gained(params)
 	dialog_data.texture = texture
 	dialog_data.render_template = render_template
 	dialog_data.shapes = shapes
+	dialog_data.sound_event = params.sound_event
+	managers.system_menu:show_new_unlock(dialog_data)
+end
+function MenuManager:show_no_safe_for_this_drill(params)
+	local dialog_data = {}
+	dialog_data.title = managers.localization:text("dialog_no_safe_for_this_drill_title")
+	dialog_data.text = managers.localization:text("dialog_no_safe_for_this_drill")
+	local ok_button = {}
+	ok_button.text = managers.localization:text("dialog_ok")
+	dialog_data.button_list = {ok_button}
+	managers.system_menu:show(dialog_data)
+end
+function MenuManager:show_and_more_tradable_item_received(params)
+	local dialog_data = {}
+	dialog_data.title = managers.localization:text("dialog_and_more_tradable_item_title")
+	dialog_data.text = managers.localization:text("dialog_and_more_tradable_item", {
+		amount = tostring(params.amount_more)
+	})
+	local ok_button = {}
+	ok_button.text = managers.localization:text("dialog_new_tradable_item_accept")
+	dialog_data.button_list = {ok_button}
+	managers.system_menu:show(dialog_data)
+end
+function MenuManager:show_new_tradable_item_received(params)
+	local dialog_data = {}
+	dialog_data.title = managers.localization:text("dialog_new_tradable_item_title")
+	dialog_data.text = managers.localization:to_upper_text("dialog_new_tradable_item", {
+		quality = params.quality_name,
+		name = params.item_name
+	})
+	dialog_data.focus_button = 1
+	local accept_button = {}
+	accept_button.text = managers.localization:text("dialog_new_tradable_item_accept")
+	accept_button.cancel_button = true
+	local rarity_color, rarity_bg_texture
+	local item = params.item
+	dialog_data.button_list = {accept_button}
+	if item.category == "safes" then
+		dialog_data.text = managers.localization:to_upper_text("dialog_new_tradable_item", {
+			quality = "",
+			name = params.item_name
+		})
+		do
+			local data = deep_clone(params)
+			local open_container_button = {}
+			open_container_button.text = managers.localization:text("dialog_new_tradable_item_open_container")
+			function open_container_button.callback_func()
+				managers.system_menu:force_close_all()
+				managers.menu:open_node("inventory_tradable_container", {data})
+			end
+			table.insert(dialog_data.button_list, open_container_button)
+		end
+	elseif item.category == "drills" then
+		dialog_data.text = managers.localization:to_upper_text("dialog_new_tradable_item", {
+			quality = "",
+			name = params.item_name
+		})
+	else
+		local entry_data = tweak_data.blackmarket[item.category][item.entry]
+		if item.bonus and entry_data.bonus then
+			local name_id = tweak_data.economy.bonuses[entry_data.bonus].name_id
+			local bonus_text = managers.localization:to_upper_text("dialog_new_tradable_item_bonus", {
+				bonus = managers.localization:text(name_id)
+			})
+			dialog_data.text = dialog_data.text .. "\n" .. bonus_text
+		end
+		rarity_color = entry_data.rarity and tweak_data.economy.rarities[entry_data.rarity].color or Color.white
+		rarity_bg_texture = entry_data.rarity and tweak_data.economy.rarities[entry_data.rarity].bg_texture or nil
+	end
+	if 1 < params.amount_more then
+		local accept_all_button = {}
+		accept_all_button.text = managers.localization:text("dialog_new_tradable_item_accept_all", {
+			amount = tostring(params.amount_more)
+		})
+		function accept_all_button.callback_func()
+			managers.system_menu:force_close_all()
+		end
+		table.insert(dialog_data.button_list, accept_all_button)
+	end
+	local texture, render_template, shapes
+	local guis_catalog = "guis/"
+	local tweak_group = tweak_data.economy[item.category] or tweak_data.blackmarket[item.category]
+	if tweak_group then
+		local guis_catalog = "guis/"
+		local bundle_folder = tweak_group[item.entry].texture_bundle_folder
+		if bundle_folder then
+			guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
+		end
+		local path = item.category .. "/"
+		texture = guis_catalog .. path .. item.entry
+	end
+	if rarity_bg_texture then
+		dialog_data.textures = {rarity_bg_texture, texture}
+	else
+		dialog_data.textures = {texture}
+	end
+	dialog_data.render_template = render_template
+	dialog_data.use_text_formating = true
+	dialog_data.text_formating_color = rarity_color
+	dialog_data.image_w = 256
 	dialog_data.sound_event = params.sound_event
 	managers.system_menu:show_new_unlock(dialog_data)
 end
@@ -642,14 +737,8 @@ function MenuManager:show_weapon_mods_available(params)
 	local ok_button = {}
 	ok_button.text = managers.localization:text("dialog_ok")
 	dialog_data.button_list = {ok_button}
-	local guis_catalog = "guis/"
 	local weapon_id = params.weapon_id
-	local bundle_folder = tweak_data.weapon[weapon_id] and tweak_data.weapon[weapon_id].texture_bundle_folder
-	if bundle_folder then
-		guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
-	end
-	local texture_name = tweak_data.weapon[weapon_id].texture_name or tostring(weapon_id)
-	dialog_data.texture = guis_catalog .. "textures/pd2/blackmarket/icons/weapons/" .. texture_name
+	dialog_data.texture = managers.blackmarket:get_weapon_icon_path(weapon_id, nil)
 	dialog_data.text_blend_mode = "add"
 	dialog_data.use_text_formating = true
 	dialog_data.text_formating_color = Color.white
@@ -747,6 +836,65 @@ function MenuManager:show_requires_big_picture()
 	local dialog_data = {}
 	dialog_data.title = managers.localization:text("dialog_error_title")
 	dialog_data.text = managers.localization:text("dialog_requires_big_picture")
+	local ok_button = {}
+	ok_button.text = managers.localization:text("dialog_ok")
+	dialog_data.button_list = {ok_button}
+	managers.system_menu:show(dialog_data)
+end
+function MenuManager:show_buying_tradable_item_dialog()
+	local dialog_data = {}
+	dialog_data.title = managers.localization:text("dialog_tradable_item_store_title")
+	dialog_data.text = managers.localization:text("dialog_checking_out")
+	dialog_data.id = "buy_tradable_item"
+	local cancel_button = {}
+	cancel_button.text = managers.localization:text("dialog_cancel")
+	function cancel_button.callback_func()
+		MenuCallbackHandler:on_steam_transaction_over(true)
+	end
+	dialog_data.button_list = {cancel_button}
+	dialog_data.indicator = true
+	managers.system_menu:show(dialog_data)
+end
+function MenuManager:show_canceled_tradable_item_dialog()
+	local dialog_data = {}
+	dialog_data.title = managers.localization:text("dialog_tradable_item_store_title")
+	dialog_data.text = managers.localization:text("dialog_tradable_item_canceled")
+	local ok_button = {}
+	ok_button.text = managers.localization:text("dialog_ok")
+	dialog_data.button_list = {ok_button}
+	managers.system_menu:show(dialog_data)
+end
+function MenuManager:show_success_tradable_item_dialog()
+	local dialog_data = {}
+	dialog_data.title = managers.localization:text("dialog_tradable_item_store_title")
+	dialog_data.text = managers.localization:text("dialog_tradable_item_success")
+	local ok_button = {}
+	ok_button.text = managers.localization:text("dialog_ok")
+	dialog_data.button_list = {ok_button}
+	managers.system_menu:show(dialog_data)
+end
+function MenuManager:show_enable_steam_overlay_tradable_item()
+	local dialog_data = {}
+	dialog_data.title = managers.localization:text("dialog_tradable_item_store_title")
+	dialog_data.text = managers.localization:text("dialog_requires_steam_overlay_tradable_item")
+	local ok_button = {}
+	ok_button.text = managers.localization:text("dialog_ok")
+	dialog_data.button_list = {ok_button}
+	managers.system_menu:show(dialog_data)
+end
+function MenuManager:show_error_tradable_item_dialog()
+	local dialog_data = {}
+	dialog_data.title = managers.localization:text("dialog_tradable_item_store_title")
+	dialog_data.text = managers.localization:text("dialog_tradable_item_error")
+	local ok_button = {}
+	ok_button.text = managers.localization:text("dialog_ok")
+	dialog_data.button_list = {ok_button}
+	managers.system_menu:show(dialog_data)
+end
+function MenuManager:show_failed_tradable_item_dialog()
+	local dialog_data = {}
+	dialog_data.title = managers.localization:text("dialog_tradable_item_store_title")
+	dialog_data.text = managers.localization:text("dialog_tradable_item_failed")
 	local ok_button = {}
 	ok_button.text = managers.localization:text("dialog_ok")
 	dialog_data.button_list = {ok_button}
@@ -961,6 +1109,53 @@ function MenuManager:show_confirm_blackmarket_mod(params)
 	end
 	local yes_button = {}
 	yes_button.text = managers.localization:text("dialog_yes")
+	yes_button.callback_func = params.yes_func
+	local no_button = {}
+	no_button.text = managers.localization:text("dialog_no")
+	no_button.callback_func = params.no_func
+	no_button.cancel_button = true
+	dialog_data.button_list = {yes_button, no_button}
+	managers.system_menu:show(dialog_data)
+end
+function MenuManager:show_confirm_weapon_cosmetics(params)
+	local l_local = managers.localization
+	local dialog_data = {}
+	dialog_data.type = "weapon_stats"
+	dialog_data.focus_button = 2
+	dialog_data.title = l_local:text("dialog_bm_weapon_modify_title")
+	dialog_data.text = l_local:text("dialog_blackmarket_slot_item", {
+		slot = params.slot,
+		item = params.weapon_name
+	}) .. [[
+
+
+]] .. l_local:text("dialog_weapon_cosmetics_" .. (params.item_has_cosmetic and "add" or "remove"), {
+		cosmetic = params.name
+	})
+	if params.item_has_cosmetic and params.crafted_has_cosmetic then
+		dialog_data.text = dialog_data.text .. "\n" .. l_local:text("dialog_weapon_cosmetics_replace", {
+			cosmetic = params.crafted_name
+		})
+	end
+	if params.crafted_has_default_blueprint and not params.item_has_default_blueprint then
+		dialog_data.text = dialog_data.text .. [[
+
+
+]] .. l_local:text("dialog_weapon_cosmetics_remove_blueprint")
+	elseif not params.crafted_has_default_blueprint and params.item_has_default_blueprint then
+		dialog_data.text = dialog_data.text .. [[
+
+
+]] .. l_local:text("dialog_weapon_cosmetics_set_blueprint")
+	end
+	if params.customize_locked then
+		dialog_data.text = dialog_data.text .. [[
+
+
+]] .. l_local:text("dialog_weapon_cosmetics_locked")
+	end
+	local yes_button = {}
+	yes_button.text = managers.localization:text("dialog_apply")
 	yes_button.callback_func = params.yes_func
 	local no_button = {}
 	no_button.text = managers.localization:text("dialog_no")
@@ -1255,6 +1450,16 @@ function MenuManager:show_abort_mission_dialog(params)
 	dialog_data.button_list = {yes_button, no_button}
 	managers.system_menu:show(dialog_data)
 end
+function MenuManager:show_safe_error_dialog(params)
+	local dialog_data = {}
+	dialog_data.title = managers.localization:text("dialog_error_title")
+	dialog_data.text = managers.localization:text(params.string_id)
+	local ok_button = {}
+	ok_button.text = managers.localization:text("dialog_ok")
+	ok_button.callback_func = params.ok_button
+	dialog_data.button_list = {ok_button}
+	managers.system_menu:show(dialog_data)
+end
 function MenuManager:show_confirm_become_infamous(params)
 	local dialog_data = {}
 	dialog_data.title = managers.localization:text("dialog_become_infamous")
@@ -1437,4 +1642,13 @@ function MenuManager:show_challenge_reward(reward)
 		managers.menu_component:post_event("sidejob_stinger_short")
 	end
 	managers.menu_component:disable_crimenet()
+end
+function MenuManager:show_inventory_load_fail_dialog()
+	local dialog_data = {}
+	dialog_data.title = managers.localization:text("dialog_inventory_load_fail_title")
+	dialog_data.text = managers.localization:text("dialog_inventory_load_fail_text")
+	local ok_button = {}
+	ok_button.text = managers.localization:text("dialog_ok")
+	dialog_data.button_list = {ok_button}
+	managers.system_menu:show(dialog_data)
 end

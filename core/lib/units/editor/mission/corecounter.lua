@@ -121,43 +121,26 @@ end
 function CoreCounterUnitElement:add_triggers(vc)
 	vc:add_trigger(Idstring("lmb"), callback(self, self, "select_unit"))
 end
-function CoreCounterUnitElement:add_unit_list_btn()
-	local function f(unit)
-		if self._digital_gui_units[unit:unit_data().unit_id] then
-			return false
-		end
-		return unit:digital_gui() and unit:digital_gui():is_number()
+function CoreCounterUnitElement:_add_unit_filter(unit)
+	if self._digital_gui_units[unit:unit_data().unit_id] then
+		return false
 	end
-	local dialog = SelectUnitByNameModal:new("Add Unit", f)
-	for _, unit in ipairs(dialog:selected_units()) do
-		if not self._digital_gui_units[unit:unit_data().unit_id] then
-			self:_add_unit(unit)
-		end
-	end
+	return unit:digital_gui() and unit:digital_gui():is_number()
 end
-function CoreCounterUnitElement:remove_unit_list_btn()
-	local function f(unit)
-		return self._digital_gui_units[unit:unit_data().unit_id]
-	end
-	local dialog = SelectUnitByNameModal:new("Remove Unit", f)
-	for _, unit in ipairs(dialog:selected_units()) do
-		if self._digital_gui_units[unit:unit_data().unit_id] then
-			self:_remove_unit(unit)
-		end
-	end
+function CoreCounterUnitElement:_remove_unit_filter(unit)
+	return self._digital_gui_units[unit:unit_data().unit_id]
 end
 function CoreCounterUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	self:_build_add_remove_static_unit_from_list(panel, panel_sizer, {
+		add_filter = callback(self, self, "_add_unit_filter"),
+		add_result = callback(self, self, "_add_unit"),
+		remove_filter = callback(self, self, "_remove_unit_filter"),
+		remove_result = callback(self, self, "_remove_unit")
+	})
 	self:_build_value_number(panel, panel_sizer, "counter_target", {floats = 0, min = 0}, "Specifies how many times the counter should be executed before running its on executed")
-	local toolbar = EWS:ToolBar(panel, "", "TB_FLAT,TB_NODIVIDER")
-	toolbar:add_tool("ADD_UNIT_LIST", "Add unit from unit list", CoreEws.image_path("world_editor\\unit_by_name_list.png"), nil)
-	toolbar:connect("ADD_UNIT_LIST", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "add_unit_list_btn"), nil)
-	toolbar:add_tool("REMOVE_UNIT_LIST", "Remove unit from unit list", CoreEws.image_path("toolbar\\delete_16x16.png"), nil)
-	toolbar:connect("REMOVE_UNIT_LIST", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "remove_unit_list_btn"), nil)
-	toolbar:realize()
-	panel_sizer:add(toolbar, 0, 1, "EXPAND,LEFT")
 	self:_add_help_text("Units with number gui extension can have their value updated from a counter.")
 end
 CoreCounterOperatorUnitElement = CoreCounterOperatorUnitElement or class(MissionElement)
@@ -226,6 +209,10 @@ function CoreCounterOperatorUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local names = {
+		"logic_counter/logic_counter"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, names)
 	self:_build_value_combobox(panel, panel_sizer, "operation", {
 		"none",
 		"add",
@@ -299,6 +286,10 @@ function CoreCounterTriggerUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local names = {
+		"logic_counter/logic_counter"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, names)
 	self:_build_value_combobox(panel, panel_sizer, "trigger_type", {
 		"none",
 		"value",
@@ -375,6 +366,10 @@ function CoreCounterFilterUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local names = {
+		"logic_counter/logic_counter"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, names)
 	self:_build_value_combobox(panel, panel_sizer, "needed_to_execute", {"all", "any"}, "Select how many elements are needed to execute")
 	self:_build_value_number(panel, panel_sizer, "value", {floats = 0}, "Specify value to trigger on.")
 	self:_build_value_combobox(panel, panel_sizer, "check_type", {

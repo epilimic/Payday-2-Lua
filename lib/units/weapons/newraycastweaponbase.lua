@@ -12,12 +12,16 @@ local math_lerp = math.lerp
 local tmp_vec1 = Vector3()
 local tmp_vec2 = Vector3()
 NewRaycastWeaponBase = NewRaycastWeaponBase or class(RaycastWeaponBase)
+require("lib/units/weapons/CosmeticsWeaponBase")
 function NewRaycastWeaponBase:init(unit)
 	NewRaycastWeaponBase.super.init(self, unit)
 	self._has_gadget = false
 	self._armor_piercing_chance = self:weapon_tweak_data().armor_piercing_chance or 0
 	self._use_shotgun_reload = self:weapon_tweak_data().use_shotgun_reload
 	self._movement_penalty = tweak_data.upgrades.weapon_movement_penalty[self:weapon_tweak_data().category] or 1
+	self._textures = {}
+	self._cosmetics_data = nil
+	self._materials = nil
 end
 function NewRaycastWeaponBase:is_npc()
 	return false
@@ -25,17 +29,45 @@ end
 function NewRaycastWeaponBase:skip_queue()
 	return false
 end
+function NewRaycastWeaponBase:use_thq()
+	return false
+end
+function NewRaycastWeaponBase:skip_thq_parts()
+	return tweak_data.weapon.factory[self._factory_id].skip_thq_parts
+end
 function NewRaycastWeaponBase:set_texture_switches(texture_switches)
 	self._texture_switches = texture_switches
 end
 function NewRaycastWeaponBase:set_factory_data(factory_id)
 	self._factory_id = factory_id
 end
+function NewRaycastWeaponBase:_check_thq_align_anim()
+	if not self:is_npc() then
+		return
+	end
+	if not self:use_thq() then
+		return
+	end
+	local thq_anim_name = self:weapon_tweak_data().animations and self:weapon_tweak_data().animations.thq_align_anim
+	if thq_anim_name then
+		self._unit:anim_set_time(Idstring(thq_anim_name), self._unit:anim_length(Idstring(thq_anim_name)))
+	end
+end
+function NewRaycastWeaponBase:_third_person()
+	if not self:is_npc() then
+		return false
+	end
+	if not self:use_thq() then
+		return true
+	end
+	return self:skip_thq_parts() and true or false
+end
 function NewRaycastWeaponBase:assemble(factory_id)
-	local third_person = self:is_npc()
+	local third_person = self:_third_person()
 	local skip_queue = self:skip_queue()
 	self._parts, self._blueprint = managers.weapon_factory:assemble_default(factory_id, self._unit, third_person, callback(self, self, "clbk_assembly_complete", function()
 	end), skip_queue)
+	self:_check_thq_align_anim()
 	self:_update_stats_values()
 	do return end
 	local third_person = self:is_npc()
@@ -44,10 +76,11 @@ function NewRaycastWeaponBase:assemble(factory_id)
 	self:_update_stats_values()
 end
 function NewRaycastWeaponBase:assemble_from_blueprint(factory_id, blueprint, clbk)
-	local third_person = self:is_npc()
+	local third_person = self:_third_person()
 	local skip_queue = self:skip_queue()
 	self._parts, self._blueprint = managers.weapon_factory:assemble_from_blueprint(factory_id, self._unit, blueprint, third_person, callback(self, self, "clbk_assembly_complete", clbk or function()
 	end), skip_queue)
+	self:_check_thq_align_anim()
 	self:_update_stats_values()
 	do return end
 	local third_person = self:is_npc()
@@ -96,6 +129,8 @@ function NewRaycastWeaponBase:clbk_assembly_complete(clbk, parts, blueprint)
 			end
 		end
 	end
+	self:_apply_cosmetics(clbk or function()
+	end)
 	self:apply_texture_switches()
 	self:check_npc()
 	self:_set_parts_enabled(self._enabled)
@@ -119,7 +154,6 @@ function NewRaycastWeaponBase:apply_texture_switches()
 					material_ids = Idstring(texture_switch.material)
 					material_config = unit:get_objects_by_type(Idstring("material"))
 					for _, material in ipairs(material_config) do
-						print(material:name())
 						if material:name() == material_ids then
 							switch_material = material
 						else
@@ -298,34 +332,39 @@ function NewRaycastWeaponBase:_update_stats_values()
 	end
 	local parts_stats = managers.weapon_factory:get_stats(self._factory_id, self._blueprint)
 	local stats = deep_clone(base_stats)
-	local tweak_data = tweak_data.weapon.stats
+	local stats_tweak_data = tweak_data.weapon.stats
 	local modifier_stats = self:weapon_tweak_data().stats_modifiers
+	local bonus_stats = self._cosmetics_bonus and self._cosmetics_data and self._cosmetics_data.bonus and tweak_data.economy.bonuses[self._cosmetics_data.bonus] and tweak_data.economy.bonuses[self._cosmetics_data.bonus].stats or {}
 	if stats.zoom then
-		stats.zoom = math.min(stats.zoom + managers.player:upgrade_value(self:weapon_tweak_data().category, "zoom_increase", 0), #tweak_data.zoom)
+		stats.zoom = math.min(stats.zoom + managers.player:upgrade_value(self:weapon_tweak_data().category, "zoom_increase", 0), #stats_tweak_data.zoom)
 	end
 	for stat, _ in pairs(stats) do
-		if stats[stat] < 1 or stats[stat] > #tweak_data[stat] then
-			Application:error("[NewRaycastWeaponBase] Base weapon stat is out of bound!", "stat: " .. stat, "index: " .. stats[stat], "max_index: " .. #tweak_data[stat], "This stat will be clamped!")
+		if stats[stat] < 1 or stats[stat] > #stats_tweak_data[stat] then
+			Application:error("[NewRaycastWeaponBase] Base weapon stat is out of bound!", "stat: " .. stat, "index: " .. stats[stat], "max_index: " .. #stats_tweak_data[stat], "This stat will be clamped!")
 		end
 		if parts_stats[stat] then
-			stats[stat] = math_clamp(stats[stat] + parts_stats[stat], 1, #tweak_data[stat])
+			stats[stat] = stats[stat] + parts_stats[stat]
 		end
-		stats[stat] = math_clamp(stats[stat], 1, #tweak_data[stat])
+		if bonus_stats[stat] then
+			stats[stat] = stats[stat] + bonus_stats[stat]
+		end
+		stats[stat] = math_clamp(stats[stat], 1, #stats_tweak_data[stat])
 	end
+	self._current_stats_indices = stats
 	self._current_stats = {}
 	for stat, i in pairs(stats) do
-		self._current_stats[stat] = tweak_data[stat][i]
+		self._current_stats[stat] = stats_tweak_data[stat][i]
 		if modifier_stats and modifier_stats[stat] then
 			self._current_stats[stat] = self._current_stats[stat] * modifier_stats[stat]
 		end
 	end
-	self._current_stats.alert_size = tweak_data.alert_size[math_clamp(stats.alert_size, 1, #tweak_data.alert_size)]
+	self._current_stats.alert_size = stats_tweak_data.alert_size[math_clamp(stats.alert_size, 1, #stats_tweak_data.alert_size)]
 	if modifier_stats and modifier_stats.alert_size then
 		self._current_stats.alert_size = self._current_stats.alert_size * modifier_stats.alert_size
 	end
 	if stats.concealment then
-		stats.suspicion = math.clamp(#tweak_data.concealment - base_stats.concealment - (parts_stats.concealment or 0), 1, #tweak_data.concealment)
-		self._current_stats.suspicion = tweak_data.concealment[stats.suspicion]
+		stats.suspicion = math.clamp(#stats_tweak_data.concealment - base_stats.concealment - (parts_stats.concealment or 0), 1, #stats_tweak_data.concealment)
+		self._current_stats.suspicion = stats_tweak_data.concealment[stats.suspicion]
 	end
 	self._alert_size = self._current_stats.alert_size or self._alert_size
 	self._suppression = self._current_stats.suppression or self._suppression
@@ -647,33 +686,14 @@ end
 function NewRaycastWeaponBase:gadget_update()
 	self:set_gadget_on(false, true)
 end
-function NewRaycastWeaponBase:is_gadget_usable()
+function NewRaycastWeaponBase:is_bipod_usable()
 	local retval = false
-	local gadgets = managers.weapon_factory:get_parts_from_weapon_by_type_or_perk("gadget", self._factory_id, self._blueprint)
-	if gadgets then
-		do
-			local xd, yd
-			local part_factory = tweak_data.weapon.factory.parts
-			table.sort(gadgets, function(x, y)
-				xd = self._parts[x]
-				yd = self._parts[y]
-				if not xd then
-					return false
-				end
-				if not yd then
-					return true
-				end
-				return xd.unit:base().GADGET_TYPE > yd.unit:base().GADGET_TYPE
-			end)
-			local gadget
-			for i, id in ipairs(gadgets) do
-				gadget = self._parts[id]
-				if gadget and gadget.unit:base().is_usable then
-					retval = gadget.unit:base():is_usable()
-				end
-			end
-		end
+	local bipod_part = managers.weapon_factory:get_parts_from_weapon_by_perk("bipod", self._parts)
+	local bipod_unit
+	if bipod_part and bipod_part[1] then
+		bipod_unit = bipod_part[1].unit:base()
 	end
+	retval = bipod_unit:is_usable()
 	return retval
 end
 function NewRaycastWeaponBase:gadget_toggle_requires_stance_update()
@@ -730,8 +750,10 @@ function NewRaycastWeaponBase:_convert_add_to_mul(value)
 end
 function NewRaycastWeaponBase:_get_spread(user_unit)
 	local current_state = user_unit:movement()._current_state
+	local spread = self._spread
 	local spread_multiplier = self:spread_multiplier(current_state)
-	return self._spread * spread_multiplier
+	local spread_addend = self:spread_addend(current_state)
+	return math.max((spread + spread_addend) * spread_multiplier, 0)
 end
 function NewRaycastWeaponBase:fire_rate_multiplier()
 	local user_unit = self._setup and self._setup.user_unit
@@ -751,11 +773,14 @@ end
 function NewRaycastWeaponBase:melee_damage_multiplier()
 	return managers.player:upgrade_value(self._name_id, "melee_multiplier", 1)
 end
+function NewRaycastWeaponBase:spread_addend(current_state)
+	return managers.blackmarket:accuracy_addend(self._name_id, self:weapon_tweak_data().category, self._current_stats_indices and self._current_stats_indices.spread, self._silencer, current_state, self:fire_mode(), self._blueprint)
+end
 function NewRaycastWeaponBase:spread_multiplier(current_state)
-	return managers.blackmarket:accuracy_multiplier(self._name_id, self:weapon_tweak_data().category, self._silencer, current_state, self:fire_mode(), self._blueprint)
+	return managers.blackmarket:accuracy_multiplier(self._name_id, self:weapon_tweak_data().category, self._silencer, current_state, self._spread_moving, self:fire_mode(), self._blueprint)
 end
 function NewRaycastWeaponBase:recoil_addend()
-	return managers.blackmarket:recoil_addend(self._name_id, self:weapon_tweak_data().category, self._silencer, self._blueprint)
+	return managers.blackmarket:recoil_addend(self._name_id, self:weapon_tweak_data().category, self._current_stats_indices and self._current_stats_indices.recoil, self._silencer, self._blueprint)
 end
 function NewRaycastWeaponBase:recoil_multiplier()
 	return managers.blackmarket:recoil_multiplier(self._name_id, self:weapon_tweak_data().category, self._silencer, self._blueprint)
@@ -912,8 +937,15 @@ function NewRaycastWeaponBase:destroy(unit)
 	NewRaycastWeaponBase.super.destroy(self, unit)
 	if self._parts_texture_switches then
 		for part_id, texture_ids in pairs(self._parts_texture_switches) do
-			print("BYE BYE ")
 			TextureCache:unretrieve(texture_ids)
+		end
+	end
+	if self._textures then
+		for tex_id, texture_data in pairs(self._textures) do
+			if not texture_data.applied then
+				texture_data.applied = true
+				TextureCache:unretrieve(texture_data.name)
+			end
 		end
 	end
 	managers.weapon_factory:disassemble(self._parts)

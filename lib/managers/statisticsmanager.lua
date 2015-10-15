@@ -490,10 +490,6 @@ end
 function StatisticsManager:aquired_money(amount)
 	self:_increment_misc("cash", amount * 1000)
 end
-function StatisticsManager:crimefest_stats(name)
-	self._global.session.crimefest = self._global.session.crimefest or {}
-	self._global.session.crimefest[name] = (self._global.session.crimefest[name] or 0) + 1
-end
 function StatisticsManager:publish_to_steam(session, success, completion)
 	if Application:editor() or not managers.criminals:local_character_name() then
 		return
@@ -863,39 +859,6 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 			stats["crimefest_challenge_" .. name] = {type = "int", value = count}
 		end
 	end
-	managers.network.account:publish_statistics(stats)
-end
-function StatisticsManager:publish_xp_to_steam(total_xp)
-	if Application:editor() then
-		return
-	end
-	local stats = {}
-	local xp = math.round(total_xp / 100)
-	if xp > 0 then
-		print("Crimefest Challenge: crimefest_challenge_clover_2", xp)
-		stats.crimefest_challenge_clover_2 = {type = "int", value = xp}
-	end
-	managers.network.account:publish_statistics(stats)
-end
-function StatisticsManager:publish_cash_to_steam(total_cash)
-	if Application:editor() then
-		return
-	end
-	local stats = {}
-	local cash = math.round(total_cash / 10000)
-	if cash > 0 then
-		print("Crimefest Challenge: crimefest_challenge_dallas_3", cash * 10000)
-		stats.crimefest_challenge_dallas_3 = {type = "int", value = cash}
-	end
-	managers.network.account:publish_statistics(stats)
-end
-function StatisticsManager:publish_lootdrop_to_steam()
-	if Application:editor() then
-		return
-	end
-	local stats = {}
-	print("Crimefest Challenge: crimefest_challenge_final", 1)
-	stats.crimefest_challenge_final = {type = "int", value = 1}
 	managers.network.account:publish_statistics(stats)
 end
 function StatisticsManager:publish_level_to_steam()

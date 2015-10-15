@@ -119,8 +119,8 @@ function UpgradesTweakData:_init_pd2_values()
 	self.weapon_cost_multiplier = {}
 	self.weapon_cost_multiplier.akimbo = 1.4
 	self.weapon_movement_penalty = {}
-	self.weapon_movement_penalty.lmg = 0.8
-	self.weapon_movement_penalty.minigun = 0.6
+	self.weapon_movement_penalty.lmg = 1
+	self.weapon_movement_penalty.minigun = 1
 	self.explosive_bullet = {}
 	self.explosive_bullet.curve_pow = 0.5
 	self.explosive_bullet.player_dmg_mul = 0.1
@@ -676,6 +676,30 @@ function UpgradesTweakData:_init_pd2_values()
 	self.values.player.movement_speed_damage_health_ratio_multiplier = {0.2}
 	self.values.player.armor_regen_damage_health_ratio_threshold_multiplier = {2}
 	self.values.player.movement_speed_damage_health_ratio_threshold_multiplier = {2}
+	self.values.assault_rifle.move_spread_index_addend = {2}
+	self.values.snp.move_spread_index_addend = {2}
+	self.values.pistol.spread_index_addend = {1}
+	self.values.akimbo.spread_index_addend = self.values.pistol.spread_index_addend
+	self.values.shotgun.hip_fire_spread_index_addend = {1}
+	self.values.weapon.hip_fire_spread_index_addend = {1}
+	self.values.weapon.single_spread_index_addend = {1}
+	self.values.weapon.silencer_spread_index_addend = {2}
+	self.values.team.pistol.recoil_index_addend = {1}
+	self.values.team.akimbo.recoil_index_addend = self.values.team.pistol.recoil_index_addend
+	self.values.team.weapon.recoil_index_addend = {2}
+	self.values.team.pistol.suppression_recoil_index_addend = self.values.team.pistol.recoil_index_addend
+	self.values.team.akimbo.suppression_recoil_index_addend = self.values.team.akimbo.recoil_index_addend
+	self.values.team.weapon.suppression_recoil_index_addend = self.values.team.weapon.recoil_index_addend
+	self.values.shotgun.recoil_index_addend = {1}
+	self.values.assault_rifle.recoil_index_addend = {1}
+	self.values.weapon.silencer_recoil_index_addend = {2}
+	self.values.lmg.recoil_index_addend = {1}
+	self.values.snp.recoil_index_addend = {1}
+	self.values.akimbo.recoil_index_addend = {
+		-6,
+		-4,
+		-2
+	}
 	local editable_skill_descs = {
 		ammo_2x = {
 			{"2"},
@@ -767,7 +791,7 @@ function UpgradesTweakData:_init_pd2_values()
 			{}
 		},
 		equilibrium = {
-			{"10%", "50%"},
+			{"4", "50%"},
 			{"100%"}
 		},
 		fast_learner = {
@@ -775,8 +799,8 @@ function UpgradesTweakData:_init_pd2_values()
 			{"20%"}
 		},
 		from_the_hip = {
-			{"20%"},
-			{"20%"}
+			{"4"},
+			{"4"}
 		},
 		ghost = {
 			{"1", "20"},
@@ -832,11 +856,11 @@ function UpgradesTweakData:_init_pd2_values()
 		},
 		kilmer = {
 			{"25%"},
-			{"50%"}
+			{"8"}
 		},
 		leadership = {
-			{"25%"},
-			{"50%"}
+			{"4"},
+			{"8"}
 		},
 		mag_plus = {
 			{"5"},
@@ -919,15 +943,15 @@ function UpgradesTweakData:_init_pd2_values()
 			{}
 		},
 		sharpshooter = {
-			{"20%"},
-			{"25%"}
+			{"4"},
+			{"8"}
 		},
 		shotgun_cqb = {
 			{"50%"},
 			{"125%"}
 		},
 		shotgun_impact = {
-			{"25%"},
+			{"4"},
 			{"35%"}
 		},
 		show_of_force = {
@@ -939,8 +963,8 @@ function UpgradesTweakData:_init_pd2_values()
 			{}
 		},
 		silence_expert = {
-			{"50%", "100%"},
-			{"50%", "20%"}
+			{"8", "100%"},
+			{"8", "20%"}
 		},
 		silent_drilling = {
 			{"65%"},
@@ -1089,8 +1113,8 @@ function UpgradesTweakData:_init_pd2_values()
 			{}
 		},
 		akimbo = {
-			{"50%"},
-			{"25%", "150%"}
+			{"-16"},
+			{"-8", "150%"}
 		},
 		jail_diet = {
 			{
@@ -1304,7 +1328,7 @@ function UpgradesTweakData:_init_pd2_values()
 			{
 				"10%",
 				"5%",
-				"75%"
+				"-24"
 			},
 			{
 				"+1",
@@ -1318,7 +1342,7 @@ function UpgradesTweakData:_init_pd2_values()
 			{
 				"10%",
 				"5%",
-				"50%",
+				"-16",
 				"125%",
 				"10%"
 			}
@@ -6760,6 +6784,150 @@ function UpgradesTweakData:_grenades_definitions()
 	self.definitions.wpn_prj_jav = {category = "grenade", dlc = "steel"}
 end
 function UpgradesTweakData:_weapon_definitions()
+	self.definitions.assault_rifle_move_spread_index_addend = {
+		category = "feature",
+		name_id = "menu_assault_rifle_move_spread_index_addend",
+		upgrade = {
+			category = "assault_rifle",
+			upgrade = "move_spread_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.snp_move_spread_index_addend = {
+		category = "feature",
+		name_id = "menu_snp_move_spread_index_addend",
+		upgrade = {
+			category = "snp",
+			upgrade = "move_spread_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.weapon_silencer_spread_index_addend = {
+		category = "feature",
+		name_id = "menu_weapon_silencer_spread_index_addend",
+		upgrade = {
+			category = "weapon",
+			upgrade = "silencer_spread_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.pistol_spread_index_addend = {
+		category = "feature",
+		name_id = "menu_pistol_spread_index_addend",
+		upgrade = {
+			category = "pistol",
+			upgrade = "spread_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.akimbo_spread_index_addend = {
+		category = "feature",
+		name_id = "menu_akimbo_spread_index_addend",
+		upgrade = {
+			category = "akimbo",
+			upgrade = "spread_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.shotgun_hip_fire_spread_index_addend = {
+		category = "feature",
+		name_id = "menu_shotgun_hip_fire_spread_index_addend",
+		upgrade = {
+			category = "shotgun",
+			upgrade = "hip_fire_spread_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.weapon_hip_fire_spread_index_addend = {
+		category = "feature",
+		name_id = "menu_weapon_hip_fire_spread_index_addend",
+		upgrade = {
+			category = "weapon",
+			upgrade = "hip_fire_spread_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.weapon_single_spread_index_addend = {
+		category = "feature",
+		name_id = "menu_weapon_single_spread_index_addend",
+		upgrade = {
+			category = "weapon",
+			upgrade = "single_spread_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.shotgun_recoil_index_addend = {
+		category = "feature",
+		name_id = "menu_shotgun_recoil_index_addend",
+		upgrade = {
+			category = "shotgun",
+			upgrade = "recoil_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.assault_rifle_recoil_index_addend = {
+		category = "feature",
+		name_id = "menu_assault_rifle_recoil_index_addend",
+		upgrade = {
+			category = "assault_rifle",
+			upgrade = "recoil_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.lmg_recoil_index_addend = {
+		category = "feature",
+		name_id = "menu_lmg_recoil_index_addend",
+		upgrade = {
+			category = "lmg",
+			upgrade = "recoil_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.snp_recoil_index_addend = {
+		category = "feature",
+		name_id = "menu_snp_recoil_index_addend",
+		upgrade = {
+			category = "snp",
+			upgrade = "recoil_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.akimbo_recoil_index_addend_1 = {
+		category = "feature",
+		name_id = "menu_akimbo_recoil_index_addend",
+		upgrade = {
+			category = "akimbo",
+			upgrade = "recoil_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.akimbo_recoil_index_addend_2 = {
+		category = "feature",
+		name_id = "menu_akimbo_recoil_index_addend",
+		upgrade = {
+			category = "akimbo",
+			upgrade = "recoil_index_addend",
+			value = 2
+		}
+	}
+	self.definitions.akimbo_recoil_index_addend_3 = {
+		category = "feature",
+		name_id = "menu_akimbo_recoil_index_addend",
+		upgrade = {
+			category = "akimbo",
+			upgrade = "recoil_index_addend",
+			value = 3
+		}
+	}
+	self.definitions.weapon_silencer_recoil_index_addend = {
+		category = "feature",
+		name_id = "menu_weapon_silencer_recoil_index_addend",
+		upgrade = {
+			category = "weapon",
+			upgrade = "silencer_recoil_index_addend",
+			value = 1
+		}
+	}
 	self.definitions.weapon_modded_damage_multiplier = {
 		category = "feature",
 		name_id = "menu_modded_damage_multiplier",
@@ -7460,6 +7628,60 @@ function UpgradesTweakData:_carry_definitions()
 	}
 end
 function UpgradesTweakData:_team_definitions()
+	self.definitions.team_pistol_recoil_index_addend = {
+		category = "team",
+		name_id = "menu_team_pistol_recoil_index_addend",
+		upgrade = {
+			category = "pistol",
+			upgrade = "recoil_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.team_akimbo_recoil_index_addend = {
+		category = "team",
+		name_id = "menu_team_akimbo_recoil_index_addend",
+		upgrade = {
+			category = "akimbo",
+			upgrade = "recoil_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.team_weapon_recoil_index_addend = {
+		category = "team",
+		name_id = "menu_team_weapon_recoil_index_addend",
+		upgrade = {
+			category = "weapon",
+			upgrade = "recoil_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.team_pistol_suppression_recoil_index_addend = {
+		category = "team",
+		name_id = "menu_team_pistol_suppression_recoil_index_addend",
+		upgrade = {
+			category = "pistol",
+			upgrade = "suppression_recoil_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.team_akimbo_suppression_recoil_index_addend = {
+		category = "team",
+		name_id = "menu_team_akimbo_suppression_recoil_index_addend",
+		upgrade = {
+			category = "akimbo",
+			upgrade = "suppression_recoil_index_addend",
+			value = 1
+		}
+	}
+	self.definitions.team_weapon_suppression_recoil_index_addend = {
+		category = "team",
+		name_id = "menu_team_weapon_suppression_recoil_index_addend",
+		upgrade = {
+			category = "weapon",
+			upgrade = "suppression_recoil_index_addend",
+			value = 1
+		}
+	}
 	self.definitions.team_pistol_suppression_recoil_multiplier = {
 		category = "team",
 		name_id = "menu_team_pistol_suppression_recoil_multiplier",

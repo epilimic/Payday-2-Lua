@@ -630,8 +630,19 @@ function CoreParticleEditorPanel:do_save(warn_on_overwrite)
 	managers.database:save_node(n, self._effect:name())
 	self._last_saved_xml = n:to_xml()
 	if self._valid_effect then
-		managers.database:recompile(self._effect:name())
-		PackageManager:reload(Idstring("effect"), managers.database:entry_path(self._effect:name()):id())
+		Application:data_compile({
+			platform = string.lower(SystemInfo:platform():s()),
+			source_root = managers.database:base_path(),
+			target_db_root = Application:base_path() .. "/assets",
+			target_db_name = "all",
+			source_files = {
+				managers.database:entry_relative_path(self._effect:name())
+			},
+			verbose = false,
+			send_idstrings = false
+		})
+		DB:reload()
+		managers.database:clear_all_cached_indices()
 	end
 	self._editor:set_page_name(self, base_path(self._effect:name()))
 	return true

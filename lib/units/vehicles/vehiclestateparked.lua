@@ -3,7 +3,10 @@ function VehicleStateParked:init(unit)
 	BaseVehicleState.init(self, unit)
 end
 function VehicleStateParked:enter(state_data, enter_data)
-	self._unit:vehicle_driving():_start_engine_sound()
+	if not self._unit:vehicle():is_active() then
+		self._unit:vehicle_driving():activate_vehicle()
+		self._unit:vehicle_driving():_start_engine_sound()
+	end
 	self._unit:interaction():set_override_timer_value(VehicleDrivingExt.TIME_ENTER)
 	self:adjust_interactions()
 	self._unit:vehicle_driving():set_input(0, 0, 1, 1, false, false, 2)

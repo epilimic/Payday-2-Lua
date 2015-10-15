@@ -15,7 +15,8 @@ function SecurityCameraUnitElement:init(unit)
 	table.insert(self._save_values, "ai_enabled")
 	table.insert(self._save_values, "apply_settings")
 end
-function SecurityCameraUnitElement:post_init()
+function SecurityCameraUnitElement:post_init(...)
+	SecurityCameraUnitElement.super.post_init(self, ...)
 	if self._hed.apply_settings then
 		table.insert(self._save_values, "yaw")
 		table.insert(self._save_values, "pitch")
@@ -26,10 +27,30 @@ function SecurityCameraUnitElement:post_init()
 		table.insert(self._save_values, "detection_delay_max")
 	end
 end
+function SecurityCameraUnitElement:_add_camera_filter(unit)
+	local id = unit:unit_data().unit_id
+	if self._hed.camera_u_id == id then
+		return false
+	end
+	return unit:base() and unit:base().security_camera
+end
+function SecurityCameraUnitElement:_remove_camera_filter(unit)
+	return self._hed.camera_u_id == unit:unit_data().unit_id
+end
+function SecurityCameraUnitElement:_remove_camera_unit()
+	self:_set_camera_unit(nil)
+end
 function SecurityCameraUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	self:_build_add_remove_static_unit_from_list(panel, panel_sizer, {
+		single = true,
+		add_filter = callback(self, self, "_add_camera_filter"),
+		add_result = callback(self, self, "_set_camera_unit"),
+		remove_filter = callback(self, self, "_remove_camera_filter"),
+		remove_result = callback(self, self, "_remove_camera_unit")
+	})
 	local ai_enabled = EWS:CheckBox(panel, "AI Enabled", "")
 	ai_enabled:set_value(self._hed.ai_enabled)
 	ai_enabled:connect("EVT_COMMAND_CHECKBOX_CLICKED", callback(self, self, "set_element_data"), {ctrlr = ai_enabled, value = "ai_enabled"})

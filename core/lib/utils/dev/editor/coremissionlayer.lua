@@ -157,6 +157,13 @@ function MissionLayer:_add_on_executed(unit)
 		local vc = self._editor_data.virtual_controller
 		if vc:down(Idstring("add_on_executed")) then
 			self._selected_unit:mission_element():add_on_executed(unit)
+			if self:shift() then
+				for _, u in ipairs(self._selected_units) do
+					if u ~= self._selected_unit and u ~= unit then
+						u:mission_element():add_on_executed(unit)
+					end
+				end
+			end
 			return true
 		end
 	end
@@ -299,6 +306,11 @@ function MissionLayer:update(time, rel_time)
 				end
 				self._name_brush:center_text(unit:position() + offset, utf8.from_latin1(unit:unit_data().name_id), cam_right, -cam_up)
 			end
+		end
+	end
+	if self._only_draw_selected_connections then
+		for _, su in ipairs(self._selected_units) do
+			su:mission_element():draw_link_on_executed(t, dt)
 		end
 	end
 end

@@ -66,6 +66,9 @@ function NewNPCRaycastWeaponBase:init(unit)
 		self._flashlight_data.light:set_spot_angle_end(25)
 		self._flashlight_data.light:set_multiplier(2)
 	end
+	self._textures = {}
+	self._cosmetics_data = nil
+	self._materials = nil
 end
 function NewNPCRaycastWeaponBase:setup(setup_data)
 	self._autoaim = setup_data.autoaim
@@ -96,6 +99,9 @@ function NewNPCRaycastWeaponBase:is_npc()
 end
 function NewNPCRaycastWeaponBase:skip_queue()
 	return true
+end
+function NewNPCRaycastWeaponBase:use_thq()
+	return managers.weapon_factory:use_thq_weapon_parts()
 end
 function NewNPCRaycastWeaponBase:check_npc()
 	if not self._assembly_complete then

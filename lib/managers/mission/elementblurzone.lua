@@ -11,9 +11,9 @@ function ElementBlurZone:on_executed(instigator)
 		return
 	end
 	if self._values.mode == 0 then
-		managers.environment_controller:set_blurzone(self._values.mode)
+		managers.environment_controller:set_blurzone(self._id, self._values.mode)
 	else
-		managers.environment_controller:set_blurzone(self._values.mode, self._values.position, self._values.radius, self._values.height)
+		managers.environment_controller:set_blurzone(self._id, self._values.mode, self._values.position, self._values.radius, self._values.height)
 	end
 	ElementBlurZone.super.on_executed(self, instigator)
 end

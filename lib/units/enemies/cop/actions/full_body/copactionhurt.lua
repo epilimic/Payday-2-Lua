@@ -199,7 +199,7 @@ function CopActionHurt:init(action_desc, common_data)
 		end
 	elseif action_type == "taser_tased" then
 		local char_tweak = tweak_data.character[self._unit:base()._tweak_table]
-		if char_tweak.can_be_tased == nil or char_tweak.can_be_tased then
+		if (char_tweak.can_be_tased == nil or char_tweak.can_be_tased) and self._unit:brain() and self._unit:brain()._current_logic_name ~= "intimidated" then
 			redir_res = self._ext_movement:play_redirect("taser")
 			local variant = math.random(4)
 			local dir_str
@@ -738,6 +738,24 @@ function CopActionHurt:_upd_empty(t)
 end
 function CopActionHurt:_upd_sick(t)
 	if not self._sick_time or t > self._sick_time then
+		self._expired = true
+	end
+end
+function CopActionHurt:_upd_tased(t)
+	if not self._tased_time or t > self._tased_time then
+		if self._tased_down_time and t < self._tased_down_time then
+			local redir_res = self._ext_movement:play_redirect("fatal")
+			if not redir_res then
+				debug_pause("[CopActionHurt:init] fatal redirect failed in", self._machine:segment_state(Idstring("base")))
+			end
+			self.update = self._upd_tased_down
+		else
+			self._expired = true
+		end
+	end
+end
+function CopActionHurt:_upd_tased_down(t)
+	if not self._tased_down_time or t > self._tased_down_time then
 		self._expired = true
 	end
 end

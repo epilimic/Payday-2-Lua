@@ -53,10 +53,29 @@ function CoreRandomUnitElement:remove_links(unit)
 		self._hed.counter_id = nil
 	end
 end
+function CoreRandomUnitElement:_add_counter_filter(unit)
+	return unit:name() == Idstring("core/units/mission_elements/logic_counter/logic_counter")
+end
+function CoreRandomUnitElement:_set_counter_id(unit)
+	self._hed.counter_id = unit:unit_data().unit_id
+end
+function CoreRandomUnitElement:_remove_counter_filter(unit)
+	return self._hed.counter_id == unit:unit_data().unit_id
+end
+function CoreRandomUnitElement:_remove_counter_id(unit)
+	self._hed.counter_id = nil
+end
 function CoreRandomUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	self:_build_add_remove_static_unit_from_list(panel, panel_sizer, {
+		single = true,
+		add_filter = callback(self, self, "_add_counter_filter"),
+		add_result = callback(self, self, "_set_counter_id"),
+		remove_filter = callback(self, self, "_remove_counter_filter"),
+		remove_result = callback(self, self, "_remove_counter_id")
+	})
 	self:_build_value_number(panel, panel_sizer, "amount", {floats = 0, min = 1}, "Specifies the amount of elements to be executed")
 	self:_build_value_number(panel, panel_sizer, "amount_random", {floats = 0, min = 0}, "Add a random amount to amount")
 	self:_build_value_checkbox(panel, panel_sizer, "ignore_disabled")

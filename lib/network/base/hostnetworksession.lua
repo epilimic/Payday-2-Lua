@@ -718,7 +718,7 @@ function HostNetworkSession:_reset_outfit_loading_status_request()
 	end
 end
 function HostNetworkSession:on_peer_outfit_loaded(peer)
-	print("[HostNetworkSession:on_peer_outfit_loaded]", inspect(peer))
+	print("[HostNetworkSession:on_peer_outfit_loaded]", peer:id())
 	for _peer_id, _peer in pairs(self._peers) do
 		self:chk_initiate_dropin_pause(_peer)
 		self:chk_drop_in_peer(_peer)

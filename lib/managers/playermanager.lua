@@ -143,12 +143,12 @@ function PlayerManager:_internal_load()
 	local secondary = managers.blackmarket:equipped_secondary()
 	local secondary_slot = managers.blackmarket:equipped_weapon_slot("secondaries")
 	local texture_switches = managers.blackmarket:get_weapon_texture_switches("secondaries", secondary_slot, secondary)
-	player:inventory():add_unit_by_factory_name(secondary.factory_id, true, false, secondary.blueprint, texture_switches)
+	player:inventory():add_unit_by_factory_name(secondary.factory_id, true, false, secondary.blueprint, secondary.cosmetics, texture_switches)
 	local primary = managers.blackmarket:equipped_primary()
 	if primary then
 		local primary_slot = managers.blackmarket:equipped_weapon_slot("primaries")
 		local texture_switches = managers.blackmarket:get_weapon_texture_switches("primaries", primary_slot, primary)
-		player:inventory():add_unit_by_factory_name(primary.factory_id, false, false, primary.blueprint, texture_switches)
+		player:inventory():add_unit_by_factory_name(primary.factory_id, false, false, primary.blueprint, primary.cosmetics, texture_switches)
 	end
 	player:inventory():set_melee_weapon(managers.blackmarket:equipped_melee_weapon())
 	local peer_id = managers.network:session():local_peer():id()
@@ -1825,7 +1825,7 @@ function PlayerManager:verify_carry(peer, carry_id)
 			return false
 		end
 	end
-	return peer:verify_bag(carry_id, -1)
+	return peer:verify_bag(carry_id, false)
 end
 function PlayerManager:register_carry(peer, carry_id)
 	if Network:is_client() or not managers.network:session() then
@@ -1834,7 +1834,7 @@ function PlayerManager:register_carry(peer, carry_id)
 	if not peer then
 		return false
 	end
-	return peer:verify_bag(carry_id, 1)
+	return peer:verify_bag(carry_id, true)
 end
 function PlayerManager:add_special(params)
 	local name = params.equipment or params.name

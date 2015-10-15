@@ -1605,27 +1605,46 @@ function TeamLoadoutItem:set_slot_outfit(slot, criminal_name, outfit)
 	local primary_texture, secondary_texture
 	if outfit.primary.factory_id then
 		local primary_id = managers.weapon_factory:get_weapon_id_by_factory_id(outfit.primary.factory_id)
-		local guis_catalog = "guis/"
-		local bundle_folder = tweak_data.weapon[primary_id] and tweak_data.weapon[primary_id].texture_bundle_folder
-		if bundle_folder then
-			guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
-		end
-		local texture_name = tweak_data.weapon[primary_id].texture_name or tostring(primary_id)
-		local texture = guis_catalog .. "textures/pd2/blackmarket/icons/weapons/" .. texture_name
+		local texture, rarity = managers.blackmarket:get_weapon_icon_path(primary_id, outfit.primary.cosmetics)
 		local primary_bitmap = player_slot.panel:bitmap({
 			texture = texture,
 			w = w,
 			h = h,
 			rotation = math.random(2) - 1.5,
-			alpha = 0.8
+			alpha = 0.8,
+			layer = 1
 		})
 		aspect = primary_bitmap:texture_width() / math.max(1, primary_bitmap:texture_height())
 		primary_bitmap:set_w(primary_bitmap:h() * aspect)
 		primary_bitmap:set_center_x(x)
 		primary_bitmap:set_center_y(y * 3)
+		if rarity then
+			local rarity_bitmap = player_slot.panel:bitmap({
+				texture = rarity,
+				rotation = 360,
+				blend_mode = "add"
+			})
+			local texture_width = rarity_bitmap:texture_width()
+			local texture_height = rarity_bitmap:texture_height()
+			local panel_width = primary_bitmap:w()
+			local panel_height = primary_bitmap:h()
+			local tw = texture_width
+			local th = texture_height
+			local pw = panel_width
+			local ph = panel_height
+			if tw == 0 or th == 0 then
+				Application:error("[TeamLoadoutItem] BG Texture size error!:", "width", tw, "height", th)
+				tw = 1
+				th = 1
+			end
+			local sw = math.min(pw, ph * (tw / th))
+			local sh = math.min(ph, pw / (tw / th))
+			rarity_bitmap:set_size(math.round(sw), math.round(sh))
+			rarity_bitmap:set_center(primary_bitmap:center())
+		end
 		primary_texture = texture
 		local perks = managers.blackmarket:get_perks_from_weapon_blueprint(outfit.primary.factory_id, outfit.primary.blueprint)
-		if table.size(perks) > 0 then
+		if 0 < table.size(perks) then
 			local perk_index = 0
 			for perk in pairs(perks) do
 				local texture = "guis/textures/pd2/blackmarket/inv_mod_" .. perk
@@ -1635,7 +1654,8 @@ function TeamLoadoutItem:set_slot_outfit(slot, criminal_name, outfit)
 						w = 16,
 						h = 16,
 						rotation = math.random(2) - 1.5,
-						alpha = 0.8
+						alpha = 0.8,
+						layer = 1
 					})
 					perk_object:set_rightbottom(math.round(primary_bitmap:right() - perk_index * 16), math.round(primary_bitmap:bottom() - 5))
 					perk_index = perk_index + 1
@@ -1645,27 +1665,46 @@ function TeamLoadoutItem:set_slot_outfit(slot, criminal_name, outfit)
 	end
 	if outfit.secondary.factory_id then
 		local secondary_id = managers.weapon_factory:get_weapon_id_by_factory_id(outfit.secondary.factory_id)
-		local guis_catalog = "guis/"
-		local bundle_folder = tweak_data.weapon[secondary_id] and tweak_data.weapon[secondary_id].texture_bundle_folder
-		if bundle_folder then
-			guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
-		end
-		local texture_name = tweak_data.weapon[secondary_id].texture_name or tostring(secondary_id)
-		local texture = guis_catalog .. "textures/pd2/blackmarket/icons/weapons/" .. texture_name
+		local texture, rarity = managers.blackmarket:get_weapon_icon_path(secondary_id, outfit.secondary.cosmetics)
 		local secondary_bitmap = player_slot.panel:bitmap({
 			texture = texture,
 			w = w,
 			h = h,
 			rotation = math.random(2) - 1.5,
-			alpha = 0.8
+			alpha = 0.8,
+			layer = 1
 		})
 		aspect = secondary_bitmap:texture_width() / math.max(1, secondary_bitmap:texture_height())
 		secondary_bitmap:set_w(secondary_bitmap:h() * aspect)
 		secondary_bitmap:set_center_x(x)
 		secondary_bitmap:set_center_y(y * 6)
+		if rarity then
+			local rarity_bitmap = player_slot.panel:bitmap({
+				texture = rarity,
+				rotation = 360,
+				blend_mode = "add"
+			})
+			local texture_width = rarity_bitmap:texture_width()
+			local texture_height = rarity_bitmap:texture_height()
+			local panel_width = secondary_bitmap:w()
+			local panel_height = secondary_bitmap:h()
+			local tw = texture_width
+			local th = texture_height
+			local pw = panel_width
+			local ph = panel_height
+			if tw == 0 or th == 0 then
+				Application:error("[TeamLoadoutItem] BG Texture size error!:", "width", tw, "height", th)
+				tw = 1
+				th = 1
+			end
+			local sw = math.min(pw, ph * (tw / th))
+			local sh = math.min(ph, pw / (tw / th))
+			rarity_bitmap:set_size(math.round(sw), math.round(sh))
+			rarity_bitmap:set_center(secondary_bitmap:center())
+		end
 		secondary_texture = texture
 		local perks = managers.blackmarket:get_perks_from_weapon_blueprint(outfit.secondary.factory_id, outfit.secondary.blueprint)
-		if table.size(perks) > 0 then
+		if 0 < table.size(perks) then
 			local perk_index = 0
 			for perk in pairs(perks) do
 				local texture = "guis/textures/pd2/blackmarket/inv_mod_" .. perk
@@ -1675,7 +1714,8 @@ function TeamLoadoutItem:set_slot_outfit(slot, criminal_name, outfit)
 						w = 16,
 						h = 16,
 						rotation = math.random(2) - 1.5,
-						alpha = 0.8
+						alpha = 0.8,
+						layer = 1
 					})
 					perk_object:set_rightbottom(secondary_bitmap:right() - perk_index * 16, secondary_bitmap:bottom() - 5)
 					perk_index = perk_index + 1
@@ -1879,6 +1919,34 @@ function NewLoadoutItem:init(panel, columns, rows, x, y, params)
 				self._item_image2:set_center(self._item_panel:w() * 0.5, self._item_panel:h() * 0.65)
 			end
 		end
+		if params.item_bg_texture and DB:has(Idstring("texture"), params.item_bg_texture) then
+			local item_bg_image = self._item_panel:bitmap({
+				texture = params.item_bg_texture,
+				blend_mode = "add",
+				layer = 0
+			})
+			if self._item_image then
+				local texture_width = item_bg_image:texture_width()
+				local texture_height = item_bg_image:texture_height()
+				local panel_width = self._item_image:w()
+				local panel_height = self._item_image:h()
+				local tw = texture_width
+				local th = texture_height
+				local pw = panel_width
+				local ph = panel_height
+				if tw == 0 or th == 0 then
+					Application:error("[NewLoadoutItem] BG Texture size error!:", "width", tw, "height", th)
+					tw = 1
+					th = 1
+				end
+				local sw = math.min(pw, ph * (tw / th))
+				local sh = math.min(ph, pw / (tw / th))
+				item_bg_image:set_size(math.round(sw), math.round(sh))
+				item_bg_image:set_world_center(self._item_image:world_center())
+			else
+				item_bg_image:set_size(self._item_panel:w(), self._item_panel:h())
+			end
+		end
 		if params.info_icons then
 			self._info_icon_panel = self._info_panel:panel()
 			local when_to_split = math.floor(self._info_icon_panel:w() / 18)
@@ -2070,11 +2138,6 @@ function NewLoadoutTab:populate_category(data)
 	for i, index in pairs(data.on_create_data) do
 		crafted = crafted_category[index]
 		if crafted then
-			guis_catalog = "guis/"
-			local bundle_folder = tweak_data.weapon[crafted.weapon_id] and tweak_data.weapon[crafted.weapon_id].texture_bundle_folder
-			if bundle_folder then
-				guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
-			end
 			new_data = {}
 			new_data.name = crafted.weapon_id
 			new_data.name_localized = managers.blackmarket:get_weapon_name_by_category_slot(category, index)
@@ -2088,8 +2151,9 @@ function NewLoadoutTab:populate_category(data)
 			new_data.skill_based = weapon_data[crafted.weapon_id].skill_based
 			new_data.skill_name = new_data.skill_based and "bm_menu_skill_locked_" .. new_data.name
 			new_data.level = managers.blackmarket:weapon_level(crafted.weapon_id)
-			local texture_name = tweak_data.weapon[crafted.weapon_id].texture_name or tostring(crafted.weapon_id)
-			new_data.bitmap_texture = guis_catalog .. "textures/pd2/blackmarket/icons/weapons/" .. texture_name
+			local texture_name, bg_texture = managers.blackmarket:get_weapon_icon_path(crafted.weapon_id, crafted.cosmetics)
+			new_data.bitmap_texture = texture_name
+			new_data.bg_texture = bg_texture
 			new_data.comparision_data = new_data.unlocked and managers.blackmarket:get_weapon_stats(category, index)
 			new_data.stream = false
 			new_data.global_value = tweak_data.weapon[new_data.name] and tweak_data.weapon[new_data.name].global_value or "normal"

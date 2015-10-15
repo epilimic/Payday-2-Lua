@@ -4,7 +4,6 @@ function ElementInteraction:init(...)
 	ElementInteraction.super.init(self, ...)
 	if Network:is_server() then
 		self._unit = CoreUnit.safe_spawn_unit("units/dev_tools/mission_elements/point_interaction/interaction_dummy", self._values.position, self._values.rotation)
-		print("set_tweak_data", self._values.tweak_data_id)
 		self._unit:interaction():set_active(false)
 		self._unit:interaction():set_mission_element(self)
 		self._unit:interaction():set_tweak_data(self._values.tweak_data_id)

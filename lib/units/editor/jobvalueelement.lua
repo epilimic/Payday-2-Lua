@@ -118,6 +118,8 @@ function ApplyJobValueUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local names
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, names)
 	local key_sizer = EWS:BoxSizer("HORIZONTAL")
 	panel_sizer:add(key_sizer, 0, 0, "EXPAND")
 	local key_name = EWS:StaticText(panel, "Key:", 0, "")

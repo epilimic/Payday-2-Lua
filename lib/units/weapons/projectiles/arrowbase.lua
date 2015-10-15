@@ -2,6 +2,7 @@ ArrowBase = ArrowBase or class(ProjectileBase)
 ArrowBase._arrow_units = {}
 local mvec1 = Vector3()
 local mrot1 = Rotation()
+local ids_pickup = Idstring("pickup")
 function ArrowBase:_setup_from_tweak_data(arrow_entry)
 	local arrow_entry = self._tweak_projectile_entry or "west_arrow"
 	local tweak_entry = tweak_data.projectiles[arrow_entry]
@@ -15,6 +16,10 @@ function ArrowBase:set_owner_peer_id(peer_id)
 	self._owner_peer_id = peer_id
 	ArrowBase._arrow_units[peer_id] = ArrowBase._arrow_units[peer_id] or {}
 	ArrowBase._arrow_units[peer_id][self._unit:key()] = self._unit
+	if peer_id == managers.network:session():local_peer():id() then
+		self._unit:add_body_activation_callback(callback(self, self, "clbk_body_activation"))
+		self._unit:body("dynamic_body"):set_deactivate_tag(ids_pickup)
+	end
 end
 function ArrowBase:owner_peer_id()
 	return self._owner_peer_id
@@ -35,7 +40,7 @@ end
 function ArrowBase:_on_collision(col_ray)
 	local damage_mult = self._weapon_damage_mult or 1
 	local loose_shoot = self._weapon_charge_fail
-	if not loose_shoot then
+	if not loose_shoot and alive(col_ray.unit) then
 		local client_damage = self._damage_class_string == "InstantExplosiveBulletBase" or alive(col_ray.unit) and col_ray.unit:id() ~= -1
 		if Network:is_server() or client_damage then
 			self._damage_class:on_collision(col_ray, self._weapon_unit or self._unit, self._thrower_unit, self._damage * damage_mult, false, false)
@@ -45,6 +50,7 @@ function ArrowBase:_on_collision(col_ray)
 		self._unit:set_slot(0)
 		return
 	end
+	self._unit:body("dynamic_body"):set_deactivate_tag(Idstring())
 	self._col_ray = col_ray
 	self:_attach_to_hit_unit(nil, loose_shoot)
 end
@@ -64,6 +70,19 @@ function ArrowBase:throw(...)
 	self:_tweak_data_play_sound("flyby")
 	self._requires_stop_flyby_sound = true
 	ArrowBase.super.throw(self, ...)
+end
+function ArrowBase:clbk_body_activation(tag, unit, body, activated)
+	if not activated and tag == ids_pickup then
+		local pos = self._unit:position()
+		self:_on_collision({
+			position = pos,
+			hit_position = pos,
+			normal = math.UP,
+			ray = -math.UP,
+			distance = 0,
+			velocity = Vector3()
+		})
+	end
 end
 function ArrowBase:sync_throw_projectile(dir, projectile_type)
 	local projectile_entry = tweak_data.blackmarket:get_projectile_name_from_index(projectile_type)
@@ -224,7 +243,8 @@ function ArrowBase:_attach_to_hit_unit(is_remote, dynamic_pickup_wanted)
 		local dir = self._col_ray.velocity
 		mvector3.normalize(dir)
 		if managers.network:session() then
-			managers.network:session():send_to_peers_synched("sync_attach_projectile", self._unit:id() ~= -1 and self._unit or nil, dynamic_pickup_wanted or false, hit_unit:id() ~= -1 and hit_unit or nil, hit_unit:id() ~= -1 and parent_body or nil, hit_unit:id() ~= -1 and parent_obj or nil, hit_unit:id() ~= -1 and local_pos or self._unit:position(), dir, tweak_data.blackmarket:get_index_from_projectile_id(self._tweak_projectile_entry), managers.network:session():local_peer():id())
+			local unit = alive(hit_unit) and hit_unit:id() ~= -1 and hit_unit
+			managers.network:session():send_to_peers_synched("sync_attach_projectile", self._unit:id() ~= -1 and self._unit or nil, dynamic_pickup_wanted or false, unit or nil, unit and parent_body or nil, unit and parent_obj or nil, unit and local_pos or self._unit:position(), dir, tweak_data.blackmarket:get_index_from_projectile_id(self._tweak_projectile_entry), managers.network:session():local_peer():id())
 		end
 	end
 	if alive(hit_unit) then

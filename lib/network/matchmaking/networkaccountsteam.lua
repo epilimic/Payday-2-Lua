@@ -21,6 +21,7 @@ NetworkAccountSTEAM.lb_levels = {
 }
 function NetworkAccountSTEAM:init()
 	NetworkAccount.init(self)
+	self._listener_holder = EventListenerHolder:new()
 	Steam:init()
 	Steam:request_listener(NetworkAccountSTEAM._on_join_request, NetworkAccountSTEAM._on_server_request)
 	Steam:error_listener(NetworkAccountSTEAM._on_disconnected, NetworkAccountSTEAM._on_ipc_fail, NetworkAccountSTEAM._on_connect_fail)
@@ -37,10 +38,14 @@ function NetworkAccountSTEAM:init()
 	Steam:lb_handler():register_storage_done_callback(NetworkAccountSTEAM._on_leaderboard_stored)
 	Steam:lb_handler():register_mappings_done_callback(NetworkAccountSTEAM._on_leaderboard_mapped)
 	self:set_lightfx()
+	self:inventory_load()
 end
 function NetworkAccountSTEAM:_load_done(...)
 	print("NetworkAccountSTEAM:_load_done()", ...)
 	self:_set_presences()
+end
+function NetworkAccountSTEAM:update()
+	self:_chk_inventory_outfit_refresh()
 end
 function NetworkAccountSTEAM:_set_presences()
 	Steam:set_rich_presence("level", managers.experience:current_level())
@@ -98,11 +103,23 @@ end
 function NetworkAccountSTEAM:has_alienware()
 	return self._has_alienware
 end
+function NetworkAccountSTEAM:_call_listeners(event, params)
+	if self._listener_holder then
+		self._listener_holder:call(event, params)
+	end
+end
+function NetworkAccountSTEAM:add_overlay_listener(key, events, clbk)
+	self._listener_holder:add(key, events, clbk)
+end
+function NetworkAccountSTEAM:remove_overlay_listener(key)
+	self._listener_holder:remove(key)
+end
 function NetworkAccountSTEAM:_on_open_overlay()
 	if self._overlay_opened then
 		return
 	end
 	self._overlay_opened = true
+	self:_call_listeners("overlay_open")
 	game_state_machine:_set_controller_enabled(false)
 end
 function NetworkAccountSTEAM:_on_close_overlay()
@@ -110,6 +127,7 @@ function NetworkAccountSTEAM:_on_close_overlay()
 		return
 	end
 	self._overlay_opened = false
+	self:_call_listeners("overlay_close")
 	game_state_machine:_set_controller_enabled(true)
 	managers.dlc:chk_content_updated()
 end
@@ -172,7 +190,7 @@ end
 function NetworkAccountSTEAM:get_global_stat(key, days)
 	local value = 0
 	local global_stat
-	if days < 0 then
+	if days and days < 0 then
 		local day = math.abs(days) + 1
 		global_stat = Steam:sa_handler():get_global_stat(key, day)
 		return global_stat[day] or 0
@@ -195,7 +213,7 @@ function NetworkAccountSTEAM:publish_statistics(stats, force_store)
 	end
 	local handler = Steam:sa_handler()
 	print("[NetworkAccountSTEAM:publish_statistics] Publishing statistics to Steam!")
-	if Application:production_build() then
+	if Application:production_build() and not force_store then
 		local err = false
 		for key, _ in pairs(stats) do
 			if not handler:set_stat(key, handler:get_stat(key)) then
@@ -205,9 +223,7 @@ function NetworkAccountSTEAM:publish_statistics(stats, force_store)
 		end
 		if err then
 		end
-		if not force_store then
-			return
-		end
+		return
 	end
 	local err = false
 	for key, stat in pairs(stats) do
@@ -254,14 +270,15 @@ function NetworkAccountSTEAM:publish_statistics(stats, force_store)
 			err = true
 		end
 	end
-	if not Application:production_build() or err then
-	end
 	if not err then
 		handler:store_data()
 	end
 end
 function NetworkAccountSTEAM._on_disconnected(lobby_id, friend_id)
 	print("[NetworkAccountSTEAM._on_disconnected]", lobby_id, friend_id)
+	if Application:editor() then
+		return
+	end
 	Application:warn("Disconnected from Steam!! Please wait", 12)
 end
 function NetworkAccountSTEAM._on_ipc_fail(lobby_id, friend_id)
@@ -328,12 +345,139 @@ function NetworkAccountSTEAM:set_playing(state)
 end
 function NetworkAccountSTEAM:_load_globals()
 	if Global.steam and Global.steam.account then
+		self._outfit_signature = Global.steam.account.outfit_signature and Global.steam.account.outfit_signature:get_data()
+		if Global.steam.account.outfit_signature then
+			Global.steam.account.outfit_signature:destroy()
+		end
 		Global.steam.account = nil
 	end
 end
 function NetworkAccountSTEAM:_save_globals()
 	Global.steam = Global.steam or {}
 	Global.steam.account = {}
+	Global.steam.account.outfit_signature = self._outfit_signature and Application:create_luabuffer(self._outfit_signature)
+end
+function NetworkAccountSTEAM:is_ready_to_close()
+	return not self._inventory_is_loading and not self._inventory_outfit_refresh_requested and not self._inventory_outfit_refresh_in_progress
+end
+function NetworkAccountSTEAM:inventory_load()
+	print("[NetworkAccountSTEAM:inventory_load]", "self._inventory_is_loading: ", self._inventory_is_loading)
+	if NetworkAccountSTEAM.TEST_INVENTORY then
+		return
+	end
+	if self._inventory_is_loading then
+		return
+	end
+	self._inventory_is_loading = true
+	Steam:inventory_load(callback(self, self, "_clbk_inventory_load"))
+end
+function NetworkAccountSTEAM:inventory_is_loading()
+	return self._inventory_is_loading
+end
+function NetworkAccountSTEAM:inventory_reward(reward_callback)
+	if NetworkAccountSTEAM.TEST_INVENTORY then
+		return false
+	end
+	Steam:inventory_reward(reward_callback)
+	return true
+end
+function NetworkAccount:inventory_reward_unlock(safe, safe_instance_id, drill_instance_id, reward_unlock_callback)
+	local safe_tweak = tweak_data.economy.safes[safe]
+	if not safe_tweak or not safe_tweak.content or not safe_tweak.drill then
+		return
+	end
+	local drill_tweak = tweak_data.economy.drills[safe_tweak.drill]
+	local content_tweak = tweak_data.economy.contents[safe_tweak.content]
+	if not content_tweak or not drill_tweak then
+		return
+	end
+	safe_instance_id = safe_instance_id or managers.blackmarket:tradable_instance_id("safes", safe)
+	drill_instance_id = drill_instance_id or managers.blackmarket:tradable_instance_id("drills", safe_tweak.drill)
+	local safe_item = managers.blackmarket:tradable_receive_item_by_instance_id(safe_instance_id)
+	local drill_item = managers.blackmarket:tradable_receive_item_by_instance_id(drill_instance_id)
+	if NetworkAccountSTEAM.TEST_INVENTORY then
+		local params = {safe = safe, callback = reward_unlock_callback}
+		managers.menu_scene:add_callback(callback(self, self, "_clbk_inventory_reward", params), 2)
+		return
+	end
+	if not safe_instance_id or not drill_instance_id then
+		if reward_unlock_callback then
+			reward_unlock_callback("invalid_open")
+		end
+		return
+	end
+	Steam:inventory_reward_unlock(safe_instance_id, drill_instance_id, content_tweak.def_id, reward_unlock_callback)
+end
+function NetworkAccountSTEAM:inventory_reward_dlc()
+	if NetworkAccountSTEAM.TEST_INVENTORY then
+		return false
+	end
+end
+function NetworkAccountSTEAM:inventory_outfit_refresh()
+	if NetworkAccountSTEAM.TEST_INVENTORY then
+		self._outfit_signature = ""
+		return
+	end
+	self._inventory_outfit_refresh_requested = true
+end
+function NetworkAccountSTEAM:_inventory_outfit_refresh()
+	local outfit = managers.blackmarket:tradable_outfit()
+	print("[NetworkAccountSTEAM:_inventory_outfit_refresh]", "outfit: ", inspect(outfit))
+	if table.size(outfit) > 0 then
+		self._outfit_signature = nil
+		self._inventory_outfit_refresh_in_progress = true
+		Steam:inventory_signature_create(outfit, callback(self, self, "_clbk_tradable_outfit_data"))
+	else
+		self._outfit_signature = ""
+		managers.network:session():check_send_outfit()
+	end
+end
+function NetworkAccountSTEAM:_chk_inventory_outfit_refresh()
+	if not self._inventory_outfit_refresh_requested then
+		return
+	end
+	if self._inventory_outfit_refresh_in_progress then
+		return
+	end
+	self._inventory_outfit_refresh_requested = nil
+	self:_inventory_outfit_refresh()
+end
+function NetworkAccountSTEAM:inventory_outfit_verify(steam_id, outfit_data, outfit_callback)
+	if outfit_data == "" then
+		return
+	end
+	Steam:inventory_signature_verify(steam_id, outfit_data, outfit_callback)
+end
+function NetworkAccountSTEAM:inventory_outfit_signature()
+	return self._outfit_signature
+end
+function NetworkAccountSTEAM:_clbk_inventory_load(error, list)
+	print("[NetworkAccountSTEAM:_clbk_inventory_load]", "error: ", error, "list: ", list)
+	self._inventory_is_loading = nil
+	if error then
+		Application:error("[NetworkAccountSTEAM:_clbk_inventory_load] Failed to update tradable inventory (" .. tostring(error) .. ")")
+	end
+	managers.blackmarket:tradable_update(list, not error)
+	managers.menu_component:set_blackmarket_tradable_loaded(error)
+	if managers.menu_scene then
+		managers.menu_scene:set_blackmarket_tradable_loaded()
+	end
+end
+function NetworkAccountSTEAM:_clbk_tradable_outfit_data(error, outfit_signature)
+	print("[NetworkAccountSTEAM:_clbk_tradable_outfit_data] error: ", error, ", self._outfit_signature: ", self._outfit_signature, [[
+
+ outfit_signature: ]], outfit_signature, "\n")
+	self._inventory_outfit_refresh_in_progress = nil
+	if self._inventory_outfit_refresh_requested then
+		return
+	end
+	if error then
+		Application:error("[NetworkAccountSTEAM:_clbk_tradable_outfit_data] Failed to check tradable inventory (" .. tostring(error) .. ")")
+	end
+	self._outfit_signature = outfit_signature
+	if managers.network:session() then
+		managers.network:session():check_send_outfit()
+	end
 end
 function NetworkAccountSTEAM.output_global_stats(file)
 	local num_days = 100

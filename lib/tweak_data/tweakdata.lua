@@ -29,6 +29,7 @@ require("lib/tweak_data/GageAssignmentTweakData")
 require("lib/tweak_data/PrePlanningTweakData")
 require("lib/tweak_data/InteractionTweakData")
 require("lib/tweak_data/VehicleTweakData")
+require("lib/tweak_data/EconomyTweakData")
 TweakData = TweakData or class()
 function TweakData:_init_wip_tweak_data()
 end
@@ -75,6 +76,8 @@ end
 function TweakData:_init_wip_carry(tweak_data)
 end
 function TweakData:_init_wip_vehicle()
+end
+function TweakData:_init_wip_economy()
 end
 require("lib/tweak_data/TweakDataPD2")
 require("lib/tweak_data/TweakDataWip")
@@ -372,6 +375,8 @@ function TweakData:init()
 	self._init_wip_interaction(self.interaction, self)
 	self.vehicle = VehicleTweakData:new(self)
 	self._init_wip_vehicle(self.vehicle, self)
+	self.economy = EconomyTweakData:new(self)
+	self._init_wip_economy(self.economy, self)
 	self.criminals = {}
 	self.criminals.character_names = {
 		"russian",
@@ -2457,7 +2462,9 @@ Play the full version soon to get your full PAYDAY!]],
 		"gallery",
 		"rat",
 		"cage",
-		"arena"
+		"arena",
+		"red2",
+		"dinner"
 	}
 	self.achievement.job_list.the_dentist = {
 		"big",
@@ -3039,8 +3046,14 @@ Play the full version soon to get your full PAYDAY!]],
 	self.pickups.keycard = {
 		unit = Idstring("units/payday2/pickups/gen_pku_keycard/gen_pku_keycard")
 	}
+	self.pickups.keycard_outlined = {
+		unit = Idstring("units/pd2_dlc_red/pickups/gen_pku_keycard_outlined/gen_pku_keycard_outlined")
+	}
 	self.pickups.hotel_room_key = {
 		unit = Idstring("units/pd2_dlc_casino/props/cas_prop_keycard/cas_prop_keycard")
+	}
+	self.pickups.pku_rambo = {
+		unit = Idstring("units/pd2_dlc_jolly/pickups/gen_pku_rambo/gen_pku_rambo")
 	}
 	self.danger_zones = {
 		0.6,
@@ -3084,6 +3097,9 @@ Play the full version soon to get your full PAYDAY!]],
 	self.contour.interactable_icon.standard_color = Vector3(0, 0, 0)
 	self.contour.interactable_icon.selected_color = Vector3(0, 1, 0)
 	self.contour.interactable_icon.standard_opacity = 0
+	self.contour.interactable_look_at = {}
+	self.contour.interactable_look_at.standard_color = Vector3(0, 0, 0)
+	self.contour.interactable_look_at.selected_color = Vector3(1, 1, 1)
 	self.music = {}
 	self.music.hit = {}
 	self.music.hit.intro = "music_hit_setup"
@@ -3546,6 +3562,11 @@ Play the full version soon to get your full PAYDAY!]],
 	self.projectiles.molotov.name_id = "bm_grenade_molotov"
 	self.projectiles.molotov.alert_radius = 1500
 	self.projectiles.molotov.fire_alert_radius = 1500
+	self.projectiles.cs_grenade_quick = {}
+	self.projectiles.cs_grenade_quick.radius = 300
+	self.projectiles.cs_grenade_quick.radius_blurzone_multiplier = 1.3
+	self.projectiles.cs_grenade_quick.damage_tick_period = 0.25
+	self.projectiles.cs_grenade_quick.damage_per_tick = 0.75
 	self.projectiles.launcher_incendiary = {}
 	self.projectiles.launcher_incendiary.damage = 3
 	self.projectiles.launcher_incendiary.launch_speed = 1250

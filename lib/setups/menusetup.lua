@@ -16,6 +16,7 @@ require("lib/units/weapons/WeaponLaser")
 require("lib/units/weapons/WeaponSecondSight")
 require("lib/units/weapons/WeaponSimpleAnim")
 require("lib/units/weapons/WeaponLionGadget1")
+require("lib/wip")
 core:import("SequenceManager")
 MenuSetup = MenuSetup or class(Setup)
 MenuSetup.IS_START_MENU = true
@@ -40,19 +41,34 @@ function MenuSetup:load_packages()
 			PackageManager:load(package)
 		end
 	end
-	if not PackageManager:loaded("packages/game_base") then
-		local _load_wip_func = function()
-			if PackageManager:package_exists("packages/wip/game_base") then
-				if not PackageManager:loaded("packages/wip/game_base") then
-					PackageManager:load("packages/wip/game_base", function()
-						Global._game_base_package_loaded = true
-					end)
-				end
-			else
-				Global._game_base_package_loaded = true
+	local platform = SystemInfo:platform()
+	if platform == Idstring("XB1") or platform == Idstring("PS4") then
+		if not PackageManager:loaded("packages/game_base_init") then
+			PackageManager:load("packages/game_base_init")
+			PackageManager:load("packages/game_base")
+			if PackageManager:package_exists("packages/wip/game_base") and not PackageManager:loaded("packages/wip/game_base") then
+				PackageManager:load("packages/wip/game_base")
 			end
+			Global._game_base_package_loaded = true
 		end
-		PackageManager:load("packages/game_base", _load_wip_func)
+	elseif not PackageManager:loaded("packages/game_base_init") then
+		do
+			local _load_wip_func = function()
+				if PackageManager:package_exists("packages/wip/game_base") then
+					if not PackageManager:loaded("packages/wip/game_base") then
+						PackageManager:load("packages/wip/game_base", function()
+							Global._game_base_package_loaded = true
+						end)
+					end
+				else
+					Global._game_base_package_loaded = true
+				end
+			end
+			local function load_base_func()
+				PackageManager:load("packages/game_base", _load_wip_func)
+			end
+			PackageManager:load("packages/game_base_init", load_base_func)
+		end
 	end
 	if PackageManager:package_exists("packages/wip/start_menu") and not PackageManager:loaded("packages/wip/start_menu") then
 		PackageManager:load("packages/wip/start_menu")
@@ -146,6 +162,7 @@ end
 function MenuSetup:init_managers(managers)
 	Setup.init_managers(self, managers)
 	managers.sequence:preload()
+	PackageManager:set_resource_loaded_clbk(Idstring("unit"), callback(managers.sequence, managers.sequence, "clbk_pkg_manager_unit_loaded"))
 	managers.menu_scene = MenuSceneManager:new()
 	managers.money = MoneyManager:new()
 	managers.statistics = StatisticsManager:new()

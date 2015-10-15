@@ -63,6 +63,18 @@ function MenuManager:setup_local_lobby_character()
 	managers.network:session():send_to_peers_loaded("sync_profile", level, rank)
 	managers.network:session():check_send_outfit()
 end
+function MenuManager:set_cash_safe_scene_done(done, silent)
+	self._cash_safe_scene_done = done
+	if not silent then
+		local logic = managers.menu:active_menu().logic
+		if logic then
+			logic:refresh_node()
+		end
+	end
+end
+function MenuManager:cash_safe_scene_done()
+	return self._cash_safe_scene_done
+end
 function MenuManager:http_test()
 	Steam:http_request("http://www.overkillsoftware.com/?feed=rss", callback(self, self, "http_test_result"))
 end
@@ -154,6 +166,7 @@ end
 function MenuCallbackHandler:leave_blackmarket(...)
 	managers.menu_component:close_weapon_box()
 	managers.menu_scene:remove_item()
+	managers.menu_scene:delete_workbench_room()
 	managers.blackmarket:release_preloaded_blueprints()
 end
 function MenuCallbackHandler:_left_blackmarket()
@@ -434,6 +447,30 @@ function MenuCallbackHandler:got_job()
 end
 function MenuCallbackHandler:got_no_job()
 	return not self:got_job()
+end
+function MenuCallbackHandler:start_safe_test_overkill()
+end
+function MenuCallbackHandler:start_safe_test_event_01()
+	managers.menu_scene:_test_start_open_economy_safe("event_01")
+end
+function MenuCallbackHandler:start_safe_test_weapon_01()
+	managers.menu_scene:_test_start_open_economy_safe("weapon_01")
+end
+function MenuCallbackHandler:start_safe_test_random()
+	local safe_names = table.map_keys(tweak_data.economy.safes)
+	table.delete(safe_names, "weapon_01")
+	local safe_name = safe_names[math.random(#safe_names)]
+	managers.menu_scene:_test_start_open_economy_safe(safe_name)
+end
+function MenuCallbackHandler:reset_safe_scene()
+	if not managers.menu:cash_safe_scene_done() then
+		return true
+	end
+	managers.menu:set_cash_safe_scene_done(false)
+	managers.menu_scene:reset_economy_safe()
+end
+function MenuCallbackHandler:is_cash_safe_back_visible()
+	return managers.menu:cash_safe_scene_done()
 end
 MenuMarketItemInitiator = MenuMarketItemInitiator or class()
 function MenuMarketItemInitiator:modify_node(node)
@@ -850,6 +887,11 @@ end
 function MenuCallbackHandler:on_visit_crimefest_challenges()
 	Steam:overlay_activate("url", tweak_data.gui.crimefest_challenges_webpage)
 end
+function MenuCallbackHandler:got_new_steam_lootdrop(item)
+	return managers.blackmarket:has_new_tradable_items()
+end
+function MenuCallbackHandler:leave_steam_inventory(item)
+end
 function MenuCallbackHandler:on_visit_fbi_files()
 	Steam:overlay_activate("url", tweak_data.gui.fbi_files_webpage)
 end
@@ -903,4 +945,263 @@ function FbiFilesInitiator:modify_node(node, up)
 end
 function FbiFilesInitiator:refresh_node(node)
 	return self:modify_node(node)
+end
+MenuInitiatorBase = MenuInitiatorBase or class()
+function MenuInitiatorBase:modify_node(original_node, data)
+	return original_node
+end
+function MenuInitiatorBase:create_divider(node, id, text_id, size, color)
+	local params = {
+		name = "divider_" .. id,
+		no_text = not text_id,
+		text_id = text_id,
+		size = size or 8,
+		color = color
+	}
+	local data_node = {
+		type = "MenuItemDivider"
+	}
+	local new_item = node:create_item(data_node, params)
+	node:add_item(new_item)
+	return new_item
+end
+function MenuInitiatorBase:create_toggle(node, params)
+	local data_node = {
+		type = "MenuItemToggleWithIcon",
+		{
+			_meta = "option",
+			icon = "guis/textures/menu_tickbox",
+			value = "on",
+			x = 24,
+			y = 0,
+			w = 24,
+			h = 24,
+			s_icon = "guis/textures/menu_tickbox",
+			s_x = 24,
+			s_y = 24,
+			s_w = 24,
+			s_h = 24
+		},
+		{
+			_meta = "option",
+			icon = "guis/textures/menu_tickbox",
+			value = "off",
+			x = 0,
+			y = 0,
+			w = 24,
+			h = 24,
+			s_icon = "guis/textures/menu_tickbox",
+			s_x = 0,
+			s_y = 24,
+			s_w = 24,
+			s_h = 24
+		}
+	}
+	local new_item = node:create_item(data_node, params)
+	new_item:set_enabled(params.enabled)
+	node:add_item(new_item)
+	return new_item
+end
+function MenuInitiatorBase:create_item(node, params)
+	local data_node = {}
+	local new_item = node:create_item(data_node, params)
+	new_item:set_enabled(params.enabled)
+	node:add_item(new_item)
+	return new_item
+end
+function MenuInitiatorBase:create_multichoice(node, choices, params)
+	if #choices == 0 then
+		return
+	end
+	local data_node = {
+		type = "MenuItemMultiChoice"
+	}
+	for _, choice in ipairs(choices) do
+		table.insert(data_node, choice)
+	end
+	local new_item = node:create_item(data_node, params)
+	new_item:set_value(choices[1].value)
+	node:add_item(new_item)
+	return new_item
+end
+function MenuInitiatorBase:create_slider(node, params)
+	local data_node = {
+		type = "CoreMenuItemSlider.ItemSlider",
+		show_value = params.show_value,
+		min = params.min,
+		max = params.max,
+		step = params.step,
+		show_value = params.show_value
+	}
+	local new_item = node:create_item(data_node, params)
+	node:add_item(new_item)
+	return new_item
+end
+function MenuInitiatorBase:add_back_button(node)
+	node:delete_item("back")
+	local params = {
+		name = "back",
+		text_id = "menu_back",
+		visible_callback = "is_pc_controller",
+		last_item = true,
+		back = true,
+		previous_node = true
+	}
+	local new_item = node:create_item(nil, params)
+	node:add_item(new_item)
+	return new_item
+end
+MenuChooseWeaponCosmeticInitiator = MenuChooseWeaponCosmeticInitiator or class(MenuInitiatorBase)
+function MenuChooseWeaponCosmeticInitiator:modify_node(original_node, data)
+	local node = deep_clone(original_node)
+	node:clean_items()
+	if not node:item("divider_end") then
+		if data and data.instance_ids then
+			local sort_items = {}
+			for id, data in pairs(data.instance_ids) do
+				table.insert(sort_items, id)
+			end
+			for _, instance_id in ipairs(sort_items) do
+				self:create_item(node, {
+					enabled = true,
+					name = instance_id,
+					localize = false,
+					text_id = instance_id
+				})
+			end
+			print(inspect(data.instance_ids))
+		end
+		self:create_divider(node, "end")
+		self:add_back_button(node)
+		node:set_default_item_name("back")
+		node:select_item("back")
+	end
+	managers.menu_component:set_blackmarket_enabled(false)
+	return node
+end
+function MenuChooseWeaponCosmeticInitiator:add_back_button(node)
+	node:delete_item("back")
+	local params = {
+		name = "back",
+		text_id = "menu_back",
+		previous_node = "true",
+		visible_callback = "is_pc_controller",
+		halign = "right",
+		align = "right",
+		last_item = "true"
+	}
+	local data_node = {}
+	local new_item = node:create_item(data_node, params)
+	node:add_item(new_item)
+	return new_item
+end
+MenuOpenContainerInitiator = MenuOpenContainerInitiator or class(MenuInitiatorBase)
+function MenuOpenContainerInitiator:modify_node(original_node, data)
+	local node = deep_clone(original_node)
+	node:parameters().container_data = data.container or {}
+	managers.menu_component:set_blackmarket_enabled(false)
+	self:update_node(node)
+	return node
+end
+function MenuOpenContainerInitiator:refresh_node(node)
+	self:update_node(node)
+	return node
+end
+function MenuOpenContainerInitiator:update_node(node)
+	node:item("open_container"):set_enabled(MenuCallbackHandler:have_safe_and_drill_for_container(node:parameters().container_data))
+end
+function MenuCallbackHandler:have_no_drills_for_container(item)
+	if not managers.menu:active_menu() or not managers.menu:active_menu().logic:selected_node() then
+		return false
+	end
+	local data = managers.menu:active_menu().logic:selected_node():parameters().container_data
+	return true
+end
+function MenuCallbackHandler:can_buy_drill(item)
+	if not managers.menu:active_menu() or not managers.menu:active_menu().logic:selected_node() then
+		return false
+	end
+	local data = managers.menu:active_menu().logic:selected_node():parameters().container_data
+	if not data then
+		return
+	end
+	local drill = data.drill
+	if not drill then
+		return
+	end
+	return not not tweak_data.economy.drills[drill].def_id
+end
+function MenuCallbackHandler:have_safe_and_drill_for_container(data)
+	if not data then
+		return
+	end
+	local drill = data.drill
+	local safe = data.safe
+	local have_drill = managers.blackmarket:have_inventory_tradable_item("drills", drill)
+	local have_safe = managers.blackmarket:have_inventory_tradable_item("safes", safe)
+	return have_drill and have_safe
+end
+function MenuCallbackHandler:steam_buy_drill(item)
+	local node = managers.menu:active_menu() and managers.menu:active_menu().logic:selected_node()
+	local quantity_item = node:item("buy_quantity")
+	local data = managers.menu:active_menu().logic:selected_node():parameters().container_data
+	if not data then
+		return
+	end
+	local drill = data.drill
+	local quantity = quantity_item and tonumber(quantity_item:value()) or 1
+	local def_id = tweak_data.economy.drills[drill].def_id
+	do break end
+	managers.menu:show_enable_steam_overlay_tradable_item()
+	do break end
+	if def_id then
+		print("buying drill", drill, quantity)
+		managers.network.account:add_overlay_listener("steam_buy_tradable_item", {
+			"overlay_close"
+		}, callback(MenuCallbackHandler, MenuCallbackHandler, "on_steam_transaction_over"))
+		Steam:overlay_activate("url", tweak_data.economy:create_buy_tradable_url(def_id, quantity))
+		managers.menu:show_buying_tradable_item_dialog()
+	end
+end
+function MenuCallbackHandler:on_steam_transaction_over(canceled)
+	print("on_steam_transaction_over", canceled)
+	managers.network.account:remove_overlay_listener("steam_buy_tradable_item")
+	managers.network.account:inventory_load()
+	managers.system_menu:close("buy_tradable_item")
+end
+function MenuCallbackHandler:steam_open_container(item)
+	if not managers.menu:active_menu() or not managers.menu:active_menu().logic:selected_node() then
+		return false
+	end
+	local data = managers.menu:active_menu().logic:selected_node():parameters().container_data
+	if not MenuCallbackHandler:have_safe_and_drill_for_container(data) then
+		return
+	end
+	local safe_entry = data.safe
+	local function ready_clbk()
+		print("ECONOMY SAFE READY CALLBACK")
+		managers.menu:back()
+		managers.system_menu:force_close_all()
+		managers.menu_component:set_blackmarket_enabled(false)
+		managers.menu:open_node("open_steam_safe", {
+			data.content
+		})
+	end
+	managers.menu_component:set_blackmarket_disable_fetching(true)
+	managers.menu_component:set_blackmarket_enabled(false)
+	managers.menu_scene:create_economy_safe_scene(safe_entry, ready_clbk)
+	managers.network.account:inventory_reward_unlock(data.safe, data.safe_id, data.drill_id, callback(MenuCallbackHandler, MenuCallbackHandler, "_safe_result_recieved"))
+end
+function MenuCallbackHandler:_safe_result_recieved(error, items_new, items_removed)
+	local active_node_gui = managers.menu:active_menu().renderer:active_node_gui()
+	if active_node_gui and active_node_gui._safe_result_recieved then
+		active_node_gui:_safe_result_recieved(error, items_new, items_removed)
+	else
+		managers.menu_scene:store_safe_result(error, items_new, items_removed)
+	end
+end
+MenuEconomySafeInitiator = MenuEconomySafeInitiator or class()
+function MenuEconomySafeInitiator:modify_node(node, safe_entry)
+	node:parameters().safe_entry = safe_entry
+	return node
 end

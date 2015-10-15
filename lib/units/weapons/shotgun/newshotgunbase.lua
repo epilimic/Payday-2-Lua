@@ -196,3 +196,18 @@ function SaigaShotgun:init(...)
 	SaigaShotgun.super.init(self, ...)
 	self._use_shotgun_reload = false
 end
+InstantElectricBulletBase = InstantElectricBulletBase or class(InstantBulletBase)
+function InstantElectricBulletBase:give_impact_damage(col_ray, weapon_unit, user_unit, damage, armor_piercing)
+	local hit_unit = col_ray.unit
+	local action_data = {}
+	action_data.damage = 0
+	action_data.weapon_unit = weapon_unit
+	action_data.attacker_unit = user_unit
+	action_data.col_ray = col_ray
+	action_data.armor_piercing = armor_piercing
+	action_data.attacker_unit = user_unit
+	action_data.attack_dir = col_ray.ray
+	action_data.variant = weapon_unit:base() and weapon_unit:base().get_tase_strength and weapon_unit:base():get_tase_strength() or "light"
+	local defense_data = hit_unit and hit_unit:character_damage().damage_tase and hit_unit:character_damage():damage_tase(action_data)
+	return defense_data
+end

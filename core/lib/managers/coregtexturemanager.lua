@@ -1,22 +1,24 @@
 core:module("CoreGTextureManager")
 GTextureManager = GTextureManager or class()
 function GTextureManager:init()
+	self._texture_map = {}
 	self._preloaded = {}
-	self._global_texture = nil
-	self._texture_name = nil
-	self._texture_type = nil
-	self._texture = nil
-	self._delay = nil
+	GlobalTextureManager:set_texture("current_global_texture", nil)
+	GlobalTextureManager:set_texture("current_global_world_overlay_texture", nil)
+	GlobalTextureManager:set_texture("current_global_world_overlay_mask_texture", nil)
 end
-function GTextureManager:set_texture(texture_name, texture_type, delay)
-	self._delay = SystemInfo:platform() ~= Idstring("PS3") and delay
-	self._texture_name = texture_name
-	self._texture_type = texture_type
-	if delay then
-		TextureCache:request(texture_name, texture_type, function()
-		end)
-	else
-		self:_retrieve()
+function GTextureManager:set_texture(variable_name, texture_name, texture_type)
+	local old_data = self._texture_map[variable_name]
+	if old_data and old_data.texture then
+		GlobalTextureManager:set_texture(variable_name, nil)
+		TextureCache:unretrieve(old_data.texture)
+		old_data.texture = nil
+	end
+	if texture_name and texture_name ~= "" then
+		local data = {texture_name = texture_name, texture_type = texture_type}
+		data.texture = TextureCache:retrieve(texture_name, texture_type)
+		GlobalTextureManager:set_texture(variable_name, data.texture)
+		self._texture_map[variable_name] = data
 	end
 end
 function GTextureManager:preload(textures, texture_type)
@@ -32,53 +34,16 @@ function GTextureManager:preload(textures, texture_type)
 		end
 	end
 end
-function GTextureManager:current_texture_name()
-	return self._texture_name
-end
-function GTextureManager:prepare_full_load(new)
-	self:_unretrieve()
-	new._preloaded = self._preloaded
-end
-function GTextureManager:is_streaming()
-	return self._delay ~= nil
-end
-function GTextureManager:reload()
-	if self._texture then
-		self:_retrieve()
-	end
-end
-function GTextureManager:update(t, dt)
-	if self._delay then
-		self._delay = self._delay - dt
-		if self._delay <= 0 then
-			self:_retrieve()
-			self._delay = nil
+function GTextureManager:destroy()
+	for variable_name, data in pairs(self._texture_map) do
+		if data.texture then
+			GlobalTextureManager:set_texture(variable_name, nil)
+			TextureCache:unretrieve(data.texture)
 		end
 	end
-end
-function GTextureManager:paused_update(t, dt)
-	self:update(t, dt)
-end
-function GTextureManager:destroy()
-	self:_unretrieve()
-	self:_unref_preloaded()
-end
-function GTextureManager:_unref_preloaded()
 	for _, v in pairs(self._preloaded) do
 		TextureCache:unretrieve(v)
 	end
-end
-function GTextureManager:_unretrieve()
-	if self._texture then
-		GlobalTextureManager:set_texture("current_global_texture", nil)
-		TextureCache:unretrieve(self._texture)
-		self._texture = nil
-	end
-end
-function GTextureManager:_retrieve()
-	self:_unretrieve()
-	if self._texture_name and self._texture_name ~= "" then
-		self._texture = TextureCache:retrieve(self._texture_name, self._texture_type)
-		GlobalTextureManager:set_texture("current_global_texture", self._texture)
-	end
+	self._texture_map = nil
+	self._preloaded = nil
 end

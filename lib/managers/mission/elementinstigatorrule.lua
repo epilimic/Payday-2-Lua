@@ -34,16 +34,20 @@ function ElementInstigatorRule:check_rules(instigator_type, instigator)
 	if not next(rules) then
 		return true
 	end
+	local check_result = true
 	if instigator_type == "player" then
-		return self:_check_player_rules(rules, instigator)
+		check_result = self:_check_player_rules(rules, instigator)
 	elseif instigator_type == "enemies" then
-		return self:_check_enemies_rules(rules, instigator)
+		check_result = self:_check_enemies_rules(rules, instigator)
 	elseif instigator_type == "civilians" then
-		return self:_check_civilians_rules(rules, instigator)
+		check_result = self:_check_civilians_rules(rules, instigator)
 	elseif instigator_type == "loot" then
-		return self:_check_loot_rules(rules, instigator)
+		check_result = self:_check_loot_rules(rules, instigator)
 	end
-	return true
+	if self._values.invert then
+		check_result = not check_result
+	end
+	return check_result
 end
 function ElementInstigatorRule:_check_player_rules(rules, instigator)
 	for rule, data in pairs(rules) do

@@ -13,9 +13,15 @@ function EnvironmentAreaManager:init()
 		1,
 		1
 	})
+	local skip_default_list = {}
+	skip_default_list[CoreEnvironmentFeeder.UnderlayPathFeeder.FILTER_CATEGORY] = true
+	skip_default_list[CoreEnvironmentFeeder.CubeMapTextureFeeder.FILTER_CATEGORY] = true
+	skip_default_list[CoreEnvironmentFeeder.WorldOverlayTextureFeeder.FILTER_CATEGORY] = true
+	skip_default_list[CoreEnvironmentFeeder.WorldOverlayMaskTextureFeeder.FILTER_CATEGORY] = true
+	skip_default_list[CoreEnvironmentFeeder.PostShadowSlice0Feeder.FILTER_CATEGORY] = true
 	local default_filter_list = {}
 	for name, data_path_key_list in pairs(managers.viewport:get_predefined_environment_filter_map()) do
-		if name ~= CoreEnvironmentFeeder.UnderlayPathFeeder.FILTER_CATEGORY and name ~= CoreEnvironmentFeeder.CubeMapTextureFeeder.FILTER_CATEGORY and name ~= CoreEnvironmentFeeder.PostShadowSlice0Feeder.FILTER_CATEGORY then
+		if not skip_default_list[name] then
 			for _, data_path_key in ipairs(data_path_key_list) do
 				table.insert(default_filter_list, data_path_key)
 			end

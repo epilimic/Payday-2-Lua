@@ -1,10 +1,6 @@
 local selected_setup
 if Global.load_level then
-	if Global.network then
-		selected_setup = require("lib/setups/NetworkGameSetup")
-	else
-		selected_setup = require("lib/setups/GameSetup")
-	end
+	selected_setup = require("lib/setups/NetworkGameSetup")
 elseif Global.load_start_menu then
 	selected_setup = require("lib/setups/MenuSetup")
 elseif Application:editor() then

@@ -49,6 +49,7 @@ function LevelSettingsLayer:build_panel(notebook)
 	self._main_sizer = EWS:BoxSizer("HORIZONTAL")
 	self._ews_panel:set_sizer(self._main_sizer)
 	self._sizer = EWS:BoxSizer("VERTICAL")
+	self:_add_chunk_name(self._ews_panel, self._sizer)
 	self:_add_simulation_level_id(self._sizer)
 	self:_add_simulation_mission_filter(self._sizer)
 	self._main_sizer:add(self._sizer, 1, 0, "EXPAND")
@@ -85,12 +86,37 @@ function LevelSettingsLayer:_add_simulation_mission_filter(sizer)
 		ctrlr:connect("EVT_COMMAND_CHECKBOX_CLICKED", callback(self, self, "_set_data"), {ctrlr = ctrlr, value = id})
 		sizer:add(ctrlr, 0, 0, "EXPAND")
 		self._settings_ctrlrs[id] = {
-			params = params,
 			ctrlr = ctrlr,
 			default = false,
 			type = "checkbox"
 		}
 	end
+end
+function LevelSettingsLayer:_add_chunk_name(panel, sizer)
+	local id = "chunk_name"
+	local horizontal_sizer = EWS:BoxSizer("HORIZONTAL")
+	sizer:add(horizontal_sizer, 0, 1, "EXPAND,LEFT")
+	local options = {"default", "init"}
+	local combobox_params = {
+		name = "Chunk Name",
+		panel = panel,
+		sizer = horizontal_sizer,
+		options = options,
+		value = self._settings.chunk_name or options[1],
+		tooltip = "Select an option from the combobox",
+		name_proportions = 1,
+		ctrlr_proportions = 2,
+		sizer_proportions = 1,
+		sorted = false
+	}
+	local ctrlr = CoreEws.combobox(combobox_params)
+	ctrlr:connect("EVT_COMMAND_COMBOBOX_SELECTED", callback(self, self, "_set_data"), {ctrlr = ctrlr, value = id})
+	self._settings_ctrlrs[id] = {
+		params = combobox_params,
+		ctrlr = ctrlr,
+		default = options[1],
+		type = "combobox"
+	}
 end
 function LevelSettingsLayer:_set_data(data)
 	self._settings[data.value] = data.ctrlr:get_value()

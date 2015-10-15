@@ -13,10 +13,10 @@ function HuskPlayerInventory:init(unit)
 end
 function HuskPlayerInventory:_send_equipped_weapon()
 end
-function HuskPlayerInventory:synch_equipped_weapon(weap_index, blueprint_string)
+function HuskPlayerInventory:synch_equipped_weapon(weap_index, blueprint_string, cosmetics_string, peer)
 	local weapon_name = self._get_weapon_name_from_sync_index(weap_index)
 	if type(weapon_name) == "string" then
-		self:add_unit_by_factory_name(weapon_name, true, true, blueprint_string)
+		self:add_unit_by_factory_name(weapon_name, true, true, blueprint_string, self:cosmetics_string_from_peer(peer, weapon_name) or cosmetics_string)
 		return
 	end
 	self:add_unit_by_name(weapon_name, true, true)
@@ -59,14 +59,29 @@ function HuskPlayerInventory:add_unit_by_name(new_unit_name, equip, instant)
 	new_unit:base():setup(setup_data)
 	self:add_unit(new_unit, equip, instant)
 end
-function HuskPlayerInventory:add_unit_by_factory_name(factory_name, equip, instant, blueprint_string)
+function HuskPlayerInventory:add_unit_by_factory_name(factory_name, equip, instant, blueprint_string, cosmetics_string)
 	local blueprint = managers.weapon_factory:unpack_blueprint_from_string(factory_name, blueprint_string)
-	self:add_unit_by_factory_blueprint(factory_name, equip, instant, blueprint)
+	local cosmetics
+	local cosmetics_data = string.split(cosmetics_string, "-")
+	local weapon_skin_id = cosmetics_data[1] or "nil"
+	local quality_index_s = cosmetics_data[2] or "1"
+	local bonus_id_s = cosmetics_data[3] or "0"
+	if weapon_skin_id ~= "nil" then
+		local quality = tweak_data.economy:get_entry_from_index("qualities", tonumber(quality_index_s))
+		local bonus = bonus_id_s == "1" and true or false
+		cosmetics = {
+			id = weapon_skin_id,
+			quality = quality,
+			bonus = bonus
+		}
+	end
+	self:add_unit_by_factory_blueprint(factory_name, equip, instant, blueprint, cosmetics)
 end
-function HuskPlayerInventory:add_unit_by_factory_blueprint(factory_name, equip, instant, blueprint)
+function HuskPlayerInventory:add_unit_by_factory_blueprint(factory_name, equip, instant, blueprint, cosmetics)
 	local factory_weapon = tweak_data.weapon.factory[factory_name]
 	local new_unit = World:spawn_unit(Idstring(factory_weapon.unit), Vector3(), Rotation())
 	new_unit:base():set_factory_data(factory_name)
+	new_unit:base():set_cosmetics_data(cosmetics)
 	new_unit:base():assemble_from_blueprint(factory_name, blueprint)
 	new_unit:base():check_npc()
 	local setup_data = {}

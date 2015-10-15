@@ -7,6 +7,7 @@ function CharacterTweakData:init(tweak_data)
 	self:_init_security(presets)
 	self:_init_gensec(presets)
 	self:_init_cop(presets)
+	self:_init_inside_man(presets)
 	self:_init_fbi(presets)
 	self:_init_swat(presets)
 	self:_init_heavy_swat(presets)
@@ -15,6 +16,7 @@ function CharacterTweakData:init(tweak_data)
 	self:_init_city_swat(presets)
 	self:_init_sniper(presets)
 	self:_init_gangster(presets)
+	self:_init_biker(presets)
 	self:_init_biker_escape(presets)
 	self:_init_mobster(presets)
 	self:_init_mobster_boss(presets)
@@ -358,6 +360,10 @@ function CharacterTweakData:_init_gangster(presets)
 	self.gangster.chatter = presets.enemy_chatter.no_chatter
 	self.gangster.melee_weapon = "fists"
 	self.gangster.steal_loot = nil
+end
+function CharacterTweakData:_init_biker(presets)
+	self.biker = deep_clone(self.gangster)
+	self.biker.calls_in = true
 end
 function CharacterTweakData:_init_biker_escape(presets)
 	self.biker_escape = deep_clone(self.gangster)
@@ -1130,6 +1136,7 @@ function CharacterTweakData:_init_phalanx_vip(presets)
 	self.phalanx_vip.HEALTH_INIT = 300
 	self.phalanx_vip.DAMAGE_CLAMP_BULLET = 100
 	self.phalanx_vip.DAMAGE_CLAMP_EXPLOSION = self.phalanx_vip.DAMAGE_CLAMP_BULLET
+	self.phalanx_vip.can_be_tased = false
 end
 function CharacterTweakData:_init_taser(presets)
 	self.taser = deep_clone(presets.base)
@@ -1250,6 +1257,28 @@ function CharacterTweakData:_init_taser(presets)
 	self.taser.announce_incomming = "incomming_taser"
 	self.taser.steal_loot = nil
 end
+function CharacterTweakData:_init_inside_man(presets)
+	self.inside_man = deep_clone(presets.base)
+	self.inside_man.experience = {}
+	self.inside_man.weapon = presets.weapon.normal
+	self.inside_man.detection = presets.detection.blind
+	self.inside_man.HEALTH_INIT = 3
+	self.inside_man.headshot_dmg_mul = self.inside_man.HEALTH_INIT / 1
+	self.inside_man.move_speed = presets.move_speed.normal
+	self.inside_man.surrender_break_time = {10, 15}
+	self.inside_man.suppression = presets.suppression.no_supress
+	self.inside_man.surrender = nil
+	self.inside_man.weapon_voice = "1"
+	self.inside_man.experience.cable_tie = "tie_swat"
+	self.inside_man.speech_prefix_p1 = "l"
+	self.inside_man.speech_prefix_p2 = "n"
+	self.inside_man.speech_prefix_count = 4
+	self.inside_man.access = "cop"
+	self.inside_man.dodge = presets.dodge.average
+	self.inside_man.chatter = presets.enemy_chatter.no_chatter
+	self.inside_man.melee_weapon = "baton"
+	self.inside_man.calls_in = nil
+end
 function CharacterTweakData:_init_civilian(presets)
 	self.civilian = {
 		experience = {}
@@ -1292,26 +1321,17 @@ function CharacterTweakData:_init_bank_manager(presets)
 	self.bank_manager.flee_type = "hide"
 	self.bank_manager.scare_max = {10, 20}
 	self.bank_manager.scare_shot = 1
-	self.bank_manager.scare_intimidate = -2
+	self.bank_manager.scare_intimidate = -5
 	self.bank_manager.submission_max = {60, 120}
-	self.bank_manager.submission_intimidate = 60
+	self.bank_manager.submission_intimidate = 120
 	self.bank_manager.damage = presets.hurt_severities.no_hurts
-	self.bank_manager.ecm_vulnerability = 0.8
-	self.bank_manager.ecm_hurts = {
-		ears = {min_duration = 1, max_duration = 5}
-	}
 	self.bank_manager.experience.cable_tie = "tie_civ"
 	self.bank_manager.speech_prefix_p1 = "cm"
 	self.bank_manager.speech_prefix_count = 2
-	self.bank_manager.escort.scared_duration = 45
-	self.bank_manager.escort.shot_scare = 25
-	self.bank_manager.escort.yell_scare = -25
-	self.bank_manager.escort.yell_timeout = 2
 	self.bank_manager.access = "civ_male"
 	self.bank_manager.intimidateable = true
 	self.bank_manager.challenges = {type = "civilians"}
 	self.bank_manager.calls_in = true
-	self.bank_manager.outline_on_discover = true
 end
 function CharacterTweakData:_init_drunk_pilot(presets)
 	self.drunk_pilot = deep_clone(self.civilian)
@@ -4474,6 +4494,33 @@ function CharacterTweakData:_presets(tweak_data)
 	presets.detection.civilian.ntl.dis_max = 2000
 	presets.detection.civilian.ntl.angle_max = 60
 	presets.detection.civilian.ntl.delay = {0.2, 3}
+	presets.detection.blind = {
+		idle = {},
+		combat = {},
+		recon = {},
+		guard = {},
+		ntl = {}
+	}
+	presets.detection.blind.idle.dis_max = 1
+	presets.detection.blind.idle.angle_max = 0
+	presets.detection.blind.idle.delay = {0, 0}
+	presets.detection.blind.idle.use_uncover_range = false
+	presets.detection.blind.combat.dis_max = 1
+	presets.detection.blind.combat.angle_max = 0
+	presets.detection.blind.combat.delay = {0, 0}
+	presets.detection.blind.combat.use_uncover_range = false
+	presets.detection.blind.recon.dis_max = 1
+	presets.detection.blind.recon.angle_max = 0
+	presets.detection.blind.recon.delay = {0, 0}
+	presets.detection.blind.recon.use_uncover_range = false
+	presets.detection.blind.guard.dis_max = 1
+	presets.detection.blind.guard.angle_max = 0
+	presets.detection.blind.guard.delay = {0, 0}
+	presets.detection.blind.guard.use_uncover_range = false
+	presets.detection.blind.ntl.dis_max = 1
+	presets.detection.blind.ntl.angle_max = 0
+	presets.detection.blind.ntl.delay = {0, 0}
+	presets.detection.blind.ntl.use_uncover_range = false
 	presets.dodge = {
 		poor = {
 			speed = 0.9,
@@ -6269,6 +6316,7 @@ function CharacterTweakData:_multiply_all_hp(hp_mul, hs_mul)
 	self.fbi_heavy_swat.HEALTH_INIT = self.fbi_heavy_swat.HEALTH_INIT * hp_mul
 	self.sniper.HEALTH_INIT = self.sniper.HEALTH_INIT * hp_mul
 	self.gangster.HEALTH_INIT = self.gangster.HEALTH_INIT * hp_mul
+	self.biker.HEALTH_INIT = self.biker.HEALTH_INIT * hp_mul
 	self.tank.HEALTH_INIT = self.tank.HEALTH_INIT * hp_mul
 	self.spooc.HEALTH_INIT = self.spooc.HEALTH_INIT * hp_mul
 	self.shield.HEALTH_INIT = self.shield.HEALTH_INIT * hp_mul
@@ -6299,6 +6347,9 @@ function CharacterTweakData:_multiply_all_hp(hp_mul, hs_mul)
 	end
 	if self.gangster.headshot_dmg_mul then
 		self.gangster.headshot_dmg_mul = self.gangster.headshot_dmg_mul * hs_mul
+	end
+	if self.biker.headshot_dmg_mul then
+		self.biker.headshot_dmg_mul = self.biker.headshot_dmg_mul * hs_mul
 	end
 	if self.tank.headshot_dmg_mul then
 		self.tank.headshot_dmg_mul = self.tank.headshot_dmg_mul * hs_mul
@@ -6349,6 +6400,7 @@ function CharacterTweakData:_multiply_all_speeds(walk_mul, run_mul)
 	self.fbi_heavy_swat.SPEED_RUN = self.fbi_heavy_swat.SPEED_RUN * run_mul
 	self.sniper.SPEED_RUN = self.sniper.SPEED_RUN * run_mul
 	self.gangster.SPEED_RUN = self.gangster.SPEED_RUN * run_mul
+	self.biker.SPEED_RUN = self.biker.SPEED_RUN * run_mul
 	self.tank.SPEED_RUN = self.tank.SPEED_RUN * run_mul
 	self.spooc.SPEED_RUN = self.spooc.SPEED_RUN * run_mul
 	self.shield.SPEED_RUN = self.shield.SPEED_RUN * run_mul
@@ -6408,6 +6460,7 @@ function CharacterTweakData:character_map()
 				"civ_male_bank_manager_1",
 				"civ_male_bank_manager_3",
 				"civ_male_bank_manager_4",
+				"civ_male_bank_manager_5",
 				"civ_male_bartender_1",
 				"civ_male_bartender_2",
 				"civ_male_business_1",

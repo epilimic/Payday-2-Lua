@@ -98,14 +98,12 @@ function IngameWaitingForRespawnState.request_player_spawn(peer_to_spawn)
 	if Network:is_client() then
 		managers.network:session():server_peer():send("request_spawn_member")
 	else
-		local possible_criminals = {}
-		for u_key, u_data in pairs(managers.groupai:state():all_player_criminals()) do
-			table.insert(possible_criminals, u_key)
+		local pos_rot = managers.criminals:get_valid_player_spawn_pos_rot()
+		if not pos_rot and managers.network then
+			local spawn_point = managers.network:session() and managers.network:session():get_next_spawn_point() or managers.network:spawn_point(1)
+			pos_rot = spawn_point and spawn_point.pos_rot
 		end
-		local spawn_at = managers.groupai:state():all_player_criminals()[possible_criminals[math.random(1, #possible_criminals)]]
-		if spawn_at then
-			local spawn_pos = spawn_at.unit:position()
-			local spawn_rot = spawn_at.unit:rotation()
+		if pos_rot then
 			local peer_id = peer_to_spawn or 1
 			local crim_name = managers.criminals:character_name_by_peer_id(peer_id)
 			local first_crim = managers.trade:get_criminal_to_trade()
@@ -115,7 +113,10 @@ function IngameWaitingForRespawnState.request_player_spawn(peer_to_spawn)
 			managers.trade:sync_set_trade_spawn(crim_name)
 			managers.network:session():send_to_peers_synched("set_trade_spawn", crim_name)
 			local sp_id = "IngameWaitingForRespawnState"
-			local spawn_point = {position = spawn_pos, rotation = spawn_rot}
+			local spawn_point = {
+				position = pos_rot[1],
+				rotation = pos_rot[2]
+			}
 			managers.network:register_spawn_point(sp_id, spawn_point)
 			managers.network:session():spawn_member_by_id(peer_id, sp_id, true)
 			managers.network:unregister_spawn_point(sp_id)
@@ -136,9 +137,12 @@ function IngameWaitingForRespawnState:update(t, dt)
 		self._stats_screen = false
 		managers.hud:hide_stats_screen()
 	end
-	if self._auto_respawn_t then
-		local time = self._auto_respawn_t - t
-		managers.hud:set_custody_respawn_time(time)
+	if self.LONELY4 and self:LONELY4(t) then
+	elseif self._auto_respawn_t then
+		if managers.hud.LONELY6 then
+			managers.hud:LONELY6(false)
+		end
+		managers.hud:set_custody_respawn_time(self._auto_respawn_t - t)
 		if t > self._auto_respawn_t then
 			self._auto_respawn_t = nil
 			self:_begin_game_enter_transition()
@@ -307,7 +311,7 @@ function IngameWaitingForRespawnState:at_enter()
 	managers.hud:set_custody_can_be_trade_visible(false)
 	managers.hud:set_custody_negotiating_visible(false)
 	managers.hud:set_custody_trade_delay_visible(false)
-	if tweak_data.player.damage.automatic_respawn_time then
+	if tweak_data.player.damage.automatic_respawn_time and not Global.game_settings.single_player then
 		self._auto_respawn_t = Application:time() + tweak_data.player.damage.automatic_respawn_time * managers.player:upgrade_value("player", "respawn_time_multiplier", 1)
 		managers.hud:set_custody_timer_visibility(true)
 	else
@@ -323,10 +327,9 @@ function IngameWaitingForRespawnState:at_enter()
 		local hostages_killed = managers.trade:hostages_killed_by_name(managers.criminals:local_character_name())
 		self:trade_death(respawn_delay, hostages_killed)
 	end
-	if Global.game_settings.single_player then
+	if Global.game_settings.single_player and (not managers.groupai:state().LONELY2 or not managers.groupai:state():LONELY2()) then
 		managers.hud:set_custody_negotiating_visible(false)
 		managers.hud:set_custody_trade_delay_visible(false)
-		managers.hud:set_custody_timer_visibility(false)
 	end
 end
 function IngameWaitingForRespawnState:at_exit()
@@ -344,6 +347,7 @@ function IngameWaitingForRespawnState:at_exit()
 	self:_clear_controller()
 	self:_clear_camera()
 	self:_clear_sound_listener()
+	self._auto_respawn_t = nil
 	self._ready_to_spawn_t = nil
 	self._fade_in_overlay_eff_id = nil
 	managers.hud:set_player_condition("mugshot_normal", "")
@@ -435,8 +439,9 @@ function IngameWaitingForRespawnState:trade_death(respawn_delay, hostages_killed
 		managers.hud:set_custody_trade_delay(self._respawn_delay)
 		managers.hud:set_custody_negotiating_visible(true)
 	end
-	if not Global.game_settings.single_player and managers.groupai:state():bain_state() then
-		if managers.groupai:state():get_assault_mode() then
+	local LONELY2 = managers.groupai:state().LONELY2 and managers.groupai:state():LONELY2()
+	if (not Global.game_settings.single_player or LONELY2) and managers.groupai:state():bain_state() then
+		if managers.groupai:state():get_assault_mode() and not LONELY2 then
 			managers.dialog:queue_dialog("ban_h31x", {})
 		elseif hostages_killed == 0 then
 			managers.dialog:queue_dialog("Play_ban_h32x", {})

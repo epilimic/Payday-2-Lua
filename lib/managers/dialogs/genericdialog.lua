@@ -16,7 +16,7 @@ function GenericDialog:init(manager, data, is_title_outside)
 	end
 	self._ws = self._data.ws or manager:_get_ws()
 	self._panel_script = _G.TextBoxGui:new(self._ws, self._data.title or "", self._data.text or "", self._data, {
-		type = "system_menu",
+		type = self._data.type or "system_menu",
 		no_close_legend = true,
 		use_indicator = data.indicator or data.no_buttons,
 		is_title_outside = is_title_outside
@@ -206,11 +206,18 @@ function GenericDialog:hide()
 	self._panel_script:set_fade(0)
 	self._manager:event_dialog_hidden(self)
 end
-function GenericDialog:close()
+function GenericDialog:_close_generic()
 	self:set_input_enabled(false)
 	self._panel_script:close()
 	managers.viewport:remove_resolution_changed_func(self._resolution_changed_callback)
+end
+function GenericDialog:close()
+	self:_close_generic()
 	Dialog.close(self)
+end
+function GenericDialog:force_close()
+	self:_close_generic()
+	Dialog.force_close(self)
 end
 function GenericDialog:dialog_cancel_callback()
 	if SystemInfo:platform() ~= Idstring("WIN32") then

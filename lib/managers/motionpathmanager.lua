@@ -374,6 +374,7 @@ function MotionPathManager:_move_unit_to_checkpoint(t, dt, path, unit, unit_and_
 		local smooth_rot = current_rotation:slerp(target_rotation, dt * 2)
 		unit:move(move_vector)
 		unit:set_rotation(smooth_rot)
+		unit:set_moving(2)
 	end
 	return find_next_checkpoint
 end

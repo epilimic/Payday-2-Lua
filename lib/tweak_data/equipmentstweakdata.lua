@@ -209,8 +209,8 @@ function EquipmentsTweakData:init()
 		sync_possession = true
 	}
 	self.specials.saw = {
-		text_id = "debug_equipment_saw",
-		icon = "equipment_saw",
+		text_id = "hud_equipment_saw",
+		icon = "pd2_generic_saw",
 		sync_possession = true
 	}
 	self.specials.saw_blade = {

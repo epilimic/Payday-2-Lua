@@ -50,6 +50,10 @@ function SpawnCivilianGroupUnitElement:remove_links(unit)
 		end
 	end
 end
+function SpawnCivilianGroupUnitElement:get_links_to_unit(...)
+	SpawnCivilianGroupUnitElement.super.get_links_to_unit(self, ...)
+	self:_get_links_of_type_from_elements(self._hed.elements, "spawn_point", ...)
+end
 function SpawnCivilianGroupUnitElement:add_triggers(vc)
 	vc:add_trigger(Idstring("lmb"), callback(self, self, "add_element"))
 end
@@ -57,6 +61,10 @@ function SpawnCivilianGroupUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local names = {
+		"ai_spawn_civilian"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, names)
 	self:_build_value_checkbox(panel, panel_sizer, "random", "Select spawn points randomly")
 	self:_build_value_checkbox(panel, panel_sizer, "ignore_disabled", "Select if disabled spawn points should be ignored or not")
 	self:_build_value_number(panel, panel_sizer, "amount", {floats = 0, min = 0}, "Specify amount of civilians to spawn from group")

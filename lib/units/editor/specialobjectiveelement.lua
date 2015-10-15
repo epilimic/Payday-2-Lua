@@ -12,7 +12,8 @@ SpecialObjectiveUnitElement._AI_SO_types = {
 	"AI_search",
 	"AI_idle",
 	"AI_escort",
-	"AI_sniper"
+	"AI_sniper",
+	"AI_phalanx"
 }
 function SpecialObjectiveUnitElement:init(unit)
 	SpecialObjectiveUnitElement.super.init(self, unit)
@@ -77,7 +78,8 @@ function SpecialObjectiveUnitElement:init(unit)
 	table.insert(self._save_values, "SO_access")
 	table.insert(self._save_values, "is_navigation_link")
 end
-function SpecialObjectiveUnitElement:post_init()
+function SpecialObjectiveUnitElement:post_init(...)
+	SpecialObjectiveUnitElement.super.post_init(self, ...)
 	self._nav_link_filter = managers.navigation:convert_access_filter_to_table(self._hed.SO_access)
 	if type_name(self._hed.SO_access) == "number" then
 		self._hed.SO_access = tostring(self._hed.SO_access)
@@ -120,6 +122,9 @@ function SpecialObjectiveUnitElement:test_element()
 	end
 	spawn_unit_name = spawn_unit_name or Idstring("units/payday2/characters/ene_swat_1/ene_swat_1")
 	local enemy = safe_spawn_unit(spawn_unit_name, self._unit:position(), self._unit:rotation())
+	if not enemy then
+		return
+	end
 	table.insert(self._enemies, enemy)
 	managers.groupai:state():set_char_team(enemy, tweak_data.levels:get_default_team_ID("non_combatant"))
 	enemy:movement():set_root_blend(false)

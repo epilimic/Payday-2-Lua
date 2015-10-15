@@ -32,8 +32,11 @@ function save_data_table(unit)
 	return t
 end
 function _light_data_table(unit)
-	local t = {}
 	local lights = CoreEditorUtils.get_editable_lights(unit)
+	if not lights then
+		return nil
+	end
+	local t = {}
 	for _, light in ipairs(lights) do
 		local data = {
 			name = light:name():s(),
@@ -52,8 +55,11 @@ function _light_data_table(unit)
 	return #t > 0 and t or nil
 end
 function _triggers_data_table(unit)
-	local t = {}
 	local triggers = managers.sequence:get_trigger_list(unit:name())
+	if #triggers == 0 then
+		return nil
+	end
+	local t = {}
 	if #triggers > 0 and unit:damage() then
 		local trigger_name_list = unit:damage():get_trigger_name_list()
 		if trigger_name_list then

@@ -5,6 +5,7 @@ WeaponFactoryManager._uses_streaming = true
 function WeaponFactoryManager:init()
 	self:_setup()
 	self._tasks = {}
+	self:set_use_thq_weapon_parts(managers.user:get_setting("use_thq_weapon_parts"))
 end
 function WeaponFactoryManager:_setup()
 	if not Global.weapon_factory then
@@ -14,6 +15,12 @@ function WeaponFactoryManager:_setup()
 	Global.weapon_factory.loaded_packages = Global.weapon_factory.loaded_packages or {}
 	self._loaded_packages = Global.weapon_factory.loaded_packages
 	self:_read_factory_data()
+end
+function WeaponFactoryManager:set_use_thq_weapon_parts(use_thq_weapon_parts)
+	self._use_thq_weapon_parts = use_thq_weapon_parts
+end
+function WeaponFactoryManager:use_thq_weapon_parts()
+	return self._use_thq_weapon_parts
 end
 function WeaponFactoryManager:update(t, dt)
 	if self._active_task then
@@ -530,7 +537,6 @@ function WeaponFactoryManager:_add_part(p_unit, factory_id, part_id, forbidden, 
 		if ids_tweak_unit_name and ids_tweak_unit_name == ids_unit_name then
 			package = "packages/fps_weapon_parts/" .. part_id
 			if DB:has(Idstring("package"), Idstring(package)) then
-				print("HAS PART AS PACKAGE")
 				self:load_package(package)
 			else
 				print("[WeaponFactoryManager] Expected weapon part packages for", part_id)
@@ -565,45 +571,53 @@ function WeaponFactoryManager:clbk_part_unit_loaded(task_data, status, u_type, u
 	if not self._async_load_tasks[task_data] then
 		return
 	end
-	local function _spawn(part)
-		local unit = self:_spawn_and_link_unit(part.name, part.a_obj, task_data.third_person, part.link_to_unit)
-		unit:set_enabled(false)
-		part.unit = unit
-		part.a_obj = nil
-		part.link_to_unit = nil
-	end
-	for part_id, part in pairs(task_data.parts) do
-		if part.name == u_name and part.is_streaming then
-			part.is_streaming = nil
-			if part.link_to_unit then
-				_spawn(part)
-			else
-				local parent_part = self:get_part_from_weapon_by_type(part.parent, task_data.parts)
-				if parent_part and parent_part.unit then
-					part.link_to_unit = parent_part.unit
-					_spawn(part)
-				end
-			end
+	if task_data.spawn then
+		local function _spawn(part)
+			local unit = self:_spawn_and_link_unit(part.name, part.a_obj, task_data.third_person, part.link_to_unit)
+			unit:set_enabled(false)
+			part.unit = unit
+			part.a_obj = nil
+			part.link_to_unit = nil
 		end
-	end
-	repeat
-		local re_iterate
 		for part_id, part in pairs(task_data.parts) do
-			if not part.unit and not part.is_streaming then
-				local parent_part = self:get_part_from_weapon_by_type(part.parent, task_data.parts)
-				if parent_part and parent_part.unit then
-					part.link_to_unit = parent_part.unit
+			if part.name == u_name and part.is_streaming then
+				part.is_streaming = nil
+				if part.link_to_unit then
 					_spawn(part)
-					re_iterate = true
+				else
+					local parent_part = self:get_part_from_weapon_by_type(part.parent, task_data.parts)
+					if parent_part and parent_part.unit then
+						part.link_to_unit = parent_part.unit
+						_spawn(part)
+					end
 				end
 			end
 		end
-	until not re_iterate
+		repeat
+			local re_iterate
+			for part_id, part in pairs(task_data.parts) do
+				if not part.unit and not part.is_streaming then
+					local parent_part = self:get_part_from_weapon_by_type(part.parent, task_data.parts)
+					if parent_part and parent_part.unit then
+						part.link_to_unit = parent_part.unit
+						_spawn(part)
+						re_iterate = true
+					end
+				end
+			end
+		until not re_iterate
+	else
+		for part_id, part in pairs(task_data.parts) do
+			if part.name == u_name and part.is_streaming then
+				part.is_streaming = nil
+			end
+		end
+	end
 	if not task_data.all_requests_sent then
 		return
 	end
 	for part_id, part in pairs(task_data.parts) do
-		if part.is_streaming or not part.unit then
+		if part.is_streaming or task_data.spawn and not part.unit then
 			return
 		end
 	end
@@ -627,9 +641,7 @@ function WeaponFactoryManager:_spawn_and_link_unit(u_name, a_obj, third_person, 
 	return unit
 end
 function WeaponFactoryManager:load_package(package)
-	print("WeaponFactoryManager:_load_package", package)
 	if not self._loaded_packages[package] then
-		print("  Load for real", package)
 		PackageManager:load(package)
 		self._loaded_packages[package] = 1
 	else
@@ -812,7 +824,7 @@ function WeaponFactoryManager:get_part_name_by_part_id(part_id)
 		Application:error("[WeaponFactoryManager:get_part_name_by_part_id] Found no part with part id", part_id)
 		return
 	end
-	return managers.localization:text(part_tweak_data.name_id)
+	return managers.localization:text(part_tweak_data.name_id or "")
 end
 function WeaponFactoryManager:change_part(p_unit, factory_id, part_id, parts, blueprint)
 	local factory = tweak_data.weapon.factory

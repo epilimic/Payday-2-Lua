@@ -68,6 +68,11 @@ ContourExt._types = {
 		priority = 4,
 		color = tweak_data.contour.interactable.standard_color
 	},
+	highlight_character = {
+		priority = 6,
+		color = tweak_data.contour.interactable.standard_color,
+		material_swap_required = true
+	},
 	generic_interactable = {
 		priority = 2,
 		material_swap_required = true,
@@ -210,7 +215,8 @@ function ContourExt:remove(type, sync)
 	if not self._contour_list then
 		return
 	end
-	for i, setup in ipairs(self._contour_list) do
+	local contour_list = clone(self._contour_list)
+	for i, setup in ipairs(contour_list) do
 		if setup.type == type then
 			self:_remove(i, sync)
 			if self._update_enabled then
@@ -368,19 +374,24 @@ function ContourExt:_apply_top_preset()
 	end
 end
 function ContourExt:material_applied(material_was_swapped)
-	self._materials = nil
-	if material_was_swapped then
-		managers.occlusion:remove_occlusion(self._unit)
-		self._unit:base():set_allow_invisible(false)
+	if not self._contour_list then
+		return
 	end
 	local setup = self._contour_list[1]
 	local data = self._types[setup.type]
 	if data.damage_bonus then
 		self._unit:character_damage():on_marked_state(true)
 	end
-	self:_upd_color()
-	if not data.ray_check then
-		self:_upd_opacity(1)
+	if material_was_swapped then
+		managers.occlusion:remove_occlusion(self._unit)
+		self._unit:base():set_allow_invisible(false)
+		self:update_materials()
+	else
+		self._materials = nil
+		self:_upd_color()
+		if not data.ray_check then
+			self:_upd_opacity(1)
+		end
 	end
 end
 function ContourExt:_chk_update_state()

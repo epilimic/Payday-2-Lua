@@ -1,6 +1,3 @@
-local tmp_vec1 = Vector3()
-local tmp_vec2 = Vector3()
-local tmp_vec3 = Vector3()
 local flashbang_test_offset = Vector3(0, 0, 150)
 local debug_vec1 = Vector3()
 CoreEnvironmentControllerManager = CoreEnvironmentControllerManager or class()
@@ -8,6 +5,8 @@ function CoreEnvironmentControllerManager:init()
 	self._DEFAULT_DOF_DISTANCE = 10
 	self._dof_distance = self._DEFAULT_DOF_DISTANCE
 	self._current_dof_distance = self._dof_distance
+	self._base_chromatic_amount = 0.15
+	self._base_contrast = 0.1
 	self._hurt_value = 1
 	self._taser_value = 1
 	self._health_effect_value = 1
@@ -19,13 +18,7 @@ function CoreEnvironmentControllerManager:init()
 	self._health_effect_value_diff = 0
 	self._GAME_DEFAULT_COLOR_GRADING = "color_off"
 	self._default_color_grading = self._GAME_DEFAULT_COLOR_GRADING
-	self._blurzone = -1
-	self._pos = nil
-	self._radius = 0
-	self._height = 0
-	self._opacity = 0
-	self._blurzone_update = nil
-	self._blurzone_check = nil
+	self._blurzones = {}
 	self._hit_right = 0
 	self._hit_left = 0
 	self._hit_up = 0
@@ -128,107 +121,141 @@ function CoreEnvironmentControllerManager:hit_feedback_down()
 	self._hit_down = math.min(self._hit_down + self._hit_amount, 1)
 	self._hit_some = math.min(self._hit_some + self._hit_amount, 1)
 end
-function CoreEnvironmentControllerManager:set_blurzone(mode, pos, radius, height)
-	if mode > 0 then
-		self._blurzone = mode
-		self._pos = pos
-		self._radius = radius
-		self._height = height
-		if mode == 2 then
-			self._opacity = 2
-			self._blurzone = 1
-			self._blurzone_update = self.blurzone_flash_in_line_of_sight
-		elseif mode == 3 then
-			self._opacity = 2
-			self._blurzone = 1
-			self._blurzone_update = self.blurzone_flash_in
-		else
-			self._opacity = 0
-			self._blurzone_update = self.blurzone_fade_in
+function CoreEnvironmentControllerManager:set_blurzone(id, mode, pos, radius, height, delete_after_fadeout)
+	local blurzone = self._blurzones[id]
+	if id then
+		blurzone = blurzone or {
+			mode = -1,
+			pos = nil,
+			radius = 0,
+			height = 0,
+			opacity = 0,
+			update = nil,
+			check = nil,
+			delete_after_fadeout = false
+		}
+		if mode > 0 then
+			blurzone.mode = mode
+			blurzone.pos = pos
+			blurzone.radius = radius
+			blurzone.height = height
+			if mode == 2 then
+				blurzone.opacity = 2
+				blurzone.mode = 1
+				blurzone.update = self.blurzone_flash_in_line_of_sight
+			elseif mode == 3 then
+				blurzone.opacity = 2
+				blurzone.mode = 1
+				blurzone.update = self.blurzone_flash_in
+			else
+				blurzone.opacity = 0
+				blurzone.update = self.blurzone_fade_in
+			end
+			if height > 0 then
+				blurzone.check = self.blurzone_check_cylinder
+			else
+				blurzone.check = self.blurzone_check_sphere
+			end
+			blurzone.delete_after_fadeout = delete_after_fadeout
+		elseif blurzone and blurzone.mode > 0 then
+			blurzone.mode = mode
+			blurzone.pos = blurzone.pos or pos
+			blurzone.radius = blurzone.radius or radius
+			blurzone.height = blurzone.height or height
+			blurzone.opacity = 1
+			blurzone.update = self.blurzone_fade_out
+			if 0 < blurzone.height then
+				blurzone.check = self.blurzone_check_cylinder
+			else
+				blurzone.check = self.blurzone_check_sphere
+			end
 		end
-		if height > 0 then
-			self._blurzone_check = self.blurzone_check_cylinder
-		else
-			self._blurzone_check = self.blurzone_check_sphere
+		self._blurzones[id] = blurzone
+	end
+end
+function CoreEnvironmentControllerManager:set_all_blurzones(mode)
+	for id, blurzone in pairs(self._blurzones) do
+		self:set_blurzone(id, mode)
+	end
+end
+function CoreEnvironmentControllerManager:_blurzones_update(t, dt, camera_pos)
+	local result = 0
+	for id, blurzone in pairs(self._blurzones) do
+		if blurzone and blurzone.mode > -1 then
+			local blur_zone_val = blurzone:update(self, t, dt, camera_pos, blurzone)
+			if result < blur_zone_val then
+				result = blur_zone_val
+			end
+		elseif blurzone.delete_after_fadeout then
+			self._blurzones[id] = nil
 		end
-	elseif 0 < self._blurzone then
-		self._blurzone = mode
-		self._pos = self._pos or pos
-		self._radius = self._radius or radius
-		self._height = self._height or height
-		self._opacity = 1
-		self._blurzone_update = self.blurzone_fade_out
-		if 0 < self._height then
-			self._blurzone_check = self.blurzone_check_cylinder
-		else
-			self._blurzone_check = self.blurzone_check_sphere
-		end
 	end
+	return result
 end
-function CoreEnvironmentControllerManager:blurzone_flash_in_line_of_sight(t, dt, camera_pos)
-	self._opacity = self._opacity - dt * 0.3
-	self._HE_blinding = self.test_line_of_sight(self._pos, 150, 1000, 2000)
-	if self._opacity < 1 then
-		self._opacity = 1
-		self._blurzone_update = self.blurzone_fade_idle_line_of_sight
+function CoreEnvironmentControllerManager:blurzone_flash_in_line_of_sight(self, t, dt, camera_pos, blurzone)
+	blurzone.opacity = blurzone.opacity - dt * 0.3
+	self._HE_blinding = self:test_line_of_sight(blurzone.pos, 150, 1000, 2000)
+	if blurzone.opacity < 1 then
+		blurzone.opacity = 1
+		blurzone.update = self.blurzone_fade_idle_line_of_sight
 	end
-	return self:_blurzone_check(camera_pos) * (1 + 11 * (self._opacity - 1))
+	return blurzone:check(blurzone, camera_pos) * (1 + 11 * (blurzone.opacity - 1))
 end
-function CoreEnvironmentControllerManager:blurzone_flash_in(t, dt, camera_pos)
-	self._opacity = self._opacity - dt * 0.3
-	if self._opacity < 1 then
-		self._opacity = 1
-		self._blurzone_update = self.blurzone_fade_idle
+function CoreEnvironmentControllerManager:blurzone_flash_in(self, t, dt, camera_pos, blurzone)
+	blurzone.opacity = blurzone.opacity - dt * 0.3
+	if blurzone.opacity < 1 then
+		blurzone.opacity = 1
+		blurzone.update = self.blurzone_fade_idle
 	end
-	return self:_blurzone_check(camera_pos) * (1 + 11 * (self._opacity - 1))
+	return blurzone:check(blurzone, camera_pos) * (1 + 11 * (blurzone.opacity - 1))
 end
-function CoreEnvironmentControllerManager:blurzone_fade_in(t, dt, camera_pos)
-	self._opacity = self._opacity + dt
-	if self._opacity > 1 then
-		self._opacity = 1
-		self._blurzone_update = self.blurzone_fade_idle
+function CoreEnvironmentControllerManager:blurzone_fade_in(self, t, dt, camera_pos, blurzone)
+	blurzone.opacity = blurzone.opacity + dt
+	if blurzone.opacity > 1 then
+		blurzone.opacity = 1
+		blurzone.update = self.blurzone_fade_idle
 	end
-	return self:_blurzone_check(camera_pos)
+	return blurzone:check(blurzone, camera_pos)
 end
-function CoreEnvironmentControllerManager:blurzone_fade_out(t, dt, camera_pos)
-	self._opacity = self._opacity - dt
-	if self._opacity < 0 then
-		self._opacity = 0
-		self._blurzone = -1
-		self._blurzone_update = self.blurzone_fade_idle
+function CoreEnvironmentControllerManager:blurzone_fade_out(self, t, dt, camera_pos, blurzone)
+	blurzone.opacity = blurzone.opacity - dt
+	if blurzone.opacity < 0 then
+		blurzone.opacity = 0
+		blurzone.mode = -1
+		blurzone.update = self.blurzone_fade_idle
 	end
-	return self:_blurzone_check(camera_pos)
+	return blurzone:check(blurzone, camera_pos)
 end
-function CoreEnvironmentControllerManager:blurzone_fade_idle_line_of_sight(t, dt, camera_pos)
-	self._HE_blinding = self.test_line_of_sight(self._pos, 150, 1000, 2000)
-	return self:_blurzone_check(camera_pos)
+function CoreEnvironmentControllerManager:blurzone_fade_idle_line_of_sight(self, t, dt, camera_pos, blurzone)
+	self._HE_blinding = self:test_line_of_sight(blurzone.pos, 150, 1000, 2000)
+	return blurzone:check(blurzone, camera_pos)
 end
-function CoreEnvironmentControllerManager:blurzone_fade_idle(t, dt, camera_pos)
-	return self:_blurzone_check(camera_pos)
+function CoreEnvironmentControllerManager:blurzone_fade_idle(self, t, dt, camera_pos, blurzone)
+	return blurzone:check(blurzone, camera_pos)
 end
-function CoreEnvironmentControllerManager:blurzone_fade_out_switch(t, dt, camera_pos)
-	return self:_blurzone_check(camera_pos)
+function CoreEnvironmentControllerManager:blurzone_fade_out_switch(self, t, dt, camera_pos, blurzone)
+	return blurzone:check(blurzone, camera_pos)
 end
-function CoreEnvironmentControllerManager:blurzone_check_cylinder(camera_pos)
-	local pos_z = self._pos.z
+function CoreEnvironmentControllerManager:blurzone_check_cylinder(blurzone, camera_pos)
+	local pos_z = blurzone.pos.z
 	local cam_z = camera_pos.z
 	local len
 	if pos_z > cam_z then
-		len = self._pos - camera_pos:length()
-	elseif cam_z > pos_z + self._height then
-		len = self._pos:with_z(pos_z + self._height) - camera_pos:length()
+		len = blurzone.pos - camera_pos:length()
+	elseif cam_z > pos_z + blurzone.height then
+		len = blurzone.pos:with_z(pos_z + blurzone.height) - camera_pos:length()
 	else
-		len = self._pos:with_z(cam_z) - camera_pos:length()
+		len = blurzone.pos:with_z(cam_z) - camera_pos:length()
 	end
-	local result = math.min(len / self._radius, 1)
+	local result = math.min(len / blurzone.radius, 1)
 	result = result * result
-	return (1 - result) * self._opacity
+	return (1 - result) * blurzone.opacity
 end
-function CoreEnvironmentControllerManager:blurzone_check_sphere(camera_pos)
-	local len = self._pos - camera_pos:length()
-	local result = math.min(len / self._radius, 1)
+function CoreEnvironmentControllerManager:blurzone_check_sphere(blurzone, camera_pos)
+	local len = blurzone.pos - camera_pos:length()
+	local result = math.min(len / blurzone.radius, 1)
 	result = result * result
-	return (1 - result) * self._opacity
+	return (1 - result) * blurzone.opacity
 end
 local ids_dof_near_plane = Idstring("near_plane")
 local ids_dof_far_plane = Idstring("far_plane")
@@ -292,9 +319,7 @@ function CoreEnvironmentControllerManager:set_post_composite(t, dt)
 		self._old_vp = vp
 	end
 	local blur_zone_val = 0
-	if 0 <= self._blurzone then
-		blur_zone_val = self:_blurzone_update(t, dt, camera:position())
-	end
+	blur_zone_val = self:_blurzones_update(t, dt, camera:position())
 	if 0 < self._hit_some then
 		local hit_fade = dt * 1.5
 		self._hit_some = math.max(self._hit_some - hit_fade, 0)
@@ -322,14 +347,16 @@ function CoreEnvironmentControllerManager:set_post_composite(t, dt)
 	local blur_zone_flashbang = blur_zone_val + flashbang
 	local flash_1 = math.pow(flashbang, 0.4)
 	local flash_2 = math.pow(flashbang, 16) + flashbang_flash
-	if flash_1 > 0 then
+	if self._custom_dof_settings then
+		self._material:set_variable(ids_dof_settings, self._custom_dof_settings)
+	elseif flash_1 > 0 then
 		self._material:set_variable(ids_dof_settings, Vector3(math.min(self._hit_some * 10, 1) + blur_zone_flashbang * 0.4, math.min(blur_zone_val + downed_value * 2 + flash_1, 1), 10 + math.abs(math.sin(t * 10) * 40) + downed_value * 3))
 	else
 		self._material:set_variable(ids_dof_settings, Vector3(math.min(self._hit_some * 10, 1) + blur_zone_flashbang * 0.4, math.min(blur_zone_val + downed_value * 2, 1), 1 + downed_value * 3))
 	end
 	self._material:set_variable(ids_radial_offset, Vector3((self._hit_left - self._hit_right) * 0.2, (self._hit_up - self._hit_down) * 0.2, self._hit_front - self._hit_back + blur_zone_flashbang * 0.1))
-	self._material:set_variable(Idstring("contrast"), 0.1 + self._hit_some * 0.25)
-	self._material:set_variable(Idstring("chromatic_amount"), 0.15 + blur_zone_val * 0.3 + flash_1 * 0.5)
+	self._material:set_variable(Idstring("contrast"), self._base_contrast + self._hit_some * 0.25)
+	self._material:set_variable(Idstring("chromatic_amount"), self._base_chromatic_amount + blur_zone_val * 0.3 + flash_1 * 0.5)
 	self:_update_dof(t, dt)
 	local lut_post = vp:vp():get_post_processor_effect("World", ids_LUT_post)
 	if lut_post then
@@ -463,7 +490,7 @@ function CoreEnvironmentControllerManager:_update_dof(t, dt)
 	end
 end
 function CoreEnvironmentControllerManager:set_flashbang(flashbang_pos, line_of_sight, travel_dis, linear_dis, duration)
-	local flash = self.test_line_of_sight(flashbang_pos + flashbang_test_offset, 200, 1000, 3000)
+	local flash = self:test_line_of_sight(flashbang_pos + flashbang_test_offset, 200, 1000, 3000)
 	self._flashbang_duration = duration
 	if flash > 0 then
 		self._current_flashbang = math.min(self._current_flashbang + flash, 1.5) * self._flashbang_duration
@@ -479,7 +506,10 @@ function CoreEnvironmentControllerManager:set_flashbang_multiplier(multiplier)
 	self._flashbang_multiplier = multiplier ~= 0 and multiplier or 1
 	self._flashbang_multiplier = 1 + (1 - self._flashbang_multiplier) * 2
 end
-function CoreEnvironmentControllerManager.test_line_of_sight(test_pos, min_distance, dot_distance, max_distance)
+function CoreEnvironmentControllerManager:test_line_of_sight(test_pos, min_distance, dot_distance, max_distance)
+	local tmp_vec1 = Vector3()
+	local tmp_vec2 = Vector3()
+	local tmp_vec3 = Vector3()
 	local vp = managers.viewport:first_active_viewport()
 	if not vp then
 		return 0
@@ -571,6 +601,21 @@ function CoreEnvironmentControllerManager:_refresh_occ_params(vp)
 			end
 		end
 	end
+end
+function CoreEnvironmentControllerManager:set_custom_dof_settings(custom_dof_settings)
+	self._custom_dof_settings = custom_dof_settings
+end
+function CoreEnvironmentControllerManager:set_base_chromatic_amount(base_chromatic_amount)
+	self._base_chromatic_amount = base_chromatic_amount
+end
+function CoreEnvironmentControllerManager:base_chromatic_amount()
+	return self._base_chromatic_amount
+end
+function CoreEnvironmentControllerManager:set_base_contrast(base_contrast)
+	self._base_contrast = base_contrast
+end
+function CoreEnvironmentControllerManager:base_contrast()
+	return self._base_contrast
 end
 local ids_d_sun = Idstring("d_sun")
 function CoreEnvironmentControllerManager:feed_params()

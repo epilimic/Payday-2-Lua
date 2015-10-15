@@ -132,7 +132,7 @@ function Shape:panel(panel, sizer)
 	return self._panel
 end
 function Shape:create_panel(parent, sizer)
-	self._panel = EWS:Panel(parent, "", "")
+	self._panel = EWS:Panel(parent, "", "TAB_TRAVERSAL")
 	self._panel:set_extension({alive = true})
 	self._panel_sizer = EWS:BoxSizer("VERTICAL")
 	self._panel:set_sizer(self._panel_sizer)
@@ -143,6 +143,7 @@ function Shape:_create_size_ctrl(name, property, value, parent, sizer)
 	ctrl_sizer:add(EWS:StaticText(parent, name, "", "ALIGN_LEFT"), 2, 0, "EXPAND")
 	local ctrl = EWS:TextCtrl(parent, string.format("%.2f", value / 100), "", "TE_PROCESS_ENTER")
 	local spin = EWS:SpinButton(parent, "", "SP_VERTICAL")
+	local slider = EWS:Slider(parent, 100, 1, 200, "", "")
 	ctrl:connect("EVT_CHAR", callback(nil, _G, "verify_number"), ctrl)
 	ctrl:set_tool_tip("Type in property " .. name)
 	ctrl:connect("EVT_COMMAND_TEXT_ENTER", callback(self, self, "update_size"), {ctrl = ctrl, property = property})
@@ -157,8 +158,18 @@ function Shape:_create_size_ctrl(name, property, value, parent, sizer)
 		property = property,
 		step = -0.1
 	})
-	ctrl_sizer:add(ctrl, 3, 0, "EXPAND")
+	local params = {
+		ctrl = ctrl,
+		slider = slider,
+		property = property
+	}
+	slider:connect("EVT_SCROLL_CHANGED", callback(self, self, "update_slider_size"), params)
+	slider:connect("EVT_SCROLL_THUMBTRACK", callback(self, self, "update_slider_size"), params)
+	slider:connect("EVT_SCROLL_CHANGED", callback(self, self, "update_slider_release"), params)
+	slider:connect("EVT_SCROLL_THUMBRELEASE", callback(self, self, "update_slider_release"), params)
+	ctrl_sizer:add(ctrl, 2, 0, "EXPAND")
 	ctrl_sizer:add(spin, 0, 0, "EXPAND")
+	ctrl_sizer:add(slider, 2, 0, "EXPAND")
 	self._properties_ctrls[property] = self._properties_ctrls[property] or {}
 	table.insert(self._properties_ctrls[property], ctrl)
 	sizer:add(ctrl_sizer, 1, 0, "EXPAND")
@@ -178,6 +189,17 @@ end
 function Shape:update_size_spin(data)
 	local value = data.ctrl:get_value() + data.step
 	self:set_property(data.property, value * 100)
+end
+function Shape:update_slider_size(data)
+	data.start_value = data.start_value or data.ctrl:get_value()
+	local value = data.start_value
+	self:set_property(data.property, value * (data.slider:get_value() / 100) * 100)
+end
+function Shape:update_slider_release(data)
+	local value = data.start_value
+	self:set_property(data.property, value * (data.slider:get_value() / 100) * 100)
+	data.start_value = nil
+	data.slider:set_value(100)
 end
 function Shape:draw(t, dt, r, g, b)
 end

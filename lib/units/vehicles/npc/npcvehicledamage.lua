@@ -1,94 +1,266 @@
 NpcVehicleDamage = NpcVehicleDamage or class(VehicleDamage)
 NpcVehicleDamage.VEHICLE_DEFAULT_HEALTH = 100
+NpcVehicleDamage._HEALTH_GRANULARITY = 512
 function NpcVehicleDamage:init(unit)
 	VehicleDamage.init(self, unit)
 	self._is_alive = true
-	Application:trace("NpcVehicleDamage:init( unit )")
 end
 function NpcVehicleDamage:damage_bullet(attack_data)
-	if self._unit:vehicle_driving() and not self._unit:vehicle_driving():is_vulnerable() then
-		return
+	local result
+	local damage = attack_data.damage
+	local damage_percent = math.ceil(math.clamp(damage / self._HEALTH_INIT_PRECENT, 1, self._HEALTH_GRANULARITY))
+	damage = damage_percent * self._HEALTH_INIT_PRECENT
+	self:_hit_direction(attack_data.col_ray)
+	if damage >= self._health then
+		attack_data.damage = self._health
+		result = {
+			type = "death",
+			variant = attack_data.variant
+		}
+		self:die(attack_data.variant)
+	else
+		attack_data.damage = damage
+		result = {
+			type = "hurt",
+			variant = attack_data.variant
+		}
+		self._health = self._health - damage
 	end
-	local damage_info = {
-		result = {type = "hurt", variant = "bullet"},
-		attacker_unit = attack_data.attacker_unit
-	}
-	if self._invulnerable then
-		self:_call_listeners(damage_info)
-		return
-	elseif self:incapacitated() then
-		return
-	elseif self:is_friendly_fire(attack_data.attacker_unit) then
-		return
-	elseif self:_chk_dmg_too_soon(attack_data.damage) then
-		return
+	local attacker = attack_data.attacker_unit
+	if attacker:id() == -1 then
+		attacker = self._unit
 	end
 	if attack_data.attacker_unit == managers.player:player_unit() then
 		managers.hud:on_hit_confirmed()
 	end
 	self:_health_recap(attack_data)
-	return attack_data.result
+	local body_index = 1
+	local hit_offset_height = 1
+	self:_send_bullet_attack_result(attack_data, attacker, damage_percent, body_index, hit_offset_height)
+	return result
+end
+function NpcVehicleDamage:_send_bullet_attack_result(attack_data, attacker, damage_percent, body_index, hit_offset_height)
+	self._unit:network():send("damage_bullet", attacker, damage_percent, body_index, hit_offset_height, self:dead() and true or false)
+end
+function NpcVehicleDamage:sync_damage_bullet(attacker_unit, damage_percent, i_body, hit_offset_height, death)
+	if self:dead() then
+		return
+	end
+	local damage = damage_percent * self._HEALTH_INIT_PRECENT
+	local attack_data = {}
+	local hit_pos = mvector3.copy(self._unit:position())
+	mvector3.set_z(hit_pos, hit_pos.z + hit_offset_height)
+	attack_data.pos = hit_pos
+	local attack_dir, distance
+	if attacker_unit then
+		attack_dir = hit_pos - attacker_unit:position()
+		distance = mvector3.normalize(attack_dir)
+	else
+		attack_dir = self._unit:rotation():y()
+	end
+	attack_data.attack_dir = attack_dir
+	local result
+	if death then
+		result = {type = "death", variant = "bullet"}
+		self:die(attack_data.variant)
+	else
+		result = {type = "hurt", variant = "bullet"}
+		self._health = self._health - damage
+		self._health_ratio = self._health / self._current_max_health
+	end
+	attack_data.variant = "bullet"
+	attack_data.attacker_unit = attacker_unit
+	attack_data.result = result
+	attack_data.damage = damage
+	self:_health_recap(attack_data)
+	self:_send_sync_bullet_attack_result(attack_data, hit_offset_height)
+	self:_on_damage_received(attack_data)
+end
+function NpcVehicleDamage:_send_sync_bullet_attack_result(attack_data, hit_offset_height)
 end
 function NpcVehicleDamage:damage_explosion(attack_data)
-	if not self._unit:vehicle_driving():is_vulnerable() then
+	Application:trace("[NpcVehicleDamage:damage_explosion]")
+	local result
+	local damage = attack_data.damage
+	local damage_percent = math.ceil(damage / self._HEALTH_INIT_PRECENT)
+	damage = damage_percent * self._HEALTH_INIT_PRECENT
+	if damage >= self._health then
+		attack_data.damage = self._health
+		result = {
+			type = "death",
+			variant = attack_data.variant
+		}
+		self:die(attack_data.variant)
+	else
+		attack_data.damage = damage
+		result = {
+			type = "hurt",
+			variant = attack_data.variant
+		}
+		self._health = self._health - damage
+	end
+	attack_data.result = result
+	attack_data.pos = attack_data.col_ray.position
+	local attacker = attack_data.attacker_unit
+	if not attacker or attacker:id() == -1 then
+		attacker = self._unit
+	end
+	self:_health_recap(attack_data)
+	self:_send_explosion_attack_result(attack_data, attacker, damage_percent, self:_get_attack_variant_index(attack_data.result.variant), attack_data.col_ray.ray)
+	self:_on_damage_received(attack_data)
+	return result
+end
+function NpcVehicleDamage:_send_explosion_attack_result(attack_data, attacker, damage_percent, i_attack_variant, direction)
+	self._unit:network():send("damage_explosion_fire", attacker, damage_percent, i_attack_variant, self._dead and true or false, direction)
+end
+function NpcVehicleDamage:sync_damage_explosion(attacker_unit, damage_percent, i_attack_variant, death, direction)
+	Application:trace("[NpcVehicleDamage:sync_damage_explosion]")
+	if self._dead then
 		return
 	end
-	local damage_info = {
-		result = {type = "hurt", variant = "explosion"}
-	}
-	if self._invulnerable then
-		self:_call_listeners(damage_info)
-		return
-	elseif self:incapacitated() then
-		return
-	elseif self:_chk_dmg_too_soon(attack_data.damage) then
-		return
+	local variant = "explosion"
+	local damage = damage_percent * self._HEALTH_INIT_PRECENT
+	local attack_data = {variant = variant}
+	local result
+	if death then
+		result = {type = "death", variant = variant}
+		self:die(attack_data.variant)
+		local data = {
+			name = self._unit:base()._tweak_table,
+			head_shot = false,
+			weapon_unit = attacker_unit and attacker_unit:inventory() and attacker_unit:inventory():equipped_unit(),
+			variant = "explosion"
+		}
+	else
+		result = {type = "explosion", variant = variant}
+		self._health = self._health - damage
 	end
-	if attack_data.attacker_unit == managers.player:player_unit() then
+	attack_data.attacker_unit = attacker_unit
+	attack_data.result = result
+	attack_data.damage = damage
+	local attack_dir
+	if direction then
+		attack_dir = direction
+	elseif attacker_unit then
+		attack_dir = self._unit:position() - attacker_unit:position()
+		mvector3.normalize(attack_dir)
+	else
+		attack_dir = self._unit:rotation():y()
+	end
+	attack_data.attack_dir = attack_dir
+	if attack_data.attacker_unit and attack_data.attacker_unit == managers.player:player_unit() then
 		managers.hud:on_hit_confirmed()
 	end
 	self:_health_recap(attack_data)
+	attack_data.pos = self._unit:position()
+	mvector3.set_z(attack_data.pos, attack_data.pos.z + math.random() * 180)
+	self:_send_sync_explosion_attack_result(attack_data)
+	self:_on_damage_received(attack_data)
+end
+function NpcVehicleDamage:_send_sync_explosion_attack_result(attack_data)
 end
 function NpcVehicleDamage:damage_fire(attack_data)
-	if not self._unit:vehicle_driving():is_vulnerable() then
+	Application:trace("[NpcVehicleDamage:damage_fire]")
+	local result
+	local damage = attack_data.damage
+	local damage_percent = math.ceil(damage / self._HEALTH_INIT_PRECENT)
+	damage = damage_percent * self._HEALTH_INIT_PRECENT
+	if damage >= self._health then
+		attack_data.damage = self._health
+		result = {
+			type = "death",
+			variant = attack_data.variant
+		}
+		self:die(attack_data.variant)
+	else
+		attack_data.damage = damage
+		result = {
+			type = "hurt",
+			variant = attack_data.variant
+		}
+		self._health = self._health - damage
+	end
+	attack_data.result = result
+	attack_data.pos = attack_data.col_ray.position
+	local attacker = attack_data.attacker_unit
+	if not attacker or attacker:id() == -1 then
+		attacker = self._unit
+	end
+	self:_health_recap(attack_data)
+	self:_send_fire_attack_result(attack_data, attacker, damage_percent, self:_get_attack_variant_index(attack_data.result.variant), attack_data.col_ray.ray)
+	self:_on_damage_received(attack_data)
+	return result
+end
+function NpcVehicleDamage:_send_fire_attack_result(attack_data, attacker, damage_percent, i_attack_variant, direction)
+	self._unit:network():send("damage_explosion_fire", attacker, damage_percent, i_attack_variant, self._dead and true or false, direction)
+end
+function NpcVehicleDamage:sync_damage_fire(attacker_unit, damage_percent, i_attack_variant, death, direction)
+	Application:trace("[NpcVehicleDamage:sync_damage_fire]")
+	if self._dead then
 		return
 	end
-	local damage_info = {
-		result = {type = "hurt", variant = "fire"}
-	}
-	if self._invulnerable then
-		self:_call_listeners(damage_info)
-		return
-	elseif self:incapacitated() then
-		return
-	elseif self:is_friendly_fire(attack_data.attacker_unit) then
-		return
-	elseif self:_chk_dmg_too_soon(attack_data.damage) then
-		return
+	local variant = "fire"
+	local damage = damage_percent * self._HEALTH_INIT_PRECENT
+	local attack_data = {variant = variant}
+	local result
+	if death then
+		result = {type = "death", variant = variant}
+		self:die(attack_data.variant)
+		local data = {
+			name = self._unit:base()._tweak_table,
+			head_shot = false,
+			weapon_unit = attacker_unit and attacker_unit:inventory() and attacker_unit:inventory():equipped_unit(),
+			variant = "fire"
+		}
+	else
+		result = {type = "fire", variant = variant}
+		self._health = self._health - damage
 	end
-	if attack_data.attacker_unit == managers.player:player_unit() and attack_data.weapon_unit and attack_data.variant ~= "stun" then
+	attack_data.attacker_unit = attacker_unit
+	attack_data.result = result
+	attack_data.damage = damage
+	local attack_dir
+	if direction then
+		attack_dir = direction
+	elseif attacker_unit then
+		attack_dir = self._unit:position() - attacker_unit:position()
+		mvector3.normalize(attack_dir)
+	else
+		attack_dir = self._unit:rotation():y()
+	end
+	attack_data.attack_dir = attack_dir
+	if attack_data.attacker_unit and attack_data.attacker_unit == managers.player:player_unit() then
 		managers.hud:on_hit_confirmed()
 	end
 	self:_health_recap(attack_data)
+	attack_data.pos = self._unit:position()
+	mvector3.set_z(attack_data.pos, attack_data.pos.z + math.random() * 180)
+	self:_send_sync_fire_attack_result(attack_data)
+	self:_on_damage_received(attack_data)
+end
+function NpcVehicleDamage:_send_sync_fire_attack_result(attack_data)
 end
 function NpcVehicleDamage:damage_collision(attack_data)
-	if not self._unit:vehicle_driving():is_vulnerable() then
-		return
+	if Network:is_server() then
+		if not self._unit:vehicle_driving():is_vulnerable() then
+			return
+		end
+		local damage_info = {
+			result = {type = "hurt", variant = "collision"}
+		}
+		local damage = attack_data.damage
+		local damage_percent = math.ceil(damage / self._HEALTH_INIT_PRECENT)
+		damage = damage_percent * self._HEALTH_INIT_PRECENT
+		if damage >= self._health then
+			attack_data.damage = self._health
+			self:die(attack_data.variant)
+		else
+			attack_data.damage = damage
+			self._health = self._health - damage
+		end
+		self:_health_recap()
+		self:_send_vehicle_health(self._health)
 	end
-	local damage_info = {
-		result = {type = "hurt", variant = "collision"}
-	}
-	if self._invulnerable then
-		self:_call_listeners(damage_info)
-		return
-	elseif self:incapacitated() then
-		return
-	elseif self:is_friendly_fire(attack_data.attacker_unit) then
-		return
-	elseif self:_chk_dmg_too_soon(attack_data.damage) then
-		return
-	end
-	self:_health_recap(attack_data)
 end
 function NpcVehicleDamage:is_friendly_fire(attacker_unit)
 	local friendly_fire = false
@@ -101,7 +273,7 @@ function NpcVehicleDamage:is_friendly_fire(attacker_unit)
 	friendly_fire = attacker_unit:movement():team().foes[self._team_police]
 	return not friendly_fire
 end
-function NpcVehicleDamage:_set_health_recap()
+function NpcVehicleDamage:_health_recap()
 	local current_health = self:get_real_health()
 	if current_health <= 0 and self._is_alive then
 		self._is_alive = false

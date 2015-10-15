@@ -110,7 +110,7 @@ function VehicleTweakData:_init_data_muscle()
 		loot_left = {name = "loot_left"},
 		loot_right = {name = "loot_right"}
 	}
-	self.muscle.damage = {max_health = 100000}
+	self.muscle.damage = {max_health = 9000000}
 	self.muscle.max_speed = 160
 	self.muscle.max_rpm = 8000
 	self.muscle.loot_drop_point = "v_repair_engine"
@@ -158,7 +158,7 @@ function VehicleTweakData:_init_data_forklift()
 	self.forklift.loot_points = {
 		loot_left = {name = "loot"}
 	}
-	self.forklift.damage = {max_health = 100000}
+	self.forklift.damage = {max_health = 9000000}
 	self.forklift.max_speed = 20
 	self.forklift.max_rpm = 1600
 	self.forklift.loot_drop_point = "v_repair_engine"

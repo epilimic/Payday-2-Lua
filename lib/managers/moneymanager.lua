@@ -135,9 +135,6 @@ function MoneyManager:on_mission_completed(num_winners)
 	self:_set_small_loot_payout(small_value + risk_table.small_risk)
 	self:_set_crew_payout(crew_value)
 	self:_add_to_total(total_payout)
-	if SystemInfo:platform() == Idstring("WIN32") then
-		managers.statistics:publish_cash_to_steam(total_payout)
-	end
 end
 function MoneyManager:get_contract_money_by_stars(job_stars, risk_stars, job_days, job_id, level_id, extra_params)
 	local job_and_difficulty_stars = job_stars + risk_stars

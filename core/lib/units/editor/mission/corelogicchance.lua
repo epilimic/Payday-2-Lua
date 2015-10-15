@@ -79,6 +79,10 @@ function CoreLogicChanceOperatorUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local names = {
+		"logic_chance/logic_chance"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, names)
 	self:_build_value_combobox(panel, panel_sizer, "operation", {
 		"none",
 		"add_chance",
@@ -152,6 +156,10 @@ function CoreLogicChanceTriggerUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local names = {
+		"logic_chance/logic_chance"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, names)
 	self:_build_value_combobox(panel, panel_sizer, "outcome", {"fail", "success"}, "Select an outcome to trigger on")
 	self:_add_help_text("This element is a trigger to logic_chance element.")
 end

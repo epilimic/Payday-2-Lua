@@ -28,9 +28,13 @@ function CoreEditor:build_left_toolbar()
 		value = "_draw_bodies_on",
 		toolbar = "_left_upper_toolbar"
 	})
+	self._left_upper_toolbar:add_check_tool("TB_FRUSTUM_FREEZE", "Frustum freeze/unfreeze", CoreEws.image_path("sequencer\\clip_icon_camera_00.png"), "Toggle frustum freeze on/off")
+	self._left_upper_toolbar:set_tool_state("TB_FRUSTUM_FREEZE", false)
+	self._left_upper_toolbar:connect("TB_FRUSTUM_FREEZE", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "_frustum_freeze_toggle"), nil)
 	self._left_upper_toolbar:add_separator()
 	self._left_upper_toolbar:add_tool("TB_MATERIAL_EDITOR", "Material Editor", CoreEWS.image_path("material_editor_16x16.png"), "Material Editor")
 	self._left_upper_toolbar:connect("TB_MATERIAL_EDITOR", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "on_open_tool"), "Material Editor")
+	self:_project_add_left_upper_toolbar_tool()
 	self._left_upper_toolbar:add_separator()
 	self._left_upper_toolbar:add_tool("TB_RELOAD_UNIT", "Reload Unit(s)", icons_path .. "reload_unit.bmp", "Reload Unit(s)")
 	self._left_upper_toolbar:connect("TB_RELOAD_UNIT", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "on_reload_unit"), "")
@@ -57,6 +61,8 @@ function CoreEditor:build_left_toolbar()
 	self._left_toolbar:realize()
 	left_panel_sizer:add(self._left_toolbar, 0, 0, "EXPAND")
 	Global.left_toolbar_sizer:add(left_panel, 0, 0, "EXPAND")
+end
+function CoreEditor:_project_add_left_upper_toolbar_tool()
 end
 function CoreEditor:show_edit_unit()
 	self:show_dialog("edit_unit", "EditUnitDialog")
@@ -98,4 +104,19 @@ function CoreEditor:on_open_world_folder()
 	if self._opendir then
 		os.execute("explorer " .. self._opendir)
 	end
+end
+function CoreEditor:_frustum_freeze_toggle(a, event)
+	local state = self._left_upper_toolbar:tool_state(event:get_id())
+	if state then
+		self._camera_controller:frustum_freeze(self:camera())
+	else
+		self._camera_controller:frustum_unfreeze(self:camera())
+	end
+end
+function CoreEditor:_interupt_frustum_freeze()
+	if not self._camera_controller:frustum_frozen() then
+		return
+	end
+	self._left_upper_toolbar:set_tool_state("TB_FRUSTUM_FREEZE", false)
+	self._camera_controller:frustum_unfreeze(self:camera())
 end

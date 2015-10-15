@@ -5,22 +5,18 @@ function ElementSetOutline:init(...)
 end
 function ElementSetOutline:client_on_executed(...)
 end
-function ElementSetOutline.sync_function(unit, state)
-	if unit:contour() then
-		if state then
-			unit:contour():add("highlight")
-		else
-			unit:contour():remove("highlight")
-		end
-	end
-end
 function ElementSetOutline:on_executed(instigator)
 	if not self._values.enabled then
 		return
 	end
 	local function f(unit)
-		ElementSetOutline.sync_function(unit, self._values.set_outline)
-		managers.network:session():send_to_peers_synched("sync_set_outline", unit, self._values.set_outline)
+		if unit:contour() then
+			if self._values.set_outline then
+				unit:contour():add("highlight_character", true)
+			else
+				unit:contour():remove("highlight_character", true)
+			end
+		end
 	end
 	for _, id in ipairs(self._values.elements) do
 		local element = self:get_mission_element(id)

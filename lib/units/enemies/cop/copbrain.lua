@@ -43,6 +43,7 @@ logic_variants.fbi_heavy_swat = security_variant
 logic_variants.nathan = security_variant
 logic_variants.sniper = security_variant
 logic_variants.gangster = security_variant
+logic_variants.biker = security_variant
 logic_variants.mobster = security_variant
 logic_variants.mobster_boss = security_variant
 logic_variants.hector_boss = security_variant
@@ -51,6 +52,7 @@ logic_variants.dealer = security_variant
 logic_variants.biker_escape = security_variant
 logic_variants.city_swat = security_variant
 logic_variants.old_hoxton_mission = security_variant
+logic_variants.inside_man = security_variant
 for _, tweak_table_name in pairs({
 	"shield",
 	"tank",

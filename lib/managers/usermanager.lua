@@ -90,6 +90,7 @@ function GenericUserManager:setup_setting_map()
 	self:setup_setting(44, "net_use_compression", true)
 	self:setup_setting(45, "net_forwarding", true)
 	self:setup_setting(46, "flush_gpu_command_queue", true)
+	self:setup_setting(47, "use_thq_weapon_parts", false)
 end
 function GenericUserManager:setup_setting(id, name, default_value)
 	assert(not Global.user_manager.setting_data_map[name], "[UserManager] Setting name \"" .. tostring(name) .. "\" already exists.")

@@ -138,7 +138,7 @@ function CoreMaterialEditor:_on_save_as()
 end
 function CoreMaterialEditor:_on_save_global()
 	local global = self._global_material_config_node:to_real_node()
-	self:_save_global_to_disk()
+	self:_save_global_to_disk(true)
 	EWS:message_box(self._main_frame, "All data in the global material config was saved to disk!", "Save", "OK,ICON_INFORMATION", Vector3(-1, -1, -1))
 end
 function CoreMaterialEditor:_on_reload()
@@ -324,20 +324,48 @@ Defaulting to ]] .. self.DEFAULT_TEXTURE .. ".", "Writing To Disk", "OK,ICON_WAR
 		self:_set_channels_default_texture(node)
 	end
 	managers.database:save_node(node, path)
-	managers.database:recompile(path)
+	local global_file = self:_save_global_to_disk(false)
+	Application:data_compile({
+		platform = string.lower(SystemInfo:platform():s()),
+		source_root = managers.database:base_path(),
+		target_db_root = Application:base_path() .. "/assets",
+		target_db_name = "all",
+		source_files = {
+			managers.database:entry_relative_path(path),
+			managers.database:entry_relative_path(global_file)
+		},
+		verbose = false,
+		send_idstrings = false
+	})
+	DB:reload()
+	managers.database:clear_all_cached_indices()
 	self:_update_output()
 	if not self._disable_live_feedback then
 		Application:reload_material_config(Idstring(managers.database:entry_path(path)))
 	end
 	self._text_in_node = node:to_xml()
-	self:_save_global_to_disk()
 end
-function CoreMaterialEditor:_save_global_to_disk()
+function CoreMaterialEditor:_save_global_to_disk(recompile)
 	local global = self._global_material_config_node:to_real_node()
 	local global_file = self._global_material_config_path
 	managers.database:save_node(global, global_file)
-	managers.database:recompile(global_file)
+	if recompile then
+		Application:data_compile({
+			platform = string.lower(SystemInfo:platform():s()),
+			source_root = managers.database:base_path(),
+			target_db_root = Application:base_path() .. "/assets",
+			target_db_name = "all",
+			source_files = {
+				managers.database:entry_relative_path(global_file)
+			},
+			verbose = false,
+			send_idstrings = false
+		})
+		DB:reload()
+		managers.database:clear_all_cached_indices()
+	end
 	self._text_in_global_node = self._global_material_config_node:to_xml()
+	return global_file
 end
 function CoreMaterialEditor:_data_diff()
 	return self._text_in_node ~= self._material_config_node:to_xml() or self._text_in_global_node ~= self._global_material_config_node:to_xml()

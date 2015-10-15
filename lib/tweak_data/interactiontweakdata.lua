@@ -19,6 +19,7 @@ function InteractionTweakData:init()
 	self.thermite.special_equipment = "thermite"
 	self.thermite.equipment_consume = true
 	self.thermite.interact_distance = 300
+	self.thermite.timer = 3
 	self.gasoline = {}
 	self.gasoline.icon = "equipment_thermite"
 	self.gasoline.text_id = "debug_interact_gas"
@@ -283,7 +284,7 @@ function InteractionTweakData:init()
 	self.timelock_panel.special_equipment = "bank_manager_key"
 	self.timelock_panel.equipment_consume = true
 	self.timelock_panel.start_active = false
-	self.timelock_panel.axis = "z"
+	self.timelock_panel.axis = "y"
 	self.take_weapons = {}
 	self.take_weapons.icon = "develop"
 	self.take_weapons.text_id = "hud_int_take_weapons"

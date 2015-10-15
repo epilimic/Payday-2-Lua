@@ -91,8 +91,9 @@ function NodeGui:_setup_item_rows(node)
 			row_item.hightlight_color = params.hightlight_color
 			row_item.disabled_color = params.disabled_color or self.row_item_disabled_text_color
 			row_item.marker_color = params.marker_color or self.marker_color
-			row_item.font = self.font
-			row_item.font_size = self.font_size
+			row_item.marker_disabled_color = params.marker_disabled_color or self.marker_disabled_color
+			row_item.font = params.font or self.font
+			row_item.font_size = params.font_size or self.font_size
 			row_item.text = item_text
 			row_item.help_text = help_text
 			row_item.align = params.align or self.align or "left"

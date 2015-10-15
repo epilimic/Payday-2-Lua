@@ -10,6 +10,11 @@ function SetOutlineElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local names = {
+		"ai_spawn_enemy",
+		"ai_spawn_civilian"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, names)
 	local set_outline = EWS:CheckBox(panel, "Enable outline", "")
 	set_outline:set_value(self._hed.set_outline)
 	set_outline:connect("EVT_COMMAND_CHECKBOX_CLICKED", callback(self, self, "set_element_data"), {

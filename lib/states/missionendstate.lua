@@ -143,18 +143,7 @@ function MissionEndState:at_enter(old_state, params)
 					managers.achievment:award(shotgun_one_o_one.award)
 				end
 			end
-			if self._type == "victory" and managers.statistics:session_hit_accuracy() > 70 then
-				local job_list = {
-					watchdogs = true,
-					watchdogs_prof = true,
-					watchdogs_night = true,
-					watchdogs_night_prof = true
-				}
-				if job_list[managers.job:current_job_id()] then
-					managers.statistics:crimefest_stats("chains_6")
-				end
-			end
-			local mask_pass, diff_pass, no_shots_pass, contract_pass, job_pass, jobs_pass, level_pass, levels_pass, stealth_pass, loud_pass, equipped_pass, equipped_team_pass, timer_pass, num_players_pass, pass_skills, killed_by_weapons_pass, killed_by_melee_pass, killed_by_grenade_pass, civilians_killed_pass, complete_job_pass, all_pass, weapon_data, memory, level_id, stage, num_skills
+			local mask_pass, diff_pass, no_shots_pass, contract_pass, job_pass, jobs_pass, level_pass, levels_pass, stealth_pass, loud_pass, equipped_pass, job_value_pass, equipped_team_pass, timer_pass, num_players_pass, pass_skills, killed_by_weapons_pass, killed_by_melee_pass, killed_by_grenade_pass, civilians_killed_pass, complete_job_pass, all_pass, weapon_data, memory, level_id, stage, num_skills
 			local killed_by_weapons = managers.statistics:session_killed_by_weapons()
 			local killed_by_melee = managers.statistics:session_killed_by_melee()
 			local killed_by_grenade = managers.statistics:session_killed_by_grenade()
@@ -174,6 +163,7 @@ function MissionEndState:at_enter(old_state, params)
 				loud_pass = not achievement_data.loud or managers.groupai and not managers.groupai:state():whisper_mode()
 				timer_pass = not achievement_data.timer or managers.game_play_central and managers.game_play_central:get_heist_timer() <= achievement_data.timer
 				num_players_pass = not achievement_data.num_players or achievement_data.num_players <= managers.network:session():amount_of_players()
+				job_value_pass = not achievement_data.job_value or managers.mission:get_job_value(achievement_data.job_value.key) == achievement_data.job_value.value
 				killed_by_weapons_pass = not achievement_data.killed_by_weapons
 				if achievement_data.killed_by_weapons then
 					if achievement_data.killed_by_weapons == 0 then
@@ -285,7 +275,7 @@ function MissionEndState:at_enter(old_state, params)
 						end
 					end
 				end
-				all_pass = job_pass and jobs_pass and level_pass and levels_pass and contract_pass and diff_pass and mask_pass and no_shots_pass and stealth_pass and loud_pass and equipped_pass and equipped_team_pass and num_players_pass and pass_skills and timer_pass and killed_by_weapons_pass and killed_by_melee_pass and killed_by_grenade_pass and complete_job_pass
+				all_pass = job_pass and jobs_pass and level_pass and levels_pass and contract_pass and diff_pass and mask_pass and no_shots_pass and stealth_pass and loud_pass and equipped_pass and equipped_team_pass and num_players_pass and pass_skills and timer_pass and killed_by_weapons_pass and killed_by_melee_pass and killed_by_grenade_pass and complete_job_pass and job_value_pass
 				if all_pass and achievement_data.need_full_job and managers.job:has_active_job() then
 					if not managers.job:interupt_stage() then
 						memory = managers.job:get_memory(achievement)
@@ -788,11 +778,8 @@ function MissionEndState:update(t, dt)
 			local data = managers.experience:give_experience(self._total_xp_bonus)
 			data.bonuses = self._bonuses
 			managers.hud:send_xp_data_endscreen_hud(data, callback(self, self, "set_completion_bonus_done"))
-			if SystemInfo:platform() == Idstring("WIN32") then
-				managers.statistics:publish_xp_to_steam(self._total_xp_bonus)
-				if level ~= managers.experience:current_level() then
-					managers.statistics:publish_level_to_steam()
-				end
+			if SystemInfo:platform() == Idstring("WIN32") and level ~= managers.experience:current_level() then
+				managers.statistics:publish_level_to_steam()
 			end
 		else
 			self:set_completion_bonus_done(true)

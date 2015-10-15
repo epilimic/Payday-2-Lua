@@ -127,6 +127,10 @@ function LootBagTriggerUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local names = {
+		"point_loot_bag/point_loot_bag"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, names)
 	self:_build_value_combobox(panel, panel_sizer, "trigger_type", {"load", "spawn"}, "Select a trigger type for the selected elements")
 	self:_add_help_text("This element is a trigger to point_loot_bag element.")
 end

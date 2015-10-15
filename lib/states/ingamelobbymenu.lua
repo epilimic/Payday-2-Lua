@@ -109,7 +109,7 @@ function IngameLobbyMenuState:at_enter()
 		if not Global.game_settings.single_player and managers.network:session() then
 			managers.network:session():send_to_peers("feed_lootdrop", 1, "", "", max_pc, 0, card_left_pc, card_right_pc)
 		end
-		self:set_lootdrop()
+		self:_set_lootdrop()
 	elseif Network:is_client() then
 		if not self._setup then
 			self._setup = true
@@ -136,6 +136,23 @@ function IngameLobbyMenuState:at_enter()
 			MenuCallbackHandler:start_the_game()
 		end
 	end
+end
+function IngameLobbyMenuState:_set_lootdrop()
+	if not managers.network.account:inventory_reward(callback(self, self, "_clbk_inventory_reward")) then
+		self:set_lootdrop()
+	end
+end
+function IngameLobbyMenuState:_clbk_inventory_reward(error, tradable_list)
+	if error then
+		Application:error("[IngameLobbyMenuState:_clbk_inventory_reward] Failed to reward tradable item (" .. tostring(error) .. ")")
+	end
+	local drop_category, drop_entry
+	if tradable_list and table.size(tradable_list) > 0 then
+		print("[IngameLobbyMenuState:_clbk_inventory_reward]", tradable_list[1].category, tradable_list[1].entry, tradable_list[1].instance_id, tradable_list[1].amount, table.size(tradable_list))
+		drop_category = tradable_list[1].category
+		drop_entry = tradable_list[1].entry
+	end
+	self:set_lootdrop(drop_category, drop_entry)
 end
 function IngameLobbyMenuState:set_lootdrop(drop_category, drop_item_id)
 	local global_value, item_category, item_id, max_pc, item_pc
@@ -173,9 +190,6 @@ function IngameLobbyMenuState:set_lootdrop(drop_category, drop_item_id)
 		local global_values = tweak_data.lootdrop.global_value_list_map
 		local global_index = global_values[global_value] or 1
 		managers.network:session():send_to_peers("feed_lootdrop", global_index, item_category, item_id, max_pc, item_pc, card_left_pc, card_right_pc)
-	end
-	if SystemInfo:platform() == Idstring("WIN32") then
-		managers.statistics:publish_lootdrop_to_steam()
 	end
 end
 function IngameLobbyMenuState:at_exit()

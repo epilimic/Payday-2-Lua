@@ -13,6 +13,7 @@ function BlackMarketTweakData:init(tweak_data)
 	self:_init_deployables(tweak_data)
 	self:_init_projectiles()
 	self:_init_melee_weapons()
+	self:_init_weapon_skins()
 end
 function BlackMarketTweakData:print_missing_strings(skip_print_id)
 	if Application:production_build() then
@@ -74,7 +75,8 @@ function BlackMarketTweakData:_init_weapon_mods(tweak_data)
 			value = data.stats and data.stats.value or 1,
 			weight = data.weight,
 			texture_bundle_folder = data.texture_bundle_folder,
-			is_a_unlockable = data.is_a_unlockable
+			is_a_unlockable = data.is_a_unlockable,
+			unatainable = data.unatainable
 		}
 	end
 	self:_add_desc_from_name_macro(self.weapon_mods)
@@ -2241,7 +2243,7 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.mason_vanguard_veteran.type = "helmet"
 	if SystemInfo:platform() == Idstring("PS3") then
 		self.masks.sweettooth = {}
-		self.masks.sweettooth.unit = "units/payday2/masks/msk_sweettooth/msk_sweettooth"
+		self.masks.sweettooth.unit = "units/pd2_dlc_consoles/masks/msk_sweettooth/msk_sweettooth"
 		self.masks.sweettooth.name_id = "bm_msk_sweettooth"
 		self.masks.sweettooth.pcs = {
 			10,
@@ -2251,13 +2253,15 @@ function BlackMarketTweakData:_init_masks()
 		}
 		self.masks.sweettooth.dlc = "sweettooth"
 		self.masks.sweettooth.value = 1
+		self.masks.sweettooth.texture_bundle_folder = "consoles"
 	elseif SystemInfo:platform() == Idstring("X360") then
 		self.masks.thespian = {}
-		self.masks.thespian.unit = "units/pd2_thespian_mask/msk_thespian"
+		self.masks.thespian.unit = "units/pd2_dlc_consoles/masks/pd2_thespian_mask/msk_thespian"
 		self.masks.thespian.name_id = "bm_msk_thespian"
 		self.masks.thespian.pcs = {}
 		self.masks.thespian.value = 0
 		self.masks.thespian.type = "helmet"
+		self.masks.thespian.texture_bundle_folder = "consoles"
 	elseif SystemInfo:platform() == Idstring("PS4") then
 		self.masks.finger = {}
 		self.masks.finger.unit = "units/pd2_nextgen/masks/finger/msk_finger"
@@ -2270,6 +2274,7 @@ function BlackMarketTweakData:_init_masks()
 		}
 		self.masks.finger.dlc = "preorder"
 		self.masks.finger.value = 7
+		self.masks.finger.texture_bundle_folder = "nextgen"
 	elseif SystemInfo:platform() == Idstring("XB1") then
 		self.masks.instinct = {}
 		self.masks.instinct.unit = "units/pd2_nextgen/masks/instinct/msk_instinct"
@@ -2282,6 +2287,14 @@ function BlackMarketTweakData:_init_masks()
 		}
 		self.masks.instinct.dlc = "preorder"
 		self.masks.instinct.value = 7
+		self.masks.instinct.texture_bundle_folder = "nextgen"
+		self.masks.unforsaken = {}
+		self.masks.unforsaken.unit = "units/pd2_nextgen/masks/unforsaken/msk_unforsaken"
+		self.masks.unforsaken.name_id = "bm_msk_unforsaken"
+		self.masks.unforsaken.pcs = {}
+		self.masks.unforsaken.value = 0
+		self.masks.unforsaken.infamous = true
+		self.masks.unforsaken.texture_bundle_folder = "nextgen"
 	end
 	self:_add_desc_from_name_macro(self.masks)
 end
@@ -6526,6 +6539,12 @@ function BlackMarketTweakData:_init_cash()
 	self.cash.cash_preorder.value_id = "cash_preorder"
 	self.cash.cash_preorder.multiplier = 1.2
 	self.cash.cash_preorder.dlc = "preorder"
+	if SystemInfo:platform() == Idstring("XB1") then
+		self.cash.xone_bonus = {}
+		self.cash.xone_bonus.name_id = "bm_csh_cash_xone"
+		self.cash.xone_bonus.value_id = "xone_bonus"
+		self.cash.xone_bonus.multiplier = 1
+	end
 end
 function BlackMarketTweakData:_init_xp()
 	self.xp = {}
@@ -6949,10 +6968,10 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.weapon.instant = true
 	self.melee_weapons.weapon.free = true
 	self.melee_weapons.weapon.stats = {}
-	self.melee_weapons.weapon.stats.min_damage = 1.5
-	self.melee_weapons.weapon.stats.max_damage = 1.5
-	self.melee_weapons.weapon.stats.min_damage_effect = 1.75
-	self.melee_weapons.weapon.stats.max_damage_effect = 1.75
+	self.melee_weapons.weapon.stats.min_damage = 3
+	self.melee_weapons.weapon.stats.max_damage = 3
+	self.melee_weapons.weapon.stats.min_damage_effect = 1
+	self.melee_weapons.weapon.stats.max_damage_effect = 1
 	self.melee_weapons.weapon.stats.charge_time = 0
 	self.melee_weapons.weapon.stats.range = 150
 	self.melee_weapons.weapon.stats.weapon_type = "blunt"
@@ -6968,10 +6987,10 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.fists.animation = nil
 	self.melee_weapons.fists.free = true
 	self.melee_weapons.fists.stats = {}
-	self.melee_weapons.fists.stats.min_damage = 1
-	self.melee_weapons.fists.stats.max_damage = 3
-	self.melee_weapons.fists.stats.min_damage_effect = 5.35
-	self.melee_weapons.fists.stats.max_damage_effect = 2.89
+	self.melee_weapons.fists.stats.min_damage = 3
+	self.melee_weapons.fists.stats.max_damage = 5.5
+	self.melee_weapons.fists.stats.min_damage_effect = 3
+	self.melee_weapons.fists.stats.max_damage_effect = 2
 	self.melee_weapons.fists.stats.charge_time = 1
 	self.melee_weapons.fists.stats.range = 150
 	self.melee_weapons.fists.stats.remove_weapon_movement_penalty = true
@@ -7003,11 +7022,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.kabar.dlc = "gage_pack_lmg"
 	self.melee_weapons.kabar.texture_bundle_folder = "gage_pack_lmg"
 	self.melee_weapons.kabar.stats = {}
-	self.melee_weapons.kabar.stats.min_damage = 1.5
-	self.melee_weapons.kabar.stats.max_damage = 7
-	self.melee_weapons.kabar.stats.min_damage_effect = 0.7
-	self.melee_weapons.kabar.stats.max_damage_effect = 0.525
-	self.melee_weapons.kabar.stats.charge_time = 1.8
+	self.melee_weapons.kabar.stats.min_damage = 3
+	self.melee_weapons.kabar.stats.max_damage = 8
+	self.melee_weapons.kabar.stats.min_damage_effect = 1
+	self.melee_weapons.kabar.stats.max_damage_effect = 1
+	self.melee_weapons.kabar.stats.charge_time = 2
 	self.melee_weapons.kabar.stats.range = 185
 	self.melee_weapons.kabar.stats.remove_weapon_movement_penalty = true
 	self.melee_weapons.kabar.stats.weapon_type = "sharp"
@@ -7033,10 +7052,10 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.rambo.type = "knife"
 	self.melee_weapons.rambo.unit = "units/pd2_dlc_gage_lmg/weapons/wpn_fps_mel_rambo/wpn_fps_mel_rambo"
 	self.melee_weapons.rambo.third_unit = "units/pd2_dlc_gage_lmg/weapons/wpn_third_mel_rambo/wpn_third_mel_rambo"
-	self.melee_weapons.rambo.stats.min_damage = 2.2
-	self.melee_weapons.rambo.stats.max_damage = 10
-	self.melee_weapons.rambo.stats.min_damage_effect = 0.61
-	self.melee_weapons.rambo.stats.max_damage_effect = 0.4
+	self.melee_weapons.rambo.stats.min_damage = 3
+	self.melee_weapons.rambo.stats.max_damage = 8
+	self.melee_weapons.rambo.stats.min_damage_effect = 1
+	self.melee_weapons.rambo.stats.max_damage_effect = 1
 	self.melee_weapons.rambo.anim_global_param = "melee_knife2"
 	self.melee_weapons.rambo.repeat_expire_t = 0.5
 	self.melee_weapons.rambo.expire_t = 1
@@ -7052,23 +7071,23 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.gerber.anim_global_param = "melee_knife2"
 	self.melee_weapons.gerber.repeat_expire_t = 0.5
 	self.melee_weapons.gerber.expire_t = 1
-	self.melee_weapons.gerber.stats.min_damage = 2
-	self.melee_weapons.gerber.stats.max_damage = 5.2
+	self.melee_weapons.gerber.stats.min_damage = 3
+	self.melee_weapons.gerber.stats.max_damage = 8
 	self.melee_weapons.gerber.stats.min_damage_effect = 1
-	self.melee_weapons.gerber.stats.max_damage_effect = 0.58
-	self.melee_weapons.gerber.stats.charge_time = 1.3
+	self.melee_weapons.gerber.stats.max_damage_effect = 1
+	self.melee_weapons.gerber.stats.charge_time = 2
 	self.melee_weapons.gerber.stats.range = 160
-	self.melee_weapons.gerber.stats.concealment = 30
+	self.melee_weapons.gerber.stats.concealment = 29
 	self.melee_weapons.kampfmesser = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.kampfmesser.name_id = "bm_melee_kampfmesser"
 	self.melee_weapons.kampfmesser.type = "knife"
 	self.melee_weapons.kampfmesser.unit = "units/pd2_dlc_gage_lmg/weapons/wpn_fps_mel_km2000/wpn_fps_mel_km2000"
 	self.melee_weapons.kampfmesser.third_unit = "units/pd2_dlc_gage_lmg/weapons/wpn_third_mel_km2000/wpn_third_mel_km2000"
-	self.melee_weapons.kampfmesser.stats.min_damage = 1.5
-	self.melee_weapons.kampfmesser.stats.max_damage = 7.5
+	self.melee_weapons.kampfmesser.stats.min_damage = 3
+	self.melee_weapons.kampfmesser.stats.max_damage = 8
 	self.melee_weapons.kampfmesser.stats.min_damage_effect = 1
-	self.melee_weapons.kampfmesser.stats.max_damage_effect = 0.445
-	self.melee_weapons.kampfmesser.stats.charge_time = 1.5
+	self.melee_weapons.kampfmesser.stats.max_damage_effect = 1
+	self.melee_weapons.kampfmesser.stats.charge_time = 2
 	self.melee_weapons.kampfmesser.stats.range = 185
 	self.melee_weapons.kampfmesser.stats.concealment = 29
 	self.melee_weapons.brass_knuckles = deep_clone(self.melee_weapons.fists)
@@ -7082,11 +7101,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	}
 	self.melee_weapons.brass_knuckles.unit = "units/payday2/weapons/wpn_fps_mel_brassknuckle/wpn_fps_mel_brassknuckle"
 	self.melee_weapons.brass_knuckles.third_unit = "units/payday2/weapons/wpn_fps_mel_brassknuckle/wpn_third_mel_brassknuckle"
-	self.melee_weapons.brass_knuckles.stats.min_damage = 1.5
-	self.melee_weapons.brass_knuckles.stats.max_damage = 3.5
-	self.melee_weapons.brass_knuckles.stats.min_damage_effect = 3.7
-	self.melee_weapons.brass_knuckles.stats.max_damage_effect = 2.675
-	self.melee_weapons.brass_knuckles.stats.charge_time = 1.3
+	self.melee_weapons.brass_knuckles.stats.min_damage = 3
+	self.melee_weapons.brass_knuckles.stats.max_damage = 5.5
+	self.melee_weapons.brass_knuckles.stats.min_damage_effect = 3
+	self.melee_weapons.brass_knuckles.stats.max_damage_effect = 2
+	self.melee_weapons.brass_knuckles.stats.charge_time = 2
 	self.melee_weapons.brass_knuckles.stats.range = 150
 	self.melee_weapons.brass_knuckles.sounds.hit_gen = "knuckles_hit_gen"
 	self.melee_weapons.brass_knuckles.sounds.hit_body = "knuckles_hit_body"
@@ -7103,11 +7122,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.tomahawk.unit = "units/pd2_dlc_gage_shot/weapons/wpn_fps_mel_tomahawk/wpn_fps_mel_tomahawk"
 	self.melee_weapons.tomahawk.third_unit = "units/pd2_dlc_gage_shot/weapons/wpn_third_mel_tomahawk/wpn_third_mel_tomahawk"
 	self.melee_weapons.tomahawk.stats.weapon_type = "sharp"
-	self.melee_weapons.tomahawk.stats.min_damage = 4
-	self.melee_weapons.tomahawk.stats.max_damage = 6.64
-	self.melee_weapons.tomahawk.stats.min_damage_effect = 0.5
-	self.melee_weapons.tomahawk.stats.max_damage_effect = 0.6
-	self.melee_weapons.tomahawk.stats.charge_time = 2.2
+	self.melee_weapons.tomahawk.stats.min_damage = 3
+	self.melee_weapons.tomahawk.stats.max_damage = 8
+	self.melee_weapons.tomahawk.stats.min_damage_effect = 1
+	self.melee_weapons.tomahawk.stats.max_damage_effect = 1
+	self.melee_weapons.tomahawk.stats.charge_time = 2
 	self.melee_weapons.tomahawk.stats.range = 225
 	self.melee_weapons.tomahawk.expire_t = 1.1
 	self.melee_weapons.tomahawk.repeat_expire_t = 0.8
@@ -7118,17 +7137,17 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.tomahawk.sounds.hit_gen = "tomahawk_hit_gen"
 	self.melee_weapons.tomahawk.sounds.hit_body = "tomahawk_hit_body"
 	self.melee_weapons.tomahawk.sounds.charge = "tomahawk_charge"
-	self.melee_weapons.tomahawk.stats.concealment = 26
+	self.melee_weapons.tomahawk.stats.concealment = 28
 	self.melee_weapons.baton = deep_clone(self.melee_weapons.tomahawk)
 	self.melee_weapons.baton.name_id = "bm_melee_baton"
 	self.melee_weapons.baton.unit = "units/pd2_dlc_gage_shot/weapons/wpn_fps_mel_baton/wpn_fps_mel_baton"
 	self.melee_weapons.baton.third_unit = "units/pd2_dlc_gage_shot/weapons/wpn_third_mel_baton/wpn_third_mel_baton"
 	self.melee_weapons.baton.stats.weapon_type = "blunt"
-	self.melee_weapons.baton.stats.min_damage = 0.68
-	self.melee_weapons.baton.stats.max_damage = 1.68
-	self.melee_weapons.baton.stats.min_damage_effect = 12
-	self.melee_weapons.baton.stats.max_damage_effect = 8.8
-	self.melee_weapons.baton.stats.charge_time = 2
+	self.melee_weapons.baton.stats.min_damage = 3
+	self.melee_weapons.baton.stats.max_damage = 9
+	self.melee_weapons.baton.stats.min_damage_effect = 5
+	self.melee_weapons.baton.stats.max_damage_effect = 3
+	self.melee_weapons.baton.stats.charge_time = 3
 	self.melee_weapons.baton.stats.range = 250
 	self.melee_weapons.baton.stats.weapon_type = "blunt"
 	self.melee_weapons.baton.sounds = {}
@@ -7146,11 +7165,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 		"a_weapon_right"
 	}
 	self.melee_weapons.shovel.stats.weapon_type = "blunt"
-	self.melee_weapons.shovel.stats.min_damage = 1.34
-	self.melee_weapons.shovel.stats.max_damage = 2.64
-	self.melee_weapons.shovel.stats.min_damage_effect = 4.75
-	self.melee_weapons.shovel.stats.max_damage_effect = 5.06
-	self.melee_weapons.shovel.stats.charge_time = 2.2
+	self.melee_weapons.shovel.stats.min_damage = 2
+	self.melee_weapons.shovel.stats.max_damage = 4
+	self.melee_weapons.shovel.stats.min_damage_effect = 10
+	self.melee_weapons.shovel.stats.max_damage_effect = 10
+	self.melee_weapons.shovel.stats.charge_time = 3
 	self.melee_weapons.shovel.stats.range = 250
 	self.melee_weapons.shovel.stats.weapon_type = "blunt"
 	self.melee_weapons.shovel.sounds = {}
@@ -7159,16 +7178,16 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.shovel.sounds.hit_gen = "shovel_hit_gen"
 	self.melee_weapons.shovel.sounds.hit_body = "shovel_hit_body"
 	self.melee_weapons.shovel.sounds.charge = "shovel_charge"
-	self.melee_weapons.shovel.stats.concealment = 24
+	self.melee_weapons.shovel.stats.concealment = 27
 	self.melee_weapons.becker = deep_clone(self.melee_weapons.tomahawk)
 	self.melee_weapons.becker.name_id = "bm_melee_becker"
 	self.melee_weapons.becker.unit = "units/pd2_dlc_gage_shot/weapons/wpn_fps_mel_tac/wpn_fps_mel_tac"
 	self.melee_weapons.becker.third_unit = "units/pd2_dlc_gage_shot/weapons/wpn_third_mel_tac/wpn_third_mel_tac"
-	self.melee_weapons.becker.stats.min_damage = 1.68
-	self.melee_weapons.becker.stats.max_damage = 11.68
-	self.melee_weapons.becker.stats.min_damage_effect = 0.4
-	self.melee_weapons.becker.stats.max_damage_effect = 0.345
-	self.melee_weapons.becker.stats.charge_time = 3
+	self.melee_weapons.becker.stats.min_damage = 3
+	self.melee_weapons.becker.stats.max_damage = 8
+	self.melee_weapons.becker.stats.min_damage_effect = 1
+	self.melee_weapons.becker.stats.max_damage_effect = 1
+	self.melee_weapons.becker.stats.charge_time = 2
 	self.melee_weapons.becker.stats.range = 200
 	self.melee_weapons.becker.repeat_expire_t = 0.6
 	self.melee_weapons.becker.sounds = {}
@@ -7177,7 +7196,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.becker.sounds.hit_gen = "becker_hit_gen"
 	self.melee_weapons.becker.sounds.hit_body = "becker_hit_body"
 	self.melee_weapons.becker.sounds.charge = "knife_charge"
-	self.melee_weapons.becker.stats.concealment = 28
+	self.melee_weapons.becker.stats.concealment = 27
 	self.melee_weapons.moneybundle = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.moneybundle.name_id = "bm_melee_moneybundle"
 	self.melee_weapons.moneybundle.dlc = "pd2_clan"
@@ -7191,11 +7210,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.moneybundle.unit = "units/pd2_million/weapons/wpn_fps_mel_moneybundle/wpn_fps_mel_moneybundle"
 	self.melee_weapons.moneybundle.third_unit = "units/pd2_million/weapons/wpn_third_mel_moneybundle/wpn_third_mel_moneybundle"
 	self.melee_weapons.moneybundle.stats.weapon_type = "blunt"
-	self.melee_weapons.moneybundle.stats.min_damage = 0.2
-	self.melee_weapons.moneybundle.stats.max_damage = 1
-	self.melee_weapons.moneybundle.stats.min_damage_effect = 15
-	self.melee_weapons.moneybundle.stats.max_damage_effect = 10
-	self.melee_weapons.moneybundle.stats.charge_time = 1
+	self.melee_weapons.moneybundle.stats.min_damage = 3
+	self.melee_weapons.moneybundle.stats.max_damage = 5.5
+	self.melee_weapons.moneybundle.stats.min_damage_effect = 3
+	self.melee_weapons.moneybundle.stats.max_damage_effect = 2
+	self.melee_weapons.moneybundle.stats.charge_time = 2
 	self.melee_weapons.moneybundle.stats.range = 150
 	self.melee_weapons.moneybundle.stats.weapon_type = "blunt"
 	self.melee_weapons.moneybundle.sounds = {}
@@ -7219,10 +7238,10 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.barbedwire.unit = "units/pd2_washington_reveal/weapons/wpn_fps_mel_barbedwire/wpn_fps_mel_barbedwire"
 	self.melee_weapons.barbedwire.third_unit = "units/pd2_washington_reveal/weapons/wpn_fps_mel_barbedwire/wpn_third_mel_barbedwire"
 	self.melee_weapons.barbedwire.stats.weapon_type = "blunt"
-	self.melee_weapons.barbedwire.stats.min_damage = 4
-	self.melee_weapons.barbedwire.stats.max_damage = 6.64
-	self.melee_weapons.barbedwire.stats.min_damage_effect = 4
-	self.melee_weapons.barbedwire.stats.max_damage_effect = 3.2
+	self.melee_weapons.barbedwire.stats.min_damage = 3
+	self.melee_weapons.barbedwire.stats.max_damage = 9
+	self.melee_weapons.barbedwire.stats.min_damage_effect = 5
+	self.melee_weapons.barbedwire.stats.max_damage_effect = 3
 	self.melee_weapons.barbedwire.stats.charge_time = 3
 	self.melee_weapons.barbedwire.stats.range = 275
 	self.melee_weapons.barbedwire.stats.weapon_type = "blunt"
@@ -7235,7 +7254,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.barbedwire.sounds.hit_body = "bat_hit_body"
 	self.melee_weapons.barbedwire.sounds.charge = "bat_charge"
 	self.melee_weapons.barbedwire.melee_damage_delay = 0.2
-	self.melee_weapons.barbedwire.stats.concealment = 21
+	self.melee_weapons.barbedwire.stats.concealment = 27
 	self.melee_weapons.x46 = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.x46.name_id = "bm_melee_x46"
 	self.melee_weapons.x46.type = "knife"
@@ -7246,13 +7265,13 @@ function BlackMarketTweakData:_init_melee_weapons()
 	}
 	self.melee_weapons.x46.unit = "units/pd2_dlc_gage_assault/weapons/wpn_fps_mel_x46/wpn_fps_mel_x46"
 	self.melee_weapons.x46.third_unit = "units/pd2_dlc_gage_assault/weapons/wpn_fps_mel_x46/wpn_third_mel_x46"
-	self.melee_weapons.x46.stats.min_damage = 2.5
-	self.melee_weapons.x46.stats.max_damage = 6
+	self.melee_weapons.x46.stats.min_damage = 3
+	self.melee_weapons.x46.stats.max_damage = 8
 	self.melee_weapons.x46.stats.min_damage_effect = 1
 	self.melee_weapons.x46.stats.max_damage_effect = 1
-	self.melee_weapons.x46.stats.charge_time = 1.5
+	self.melee_weapons.x46.stats.charge_time = 2
 	self.melee_weapons.x46.stats.range = 185
-	self.melee_weapons.x46.stats.concealment = 30
+	self.melee_weapons.x46.stats.concealment = 29
 	self.melee_weapons.dingdong = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.dingdong.name_id = "bm_melee_dingdong"
 	self.melee_weapons.dingdong.anim_global_param = "melee_baseballbat"
@@ -7265,11 +7284,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.dingdong.unit = "units/pd2_dlc_gage_assault/weapons/wpn_fps_mel_dingdong/wpn_fps_mel_dingdong"
 	self.melee_weapons.dingdong.third_unit = "units/pd2_dlc_gage_assault/weapons/wpn_fps_mel_dingdong/wpn_third_mel_dingdong"
 	self.melee_weapons.dingdong.stats.weapon_type = "blunt"
-	self.melee_weapons.dingdong.stats.min_damage = 3
-	self.melee_weapons.dingdong.stats.max_damage = 9.2
-	self.melee_weapons.dingdong.stats.min_damage_effect = 4
-	self.melee_weapons.dingdong.stats.max_damage_effect = 3.2
-	self.melee_weapons.dingdong.stats.charge_time = 2.5
+	self.melee_weapons.dingdong.stats.min_damage = 2
+	self.melee_weapons.dingdong.stats.max_damage = 4
+	self.melee_weapons.dingdong.stats.min_damage_effect = 10
+	self.melee_weapons.dingdong.stats.max_damage_effect = 10
+	self.melee_weapons.dingdong.stats.charge_time = 3
 	self.melee_weapons.dingdong.stats.range = 275
 	self.melee_weapons.dingdong.stats.weapon_type = "blunt"
 	self.melee_weapons.dingdong.sounds = {}
@@ -7281,7 +7300,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.dingdong.sounds.hit_body = "ding_dong_hit_body"
 	self.melee_weapons.dingdong.sounds.charge = "knife_charge"
 	self.melee_weapons.dingdong.melee_damage_delay = 0.2
-	self.melee_weapons.dingdong.stats.concealment = 20
+	self.melee_weapons.dingdong.stats.concealment = 26
 	self.melee_weapons.bayonet = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.bayonet.name_id = "bm_melee_bayonet"
 	self.melee_weapons.bayonet.type = "knife"
@@ -7321,11 +7340,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.bullseye.sounds.charge = "bullseye_charge"
 	self.melee_weapons.bullseye.stats.min_damage = 3
 	self.melee_weapons.bullseye.stats.max_damage = 8
-	self.melee_weapons.bullseye.stats.min_damage_effect = 0.5
-	self.melee_weapons.bullseye.stats.max_damage_effect = 0.6
-	self.melee_weapons.bullseye.stats.charge_time = 1.6
+	self.melee_weapons.bullseye.stats.min_damage_effect = 1
+	self.melee_weapons.bullseye.stats.max_damage_effect = 1
+	self.melee_weapons.bullseye.stats.charge_time = 2
 	self.melee_weapons.bullseye.stats.range = 185
-	self.melee_weapons.bullseye.stats.concealment = 27
+	self.melee_weapons.bullseye.stats.concealment = 29
 	self.melee_weapons.baseballbat = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.baseballbat.name_id = "bm_melee_bat"
 	self.melee_weapons.baseballbat.anim_global_param = "melee_baseballbat_miami"
@@ -7343,13 +7362,13 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.baseballbat.sounds.hit_gen = "baseballbat_hit_gen"
 	self.melee_weapons.baseballbat.sounds.hit_body = "baseballbat_hit_body"
 	self.melee_weapons.baseballbat.sounds.charge = "bat_charge"
-	self.melee_weapons.baseballbat.stats.min_damage = 3.5
-	self.melee_weapons.baseballbat.stats.max_damage = 6
-	self.melee_weapons.baseballbat.stats.min_damage_effect = 4
-	self.melee_weapons.baseballbat.stats.max_damage_effect = 3.2
-	self.melee_weapons.baseballbat.stats.charge_time = 2.4
+	self.melee_weapons.baseballbat.stats.min_damage = 3
+	self.melee_weapons.baseballbat.stats.max_damage = 9
+	self.melee_weapons.baseballbat.stats.min_damage_effect = 5
+	self.melee_weapons.baseballbat.stats.max_damage_effect = 3
+	self.melee_weapons.baseballbat.stats.charge_time = 3
 	self.melee_weapons.baseballbat.stats.range = 250
-	self.melee_weapons.baseballbat.stats.concealment = 24
+	self.melee_weapons.baseballbat.stats.concealment = 27
 	self.melee_weapons.baseballbat.repeat_expire_t = 0.9
 	self.melee_weapons.baseballbat.expire_t = 1.2
 	self.melee_weapons.baseballbat.melee_damage_delay = 0.2
@@ -7371,12 +7390,12 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.cleaver.sounds.hit_body = "cleaver_hit_body"
 	self.melee_weapons.cleaver.sounds.charge = "cleaver_charge"
 	self.melee_weapons.cleaver.stats.min_damage = 3
-	self.melee_weapons.cleaver.stats.max_damage = 9.5
-	self.melee_weapons.cleaver.stats.min_damage_effect = 0.5
-	self.melee_weapons.cleaver.stats.max_damage_effect = 0.6
-	self.melee_weapons.cleaver.stats.charge_time = 2.5
+	self.melee_weapons.cleaver.stats.max_damage = 8
+	self.melee_weapons.cleaver.stats.min_damage_effect = 1
+	self.melee_weapons.cleaver.stats.max_damage_effect = 1
+	self.melee_weapons.cleaver.stats.charge_time = 2
 	self.melee_weapons.cleaver.stats.range = 185
-	self.melee_weapons.cleaver.stats.concealment = 26
+	self.melee_weapons.cleaver.stats.concealment = 29
 	self.melee_weapons.fireaxe = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.fireaxe.name_id = "bm_melee_fireaxe"
 	self.melee_weapons.fireaxe.anim_global_param = "melee_fireaxe"
@@ -7394,13 +7413,13 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.fireaxe.sounds.hit_gen = "fire_axe_hit_gen"
 	self.melee_weapons.fireaxe.sounds.hit_body = "fire_axe_hit_body"
 	self.melee_weapons.fireaxe.sounds.charge = "knife_charge"
-	self.melee_weapons.fireaxe.stats.min_damage = 9
-	self.melee_weapons.fireaxe.stats.max_damage = 14
+	self.melee_weapons.fireaxe.stats.min_damage = 7
+	self.melee_weapons.fireaxe.stats.max_damage = 45
 	self.melee_weapons.fireaxe.stats.min_damage_effect = 1
 	self.melee_weapons.fireaxe.stats.max_damage_effect = 1
-	self.melee_weapons.fireaxe.stats.charge_time = 3.5
+	self.melee_weapons.fireaxe.stats.charge_time = 4
 	self.melee_weapons.fireaxe.stats.range = 275
-	self.melee_weapons.fireaxe.stats.concealment = 20
+	self.melee_weapons.fireaxe.stats.concealment = 27
 	self.melee_weapons.fireaxe.repeat_expire_t = 1.6
 	self.melee_weapons.fireaxe.expire_t = 1.8
 	self.melee_weapons.fireaxe.melee_damage_delay = 0.4
@@ -7421,15 +7440,15 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.machete.sounds.hit_gen = "machete_hit_gen"
 	self.melee_weapons.machete.sounds.hit_body = "machete_hit_body"
 	self.melee_weapons.machete.sounds.charge = "machete_charge"
-	self.melee_weapons.machete.stats.min_damage = 4
-	self.melee_weapons.machete.stats.max_damage = 8.5
-	self.melee_weapons.machete.stats.min_damage_effect = 0.5
-	self.melee_weapons.machete.stats.max_damage_effect = 0.6
-	self.melee_weapons.machete.stats.charge_time = 2.7
+	self.melee_weapons.machete.stats.min_damage = 3
+	self.melee_weapons.machete.stats.max_damage = 8
+	self.melee_weapons.machete.stats.min_damage_effect = 1
+	self.melee_weapons.machete.stats.max_damage_effect = 1
+	self.melee_weapons.machete.stats.charge_time = 2
 	self.melee_weapons.machete.stats.range = 225
 	self.melee_weapons.machete.expire_t = 1.1
 	self.melee_weapons.machete.repeat_expire_t = 0.8
-	self.melee_weapons.machete.stats.concealment = 24
+	self.melee_weapons.machete.stats.concealment = 29
 	self.melee_weapons.briefcase = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.briefcase.name_id = "bm_melee_briefcase"
 	self.melee_weapons.briefcase.anim_global_param = "melee_briefcase"
@@ -7447,10 +7466,10 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.briefcase.sounds.hit_gen = "suitcase_hit_gen"
 	self.melee_weapons.briefcase.sounds.hit_body = "suitcase_hit_body"
 	self.melee_weapons.briefcase.sounds.charge = "suitcase_charge"
-	self.melee_weapons.briefcase.stats.min_damage = 0.68
-	self.melee_weapons.briefcase.stats.max_damage = 1.68
-	self.melee_weapons.briefcase.stats.min_damage_effect = 10
-	self.melee_weapons.briefcase.stats.max_damage_effect = 10
+	self.melee_weapons.briefcase.stats.min_damage = 3
+	self.melee_weapons.briefcase.stats.max_damage = 5.5
+	self.melee_weapons.briefcase.stats.min_damage_effect = 3
+	self.melee_weapons.briefcase.stats.max_damage_effect = 2
 	self.melee_weapons.briefcase.stats.charge_time = 2
 	self.melee_weapons.briefcase.stats.range = 185
 	self.melee_weapons.briefcase.stats.concealment = 30
@@ -7466,11 +7485,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.kabartanto.third_unit = "units/pd2_crimefest_2014/oct22/weapons/wpn_fps_mel_kabar_tanto/wpn_third_mel_kabar_tanto"
 	self.melee_weapons.kabartanto.stats.min_damage = 2
 	self.melee_weapons.kabartanto.stats.max_damage = 8
-	self.melee_weapons.kabartanto.stats.min_damage_effect = 0.8
-	self.melee_weapons.kabartanto.stats.max_damage_effect = 0.5
-	self.melee_weapons.kabartanto.stats.charge_time = 1.7
+	self.melee_weapons.kabartanto.stats.min_damage_effect = 1
+	self.melee_weapons.kabartanto.stats.max_damage_effect = 1
+	self.melee_weapons.kabartanto.stats.charge_time = 2
 	self.melee_weapons.kabartanto.stats.range = 185
-	self.melee_weapons.kabartanto.stats.concealment = 30
+	self.melee_weapons.kabartanto.stats.concealment = 29
 	self.melee_weapons.toothbrush = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.toothbrush.name_id = "bm_melee_toothbrush"
 	self.melee_weapons.toothbrush.dlc = "pd2_clan"
@@ -7485,11 +7504,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.toothbrush.unit = "units/pd2_crimefest_2014/oct27/weapons/wpn_fps_mel_toothbrush_shiv/wpn_fps_mel_toothbrush_shiv"
 	self.melee_weapons.toothbrush.third_unit = "units/pd2_crimefest_2014/oct27/weapons/wpn_fps_mel_toothbrush_shiv/wpn_third_mel_toothbrush_shiv"
 	self.melee_weapons.toothbrush.stats.weapon_type = "sharp"
-	self.melee_weapons.toothbrush.stats.min_damage = 2.5
-	self.melee_weapons.toothbrush.stats.max_damage = 4
-	self.melee_weapons.toothbrush.stats.min_damage_effect = 0.1
+	self.melee_weapons.toothbrush.stats.min_damage = 3
+	self.melee_weapons.toothbrush.stats.max_damage = 8
+	self.melee_weapons.toothbrush.stats.min_damage_effect = 1
 	self.melee_weapons.toothbrush.stats.max_damage_effect = 1
-	self.melee_weapons.toothbrush.stats.charge_time = 1.5
+	self.melee_weapons.toothbrush.stats.charge_time = 2
 	self.melee_weapons.toothbrush.stats.range = 150
 	self.melee_weapons.toothbrush.sounds = {}
 	self.melee_weapons.toothbrush.sounds.equip = "toothbrush_equip"
@@ -7512,11 +7531,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.chef.unit = "units/pd2_halloween/weapons/wpn_fps_mel_chef/wpn_fps_mel_chef"
 	self.melee_weapons.chef.third_unit = "units/pd2_halloween/weapons/wpn_fps_mel_chef/wpn_third_mel_chef"
 	self.melee_weapons.chef.stats.weapon_type = "sharp"
-	self.melee_weapons.chef.stats.min_damage = 2.8
-	self.melee_weapons.chef.stats.max_damage = 14
+	self.melee_weapons.chef.stats.min_damage = 3
+	self.melee_weapons.chef.stats.max_damage = 8
 	self.melee_weapons.chef.stats.min_damage_effect = 1
 	self.melee_weapons.chef.stats.max_damage_effect = 1
-	self.melee_weapons.chef.stats.charge_time = 4
+	self.melee_weapons.chef.stats.charge_time = 2
 	self.melee_weapons.chef.stats.range = 150
 	self.melee_weapons.chef.sounds = {}
 	self.melee_weapons.chef.sounds.equip = "tomahawk_equip"
@@ -7525,7 +7544,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.chef.sounds.hit_body = "tomahawk_hit_body"
 	self.melee_weapons.chef.sounds.charge = "halloween_charge"
 	self.melee_weapons.chef.repeat_expire_t = 0.36
-	self.melee_weapons.chef.stats.concealment = 28
+	self.melee_weapons.chef.stats.concealment = 29
 	self.melee_weapons.fairbair = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.fairbair.name_id = "bm_melee_fairbair"
 	self.melee_weapons.fairbair.dlc = "gage_pack_historical"
@@ -7540,8 +7559,8 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.fairbair.third_unit = "units/pd2_dlc_gage_historical/weapons/wpn_fps_mel_fairbair/wpn_third_mel_fairbair"
 	self.melee_weapons.fairbair.stats.weapon_type = "sharp"
 	self.melee_weapons.fairbair.stats.min_damage = 3
-	self.melee_weapons.fairbair.stats.max_damage = 5
-	self.melee_weapons.fairbair.stats.min_damage_effect = 0.2
+	self.melee_weapons.fairbair.stats.max_damage = 8
+	self.melee_weapons.fairbair.stats.min_damage_effect = 1
 	self.melee_weapons.fairbair.stats.max_damage_effect = 1
 	self.melee_weapons.fairbair.stats.charge_time = 2
 	self.melee_weapons.fairbair.stats.range = 175
@@ -7552,7 +7571,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.fairbair.sounds.hit_body = "fairbairn_hit_body"
 	self.melee_weapons.fairbair.sounds.charge = "knife_charge"
 	self.melee_weapons.fairbair.repeat_expire_t = 0.3
-	self.melee_weapons.fairbair.stats.concealment = 30
+	self.melee_weapons.fairbair.stats.concealment = 29
 	self.melee_weapons.freedom = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.freedom.name_id = "bm_melee_freedom"
 	self.melee_weapons.freedom.dlc = "gage_pack_historical"
@@ -7567,10 +7586,10 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.freedom.third_unit = "units/pd2_dlc_gage_historical/weapons/wpn_third_mel_freedom/wpn_third_mel_freedom"
 	self.melee_weapons.freedom.stats.weapon_type = "sharp"
 	self.melee_weapons.freedom.stats.min_damage = 7
-	self.melee_weapons.freedom.stats.max_damage = 16
+	self.melee_weapons.freedom.stats.max_damage = 45
 	self.melee_weapons.freedom.stats.min_damage_effect = 1
 	self.melee_weapons.freedom.stats.max_damage_effect = 1
-	self.melee_weapons.freedom.stats.charge_time = 4
+	self.melee_weapons.freedom.stats.charge_time = 3
 	self.melee_weapons.freedom.stats.range = 275
 	self.melee_weapons.freedom.sounds = {}
 	self.melee_weapons.freedom.sounds.equip = "freedom_equip"
@@ -7580,7 +7599,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.freedom.sounds.charge = "freedom_charge"
 	self.melee_weapons.freedom.repeat_expire_t = 0.9
 	self.melee_weapons.freedom.expire_t = 1.3
-	self.melee_weapons.freedom.stats.concealment = 18
+	self.melee_weapons.freedom.stats.concealment = 27
 	self.melee_weapons.freedom.melee_damage_delay = 0.35
 	self.melee_weapons.model24 = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.model24.name_id = "bm_melee_model24"
@@ -7596,10 +7615,10 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.model24.third_unit = "units/pd2_dlc_gage_historical/weapons/wpn_fps_mel_model24/wpn_third_mel_model24"
 	self.melee_weapons.model24.stats.weapon_type = "sharp"
 	self.melee_weapons.model24.stats.min_damage = 3
-	self.melee_weapons.model24.stats.max_damage = 6.1
-	self.melee_weapons.model24.stats.min_damage_effect = 3.2
-	self.melee_weapons.model24.stats.max_damage_effect = 1.5
-	self.melee_weapons.model24.stats.charge_time = 2
+	self.melee_weapons.model24.stats.max_damage = 9
+	self.melee_weapons.model24.stats.min_damage_effect = 5
+	self.melee_weapons.model24.stats.max_damage_effect = 3
+	self.melee_weapons.model24.stats.charge_time = 3
 	self.melee_weapons.model24.stats.range = 185
 	self.melee_weapons.model24.sounds = {}
 	self.melee_weapons.model24.sounds.equip = "grenade_equip"
@@ -7608,7 +7627,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.model24.sounds.hit_body = "grenade_hit_body"
 	self.melee_weapons.model24.sounds.charge = "bat_charge"
 	self.melee_weapons.model24.repeat_expire_t = 0.8
-	self.melee_weapons.model24.stats.concealment = 27
+	self.melee_weapons.model24.stats.concealment = 28
 	self.melee_weapons.swagger = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.swagger.name_id = "bm_melee_swagger"
 	self.melee_weapons.swagger.dlc = "gage_pack_historical"
@@ -7622,11 +7641,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.swagger.unit = "units/pd2_dlc_gage_historical/weapons/wpn_fps_mel_swagger/wpn_fps_mel_swagger"
 	self.melee_weapons.swagger.third_unit = "units/pd2_dlc_gage_historical/weapons/wpn_third_mel_swagger/wpn_third_mel_swagger"
 	self.melee_weapons.swagger.stats.weapon_type = "sharp"
-	self.melee_weapons.swagger.stats.min_damage = 2
-	self.melee_weapons.swagger.stats.max_damage = 3.5
-	self.melee_weapons.swagger.stats.min_damage_effect = 3.8
-	self.melee_weapons.swagger.stats.max_damage_effect = 4
-	self.melee_weapons.swagger.stats.charge_time = 2.2
+	self.melee_weapons.swagger.stats.min_damage = 3
+	self.melee_weapons.swagger.stats.max_damage = 9
+	self.melee_weapons.swagger.stats.min_damage_effect = 5
+	self.melee_weapons.swagger.stats.max_damage_effect = 3
+	self.melee_weapons.swagger.stats.charge_time = 3
 	self.melee_weapons.swagger.stats.range = 225
 	self.melee_weapons.swagger.sounds = {}
 	self.melee_weapons.swagger.sounds.equip = "grenade_equip"
@@ -7635,7 +7654,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.swagger.sounds.hit_body = "swagger_hit_body"
 	self.melee_weapons.swagger.sounds.charge = "bat_charge"
 	self.melee_weapons.swagger.repeat_expire_t = 0.8
-	self.melee_weapons.swagger.stats.concealment = 27
+	self.melee_weapons.swagger.stats.concealment = 28
 	self.melee_weapons.alien_maul = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.alien_maul.name_id = "bm_melee_alien_maul"
 	self.melee_weapons.alien_maul.anim_global_param = "melee_baseballbat"
@@ -7649,11 +7668,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.alien_maul.unit = "units/pd2_dlc_alienware/weapons/wpn_fps_mel_maul/wpn_fps_mel_maul"
 	self.melee_weapons.alien_maul.third_unit = "units/pd2_dlc_alienware/weapons/wpn_fps_mel_maul/wpn_third_mel_maul"
 	self.melee_weapons.alien_maul.stats.weapon_type = "blunt"
-	self.melee_weapons.alien_maul.stats.min_damage = 2.9
-	self.melee_weapons.alien_maul.stats.max_damage = 6
-	self.melee_weapons.alien_maul.stats.min_damage_effect = 3.9
-	self.melee_weapons.alien_maul.stats.max_damage_effect = 3.1
-	self.melee_weapons.alien_maul.stats.charge_time = 2
+	self.melee_weapons.alien_maul.stats.min_damage = 2
+	self.melee_weapons.alien_maul.stats.max_damage = 4
+	self.melee_weapons.alien_maul.stats.min_damage_effect = 10
+	self.melee_weapons.alien_maul.stats.max_damage_effect = 10
+	self.melee_weapons.alien_maul.stats.charge_time = 3
 	self.melee_weapons.alien_maul.stats.range = 275
 	self.melee_weapons.alien_maul.stats.weapon_type = "blunt"
 	self.melee_weapons.alien_maul.sounds = {}
@@ -7665,7 +7684,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.alien_maul.sounds.hit_body = "alpha_hit_body"
 	self.melee_weapons.alien_maul.sounds.charge = "alpha_charge"
 	self.melee_weapons.alien_maul.melee_damage_delay = 0.2
-	self.melee_weapons.alien_maul.stats.concealment = 20
+	self.melee_weapons.alien_maul.stats.concealment = 26
 	self.melee_weapons.shillelagh = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.shillelagh.name_id = "bm_melee_shillelagh"
 	self.melee_weapons.shillelagh.dlc = "character_pack_clover"
@@ -7679,11 +7698,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.shillelagh.unit = "units/pd2_dlc_clover/weapons/wpn_fps_mel_shillelagh/wpn_fps_mel_shillelagh"
 	self.melee_weapons.shillelagh.third_unit = "units/pd2_dlc_clover/weapons/wpn_fps_mel_shillelagh/wpn_third_mel_shillelagh"
 	self.melee_weapons.shillelagh.stats.weapon_type = "sharp"
-	self.melee_weapons.shillelagh.stats.min_damage = 3.5
-	self.melee_weapons.shillelagh.stats.max_damage = 6.5
-	self.melee_weapons.shillelagh.stats.min_damage_effect = 4
+	self.melee_weapons.shillelagh.stats.min_damage = 3
+	self.melee_weapons.shillelagh.stats.max_damage = 9
+	self.melee_weapons.shillelagh.stats.min_damage_effect = 5
 	self.melee_weapons.shillelagh.stats.max_damage_effect = 3
-	self.melee_weapons.shillelagh.stats.charge_time = 2
+	self.melee_weapons.shillelagh.stats.charge_time = 3
 	self.melee_weapons.shillelagh.stats.range = 185
 	self.melee_weapons.shillelagh.sounds = {}
 	self.melee_weapons.shillelagh.sounds.equip = "shillelagh_equip"
@@ -7692,7 +7711,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.shillelagh.sounds.hit_body = "shillelagh_hit_body"
 	self.melee_weapons.shillelagh.sounds.charge = "baton_charge"
 	self.melee_weapons.shillelagh.repeat_expire_t = 0.8
-	self.melee_weapons.shillelagh.stats.concealment = 26
+	self.melee_weapons.shillelagh.stats.concealment = 27
 	self.melee_weapons.boxing_gloves = deep_clone(self.melee_weapons.fists)
 	self.melee_weapons.boxing_gloves.name_id = "bm_melee_boxing_gloves"
 	self.melee_weapons.boxing_gloves.free = nil
@@ -7709,11 +7728,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.boxing_gloves.menu_scene_anim = "menu"
 	self.melee_weapons.boxing_gloves.menu_scene_params = {loop = false, start_time = -1}
 	self.melee_weapons.boxing_gloves.anim_global_param = "melee_boxing"
-	self.melee_weapons.boxing_gloves.stats.min_damage = 1.5
-	self.melee_weapons.boxing_gloves.stats.max_damage = 3.5
-	self.melee_weapons.boxing_gloves.stats.min_damage_effect = 4
-	self.melee_weapons.boxing_gloves.stats.max_damage_effect = 3
-	self.melee_weapons.boxing_gloves.stats.charge_time = 1.3
+	self.melee_weapons.boxing_gloves.stats.min_damage = 3
+	self.melee_weapons.boxing_gloves.stats.max_damage = 5.5
+	self.melee_weapons.boxing_gloves.stats.min_damage_effect = 3
+	self.melee_weapons.boxing_gloves.stats.max_damage_effect = 2
+	self.melee_weapons.boxing_gloves.stats.charge_time = 2
 	self.melee_weapons.boxing_gloves.stats.range = 150
 	self.melee_weapons.boxing_gloves.sounds.hit_gen = "boxing_hit_gen"
 	self.melee_weapons.boxing_gloves.sounds.hit_body = "boxing_hit_body"
@@ -7739,12 +7758,12 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.meat_cleaver.sounds.hit_body = "cleaver_hit_body"
 	self.melee_weapons.meat_cleaver.sounds.charge = "cleaver_charge"
 	self.melee_weapons.meat_cleaver.stats.min_damage = 3
-	self.melee_weapons.meat_cleaver.stats.max_damage = 7.5
-	self.melee_weapons.meat_cleaver.stats.min_damage_effect = 0.5
-	self.melee_weapons.meat_cleaver.stats.max_damage_effect = 0.6
+	self.melee_weapons.meat_cleaver.stats.max_damage = 8
+	self.melee_weapons.meat_cleaver.stats.min_damage_effect = 1
+	self.melee_weapons.meat_cleaver.stats.max_damage_effect = 1
 	self.melee_weapons.meat_cleaver.stats.charge_time = 2
 	self.melee_weapons.meat_cleaver.stats.range = 195
-	self.melee_weapons.meat_cleaver.stats.concealment = 26
+	self.melee_weapons.meat_cleaver.stats.concealment = 28
 	self.melee_weapons.hammer = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.hammer.name_id = "bm_melee_hammer"
 	self.melee_weapons.hammer.dlc = "hlm2_deluxe"
@@ -7758,11 +7777,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.hammer.unit = "units/pd2_dlc_hotline2/weapons/wpn_fps_mel_hammer/wpn_fps_mel_hammer"
 	self.melee_weapons.hammer.third_unit = "units/pd2_dlc_hotline2/weapons/wpn_fps_mel_hammer/wpn_third_mel_hammer"
 	self.melee_weapons.hammer.stats.weapon_type = "blunt"
-	self.melee_weapons.hammer.stats.min_damage = 3
-	self.melee_weapons.hammer.stats.max_damage = 6.1
-	self.melee_weapons.hammer.stats.min_damage_effect = 3.2
-	self.melee_weapons.hammer.stats.max_damage_effect = 1.6
-	self.melee_weapons.hammer.stats.charge_time = 2
+	self.melee_weapons.hammer.stats.min_damage = 2
+	self.melee_weapons.hammer.stats.max_damage = 4
+	self.melee_weapons.hammer.stats.min_damage_effect = 10
+	self.melee_weapons.hammer.stats.max_damage_effect = 10
+	self.melee_weapons.hammer.stats.charge_time = 3
 	self.melee_weapons.hammer.stats.range = 185
 	self.melee_weapons.hammer.sounds = {}
 	self.melee_weapons.hammer.sounds.equip = "hammer_equip"
@@ -7771,7 +7790,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.hammer.sounds.hit_body = "hammer_hit_body"
 	self.melee_weapons.hammer.sounds.charge = "hammer_charge"
 	self.melee_weapons.hammer.repeat_expire_t = 0.8
-	self.melee_weapons.hammer.stats.concealment = 27
+	self.melee_weapons.hammer.stats.concealment = 28
 	self.melee_weapons.whiskey = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.whiskey.name_id = "bm_melee_whiskey"
 	self.melee_weapons.whiskey.dlc = "pd2_clan"
@@ -7798,7 +7817,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.whiskey.sounds.hit_body = "whiskey_hit_body"
 	self.melee_weapons.whiskey.sounds.charge = "whiskey_charge"
 	self.melee_weapons.whiskey.repeat_expire_t = 0.8
-	self.melee_weapons.whiskey.stats.concealment = 27
+	self.melee_weapons.whiskey.stats.concealment = 30
 	self.melee_weapons.fork = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.fork.name_id = "bm_melee_fork"
 	self.melee_weapons.fork.dlc = "bbq"
@@ -7811,10 +7830,10 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.fork.unit = "units/pd2_dlc_bbq/weapons/fork/wpn_fps_mel_fork"
 	self.melee_weapons.fork.third_unit = "units/pd2_dlc_bbq/weapons/fork/wpn_third_mel_fork"
 	self.melee_weapons.fork.stats.weapon_type = "sharp"
-	self.melee_weapons.fork.stats.min_damage = 4
-	self.melee_weapons.fork.stats.max_damage = 9
-	self.melee_weapons.fork.stats.min_damage_effect = 0.25
-	self.melee_weapons.fork.stats.max_damage_effect = 0.5
+	self.melee_weapons.fork.stats.min_damage = 3
+	self.melee_weapons.fork.stats.max_damage = 8
+	self.melee_weapons.fork.stats.min_damage_effect = 1
+	self.melee_weapons.fork.stats.max_damage_effect = 1
 	self.melee_weapons.fork.stats.charge_time = 2
 	self.melee_weapons.fork.stats.range = 185
 	self.melee_weapons.fork.sounds = {}
@@ -7824,7 +7843,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.fork.sounds.hit_body = "bbq_fork_hit_body"
 	self.melee_weapons.fork.sounds.charge = "bbq_fork_charge"
 	self.melee_weapons.fork.repeat_expire_t = 0.3
-	self.melee_weapons.fork.stats.concealment = 27
+	self.melee_weapons.fork.stats.concealment = 28
 	self.melee_weapons.poker = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.poker.name_id = "bm_melee_poker"
 	self.melee_weapons.poker.dlc = "bbq"
@@ -7837,10 +7856,10 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.poker.unit = "units/pd2_dlc_bbq/weapons/poker/wpn_fps_mel_poker"
 	self.melee_weapons.poker.third_unit = "units/pd2_dlc_bbq/weapons/poker/wpn_third_mel_poker"
 	self.melee_weapons.poker.stats.weapon_type = "blunt"
-	self.melee_weapons.poker.stats.min_damage = 6
-	self.melee_weapons.poker.stats.max_damage = 12
-	self.melee_weapons.poker.stats.min_damage_effect = 1.7
-	self.melee_weapons.poker.stats.max_damage_effect = 2
+	self.melee_weapons.poker.stats.min_damage = 3
+	self.melee_weapons.poker.stats.max_damage = 9
+	self.melee_weapons.poker.stats.min_damage_effect = 5
+	self.melee_weapons.poker.stats.max_damage_effect = 3
 	self.melee_weapons.poker.stats.charge_time = 3
 	self.melee_weapons.poker.stats.range = 185
 	self.melee_weapons.poker.sounds = {}
@@ -7850,7 +7869,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.poker.sounds.hit_body = "bbq_poker_hit_body"
 	self.melee_weapons.poker.sounds.charge = "bbq_poker_charge"
 	self.melee_weapons.poker.repeat_expire_t = 0.8
-	self.melee_weapons.poker.stats.concealment = 27
+	self.melee_weapons.poker.stats.concealment = 28
 	self.melee_weapons.spatula = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.spatula.name_id = "bm_melee_spatula"
 	self.melee_weapons.spatula.dlc = "bbq"
@@ -7863,11 +7882,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.spatula.unit = "units/pd2_dlc_bbq/weapons/spatula/wpn_fps_mel_spatula"
 	self.melee_weapons.spatula.third_unit = "units/pd2_dlc_bbq/weapons/spatula/wpn_third_mel_spatula"
 	self.melee_weapons.spatula.stats.weapon_type = "blunt"
-	self.melee_weapons.spatula.stats.min_damage = 2
-	self.melee_weapons.spatula.stats.max_damage = 3
-	self.melee_weapons.spatula.stats.min_damage_effect = 1.5
+	self.melee_weapons.spatula.stats.min_damage = 3
+	self.melee_weapons.spatula.stats.max_damage = 5.5
+	self.melee_weapons.spatula.stats.min_damage_effect = 3
 	self.melee_weapons.spatula.stats.max_damage_effect = 2
-	self.melee_weapons.spatula.stats.charge_time = 1
+	self.melee_weapons.spatula.stats.charge_time = 2
 	self.melee_weapons.spatula.stats.range = 185
 	self.melee_weapons.spatula.sounds = {}
 	self.melee_weapons.spatula.sounds.equip = "bbq_spatula_equip"
@@ -7876,7 +7895,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.spatula.sounds.hit_body = "bbq_spatula_hit_body"
 	self.melee_weapons.spatula.sounds.charge = "bbq_spatula_charge"
 	self.melee_weapons.spatula.repeat_expire_t = 0.8
-	self.melee_weapons.spatula.stats.concealment = 27
+	self.melee_weapons.spatula.stats.concealment = 29
 	self.melee_weapons.tenderizer = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.tenderizer.name_id = "bm_melee_tenderizer"
 	self.melee_weapons.tenderizer.dlc = "bbq"
@@ -7889,10 +7908,10 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.tenderizer.unit = "units/pd2_dlc_bbq/weapons/wpn_mel_tenderizer/wpn_fps_mel_tenderizer"
 	self.melee_weapons.tenderizer.third_unit = "units/pd2_dlc_bbq/weapons/wpn_mel_tenderizer/wpn_third_mel_tenderizer"
 	self.melee_weapons.tenderizer.stats.weapon_type = "blunt"
-	self.melee_weapons.tenderizer.stats.min_damage = 3
-	self.melee_weapons.tenderizer.stats.max_damage = 9
-	self.melee_weapons.tenderizer.stats.min_damage_effect = 2
-	self.melee_weapons.tenderizer.stats.max_damage_effect = 1.6
+	self.melee_weapons.tenderizer.stats.min_damage = 2
+	self.melee_weapons.tenderizer.stats.max_damage = 4
+	self.melee_weapons.tenderizer.stats.min_damage_effect = 10
+	self.melee_weapons.tenderizer.stats.max_damage_effect = 10
 	self.melee_weapons.tenderizer.stats.charge_time = 3
 	self.melee_weapons.tenderizer.stats.range = 185
 	self.melee_weapons.tenderizer.sounds = {}
@@ -7902,7 +7921,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.tenderizer.sounds.hit_body = "bbq_tenderizer_hit_body"
 	self.melee_weapons.tenderizer.sounds.charge = "bbq_tenderizer_charge"
 	self.melee_weapons.tenderizer.repeat_expire_t = 0.8
-	self.melee_weapons.tenderizer.stats.concealment = 27
+	self.melee_weapons.tenderizer.stats.concealment = 28
 	self.melee_weapons.scalper = deep_clone(self.melee_weapons.tomahawk)
 	self.melee_weapons.scalper.name_id = "bm_melee_scalper"
 	self.melee_weapons.scalper.dlc = "west"
@@ -7915,10 +7934,10 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.scalper.unit = "units/pd2_dlc_west/weapons/wpn_fps_mel_scalper/wpn_fps_mel_scalper"
 	self.melee_weapons.scalper.third_unit = "units/pd2_dlc_west/weapons/wpn_third_mel_scalper/wpn_third_mel_scalper"
 	self.melee_weapons.scalper.stats.weapon_type = "sharp"
-	self.melee_weapons.scalper.stats.min_damage = 4
-	self.melee_weapons.scalper.stats.max_damage = 6.64
-	self.melee_weapons.scalper.stats.min_damage_effect = 0.5
-	self.melee_weapons.scalper.stats.max_damage_effect = 0.6
+	self.melee_weapons.scalper.stats.min_damage = 3
+	self.melee_weapons.scalper.stats.max_damage = 8
+	self.melee_weapons.scalper.stats.min_damage_effect = 1
+	self.melee_weapons.scalper.stats.max_damage_effect = 1
 	self.melee_weapons.scalper.stats.charge_time = 2
 	self.melee_weapons.scalper.stats.range = 200
 	self.melee_weapons.scalper.expire_t = 1.1
@@ -7930,7 +7949,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.scalper.sounds.hit_gen = "tomahawk_hit_gen"
 	self.melee_weapons.scalper.sounds.hit_body = "tomahawk_hit_body"
 	self.melee_weapons.scalper.sounds.charge = "tomahawk_charge"
-	self.melee_weapons.scalper.stats.concealment = 25
+	self.melee_weapons.scalper.stats.concealment = 28
 	self.melee_weapons.mining_pick = deep_clone(self.melee_weapons.tomahawk)
 	self.melee_weapons.mining_pick.name_id = "bm_melee_mining_pick"
 	self.melee_weapons.mining_pick.dlc = "west"
@@ -7943,11 +7962,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.mining_pick.unit = "units/pd2_dlc_west/weapons/wpn_fps_mel_miningpick/wpn_fps_mel_miningpick"
 	self.melee_weapons.mining_pick.third_unit = "units/pd2_dlc_west/weapons/wpn_third_mel_miningpick/wpn_third_mel_miningpick"
 	self.melee_weapons.mining_pick.stats.weapon_type = "sharp"
-	self.melee_weapons.mining_pick.stats.min_damage = 3.5
-	self.melee_weapons.mining_pick.stats.max_damage = 8
-	self.melee_weapons.mining_pick.stats.min_damage_effect = 0.5
-	self.melee_weapons.mining_pick.stats.max_damage_effect = 0.6
-	self.melee_weapons.mining_pick.stats.charge_time = 3
+	self.melee_weapons.mining_pick.stats.min_damage = 7
+	self.melee_weapons.mining_pick.stats.max_damage = 45
+	self.melee_weapons.mining_pick.stats.min_damage_effect = 1
+	self.melee_weapons.mining_pick.stats.max_damage_effect = 1
+	self.melee_weapons.mining_pick.stats.charge_time = 4
 	self.melee_weapons.mining_pick.stats.range = 225
 	self.melee_weapons.mining_pick.expire_t = 1.1
 	self.melee_weapons.mining_pick.repeat_expire_t = 0.8
@@ -7958,7 +7977,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.mining_pick.sounds.hit_gen = "mining_pick_hit_gen"
 	self.melee_weapons.mining_pick.sounds.hit_body = "mining_pick_hit_body"
 	self.melee_weapons.mining_pick.sounds.charge = "mining_pick_charge"
-	self.melee_weapons.mining_pick.stats.concealment = 20
+	self.melee_weapons.mining_pick.stats.concealment = 27
 	self.melee_weapons.branding_iron = deep_clone(self.melee_weapons.tomahawk)
 	self.melee_weapons.branding_iron.name_id = "bm_melee_branding_iron"
 	self.melee_weapons.branding_iron.dlc = "west"
@@ -7972,10 +7991,10 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.branding_iron.third_unit = "units/pd2_dlc_west/weapons/wpn_third_mel_branding/wpn_third_mel_branding"
 	self.melee_weapons.branding_iron.stats.weapon_type = "sharp"
 	self.melee_weapons.branding_iron.stats.min_damage = 3
-	self.melee_weapons.branding_iron.stats.max_damage = 6.1
-	self.melee_weapons.branding_iron.stats.min_damage_effect = 3.2
-	self.melee_weapons.branding_iron.stats.max_damage_effect = 1.6
-	self.melee_weapons.branding_iron.stats.charge_time = 2
+	self.melee_weapons.branding_iron.stats.max_damage = 9
+	self.melee_weapons.branding_iron.stats.min_damage_effect = 5
+	self.melee_weapons.branding_iron.stats.max_damage_effect = 3
+	self.melee_weapons.branding_iron.stats.charge_time = 3
 	self.melee_weapons.branding_iron.stats.range = 225
 	self.melee_weapons.branding_iron.expire_t = 1.1
 	self.melee_weapons.branding_iron.repeat_expire_t = 0.8
@@ -7986,7 +8005,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.branding_iron.sounds.hit_gen = "branding_iron_hit_gen"
 	self.melee_weapons.branding_iron.sounds.hit_body = "branding_iron_hit_body"
 	self.melee_weapons.branding_iron.sounds.charge = "branding_iron_charge"
-	self.melee_weapons.branding_iron.stats.concealment = 20
+	self.melee_weapons.branding_iron.stats.concealment = 27
 	self.melee_weapons.bowie = deep_clone(self.melee_weapons.tomahawk)
 	self.melee_weapons.bowie.name_id = "bm_melee_bowie"
 	self.melee_weapons.bowie.dlc = "west"
@@ -8000,9 +8019,9 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.bowie.third_unit = "units/pd2_dlc_west/weapons/wpn_third_mel_bowie/wpn_third_mel_bowie"
 	self.melee_weapons.bowie.stats.weapon_type = "sharp"
 	self.melee_weapons.bowie.stats.min_damage = 3
-	self.melee_weapons.bowie.stats.max_damage = 6.1
-	self.melee_weapons.bowie.stats.min_damage_effect = 3.2
-	self.melee_weapons.bowie.stats.max_damage_effect = 1.5
+	self.melee_weapons.bowie.stats.max_damage = 8
+	self.melee_weapons.bowie.stats.min_damage_effect = 1
+	self.melee_weapons.bowie.stats.max_damage_effect = 1
 	self.melee_weapons.bowie.stats.charge_time = 2
 	self.melee_weapons.bowie.stats.range = 225
 	self.melee_weapons.bowie.expire_t = 1.1
@@ -8014,7 +8033,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.bowie.sounds.hit_gen = "knife_hit_gen"
 	self.melee_weapons.bowie.sounds.hit_body = "knife_hit_body"
 	self.melee_weapons.bowie.sounds.charge = "knife_charge"
-	self.melee_weapons.bowie.stats.concealment = 27
+	self.melee_weapons.bowie.stats.concealment = 29
 	self.melee_weapons.microphone = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.microphone.name_id = "bm_melee_microphone"
 	self.melee_weapons.microphone.dlc = "arena"
@@ -8027,11 +8046,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.microphone.unit = "units/pd2_dlc_arena/weapons/wpn_fps_mel_microphone/wpn_fps_mel_microphone"
 	self.melee_weapons.microphone.third_unit = "units/pd2_dlc_arena/weapons/wpn_third_mel_microphone/wpn_third_mel_microphone"
 	self.melee_weapons.microphone.stats.weapon_type = "sharp"
-	self.melee_weapons.microphone.stats.min_damage = 1.5
-	self.melee_weapons.microphone.stats.max_damage = 3.5
-	self.melee_weapons.microphone.stats.min_damage_effect = 4
-	self.melee_weapons.microphone.stats.max_damage_effect = 3
-	self.melee_weapons.microphone.stats.charge_time = 1.3
+	self.melee_weapons.microphone.stats.min_damage = 3
+	self.melee_weapons.microphone.stats.max_damage = 5.5
+	self.melee_weapons.microphone.stats.min_damage_effect = 3
+	self.melee_weapons.microphone.stats.max_damage_effect = 2
+	self.melee_weapons.microphone.stats.charge_time = 2
 	self.melee_weapons.microphone.stats.range = 150
 	self.melee_weapons.microphone.expire_t = 1.1
 	self.melee_weapons.microphone.repeat_expire_t = 0.8
@@ -8070,7 +8089,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.detector.sounds.hit_gen = "metal_detector_hit_gen"
 	self.melee_weapons.detector.sounds.hit_body = "metal_detector_hit_body"
 	self.melee_weapons.detector.sounds.charge = "metal_detector_charge"
-	self.melee_weapons.detector.stats.concealment = 26
+	self.melee_weapons.detector.stats.concealment = 29
 	self.melee_weapons.micstand = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.micstand.name_id = "bm_melee_micstand"
 	self.melee_weapons.micstand.dlc = "arena"
@@ -8083,11 +8102,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.micstand.unit = "units/pd2_dlc_arena/weapons/wpn_fps_mel_micstand/wpn_fps_mel_micstand"
 	self.melee_weapons.micstand.third_unit = "units/pd2_dlc_arena/weapons/wpn_third_mel_micstand/wpn_third_mel_micstand"
 	self.melee_weapons.micstand.stats.weapon_type = "sharp"
-	self.melee_weapons.micstand.stats.min_damage = 2
-	self.melee_weapons.micstand.stats.max_damage = 3
-	self.melee_weapons.micstand.stats.min_damage_effect = 1.5
-	self.melee_weapons.micstand.stats.max_damage_effect = 2
-	self.melee_weapons.micstand.stats.charge_time = 1
+	self.melee_weapons.micstand.stats.min_damage = 3
+	self.melee_weapons.micstand.stats.max_damage = 9
+	self.melee_weapons.micstand.stats.min_damage_effect = 5
+	self.melee_weapons.micstand.stats.max_damage_effect = 3
+	self.melee_weapons.micstand.stats.charge_time = 3
 	self.melee_weapons.micstand.stats.range = 250
 	self.melee_weapons.micstand.expire_t = 1.1
 	self.melee_weapons.micstand.repeat_expire_t = 0.8
@@ -8098,7 +8117,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.micstand.sounds.hit_gen = "mic_stand_hit_gen"
 	self.melee_weapons.micstand.sounds.hit_body = "mic_stand_hit_body"
 	self.melee_weapons.micstand.sounds.charge = "mic_stand_charge"
-	self.melee_weapons.micstand.stats.concealment = 24
+	self.melee_weapons.micstand.stats.concealment = 27
 	self.melee_weapons.oldbaton = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.oldbaton.name_id = "bm_melee_oldbaton"
 	self.melee_weapons.oldbaton.dlc = "arena"
@@ -8111,11 +8130,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.oldbaton.unit = "units/pd2_dlc_arena/weapons/wpn_fps_mel_oldbaton/wpn_fps_mel_oldbaton"
 	self.melee_weapons.oldbaton.third_unit = "units/pd2_dlc_arena/weapons/wpn_third_mel_oldbaton/wpn_third_mel_oldbaton"
 	self.melee_weapons.oldbaton.stats.weapon_type = "sharp"
-	self.melee_weapons.oldbaton.stats.min_damage = 0.68
-	self.melee_weapons.oldbaton.stats.max_damage = 1.68
-	self.melee_weapons.oldbaton.stats.min_damage_effect = 12
-	self.melee_weapons.oldbaton.stats.max_damage_effect = 8.8
-	self.melee_weapons.oldbaton.stats.charge_time = 2
+	self.melee_weapons.oldbaton.stats.min_damage = 3
+	self.melee_weapons.oldbaton.stats.max_damage = 9
+	self.melee_weapons.oldbaton.stats.min_damage_effect = 5
+	self.melee_weapons.oldbaton.stats.max_damage_effect = 3
+	self.melee_weapons.oldbaton.stats.charge_time = 3
 	self.melee_weapons.oldbaton.stats.range = 250
 	self.melee_weapons.oldbaton.expire_t = 1.1
 	self.melee_weapons.oldbaton.repeat_expire_t = 0.8
@@ -8126,7 +8145,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.oldbaton.sounds.hit_gen = "copbaton_hit_gen"
 	self.melee_weapons.oldbaton.sounds.hit_body = "copbaton_hit_body"
 	self.melee_weapons.oldbaton.sounds.charge = "copbaton_charge"
-	self.melee_weapons.oldbaton.stats.concealment = 27
+	self.melee_weapons.oldbaton.stats.concealment = 28
 	self.melee_weapons.hockey = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.hockey.name_id = "bm_melee_hockey"
 	self.melee_weapons.hockey.dlc = "character_pack_sokol"
@@ -8139,11 +8158,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.hockey.unit = "units/pd2_dlc_character_sokol/weapons/wpn_fps_mel_hockey/wpn_fps_mel_hockey"
 	self.melee_weapons.hockey.third_unit = "units/pd2_dlc_character_sokol/weapons/wpn_third_mel_hockey/wpn_third_mel_hockey"
 	self.melee_weapons.hockey.stats.weapon_type = "sharp"
-	self.melee_weapons.hockey.stats.min_damage = 3.5
-	self.melee_weapons.hockey.stats.max_damage = 6
-	self.melee_weapons.hockey.stats.min_damage_effect = 4
-	self.melee_weapons.hockey.stats.max_damage_effect = 3.2
-	self.melee_weapons.hockey.stats.charge_time = 2.4
+	self.melee_weapons.hockey.stats.min_damage = 3
+	self.melee_weapons.hockey.stats.max_damage = 9
+	self.melee_weapons.hockey.stats.min_damage_effect = 5
+	self.melee_weapons.hockey.stats.max_damage_effect = 3
+	self.melee_weapons.hockey.stats.charge_time = 3
 	self.melee_weapons.hockey.stats.range = 250
 	self.melee_weapons.hockey.expire_t = 1.1
 	self.melee_weapons.hockey.repeat_expire_t = 0.8
@@ -8154,7 +8173,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.hockey.sounds.hit_gen = "hockeystick_hit_gen"
 	self.melee_weapons.hockey.sounds.hit_body = "hockeystick_hit_body"
 	self.melee_weapons.hockey.sounds.charge = "bat_charge"
-	self.melee_weapons.hockey.stats.concealment = 24
+	self.melee_weapons.hockey.stats.concealment = 27
 	self.melee_weapons.switchblade = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.switchblade.name_id = "bm_melee_switchblade"
 	self.melee_weapons.switchblade.anim_global_param = "melee_stab"
@@ -8173,12 +8192,12 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.switchblade.sounds.hit_body = "toothbrush_hit_body"
 	self.melee_weapons.switchblade.sounds.charge = "toothbrush_charge"
 	self.melee_weapons.switchblade.stats.min_damage = 3
-	self.melee_weapons.switchblade.stats.max_damage = 5
-	self.melee_weapons.switchblade.stats.min_damage_effect = 0.2
+	self.melee_weapons.switchblade.stats.max_damage = 8
+	self.melee_weapons.switchblade.stats.min_damage_effect = 1
 	self.melee_weapons.switchblade.stats.max_damage_effect = 1
 	self.melee_weapons.switchblade.stats.charge_time = 2
 	self.melee_weapons.switchblade.stats.range = 175
-	self.melee_weapons.switchblade.stats.concealment = 30
+	self.melee_weapons.switchblade.stats.concealment = 29
 	self.melee_weapons.switchblade.repeat_expire_t = 0.3
 	self.melee_weapons.switchblade.expire_t = 1
 	self.melee_weapons.switchblade.melee_damage_delay = 0.1
@@ -8229,12 +8248,12 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.slot_lever.sounds.hit_body = "slot_lever_hit_body"
 	self.melee_weapons.slot_lever.sounds.charge = "slot_lever_charge"
 	self.melee_weapons.slot_lever.stats.min_damage = 3
-	self.melee_weapons.slot_lever.stats.max_damage = 6.1
-	self.melee_weapons.slot_lever.stats.min_damage_effect = 3.2
-	self.melee_weapons.slot_lever.stats.max_damage_effect = 1.6
+	self.melee_weapons.slot_lever.stats.max_damage = 9
+	self.melee_weapons.slot_lever.stats.min_damage_effect = 5
+	self.melee_weapons.slot_lever.stats.max_damage_effect = 3
 	self.melee_weapons.slot_lever.stats.charge_time = 2
 	self.melee_weapons.slot_lever.stats.range = 225
-	self.melee_weapons.slot_lever.stats.concealment = 20
+	self.melee_weapons.slot_lever.stats.concealment = 28
 	self.melee_weapons.slot_lever.expire_t = 1
 	self.melee_weapons.slot_lever.repeat_expire_t = 0.7
 	self.melee_weapons.slot_lever.melee_damage_delay = 0.1
@@ -8255,11 +8274,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.croupier_rake.sounds.hit_gen = "croupier_stick_hit_gen"
 	self.melee_weapons.croupier_rake.sounds.hit_body = "croupier_stick_hit_body"
 	self.melee_weapons.croupier_rake.sounds.charge = "croupier_stick_charge"
-	self.melee_weapons.croupier_rake.stats.min_damage = 0.68
-	self.melee_weapons.croupier_rake.stats.max_damage = 1.68
-	self.melee_weapons.croupier_rake.stats.min_damage_effect = 12
-	self.melee_weapons.croupier_rake.stats.max_damage_effect = 8.8
-	self.melee_weapons.croupier_rake.stats.charge_time = 2
+	self.melee_weapons.croupier_rake.stats.min_damage = 3
+	self.melee_weapons.croupier_rake.stats.max_damage = 9
+	self.melee_weapons.croupier_rake.stats.min_damage_effect = 5
+	self.melee_weapons.croupier_rake.stats.max_damage_effect = 3
+	self.melee_weapons.croupier_rake.stats.charge_time = 3
 	self.melee_weapons.croupier_rake.stats.range = 250
 	self.melee_weapons.croupier_rake.stats.concealment = 28
 	self.melee_weapons.croupier_rake.expire_t = 1
@@ -8275,11 +8294,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.fight.dlc = "turtles"
 	self.melee_weapons.fight.texture_bundle_folder = "turtles"
 	self.melee_weapons.fight.stats = {}
-	self.melee_weapons.fight.stats.min_damage = 1.5
-	self.melee_weapons.fight.stats.max_damage = 3
+	self.melee_weapons.fight.stats.min_damage = 3
+	self.melee_weapons.fight.stats.max_damage = 5.5
 	self.melee_weapons.fight.stats.min_damage_effect = 3
-	self.melee_weapons.fight.stats.max_damage_effect = 3
-	self.melee_weapons.fight.stats.charge_time = 1
+	self.melee_weapons.fight.stats.max_damage_effect = 2
+	self.melee_weapons.fight.stats.charge_time = 2
 	self.melee_weapons.fight.stats.range = 150
 	self.melee_weapons.fight.stats.remove_weapon_movement_penalty = true
 	self.melee_weapons.fight.stats.weapon_type = "blunt"
@@ -8315,10 +8334,10 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.tiger.unit = "units/pd2_dlc_turtles/weapons/wpn_fps_mel_tiger/wpn_fps_mel_tiger"
 	self.melee_weapons.tiger.third_unit = "units/pd2_dlc_turtles/weapons/wpn_fps_mel_tiger/wpn_third_mel_tiger"
 	self.melee_weapons.tiger.anim_global_param = "melee_tiger"
-	self.melee_weapons.tiger.stats.min_damage = 3.5
-	self.melee_weapons.tiger.stats.max_damage = 5
-	self.melee_weapons.tiger.stats.min_damage_effect = 0.3
-	self.melee_weapons.tiger.stats.max_damage_effect = 0.3
+	self.melee_weapons.tiger.stats.min_damage = 3
+	self.melee_weapons.tiger.stats.max_damage = 8
+	self.melee_weapons.tiger.stats.min_damage_effect = 1
+	self.melee_weapons.tiger.stats.max_damage_effect = 1
 	self.melee_weapons.tiger.stats.charge_time = 2
 	self.melee_weapons.tiger.stats.range = 150
 	self.melee_weapons.tiger.melee_damage_delay = 0.1
@@ -8327,7 +8346,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.tiger.sounds.hit_gen = "tiger_hit_gen"
 	self.melee_weapons.tiger.sounds.hit_body = "tiger_hit_body"
 	self.melee_weapons.tiger.sounds.charge = "tiger_charge"
-	self.melee_weapons.tiger.stats.concealment = 27
+	self.melee_weapons.tiger.stats.concealment = 28
 	self.melee_weapons.cqc = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.cqc.name_id = "bm_melee_cqc"
 	self.melee_weapons.cqc.info_id = "bm_melee_cqc_info"
@@ -8346,11 +8365,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 		custom_data = {dot_length = 1, hurt_animation_chance = 0.7}
 	}
 	self.melee_weapons.cqc.stats.weapon_type = "sharp"
-	self.melee_weapons.cqc.stats.min_damage = 2
-	self.melee_weapons.cqc.stats.max_damage = 4
-	self.melee_weapons.cqc.stats.min_damage_effect = 0.5
-	self.melee_weapons.cqc.stats.max_damage_effect = 0.5
-	self.melee_weapons.cqc.stats.charge_time = 1
+	self.melee_weapons.cqc.stats.min_damage = 3
+	self.melee_weapons.cqc.stats.max_damage = 8
+	self.melee_weapons.cqc.stats.min_damage_effect = 1
+	self.melee_weapons.cqc.stats.max_damage_effect = 1
+	self.melee_weapons.cqc.stats.charge_time = 2
 	self.melee_weapons.cqc.stats.range = 150
 	self.melee_weapons.cqc.sounds = {}
 	self.melee_weapons.cqc.sounds.equip = "cqc_equip"
@@ -8359,7 +8378,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.cqc.sounds.hit_body = "cqc_hit_body"
 	self.melee_weapons.cqc.sounds.charge = "cqc_charge"
 	self.melee_weapons.cqc.repeat_expire_t = 0.3
-	self.melee_weapons.cqc.stats.concealment = 30
+	self.melee_weapons.cqc.stats.concealment = 29
 	self.melee_weapons.twins = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.twins.name_id = "bm_melee_twins"
 	self.melee_weapons.twins.dlc = "turtles"
@@ -8375,10 +8394,10 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.twins.third_unit = "units/pd2_dlc_turtles/weapons/wpn_fps_mel_twin/wpn_third_mel_twin"
 	self.melee_weapons.twins.stats.weapon_type = "sharp"
 	self.melee_weapons.twins.stats.min_damage = 3
-	self.melee_weapons.twins.stats.max_damage = 4
-	self.melee_weapons.twins.stats.min_damage_effect = 0.5
-	self.melee_weapons.twins.stats.max_damage_effect = 0.5
-	self.melee_weapons.twins.stats.charge_time = 1
+	self.melee_weapons.twins.stats.max_damage = 8
+	self.melee_weapons.twins.stats.min_damage_effect = 1
+	self.melee_weapons.twins.stats.max_damage_effect = 1
+	self.melee_weapons.twins.stats.charge_time = 2
 	self.melee_weapons.twins.stats.range = 200
 	self.melee_weapons.twins.sounds = {}
 	self.melee_weapons.twins.sounds.equip = "twin_equip"
@@ -8387,7 +8406,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.twins.sounds.hit_body = "twin_hit_body"
 	self.melee_weapons.twins.sounds.charge = "twin_charge"
 	self.melee_weapons.twins.repeat_expire_t = 0.6
-	self.melee_weapons.twins.stats.concealment = 28
+	self.melee_weapons.twins.stats.concealment = 29
 	self.melee_weapons.sandsteel = {}
 	self.melee_weapons.sandsteel.name_id = "bm_melee_sandsteel"
 	self.melee_weapons.sandsteel.animation = nil
@@ -8416,11 +8435,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.sandsteel.stats.weapon_type = "sharp"
 	self.melee_weapons.sandsteel.stats.min_damage = 7
 	self.melee_weapons.sandsteel.stats.max_damage = 45
-	self.melee_weapons.sandsteel.stats.min_damage_effect = 0.1
-	self.melee_weapons.sandsteel.stats.max_damage_effect = 0.1
+	self.melee_weapons.sandsteel.stats.min_damage_effect = 1
+	self.melee_weapons.sandsteel.stats.max_damage_effect = 1
 	self.melee_weapons.sandsteel.stats.charge_time = 4
 	self.melee_weapons.sandsteel.stats.range = 275
-	self.melee_weapons.sandsteel.stats.concealment = 26
+	self.melee_weapons.sandsteel.stats.concealment = 27
 	self.melee_weapons.sandsteel.stats.remove_weapon_movement_penalty = true
 	self.melee_weapons.sandsteel.repeat_expire_t = 0.5
 	self.melee_weapons.sandsteel.expire_t = 1
@@ -8457,7 +8476,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.great.stats.max_damage_effect = 1
 	self.melee_weapons.great.stats.charge_time = 4
 	self.melee_weapons.great.stats.range = 275
-	self.melee_weapons.great.stats.concealment = 25
+	self.melee_weapons.great.stats.concealment = 27
 	self.melee_weapons.great.stats.remove_weapon_movement_penalty = true
 	self.melee_weapons.great.repeat_expire_t = 1.1
 	self.melee_weapons.great.expire_t = 1.5
@@ -8487,11 +8506,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.beardy.sounds.charge = "beardy_charge"
 	self.melee_weapons.beardy.stats = {}
 	self.melee_weapons.beardy.stats.weapon_type = "sharp"
-	self.melee_weapons.beardy.stats.min_damage = 9
-	self.melee_weapons.beardy.stats.max_damage = 14
+	self.melee_weapons.beardy.stats.min_damage = 7
+	self.melee_weapons.beardy.stats.max_damage = 45
 	self.melee_weapons.beardy.stats.min_damage_effect = 1
 	self.melee_weapons.beardy.stats.max_damage_effect = 1
-	self.melee_weapons.beardy.stats.charge_time = 3.5
+	self.melee_weapons.beardy.stats.charge_time = 4
 	self.melee_weapons.beardy.stats.range = 250
 	self.melee_weapons.beardy.stats.concealment = 26
 	self.melee_weapons.beardy.stats.remove_weapon_movement_penalty = true
@@ -8519,13 +8538,13 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.buck.sounds.charge = "buck_charge"
 	self.melee_weapons.buck.stats = {}
 	self.melee_weapons.buck.stats.weapon_type = "sharp"
-	self.melee_weapons.buck.stats.min_damage = 3.5
-	self.melee_weapons.buck.stats.max_damage = 6
-	self.melee_weapons.buck.stats.min_damage_effect = 4
-	self.melee_weapons.buck.stats.max_damage_effect = 3.2
+	self.melee_weapons.buck.stats.min_damage = 3
+	self.melee_weapons.buck.stats.max_damage = 5.5
+	self.melee_weapons.buck.stats.min_damage_effect = 3
+	self.melee_weapons.buck.stats.max_damage_effect = 2
 	self.melee_weapons.buck.stats.charge_time = 2
 	self.melee_weapons.buck.stats.range = 175
-	self.melee_weapons.buck.stats.concealment = 30
+	self.melee_weapons.buck.stats.concealment = 28
 	self.melee_weapons.buck.stats.remove_weapon_movement_penalty = true
 	self.melee_weapons.buck.repeat_expire_t = 0.9
 	self.melee_weapons.buck.expire_t = 1.4
@@ -8556,11 +8575,11 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.morning.sounds.charge = "morning_charge"
 	self.melee_weapons.morning.stats = {}
 	self.melee_weapons.morning.stats.weapon_type = "sharp"
-	self.melee_weapons.morning.stats.min_damage = 4
-	self.melee_weapons.morning.stats.max_damage = 6.64
-	self.melee_weapons.morning.stats.min_damage_effect = 4
-	self.melee_weapons.morning.stats.max_damage_effect = 3.2
-	self.melee_weapons.morning.stats.charge_time = 3.5
+	self.melee_weapons.morning.stats.min_damage = 2
+	self.melee_weapons.morning.stats.max_damage = 4
+	self.melee_weapons.morning.stats.min_damage_effect = 10
+	self.melee_weapons.morning.stats.max_damage_effect = 10
+	self.melee_weapons.morning.stats.charge_time = 3
 	self.melee_weapons.morning.stats.range = 225
 	self.melee_weapons.morning.stats.concealment = 26
 	self.melee_weapons.morning.stats.remove_weapon_movement_penalty = true
@@ -8568,4 +8587,1010 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.morning.expire_t = 1.1
 	self.melee_weapons.morning.melee_damage_delay = 0.1
 	self:_add_desc_from_name_macro(self.melee_weapons)
+end
+function BlackMarketTweakData:_init_weapon_skins()
+	self.weapon_skins = {}
+	self.weapon_skins.serbu_woodland = {}
+	self.weapon_skins.serbu_woodland.name_id = "bm_wskn_serbu_woodland"
+	self.weapon_skins.serbu_woodland.desc_id = "bm_wskn_serbu_woodland_desc"
+	self.weapon_skins.serbu_woodland.weapon_id = "serbu"
+	self.weapon_skins.serbu_woodland.rarity = "common"
+	self.weapon_skins.serbu_woodland.bonus = "concealment_p1"
+	self.weapon_skins.serbu_woodland.reserve_quality = true
+	self.weapon_skins.serbu_woodland.texture_bundle_folder = "cash/safes/sputnik"
+	self.weapon_skins.serbu_woodland.base_gradient = Idstring("units/payday2_cash/safes/sputnik/base_gradient/base_sput_001_df")
+	self.weapon_skins.p90_woodland = {}
+	self.weapon_skins.p90_woodland.name_id = "bm_wskn_p90_woodland"
+	self.weapon_skins.p90_woodland.desc_id = "bm_wskn_p90_woodland_desc"
+	self.weapon_skins.p90_woodland.weapon_id = "p90"
+	self.weapon_skins.p90_woodland.rarity = "common"
+	self.weapon_skins.p90_woodland.bonus = "recoil_p1"
+	self.weapon_skins.p90_woodland.reserve_quality = true
+	self.weapon_skins.p90_woodland.texture_bundle_folder = "cash/safes/sputnik"
+	self.weapon_skins.p90_woodland.base_gradient = Idstring("units/payday2_cash/safes/sputnik/base_gradient/base_sput_004_df")
+	self.weapon_skins.p90_woodland.pattern_tweak = Vector3(6.35822, 0, 0)
+	self.weapon_skins.p90_woodland.pattern_pos = Vector3(0.826616, -0.375387, 0)
+	self.weapon_skins.p90_woodland.parts = {
+		wpn_fps_smg_p90_body_p90 = {
+			[Idstring("p90"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_stars_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_stars_df")
+			}
+		},
+		wpn_fps_upg_o_cmore = {
+			[Idstring("cmore"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_stars_df"),
+				pattern_pos = Vector3(0.111138, -0.0987357, 0),
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_stars_df"),
+				pattern_tweak = Vector3(1.77916, 0, 1)
+			}
+		}
+	}
+	self.weapon_skins.plainsrider_woodland = {}
+	self.weapon_skins.plainsrider_woodland.name_id = "bm_wskn_plainsrider_woodland"
+	self.weapon_skins.plainsrider_woodland.desc_id = "bm_wskn_plainsrider_woodland_desc"
+	self.weapon_skins.plainsrider_woodland.weapon_id = "plainsrider"
+	self.weapon_skins.plainsrider_woodland.rarity = "common"
+	self.weapon_skins.plainsrider_woodland.bonus = "concealment_p1"
+	self.weapon_skins.plainsrider_woodland.reserve_quality = true
+	self.weapon_skins.plainsrider_woodland.texture_bundle_folder = "cash/safes/sputnik"
+	self.weapon_skins.plainsrider_woodland.base_gradient = Idstring("units/payday2_cash/safes/sputnik/base_gradient/base_sput_001_df")
+	self.weapon_skins.plainsrider_woodland.pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_004_df")
+	self.weapon_skins.plainsrider_woodland.pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_pixel_camo_df")
+	self.weapon_skins.plainsrider_woodland.pattern_tweak = Vector3(3.44861, 0, 0.997)
+	self.weapon_skins.plainsrider_woodland.pattern_pos = Vector3(1.40516, 1.00779, 0)
+	self.weapon_skins.rpg7_woodland = {}
+	self.weapon_skins.rpg7_woodland.name_id = "bm_wskn_rpg7_woodland"
+	self.weapon_skins.rpg7_woodland.desc_id = "bm_wskn_rpg7_woodland_desc"
+	self.weapon_skins.rpg7_woodland.weapon_id = "rpg7"
+	self.weapon_skins.rpg7_woodland.rarity = "common"
+	self.weapon_skins.rpg7_woodland.bonus = "spread_p1"
+	self.weapon_skins.rpg7_woodland.reserve_quality = true
+	self.weapon_skins.rpg7_woodland.texture_bundle_folder = "cash/safes/sputnik"
+	self.weapon_skins.rpg7_woodland.base_gradient = Idstring("units/payday2_cash/safes/shared/base_gradient/base_shared_001_df")
+	self.weapon_skins.rpg7_woodland.pattern_tweak = Vector3(5.26115, 0, 2)
+	self.weapon_skins.rpg7_woodland.pattern_pos = Vector3(-1.17618, -0.715976, 0)
+	self.weapon_skins.rpg7_woodland.parts = {
+		wpn_fps_rpg7_m_rocket = {
+			[Idstring("mtr_rocket"):key()] = {
+				pattern_tweak = Vector3(3.44861, 0, 1),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_type_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_003_df")
+			}
+		}
+	}
+	self.weapon_skins.ppk_woodland = {}
+	self.weapon_skins.ppk_woodland.name_id = "bm_wskn_ppk_woodland"
+	self.weapon_skins.ppk_woodland.desc_id = "bm_wskn_ppk_woodland_desc"
+	self.weapon_skins.ppk_woodland.weapon_id = "ppk"
+	self.weapon_skins.ppk_woodland.rarity = "common"
+	self.weapon_skins.ppk_woodland.bonus = "recoil_p1"
+	self.weapon_skins.ppk_woodland.reserve_quality = true
+	self.weapon_skins.ppk_woodland.texture_bundle_folder = "cash/safes/sputnik"
+	self.weapon_skins.ppk_woodland.base_gradient = Idstring("units/payday2_cash/safes/sputnik/base_gradient/base_sput_005_df")
+	self.weapon_skins.ppk_woodland.parts = {
+		wpn_fps_pis_ppk_body_standard = {
+			[Idstring("mtr_frame"):key()] = {
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_003_df"),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_leopard_df"),
+				pattern_tweak = Vector3(2.06535, 0, 1)
+			}
+		},
+		wpn_fps_pis_ppk_b_standard = {
+			[Idstring("mtr_slide"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_leopard_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_003_df"),
+				pattern_tweak = Vector3(1.49297, 0, 1)
+			}
+		},
+		wpn_fps_pis_ppk_b_long = {
+			[Idstring("mtr_slide_long"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_leopard_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_003_df"),
+				pattern_tweak = Vector3(1.49297, 0, 1)
+			}
+		}
+	}
+	self.weapon_skins.judge_woodland = {}
+	self.weapon_skins.judge_woodland.name_id = "bm_wskn_judge_woodland"
+	self.weapon_skins.judge_woodland.desc_id = "bm_wskn_judge_woodland_desc"
+	self.weapon_skins.judge_woodland.weapon_id = "judge"
+	self.weapon_skins.judge_woodland.reserve_quality = true
+	self.weapon_skins.judge_woodland.rarity = "common"
+	self.weapon_skins.judge_woodland.bonus = "concealment_p1"
+	self.weapon_skins.judge_woodland.texture_bundle_folder = "cash/safes/sputnik"
+	self.weapon_skins.judge_woodland.base_gradient = Idstring("units/payday2_cash/safes/shared/base_gradient/base_shared_002_df")
+	self.weapon_skins.judge_woodland.parts = {
+		wpn_fps_pis_judge_body_standard = {
+			[Idstring("mtr_frame"):key()] = {
+				pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_002_df"),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_pixel_camo_df"),
+				pattern_tweak = Vector3(1.01598, 0, 1)
+			}
+		}
+	}
+	self.weapon_skins.new_m4_goldstripes = {}
+	self.weapon_skins.new_m4_goldstripes.name_id = "bm_wskn_new_m4_goldstripes"
+	self.weapon_skins.new_m4_goldstripes.desc_id = "bm_wskn_new_m4_goldstripes_desc"
+	self.weapon_skins.new_m4_goldstripes.weapon_id = "new_m4"
+	self.weapon_skins.new_m4_goldstripes.rarity = "uncommon"
+	self.weapon_skins.new_m4_goldstripes.bonus = "concealment_p1"
+	self.weapon_skins.new_m4_goldstripes.reserve_quality = true
+	self.weapon_skins.new_m4_goldstripes.texture_bundle_folder = "cash/safes/sputnik"
+	self.weapon_skins.new_m4_goldstripes.base_gradient = Idstring("units/payday2_cash/safes/shared/base_gradient/base_shared_003_df")
+	self.weapon_skins.new_m4_goldstripes.pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_009_df")
+	self.weapon_skins.new_m4_goldstripes.pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_flag_stripes_df")
+	self.weapon_skins.new_m4_goldstripes.pattern_tweak = Vector3(2.82853, 0, 0)
+	self.weapon_skins.new_raging_bull_goldstripes = {}
+	self.weapon_skins.new_raging_bull_goldstripes.weapon_id = "new_raging_bull"
+	self.weapon_skins.new_raging_bull_goldstripes.name_id = "bm_wskn_new_raging_bull_goldstripes"
+	self.weapon_skins.new_raging_bull_goldstripes.desc_id = "bm_wskn_new_raging_bull_goldstripes_desc"
+	self.weapon_skins.new_raging_bull_goldstripes.rarity = "uncommon"
+	self.weapon_skins.new_raging_bull_goldstripes.bonus = "recoil_p1"
+	self.weapon_skins.new_raging_bull_goldstripes.base_gradient = Idstring("units/payday2_cash/safes/sputnik/base_gradient/base_sput_004_df")
+	self.weapon_skins.new_raging_bull_goldstripes.texture_bundle_folder = "cash/safes/sputnik"
+	self.weapon_skins.new_raging_bull_goldstripes.reserve_quality = true
+	self.weapon_skins.flamethrower_mk2_goldstripes = {}
+	self.weapon_skins.flamethrower_mk2_goldstripes.name_id = "bm_wskn_flamethrower_mk2_goldstripes"
+	self.weapon_skins.flamethrower_mk2_goldstripes.desc_id = "bm_wskn_flamethrower_mk2_goldstripes_desc"
+	self.weapon_skins.flamethrower_mk2_goldstripes.weapon_id = "flamethrower_mk2"
+	self.weapon_skins.flamethrower_mk2_goldstripes.rarity = "uncommon"
+	self.weapon_skins.flamethrower_mk2_goldstripes.bonus = "damage_p1"
+	self.weapon_skins.flamethrower_mk2_goldstripes.reserve_quality = true
+	self.weapon_skins.flamethrower_mk2_goldstripes.texture_bundle_folder = "cash/safes/sputnik"
+	self.weapon_skins.flamethrower_mk2_goldstripes.base_gradient = Idstring("units/payday2_cash/safes/shared/base_gradient/base_shared_003_df")
+	self.weapon_skins.flamethrower_mk2_goldstripes.parts = {
+		wpn_fps_fla_mk2_mag = {
+			[Idstring("flame_fuel_can"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_stbasil_df"),
+				pattern_pos = Vector3(-0.308609, -0.237292, 0),
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_005_df"),
+				pattern_tweak = Vector3(1.96995, 4.72475, 1)
+			}
+		},
+		wpn_fps_fla_mk2_mag_rare = {
+			[Idstring("flame_fuel_can"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_stbasil_df"),
+				pattern_pos = Vector3(-0.308609, -0.237292, 0),
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_004_df"),
+				pattern_tweak = Vector3(1.96995, 4.72475, 1)
+			}
+		},
+		wpn_fps_fla_mk2_mag_welldone = {
+			[Idstring("flame_fuel_can"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_stbasil_df"),
+				pattern_pos = Vector3(-0.308609, -0.237292, 0),
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_stars_df"),
+				pattern_tweak = Vector3(1.96995, 4.72475, 1)
+			}
+		}
+	}
+	self.weapon_skins.g36_goldstripes = {}
+	self.weapon_skins.g36_goldstripes.name_id = "bm_wskn_g36_goldstripes"
+	self.weapon_skins.g36_goldstripes.desc_id = "bm_wskn_g36_goldstripes_desc"
+	self.weapon_skins.g36_goldstripes.weapon_id = "g36"
+	self.weapon_skins.g36_goldstripes.rarity = "uncommon"
+	self.weapon_skins.g36_goldstripes.reserve_quality = true
+	self.weapon_skins.g36_goldstripes.bonus = "spread_p1"
+	self.weapon_skins.g36_goldstripes.texture_bundle_folder = "cash/safes/sputnik"
+	self.weapon_skins.g36_goldstripes.base_gradient = Idstring("units/payday2_cash/safes/shared/base_gradient/base_shared_006_df")
+	self.weapon_skins.g36_goldstripes.pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_004_df")
+	self.weapon_skins.g36_goldstripes.pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_leopard_df")
+	self.weapon_skins.g36_goldstripes.pattern_tweak = Vector3(1.2, 0, 1)
+	self.weapon_skins.new_m14_luxury = {}
+	self.weapon_skins.new_m14_luxury.name_id = "bm_wskn_new_m14_luxury"
+	self.weapon_skins.new_m14_luxury.desc_id = "bm_wskn_new_m14_luxury_desc"
+	self.weapon_skins.new_m14_luxury.weapon_id = "new_m14"
+	self.weapon_skins.new_m14_luxury.reserve_quality = true
+	self.weapon_skins.new_m14_luxury.rarity = "rare"
+	self.weapon_skins.new_m14_luxury.bonus = "recoil_p1"
+	self.weapon_skins.new_m14_luxury.texture_bundle_folder = "cash/safes/sputnik"
+	self.weapon_skins.new_m14_luxury.base_gradient = Idstring("units/payday2_cash/safes/sputnik/base_gradient/base_sput_001_df")
+	self.weapon_skins.new_m14_luxury.parts = {
+		wpn_fps_upg_o_acog = {
+			[Idstring("mtr_acog"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/sputnik/sticker/sticker_sputnik_df"),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_galaxy_df"),
+				base_gradient = Idstring("units/payday2_cash/safes/sputnik/base_gradient/base_sput_001_df"),
+				uv_offset_rot = Vector3(0.0920584, 0.874315, 6.28319),
+				pattern_pos = Vector3(0.769378, 0, 0),
+				uv_scale = Vector3(8.8918, 8.8918, 0),
+				pattern_tweak = Vector3(0.634393, 0.828668, 1),
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_002_df")
+			}
+		},
+		wpn_fps_upg_o_m14_scopemount = {
+			[Idstring("mtr_mount"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/sputnik/base_gradient/base_sput_001_df"),
+				pattern_tweak = Vector3(1, 0, 0),
+				pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_001_df")
+			}
+		},
+		wpn_fps_ass_m14_body_jae = {
+			[Idstring("jae"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/sputnik/sticker/sticker_sputnik_df"),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_galaxy_df"),
+				cubemap_pattern_control = Vector3(1, 1, 0),
+				base_gradient = Idstring("units/payday2_cash/safes/sputnik/base_gradient/base_sput_001_df"),
+				uv_offset_rot = Vector3(-0.376308, 0.920473, 0),
+				pattern_pos = Vector3(0, 0.187455, 0),
+				uv_scale = Vector3(8.22535, 9.41622, 0),
+				pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_007_df"),
+				pattern_tweak = Vector3(1.01598, 0, 1)
+			}
+		},
+		wpn_fps_ass_m14_body_upper = {
+			[Idstring("base"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/sputnik/base_gradient/base_sput_001_df"),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_stars_df"),
+				pattern_pos = Vector3(0, 0.158836, 0),
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_003_df"),
+				cubemap_pattern_control = Vector3(0, 1, 0),
+				pattern_tweak = Vector3(14.0854, 0, 1)
+			}
+		},
+		wpn_fps_ass_m14_body_lower = {
+			[Idstring("lower"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/sputnik/base_gradient/base_sput_001_df"),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_stars_df"),
+				pattern_tweak = Vector3(20, 0, 1),
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_003_df")
+			}
+		}
+	}
+	self.weapon_skins.new_m14_luxury.default_blueprint = {
+		"wpn_fps_ass_m14_b_standard",
+		"wpn_fps_ass_m14_body_lower",
+		"wpn_fps_ass_m14_body_upper",
+		"wpn_fps_ass_m14_m_standard",
+		"wpn_fps_upg_ass_ns_surefire",
+		"wpn_fps_ass_m14_body_jae",
+		"wpn_fps_upg_o_acog",
+		"wpn_fps_upg_o_m14_scopemount"
+	}
+	self.weapon_skins.m95_luxury = {}
+	self.weapon_skins.m95_luxury.name_id = "bm_wskn_m95_luxury"
+	self.weapon_skins.m95_luxury.desc_id = "bm_wskn_m95_luxury_desc"
+	self.weapon_skins.m95_luxury.weapon_id = "m95"
+	self.weapon_skins.m95_luxury.reserve_quality = true
+	self.weapon_skins.m95_luxury.rarity = "rare"
+	self.weapon_skins.m95_luxury.bonus = "total_ammo_p1"
+	self.weapon_skins.m95_luxury.texture_bundle_folder = "cash/safes/sputnik"
+	self.weapon_skins.m95_luxury.base_gradient = Idstring("units/payday2_cash/safes/shared/base_gradient/base_shared_003_df")
+	self.weapon_skins.m95_luxury.pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_crackled_ground_df")
+	self.weapon_skins.m95_luxury.parts = {
+		wpn_fps_snp_m95_upper_reciever = {
+			[Idstring("mtr_upper"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/sputnik/sticker/sticker_matryoshka_heisters_df"),
+				uv_offset_rot = Vector3(0.0634394, 0.982791, 0),
+				pattern_pos = Vector3(0.0920584, 0.216075, 0),
+				uv_scale = Vector3(7.84295, 11.6569, 1),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_faberge_df"),
+				pattern_tweak = Vector3(12.7498, 4.70977, 1)
+			}
+		},
+		wpn_fps_snp_m95_lower_reciever = {
+			[Idstring("mtr_lower"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/sputnik/sticker/sticker_matryoshka_heisters_df"),
+				uv_offset_rot = Vector3(0.108598, 1.02295, 0),
+				pattern_pos = Vector3(-0.0550372, 0.0583599, 0),
+				uv_scale = Vector3(10.2267, 10.179, 1),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_faberge_df"),
+				pattern_tweak = Vector3(14.7285, 0, 1)
+			}
+		}
+	}
+	self.weapon_skins.m95_luxury.default_blueprint = {
+		"wpn_fps_snp_m95_bipod",
+		"wpn_fps_snp_m95_lower_reciever",
+		"wpn_fps_snp_m95_upper_reciever",
+		"wpn_fps_snp_m95_magazine",
+		"wpn_fps_snp_m95_barrel_long",
+		"wpn_fps_upg_m4_g_hgrip",
+		"wpn_fps_upg_o_leupold"
+	}
+	self.weapon_skins.b92fs_luxury = {}
+	self.weapon_skins.b92fs_luxury.name_id = "bm_wskn_b92fs_luxury"
+	self.weapon_skins.b92fs_luxury.desc_id = "bm_wskn_b92fs_luxury_desc"
+	self.weapon_skins.b92fs_luxury.weapon_id = "b92fs"
+	self.weapon_skins.b92fs_luxury.rarity = "rare"
+	self.weapon_skins.b92fs_luxury.bonus = "concealment_p3"
+	self.weapon_skins.b92fs_luxury.reserve_quality = true
+	self.weapon_skins.b92fs_luxury.texture_bundle_folder = "cash/safes/sputnik"
+	self.weapon_skins.b92fs_luxury.base_gradient = Idstring("units/payday2_cash/safes/shared/base_gradient/base_shared_004_df")
+	self.weapon_skins.b92fs_luxury.default_blueprint = {
+		"wpn_fps_pis_beretta_body_beretta",
+		"wpn_fps_pis_beretta_b_std",
+		"wpn_fps_pis_beretta_m_std",
+		"wpn_fps_pis_beretta_o_std",
+		"wpn_fps_upg_ns_pis_large",
+		"wpn_fps_pis_beretta_g_ergo",
+		"wpn_fps_pis_beretta_sl_brigadier"
+	}
+	self.weapon_skins.b92fs_luxury.parts = {
+		wpn_fps_pis_beretta_body_beretta = {
+			[Idstring("body"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/sputnik/sticker/sticker_bear_df"),
+				uv_scale = Vector3(6.74644, 2.36036, 0),
+				uv_offset_rot = Vector3(-0.470784, 0.906234, 0)
+			}
+		},
+		wpn_fps_pis_beretta_sl_brigadier = {
+			[Idstring("brig"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/sputnik/sticker/sticker_bear_df"),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_flag_stripes_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_010_df"),
+				pattern_pos = Vector3(-0.213212, 0.254233, 0),
+				uv_scale = Vector3(2.21734, 2.31269, 0),
+				uv_offset_rot = Vector3(-0.332768, 0.987251, 4.73174),
+				pattern_tweak = Vector3(4.64107, 3.43605, 0)
+			}
+		},
+		wpn_fps_upg_ns_pis_large = {
+			[Idstring("large"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/sputnik/sticker/sticker_bear_df"),
+				uv_offset_rot = Vector3(-0.28907, 0.916393, 0),
+				pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_010_df"),
+				pattern_pos = Vector3(0, -0.140434, 0),
+				uv_scale = Vector3(7.27086, 7.27086, 0.105652),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_flag_stripes_df"),
+				pattern_tweak = Vector3(5.64274, 3.40608, 0)
+			}
+		}
+	}
+	self.weapon_skins.famas_hypno = {}
+	self.weapon_skins.famas_hypno.name_id = "bm_wskn_famas_hypno"
+	self.weapon_skins.famas_hypno.desc_id = "bm_wskn_famas_hypno_desc"
+	self.weapon_skins.famas_hypno.weapon_id = "famas"
+	self.weapon_skins.famas_hypno.reserve_quality = true
+	self.weapon_skins.famas_hypno.rarity = "epic"
+	self.weapon_skins.famas_hypno.bonus = "damage_p2"
+	self.weapon_skins.famas_hypno.texture_bundle_folder = "cash/safes/sputnik"
+	self.weapon_skins.famas_hypno.base_gradient = Idstring("units/payday2_cash/safes/shared/base_gradient/base_tactical_001_df")
+	self.weapon_skins.famas_hypno.pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/pattern_gradient_camo_snow_001_df")
+	self.weapon_skins.famas_hypno.pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_wheat_df")
+	self.weapon_skins.famas_hypno.pattern_tweak = Vector3(1.20678, 3.40608, 1)
+	self.weapon_skins.famas_hypno.parts = {
+		wpn_fps_ass_famas_body_standard = {
+			[Idstring("mtr_lower"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/sputnik/sticker/sticker_topowl_df"),
+				uv_offset_rot = Vector3(-0.324149, 0.941092, 5.62385),
+				uv_scale = Vector3(4.7441, 4.7441, 0),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_wheat_df"),
+				pattern_tweak = Vector3(5.30885, 0, 1)
+			},
+			[Idstring("mtr_upper"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/sputnik/sticker/sticker_topowl_df"),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_wheat_df"),
+				pattern_pos = Vector3(-0.108275, -0.499403, 0),
+				uv_scale = Vector3(1.1685, 1.26385, 0),
+				uv_offset_rot = Vector3(0.0363599, 0.71052, 0),
+				pattern_tweak = Vector3(3.01532, 0, 1)
+			},
+			[Idstring("mtr_charge"):key()] = {
+				pattern_pos = Vector3(-0.022418, 0, 0),
+				pattern_tweak = Vector3(0.872886, 2.64185, 1)
+			}
+		},
+		wpn_fps_ass_famas_m_standard = {
+			[Idstring("mtr_mag"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_wheat_df"),
+				pattern_tweak = Vector3(2.78083, 0, 1)
+			}
+		},
+		wpn_fps_upg_ass_ns_surefire = {
+			[Idstring("mtr_surefire"):key()] = {
+				pattern_pos = Vector3(-0.136895, -0.461245, 0),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_wheat_df"),
+				pattern_tweak = Vector3(0.443599, 0.012, 1)
+			}
+		}
+	}
+	self.weapon_skins.famas_hypno.default_blueprint = {
+		"wpn_fps_ass_famas_body_standard",
+		"wpn_fps_ass_famas_m_standard",
+		"wpn_fps_ass_famas_b_sniper",
+		"wpn_fps_upg_ass_ns_surefire",
+		"wpn_fps_ass_famas_g_retro"
+	}
+	self.weapon_skins.huntsman_hypno = {}
+	self.weapon_skins.huntsman_hypno.name_id = "bm_wskn_huntsman_hypno"
+	self.weapon_skins.huntsman_hypno.desc_id = "bm_wskn_huntsman_hypno_desc"
+	self.weapon_skins.huntsman_hypno.weapon_id = "huntsman"
+	self.weapon_skins.huntsman_hypno.reserve_quality = true
+	self.weapon_skins.huntsman_hypno.rarity = "epic"
+	self.weapon_skins.huntsman_hypno.bonus = "spread_n1"
+	self.weapon_skins.huntsman_hypno.texture_bundle_folder = "cash/safes/sputnik"
+	self.weapon_skins.huntsman_hypno.base_gradient = Idstring("units/payday2_cash/safes/shared/base_gradient/base_shared_006_df")
+	self.weapon_skins.huntsman_hypno.parts = {
+		wpn_fps_shot_huntsman_b_long = {
+			[Idstring("long_barrel"):key()] = {
+				pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_009_df"),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_khokloma_df"),
+				uv_offset_rot = Vector3(0.120677, 0.922013, 0),
+				pattern_pos = Vector3(0, -1.66517, 0),
+				uv_scale = Vector3(3.93363, 3.83828, 1),
+				pattern_tweak = Vector3(3.87489, 0.169331, 1)
+			}
+		},
+		wpn_fps_shot_huntsman_b_short = {
+			[Idstring("short_barrel"):key()] = {
+				pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_009_df"),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_khokloma_df"),
+				uv_offset_rot = Vector3(0.120677, 0.922013, 0),
+				pattern_pos = Vector3(0, -1.66517, 0),
+				uv_scale = Vector3(3.93363, 3.83828, 1),
+				pattern_tweak = Vector3(3.87489, 0.169331, 1)
+			}
+		},
+		wpn_fps_shot_huntsman_s_long = {
+			[Idstring("long_stock"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/sputnik/sticker/sticker_bear_bullets_df"),
+				pattern = Idstring("units/payday2_cash/safes/default/pattern/pattern_default_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_009_df"),
+				uv_scale = Vector3(1.32152, 1.28318, 1),
+				uv_offset_rot = Vector3(-0.27999, 0.340091, 0),
+				pattern_tweak = Vector3(2.06535, 0, 1)
+			}
+		}
+	}
+	self.weapon_skins.huntsman_hypno.default_blueprint = {
+		"wpn_fps_shot_huntsman_body_standard",
+		"wpn_fps_shot_huntsman_b_long",
+		"wpn_fps_shot_huntsman_s_long",
+		"wpn_fps_upg_a_slug"
+	}
+	self.weapon_skins.ak74_rodina = {}
+	self.weapon_skins.ak74_rodina.name_id = "bm_wskn_ak74_rodina"
+	self.weapon_skins.ak74_rodina.desc_id = "bm_wskn_ak74_rodina_desc"
+	self.weapon_skins.ak74_rodina.weapon_id = "ak74"
+	self.weapon_skins.ak74_rodina.reserve_quality = true
+	self.weapon_skins.ak74_rodina.rarity = "legendary"
+	self.weapon_skins.ak74_rodina.bonus = "spread_p1"
+	self.weapon_skins.ak74_rodina.texture_bundle_folder = "cash/safes/sputnik"
+	self.weapon_skins.ak74_rodina.unique_name_id = "bm_wskn_ak74_rodina"
+	self.weapon_skins.ak74_rodina.locked = true
+	self.weapon_skins.ak74_rodina.base_gradient = Idstring("units/payday2_cash/safes/sputnik/base_gradient/base_sput_005_df")
+	self.weapon_skins.ak74_rodina.default_blueprint = {
+		"wpn_fps_ass_74_body_upperreceiver",
+		"wpn_fps_ass_ak_body_lowerreceiver",
+		"wpn_fps_ass_74_b_legend",
+		"wpn_fps_upg_ak_m_uspalm",
+		"wpn_upg_ak_s_legend",
+		"wpn_upg_ak_g_legend",
+		"wpn_upg_ak_fg_legend",
+		"wpn_upg_ak_fl_legend",
+		"wpn_fps_upg_o_cmore",
+		"wpn_fps_upg_o_ak_scopemount"
+	}
+	self.weapon_skins.ak74_rodina.parts = {
+		wpn_fps_upg_ak_m_uspalm = {
+			[Idstring("mtr_uspalm"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/sputnik/sticker/sticker_russian_flag_df"),
+				pattern = Idstring("units/payday2_cash/safes/sputnik/pattern/pattern_flag_stripes_df"),
+				pattern_tweak = Vector3(2.35154, 3.49599, 1),
+				pattern_pos = Vector3(-0.156974, -1.42476, 0),
+				uv_scale = Vector3(0.01, 1.12082, 0),
+				uv_offset_rot = Vector3(0.244694, 0.979251, 0),
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_004_df")
+			}
+		},
+		wpn_fps_ass_74_body_upperreceiver = {
+			[Idstring("ak74_dustcover"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/sputnik/sticker/sticker_starbomb_df"),
+				uv_scale = Vector3(2.69309, 2.69377, 1),
+				uv_offset_rot = Vector3(-0.165514, 0.893394, 0)
+			}
+		},
+		wpn_fps_ass_ak_body_lowerreceiver = {
+			[Idstring("ak_base"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/sputnik/sticker/sticker_starbomb_df"),
+				uv_scale = Vector3(4.26735, 4.69642, 1),
+				uv_offset_rot = Vector3(-0.223752, 0.977171, 0)
+			}
+		},
+		wpn_upg_ak_fg_legend = {
+			[Idstring("mtr_fore"):key()] = {
+				uv_scale = Vector3(11.1802, 10.2744, 1),
+				uv_offset_rot = Vector3(0.406869, 1.00787, 0)
+			},
+			[Idstring("handguard_upper_wood"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/sputnik/sticker/sticker_stbasil_df"),
+				uv_scale = Vector3(1.54989, 1.1685, 1),
+				uv_offset_rot = Vector3(-0.108275, 0.960172, 0)
+			}
+		}
+	}
+	self.weapon_skins.m95_forest = {}
+	self.weapon_skins.m95_forest.name_id = "bm_wskn_m95_forest"
+	self.weapon_skins.m95_forest.desc_id = "bm_wskn_m95_forest_desc"
+	self.weapon_skins.m95_forest.weapon_id = "m95"
+	self.weapon_skins.m95_forest.reserve_quality = true
+	self.weapon_skins.m95_forest.rarity = "common"
+	self.weapon_skins.m95_forest.bonus = "total_ammo_p1"
+	self.weapon_skins.m95_forest.base_gradient = Idstring("units/payday2_cash/safes/cf15/base_gradient/base_cf15_001_df")
+	self.weapon_skins.m95_forest.texture_bundle_folder = "cash/safes/cf15"
+	self.weapon_skins.famas_forest = {}
+	self.weapon_skins.famas_forest.name_id = "bm_wskn_famas_forest"
+	self.weapon_skins.famas_forest.desc_id = "bm_wskn_famas_forest_desc"
+	self.weapon_skins.famas_forest.weapon_id = "famas"
+	self.weapon_skins.famas_forest.reserve_quality = true
+	self.weapon_skins.famas_forest.rarity = "common"
+	self.weapon_skins.famas_forest.bonus = "spread_p1"
+	self.weapon_skins.famas_forest.texture_bundle_folder = "cash/safes/cf15"
+	self.weapon_skins.famas_forest.base_gradient = Idstring("units/payday2_cash/safes/shared/base_gradient/base_shared_007_df")
+	self.weapon_skins.famas_forest.parts = {
+		wpn_fps_ass_famas_body_standard = {
+			[Idstring("mtr_lower"):key()] = {
+				pattern_tweak = Vector3(17.1858, 6.02844, 1),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/pattern_goldcoins_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_new_002_df")
+			}
+		}
+	}
+	self.weapon_skins.huntsman_forest = {}
+	self.weapon_skins.huntsman_forest.name_id = "bm_wskn_huntsman_forest"
+	self.weapon_skins.huntsman_forest.desc_id = "bm_wskn_huntsman_forest_desc"
+	self.weapon_skins.huntsman_forest.weapon_id = "huntsman"
+	self.weapon_skins.huntsman_forest.reserve_quality = true
+	self.weapon_skins.huntsman_forest.rarity = "common"
+	self.weapon_skins.huntsman_forest.bonus = "recoil_p1"
+	self.weapon_skins.huntsman_forest.texture_bundle_folder = "cash/safes/cf15"
+	self.weapon_skins.huntsman_forest.base_gradient = Idstring("units/payday2_cash/safes/cf15/base_gradient/base_cf15_001_df")
+	self.weapon_skins.r93_forest = {}
+	self.weapon_skins.r93_forest.name_id = "bm_wskn_r93_forest"
+	self.weapon_skins.r93_forest.desc_id = "bm_wskn_r93_forest_desc"
+	self.weapon_skins.r93_forest.weapon_id = "r93"
+	self.weapon_skins.r93_forest.reserve_quality = true
+	self.weapon_skins.r93_forest.rarity = "common"
+	self.weapon_skins.r93_forest.bonus = "recoil_p1"
+	self.weapon_skins.r93_forest.texture_bundle_folder = "cash/safes/cf15"
+	self.weapon_skins.r93_forest.base_gradient = Idstring("units/payday2_cash/safes/shared/base_gradient/base_shared_005_df")
+	self.weapon_skins.r93_forest.parts = {
+		wpn_fps_snp_r93_b_standard = {
+			[Idstring("mtr_barrel"):key()] = {
+				uv_offset_rot = Vector3(-0.29907, 0, 0),
+				pattern_pos = Vector3(0, -0.556642, 0),
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_005_df"),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/fire_pattern_df"),
+				pattern_tweak = Vector3(1.11138, 0, 1)
+			}
+		},
+		wpn_fps_snp_r93_body_standard = {
+			[Idstring("mtr_body"):key()] = {
+				pattern_tweak = Vector3(1.49297, 0, 1)
+			},
+			[Idstring("mtr_upper"):key()] = {
+				pattern_tweak = Vector3(0.491297, 0, 1),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/fire_pattern_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_005_df")
+			}
+		},
+		wpn_fps_upg_o_shortdot = {
+			[Idstring("mtr_shortdot"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/fire_pattern_df"),
+				pattern_pos = Vector3(0.883854, 0.168376, 0),
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_005_df"),
+				pattern_tweak = Vector3(0.538996, 0, 1)
+			}
+		},
+		wpn_fps_snp_r93_m_std = {
+			[Idstring("mtr_mag"):key()] = {
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_005_df"),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/fire_pattern_df"),
+				pattern_tweak = Vector3(0.300503, 0, 1)
+			}
+		}
+	}
+	self.weapon_skins.b92fs_forest = {}
+	self.weapon_skins.b92fs_forest.name_id = "bm_wskn_b92fs_forest"
+	self.weapon_skins.b92fs_forest.desc_id = "bm_wskn_b92fs_forest_desc"
+	self.weapon_skins.b92fs_forest.weapon_id = "b92fs"
+	self.weapon_skins.b92fs_forest.reserve_quality = true
+	self.weapon_skins.b92fs_forest.rarity = "common"
+	self.weapon_skins.b92fs_forest.bonus = "recoil_p1"
+	self.weapon_skins.b92fs_forest.texture_bundle_folder = "cash/safes/cf15"
+	self.weapon_skins.b92fs_forest.base_gradient = Idstring("units/payday2_cash/safes/cf15/base_gradient/base_cf15_003_df")
+	self.weapon_skins.m134_forest = {}
+	self.weapon_skins.m134_forest.name_id = "bm_wskn_m134_forest"
+	self.weapon_skins.m134_forest.desc_id = "bm_wskn_m134_forest_desc"
+	self.weapon_skins.m134_forest.weapon_id = "m134"
+	self.weapon_skins.m134_forest.reserve_quality = true
+	self.weapon_skins.m134_forest.rarity = "common"
+	self.weapon_skins.m134_forest.bonus = "spread_p1"
+	self.weapon_skins.m134_forest.texture_bundle_folder = "cash/safes/cf15"
+	self.weapon_skins.m134_forest.base_gradient = Idstring("units/payday2_cash/safes/cf15/base_gradient/base_cf15_001_df")
+	self.weapon_skins.m134_forest.parts = {
+		wpn_fps_lmg_m134_body = {
+			[Idstring("mtr_body"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/pattern_crimenet_df"),
+				pattern_pos = Vector3(0.158836, -0.0701165, 0),
+				pattern_tweak = Vector3(3.5917, 0, 1),
+				pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_bones_df")
+			}
+		}
+	}
+	self.weapon_skins.serbu_camohex = {}
+	self.weapon_skins.serbu_camohex.weapon_id = "serbu"
+	self.weapon_skins.serbu_camohex.name_id = "bm_wskn_serbu_camohex"
+	self.weapon_skins.serbu_camohex.desc_id = "bm_wskn_serbu_camohex_desc"
+	self.weapon_skins.serbu_camohex.rarity = "uncommon"
+	self.weapon_skins.serbu_camohex.bonus = "spread_n1"
+	self.weapon_skins.serbu_camohex.base_gradient = Idstring("units/payday2_cash/safes/cf15/base_gradient/base_cf15_002_df")
+	self.weapon_skins.serbu_camohex.texture_bundle_folder = "cash/safes/cf15"
+	self.weapon_skins.serbu_camohex.reserve_quality = true
+	self.weapon_skins.new_m14_camohex = {}
+	self.weapon_skins.new_m14_camohex.weapon_id = "new_m14"
+	self.weapon_skins.new_m14_camohex.name_id = "bm_wskn_new_m14_camohex"
+	self.weapon_skins.new_m14_camohex.desc_id = "bm_wskn_new_m14_camohex_desc"
+	self.weapon_skins.new_m14_camohex.rarity = "uncommon"
+	self.weapon_skins.new_m14_camohex.bonus = "recoil_p1"
+	self.weapon_skins.new_m14_camohex.base_gradient = Idstring("units/payday2_cash/safes/cf15/base_gradient/base_cf15_new_m14_df")
+	self.weapon_skins.new_m14_camohex.texture_bundle_folder = "cash/safes/cf15"
+	self.weapon_skins.new_m14_camohex.reserve_quality = true
+	self.weapon_skins.judge_camohex = {}
+	self.weapon_skins.judge_camohex.weapon_id = "judge"
+	self.weapon_skins.judge_camohex.name_id = "bm_wskn_judge_camohex"
+	self.weapon_skins.judge_camohex.desc_id = "bm_wskn_judge_camohex_desc"
+	self.weapon_skins.judge_camohex.rarity = "uncommon"
+	self.weapon_skins.judge_camohex.bonus = "spread_n1"
+	self.weapon_skins.judge_camohex.base_gradient = Idstring("units/payday2_cash/safes/cf15/base_gradient/base_cf15_002_df")
+	self.weapon_skins.judge_camohex.texture_bundle_folder = "cash/safes/cf15"
+	self.weapon_skins.judge_camohex.reserve_quality = true
+	self.weapon_skins.mg42_camohex = {}
+	self.weapon_skins.mg42_camohex.weapon_id = "mg42"
+	self.weapon_skins.mg42_camohex.name_id = "bm_wskn_mg42_camohex"
+	self.weapon_skins.mg42_camohex.desc_id = "bm_wskn_mg42_camohex_desc"
+	self.weapon_skins.mg42_camohex.rarity = "uncommon"
+	self.weapon_skins.mg42_camohex.bonus = "spread_p1"
+	self.weapon_skins.mg42_camohex.reserve_quality = true
+	self.weapon_skins.mg42_camohex.texture_bundle_folder = "cash/safes/cf15"
+	self.weapon_skins.mg42_camohex.base_gradient = Idstring("units/payday2_cash/safes/cf15/base_gradient/base_cf15_003_df")
+	self.weapon_skins.mg42_camohex.pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_001_df")
+	self.weapon_skins.mg42_camohex.pattern_tweak = Vector3(0.634393, 2.64684, 0.942682)
+	self.weapon_skins.mg42_camohex.parts = {
+		wpn_fps_lmg_mg42_reciever = {
+			[Idstring("wpn_fps_ass_fal_base_nm"):key()] = {
+				pattern_tweak = Vector3(11.8435, 0, 1),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/pattern_bones_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_bones_df")
+			}
+		}
+	}
+	self.weapon_skins.p90_luxury = {}
+	self.weapon_skins.p90_luxury.name_id = "bm_wskn_p90_luxury"
+	self.weapon_skins.p90_luxury.desc_id = "bm_wskn_p90_luxury_desc"
+	self.weapon_skins.p90_luxury.weapon_id = "p90"
+	self.weapon_skins.p90_luxury.reserve_quality = true
+	self.weapon_skins.p90_luxury.rarity = "rare"
+	self.weapon_skins.p90_luxury.bonus = "concealment_p2"
+	self.weapon_skins.p90_luxury.texture_bundle_folder = "cash/safes/cf15"
+	self.weapon_skins.p90_luxury.base_gradient = Idstring("units/payday2_cash/safes/shared/base_gradient/base_tactical_001_df")
+	self.weapon_skins.p90_luxury.pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_binary_df")
+	self.weapon_skins.p90_luxury.parts = {
+		wpn_fps_smg_p90_body_p90 = {
+			[Idstring("p90"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/cf15/sticker/sticker_hoxton_hacks_df"),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/binary_pattern_df"),
+				pattern_pos = Vector3(0.024, 0.014, 0),
+				uv_scale = Vector3(5.17317, 5.36387, 1),
+				uv_offset_rot = Vector3(-0.337228, 0.927013, 6.22325),
+				pattern_tweak = Vector3(6.63141, 0, 1)
+			}
+		},
+		wpn_fps_smg_p90_b_ninja = {
+			[Idstring("mtr_ninja"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/cf15/sticker/sticker_hoxton_hacks_df"),
+				uv_scale = Vector3(2.21734, 2.21734, 0.804436),
+				uv_offset_rot = Vector3(0.0443599, 1.16651, 3.19629)
+			}
+		}
+	}
+	self.weapon_skins.p90_luxury.default_blueprint = {
+		"wpn_fps_smg_p90_body_p90",
+		"wpn_fps_smg_p90_m_std",
+		"wpn_fps_smg_p90_b_ninja",
+		"wpn_fps_upg_o_eotech"
+	}
+	self.weapon_skins.ak74_luxury = {}
+	self.weapon_skins.ak74_luxury.name_id = "bm_wskn_ak74_luxury"
+	self.weapon_skins.ak74_luxury.desc_id = "bm_wskn_ak74_luxury_desc"
+	self.weapon_skins.ak74_luxury.weapon_id = "ak74"
+	self.weapon_skins.ak74_luxury.reserve_quality = true
+	self.weapon_skins.ak74_luxury.rarity = "rare"
+	self.weapon_skins.ak74_luxury.bonus = "spread_p1"
+	self.weapon_skins.ak74_luxury.texture_bundle_folder = "cash/safes/cf15"
+	self.weapon_skins.ak74_luxury.base_gradient = Idstring("units/payday2_cash/safes/cf15/base_gradient/base_cf15_002_df")
+	self.weapon_skins.ak74_luxury.pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_002_df")
+	self.weapon_skins.ak74_luxury.parts = {
+		wpn_fps_upg_ak_m_quad = {
+			[Idstring("mtr_quadstack"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/cf15/sticker/sticker_sad_almir_df"),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/pattern_dead_birds_df"),
+				pattern_pos = Vector3(-0.184593, 0, 0),
+				uv_scale = Vector3(4.02898, 4.172, 1),
+				uv_offset_rot = Vector3(0.177916, 0.998331, 0.184315),
+				pattern_tweak = Vector3(5.49964, 0, 0.33699)
+			}
+		},
+		wpn_fps_ass_74_body_upperreceiver = {
+			[Idstring("ak74_dustcover"):key()] = {
+				pattern_pos = Vector3(0, 0.0920584, 0),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/pattern_dead_birds_df"),
+				pattern_tweak = Vector3(3.21011, 0, 1)
+			}
+		},
+		wpn_fps_ass_ak_body_lowerreceiver = {
+			[Idstring("ak_base"):key()] = {
+				uv_offset_rot = Vector3(0.130217, 0.931553, 0.0944058),
+				pattern_pos = Vector3(0.0348201, 0, 0),
+				uv_scale = Vector3(14.8511, 14.6128, 0),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/pattern_dead_birds_df"),
+				pattern_tweak = Vector3(4.78417, 0, 1)
+			}
+		},
+		wpn_fps_upg_o_cmore = {
+			[Idstring("cmore"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/cf15/sticker/sticker_sad_almir_df"),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/pattern_dead_birds_df"),
+				pattern_tweak = Vector3(7.78917, 0, 1),
+				uv_scale = Vector3(7.99564, 7.98598, 1),
+				uv_offset_rot = Vector3(-0.371387, 0.578663, 0),
+				pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_binary_df")
+			}
+		}
+	}
+	self.weapon_skins.ak74_luxury.default_blueprint = {
+		"wpn_fps_ass_74_body_upperreceiver",
+		"wpn_fps_ass_ak_body_lowerreceiver",
+		"wpn_fps_upg_ak_b_ak105",
+		"wpn_fps_upg_ass_ns_surefire",
+		"wpn_fps_upg_ak_fg_trax",
+		"wpn_fps_upg_ak_g_pgrip",
+		"wpn_fps_upg_ak_m_quad",
+		"wpn_fps_upg_o_cmore",
+		"wpn_fps_upg_ak_s_solidstock",
+		"wpn_fps_upg_o_ak_scopemount"
+	}
+	self.weapon_skins.ppk_luxury = {}
+	self.weapon_skins.ppk_luxury.name_id = "bm_wskn_ppk_luxury"
+	self.weapon_skins.ppk_luxury.desc_id = "bm_wskn_ppk_luxury_desc"
+	self.weapon_skins.ppk_luxury.weapon_id = "ppk"
+	self.weapon_skins.ppk_luxury.reserve_quality = true
+	self.weapon_skins.ppk_luxury.rarity = "rare"
+	self.weapon_skins.ppk_luxury.bonus = "recoil_p1"
+	self.weapon_skins.ppk_luxury.texture_bundle_folder = "cash/safes/cf15"
+	self.weapon_skins.ppk_luxury.base_gradient = Idstring("units/payday2_cash/safes/cf15/base_gradient/base_cf15_003_df")
+	self.weapon_skins.ppk_luxury.parts = {
+		wpn_fps_pis_ppk_g_standard = {
+			[Idstring("mtr_grip"):key()] = {
+				pattern_tweak = Vector3(2.59003, 0, 1)
+			}
+		},
+		wpn_fps_pis_ppk_body_standard = {
+			[Idstring("mtr_frame"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/cf15/sticker/sticker_cloaker_df"),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/dungeon_pattern_df"),
+				pattern_tweak = Vector3(3.5917, 0, 0.410923),
+				uv_scale = Vector3(1.69292, 1.97897, 0.148581),
+				uv_offset_rot = Vector3(0.0423599, 1.02295, 0),
+				pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_new_004_df")
+			}
+		},
+		wpn_fps_pis_ppk_b_standard = {
+			[Idstring("mtr_slide"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/cf15/sticker/sticker_cloaker_df"),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/dungeon_pattern_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_new_004_df"),
+				uv_scale = Vector3(1.74059, 2.12199, 0.141426),
+				uv_offset_rot = Vector3(-0.022418, 0.874315, 0),
+				pattern_tweak = Vector3(2.97162, 0, 0.623182)
+			},
+			[Idstring("mtr_barrel"):key()] = {
+				uv_scale = Vector3(1.31152, 1.50222, 1),
+				uv_offset_rot = Vector3(-0.222752, 1.12235, 0),
+				pattern_tweak = Vector3(2.25614, 0, 1)
+			}
+		},
+		wpn_fps_upg_ns_pis_medium_gem = {
+			[Idstring("silencer"):key()] = {
+				pattern_pos = Vector3(0, -0.00333858, 0),
+				uv_scale = Vector3(1.12082, 2.31269, 0.363224),
+				uv_offset_rot = Vector3(0.0634394, 0.864775, 0)
+			}
+		},
+		wpn_fps_pis_ppk_b_long = {
+			[Idstring("mtr_slide_long"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/cf15/sticker/sticker_cloaker_df"),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/dungeon_pattern_df"),
+				base_gradient = Idstring("units/payday2_cash/safes/sputnik/base_gradient/base_sput_005_df"),
+				uv_offset_rot = Vector3(-0.022418, 0.902934, 0),
+				pattern_pos = Vector3(0, -0.0987357, 0),
+				uv_scale = Vector3(1.50222, 1.74059, 1),
+				pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_new_004_df"),
+				pattern_tweak = Vector3(2.73313, 0, 1)
+			}
+		}
+	}
+	self.weapon_skins.ppk_luxury.default_blueprint = {
+		"wpn_fps_pis_ppk_body_standard",
+		"wpn_fps_pis_ppk_m_standard",
+		"wpn_fps_pis_ppk_b_long",
+		"wpn_fps_upg_o_rmr",
+		"wpn_fps_pis_ppk_g_laser"
+	}
+	self.weapon_skins.plainsrider_linked = {}
+	self.weapon_skins.plainsrider_linked.name_id = "bm_wskn_plainsrider_linked"
+	self.weapon_skins.plainsrider_linked.desc_id = "bm_wskn_plainsrider_linked_desc"
+	self.weapon_skins.plainsrider_linked.weapon_id = "plainsrider"
+	self.weapon_skins.plainsrider_linked.rarity = "epic"
+	self.weapon_skins.plainsrider_linked.bonus = "total_ammo_p3"
+	self.weapon_skins.plainsrider_linked.reserve_quality = true
+	self.weapon_skins.plainsrider_linked.texture_bundle_folder = "cash/safes/cf15"
+	self.weapon_skins.plainsrider_linked.base_gradient = Idstring("units/payday2_cash/safes/cf15/base_gradient/base_cf15_005_df")
+	self.weapon_skins.plainsrider_linked.pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_005_df")
+	self.weapon_skins.plainsrider_linked.pattern = Idstring("units/payday2_cash/safes/cf15/pattern/pattern_waves_df")
+	self.weapon_skins.plainsrider_linked.sticker = Idstring("units/payday2_cash/safes/cf15/sticker/sticker_thebomb_df")
+	self.weapon_skins.plainsrider_linked.pattern_tweak = Vector3(8.55235, 0, 1)
+	self.weapon_skins.plainsrider_linked.pattern_pos = Vector3(0.058, 0.036, 0)
+	self.weapon_skins.plainsrider_linked.uv_scale = Vector3(20, 20, 1)
+	self.weapon_skins.plainsrider_linked.uv_offset_rot = Vector3(-0.037418, 1.21774, 0)
+	self.weapon_skins.plainsrider_linked.default_blueprint = {
+		"wpn_fps_bow_plainsrider_b_standard",
+		"wpn_fps_bow_plainsrider_body_standard",
+		"wpn_fps_upg_a_bow_explosion"
+	}
+	self.weapon_skins.new_m4_payday = {}
+	self.weapon_skins.new_m4_payday.name_id = "bm_wskn_new_m4_payday"
+	self.weapon_skins.new_m4_payday.desc_id = "bm_wskn_new_m4_payday_desc"
+	self.weapon_skins.new_m4_payday.weapon_id = "new_m4"
+	self.weapon_skins.new_m4_payday.reserve_quality = true
+	self.weapon_skins.new_m4_payday.rarity = "epic"
+	self.weapon_skins.new_m4_payday.bonus = "spread_p1"
+	self.weapon_skins.new_m4_payday.texture_bundle_folder = "cash/safes/cf15"
+	self.weapon_skins.new_m4_payday.base_gradient = Idstring("units/payday2_cash/safes/cf15/base_gradient/base_cf15_002_df")
+	self.weapon_skins.new_m4_payday.pattern_tweak = Vector3(0.968283, 0, 1)
+	self.weapon_skins.new_m4_payday.pattern_pos = Vector3(0.187455, -0.0510372, 0)
+	self.weapon_skins.new_m4_payday.parts = {
+		wpn_fps_upg_o_acog = {
+			[Idstring("mtr_acog"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/cf15/sticker/sticker_pixel_safe_df"),
+				uv_offset_rot = Vector3(0.216075, 1.18912, 3.36112),
+				pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_001_df"),
+				uv_scale = Vector3(5.84062, 6.17434, 1),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/pattern_crackled_ground_df"),
+				pattern_tweak = Vector3(0.72979, 0, 1)
+			}
+		},
+		wpn_fps_upg_ass_ns_jprifles = {
+			[Idstring("mtr_jprifles"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/pattern_crackled_ground_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_001_df"),
+				pattern_tweak = Vector3(0.538996, 0, 1)
+			}
+		},
+		wpn_fps_ass_l85a2_m_emag = {
+			[Idstring("mtr_emag"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/cf15/sticker/sticker_pixel_safe_df"),
+				uv_offset_rot = Vector3(-0.179133, 0.673981, 5.98349),
+				pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_001_df"),
+				uv_scale = Vector3(2.78944, 2.98014, 1),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/pattern_crackled_ground_df"),
+				pattern_tweak = Vector3(0.443599, 0, 1)
+			}
+		},
+		wpn_fps_m4_lower_reciever = {
+			[Idstring("m4_lower_reciever"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/cf15/sticker/sticker_pixel_safe_df"),
+				uv_offset_rot = Vector3(0.243773, 0.731219, 0.109391),
+				pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_001_df"),
+				pattern_pos = Vector3(0, -0.318149, 0),
+				uv_scale = Vector3(3.36153, 4.02898, 1),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/pattern_crackled_ground_df"),
+				pattern_tweak = Vector3(0.682091, 0, 1)
+			}
+		},
+		wpn_fps_upg_m4_s_ubr = {
+			[Idstring("mtr_ubr"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/cf15/sticker/sticker_pixel_safe_df"),
+				uv_offset_rot = Vector3(0.33471, 0.954712, 6.0734),
+				uv_scale = Vector3(7.69993, 7.98598, 1),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/pattern_crackled_ground_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_001_df")
+			}
+		},
+		wpn_fps_upg_ass_m4_fg_moe = {
+			[Idstring("mtr_moe"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/cf15/sticker/sticker_pixel_safe_df"),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/pattern_crackled_ground_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_001_df"),
+				uv_scale = Vector3(6.12667, 6.55574, 0),
+				uv_offset_rot = Vector3(0.265233, 0.880774, 6.2682),
+				pattern_tweak = Vector3(0.920584, 0, 1)
+			}
+		}
+	}
+	self.weapon_skins.new_m4_payday.default_blueprint = {
+		"wpn_fps_m4_uupg_draghandle",
+		"wpn_fps_upg_m4_s_ubr",
+		"wpn_fps_upg_ass_m4_fg_moe",
+		"wpn_fps_m4_uupg_b_long",
+		"wpn_fps_upg_ass_ns_jprifles",
+		"wpn_fps_upg_m4_g_hgrip",
+		"wpn_fps_m4_lower_reciever",
+		"wpn_fps_ass_l85a2_m_emag",
+		"wpn_fps_upg_o_acog",
+		"wpn_fps_upg_ass_m4_upper_reciever_ballos"
+	}
+	self.weapon_skins.deagle_bling = {}
+	self.weapon_skins.deagle_bling.name_id = "bm_wskn_deagle_bling"
+	self.weapon_skins.deagle_bling.desc_id = "bm_wskn_deagle_bling_desc"
+	self.weapon_skins.deagle_bling.weapon_id = "deagle"
+	self.weapon_skins.deagle_bling.rarity = "legendary"
+	self.weapon_skins.deagle_bling.bonus = "recoil_p2"
+	self.weapon_skins.deagle_bling.reserve_quality = true
+	self.weapon_skins.deagle_bling.texture_bundle_folder = "cash/safes/cf15"
+	self.weapon_skins.deagle_bling.unique_name_id = "bm_wskn_deagle_bling"
+	self.weapon_skins.deagle_bling.locked = true
+	self.weapon_skins.deagle_bling.base_gradient = Idstring("units/payday2_cash/safes/cf15/base_gradient/base_cf15_004_df")
+	self.weapon_skins.deagle_bling.default_blueprint = {
+		"wpn_fps_pis_deagle_body_standard",
+		"wpn_fps_pis_deagle_m_standard",
+		"wpn_fps_pis_deagle_b_legend",
+		"wpn_fps_pis_deagle_g_ergo",
+		"wpn_fps_upg_o_rmr"
+	}
+	self.weapon_skins.deagle_bling.parts = {
+		wpn_fps_pis_deagle_g_ergo = {
+			[Idstring("ergo"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/shared/base_gradient/base_tactical_001_df")
+			},
+			[Idstring("grip"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/pattern_goldcoins_df"),
+				pattern_tweak = Vector3(4.54567, 0, 1),
+				uv_scale = Vector3(2.64641, 2.64641, 1),
+				uv_offset_rot = Vector3(-0.170117, 1.01187, 4.70977),
+				pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_005_df")
+			}
+		},
+		wpn_fps_pis_deagle_b_legend = {
+			[Idstring("mtr_barrel"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/cf15/base_gradient/base_cf15_001_df"),
+				uv_offset_rot = Vector3(0.244694, 1.07465, 0),
+				pattern_pos = Vector3(0.005, 0.769457, 0),
+				uv_scale = Vector3(3.45688, 3.93363, 1),
+				pattern_tweak = Vector3(0.641791, 0, 0)
+			},
+			[Idstring("mtr_legendcomp"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/fire_pattern_df"),
+				pattern_tweak = Vector3(0.200805, 4.71977, 0),
+				pattern_pos = Vector3(0.530885, 1.03795, 0),
+				uv_scale = Vector3(2.07432, 2.21734, 1),
+				uv_offset_rot = Vector3(-0.0128784, 0.712139, 4.72674),
+				pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_gold_df")
+			}
+		},
+		wpn_fps_pis_deagle_b_standard = {
+			[Idstring("barrel"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/shared/pattern/pattern_hypnotic_001_df"),
+				pattern_pos = Vector3(0.0443599, -0.0128784, 0),
+				cubemap_pattern_control = Vector3(0, 5, 0),
+				pattern_tweak = Vector3(0.825187, 0, 1)
+			}
+		},
+		wpn_fps_pis_deagle_body_standard = {
+			[Idstring("base"):key()] = {
+				pattern_tweak = Vector3(0.292202, 0, 0),
+				pattern = Idstring("units/payday2_cash/safes/cf15/pattern/fire_pattern_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_gold_df")
+			}
+		},
+		wpn_fps_pis_deagle_co_short = {
+			[Idstring("comp2"):key()] = {
+				cubemap_pattern_control = Vector3(0, 5, 0),
+				pattern = Idstring("units/payday2_cash/safes/shared/pattern/pattern_hypnotic_001_df"),
+				pattern_tweak = Vector3(1, 0, 1.06511)
+			}
+		}
+	}
 end

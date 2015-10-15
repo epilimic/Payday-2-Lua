@@ -30,7 +30,8 @@ function FilterUnitElement:init(unit)
 	table.insert(self._save_values, "mode_assault")
 	table.insert(self._save_values, "mode_control")
 end
-function FilterUnitElement:post_init()
+function FilterUnitElement:post_init(...)
+	FilterUnitElement.super.post_init(self, ...)
 	self:_check_convertion()
 end
 function FilterUnitElement:_check_convertion()

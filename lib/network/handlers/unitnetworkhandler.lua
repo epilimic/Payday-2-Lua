@@ -29,11 +29,15 @@ function UnitNetworkHandler:set_unit(unit, character_name, outfit_string, outfit
 	peer:set_unit(unit, character_name)
 	self:_chk_flush_unit_too_early_packets(unit)
 end
-function UnitNetworkHandler:set_equipped_weapon(unit, item_index, blueprint_string, sender)
-	if not self._verify_character_and_sender(unit, sender) then
+function UnitNetworkHandler:set_equipped_weapon(unit, item_index, blueprint_string, cosmetics_string, sender)
+	if not self._verify_character(unit) then
 		return
 	end
-	unit:inventory():synch_equipped_weapon(item_index, blueprint_string)
+	local peer = self._verify_sender(sender)
+	if not peer then
+		return
+	end
+	unit:inventory():synch_equipped_weapon(item_index, blueprint_string, cosmetics_string, peer)
 end
 function UnitNetworkHandler:set_weapon_gadget_state(unit, gadget_state, sender)
 	if not self._verify_character_and_sender(unit, sender) then
@@ -1840,12 +1844,6 @@ function UnitNetworkHandler:sync_level_up(level, sender)
 		return
 	end
 	peer:set_level(level)
-end
-function UnitNetworkHandler:sync_set_outline(unit, state, sender)
-	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not self._verify_character_and_sender(unit, sender) then
-		return
-	end
-	ElementSetOutline.sync_function(unit, state)
 end
 function UnitNetworkHandler:sync_disable_shout(unit, state, sender)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not self._verify_character_and_sender(unit, sender) then

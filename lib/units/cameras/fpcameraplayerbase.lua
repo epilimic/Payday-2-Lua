@@ -595,6 +595,7 @@ function FPCameraPlayerBase:play_redirect(redirect_name, speed, offset_time)
 	self:set_anims_enabled(true)
 	self._anim_empty_state_wanted = false
 	local result = self._unit:play_redirect(redirect_name, offset_time)
+	Application:debug("FPCameraPlayerBase:play_redirect: ", redirect_name)
 	if result == self.IDS_NOSTRING then
 		return false
 	end

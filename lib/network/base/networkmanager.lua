@@ -237,6 +237,9 @@ function NetworkManager:update(t, dt)
 	if self.voice_chat then
 		self.voice_chat:update(t)
 	end
+	if self.account then
+		self.account:update()
+	end
 end
 function NetworkManager:end_update()
 	if self._stop_network then
@@ -313,7 +316,13 @@ function NetworkManager:is_ready_to_load()
 	if self._stop_next_frame or self._stop_network then
 		return false
 	end
-	return not self._session or self._session:is_ready_to_close()
+	if self._session and not self._session:is_ready_to_close() then
+		return false
+	end
+	if self.account and not self.account:is_ready_to_close() then
+		return false
+	end
+	return true
 end
 function NetworkManager:stopping()
 	if not self._started then

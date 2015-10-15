@@ -183,7 +183,9 @@ function WeaponFactoryTweakData:init()
 	self:_init_arblast()
 	self:_init_frankish()
 	self:_init_long()
+	self:_init_legendary()
 	self:create_ammunition()
+	self:_init_cc_material_config()
 	self:_init_content_unfinished()
 end
 function WeaponFactoryTweakData:_init_silencers()
@@ -205,8 +207,9 @@ function WeaponFactoryTweakData:_init_silencers()
 			suppression = 12,
 			alert_size = 12,
 			damage = -1,
-			recoil = 3,
-			spread_moving = -3,
+			recoil = 1,
+			spread_moving = 2,
+			spread = 2,
 			concealment = -3
 		},
 		perks = {"silencer"},
@@ -3118,10 +3121,10 @@ function WeaponFactoryTweakData:_init_m16()
 		wpn_fps_upg_ass_m4_b_beowulf = {
 			stats = {
 				value = 1,
-				spread = 2,
-				recoil = -8,
-				total_ammo_mod = -6,
-				damage = 10,
+				spread = 4,
+				recoil = -4,
+				total_ammo_mod = -4,
+				damage = 80,
 				concealment = -4
 			},
 			custom_stats = {ammo_pickup_min_mul = 0.8, ammo_pickup_max_mul = 0.8}
@@ -3718,10 +3721,10 @@ function WeaponFactoryTweakData:_init_ak74()
 		wpn_fps_upg_ass_ak_b_zastava = {
 			stats = {
 				value = 1,
-				spread = 2,
-				recoil = -8,
+				spread = 3,
+				recoil = -9,
 				total_ammo_mod = -12,
-				damage = 14,
+				damage = 120,
 				concealment = -4
 			},
 			custom_stats = {ammo_pickup_min_mul = 0.5, ammo_pickup_max_mul = 0.5}
@@ -3851,7 +3854,12 @@ function WeaponFactoryTweakData:_init_ak74()
 		"wpn_fps_upg_ak_ns_ak105",
 		"wpn_fps_upg_ass_ak_b_zastava",
 		"wpn_fps_upg_ass_ns_battle",
-		"wpn_fps_upg_fl_ass_utg"
+		"wpn_fps_upg_fl_ass_utg",
+		"wpn_fps_ass_74_b_legend",
+		"wpn_upg_ak_fg_legend",
+		"wpn_upg_ak_g_legend",
+		"wpn_upg_ak_s_legend",
+		"wpn_upg_ak_fl_legend"
 	}
 	self.wpn_fps_ass_74_npc = deep_clone(self.wpn_fps_ass_74)
 	self.wpn_fps_ass_74_npc.unit = "units/payday2/weapons/wpn_fps_ass_74/wpn_fps_ass_74_npc"
@@ -5908,7 +5916,8 @@ function WeaponFactoryTweakData:_init_deagle()
 		"wpn_fps_upg_ns_pis_ipsccomp",
 		"wpn_fps_upg_fl_pis_m3x",
 		"wpn_fps_upg_ns_ass_filter",
-		"wpn_fps_upg_ns_pis_jungle"
+		"wpn_fps_upg_ns_pis_jungle",
+		"wpn_fps_pis_deagle_b_legend"
 	}
 	self.wpn_fps_pis_deagle_npc = deep_clone(self.wpn_fps_pis_deagle)
 	self.wpn_fps_pis_deagle_npc.unit = "units/payday2/weapons/wpn_fps_pis_deagle/wpn_fps_pis_deagle_npc"
@@ -7260,7 +7269,7 @@ function WeaponFactoryTweakData:_init_serbu()
 		stats = {
 			value = 3,
 			spread_moving = -2,
-			recoil = 4,
+			recoil = 2,
 			concealment = -3
 		},
 		forbids = {
@@ -8983,7 +8992,7 @@ function WeaponFactoryTweakData:_init_s552()
 			value = 6,
 			spread = 1,
 			damage = 1,
-			spread_moving = -4,
+			spread_moving = -1,
 			concealment = -4
 		},
 		dlc = "armored_transport"
@@ -9048,7 +9057,7 @@ function WeaponFactoryTweakData:_init_s552()
 		unit = "units/pd2_dlc1/weapons/wpn_fps_ass_s552_pts/wpn_fps_ass_s552_fg_standard_green",
 		stats = {
 			value = 1,
-			spread = 2,
+			spread = 1,
 			concealment = -4
 		},
 		dlc = "armored_transport"
@@ -9067,7 +9076,6 @@ function WeaponFactoryTweakData:_init_s552()
 		unit = "units/pd2_dlc1/weapons/wpn_fps_ass_s552_pts/wpn_fps_ass_s552_fg_railed",
 		stats = {
 			value = 7,
-			spread_moving = -2,
 			recoil = 5,
 			concealment = -2
 		},
@@ -12189,11 +12197,11 @@ function WeaponFactoryTweakData:_init_g3()
 		unit = "units/pd2_dlc_gage_assault/weapons/wpn_fps_ass_g3_pts/wpn_fps_ass_g3_b_sniper",
 		stats = {
 			value = 2,
-			recoil = -2,
+			recoil = -1,
 			spread = 2,
 			concealment = -2,
-			total_ammo_mod = -8,
-			damage = 11,
+			total_ammo_mod = -6,
+			damage = 80,
 			extra_ammo = -5
 		},
 		override = {
@@ -12225,11 +12233,11 @@ function WeaponFactoryTweakData:_init_g3()
 		unit = "units/pd2_dlc_gage_assault/weapons/wpn_fps_ass_g3_pts/wpn_fps_ass_g3_b_short",
 		stats = {
 			value = 2,
-			recoil = 2,
-			spread = -2,
+			recoil = 5,
+			spread = -4,
 			concealment = 4,
-			damage = -1,
-			total_ammo_mod = 5
+			damage = -40,
+			total_ammo_mod = 15
 		},
 		texture_bundle_folder = "gage_pack_assault",
 		dlc = "gage_pack_assault",
@@ -14237,8 +14245,8 @@ function WeaponFactoryTweakData:create_ammunition()
 		is_a_unlockable = true,
 		stats = {
 			value = 5,
-			total_ammo_mod = -10,
-			damage = 3,
+			total_ammo_mod = -6,
+			damage = 15,
 			spread = 2,
 			moving_spread = 2
 		},
@@ -14269,7 +14277,7 @@ function WeaponFactoryTweakData:create_ammunition()
 		stats = {
 			value = 5,
 			total_ammo_mod = -6,
-			damage = 3
+			damage = 15
 		},
 		custom_stats = {ammo_pickup_min_mul = 1, ammo_pickup_max_mul = 1},
 		internal_part = true,
@@ -14292,7 +14300,7 @@ function WeaponFactoryTweakData:create_ammunition()
 		is_a_unlockable = true,
 		stats = {
 			value = 5,
-			total_ammo_mod = -10,
+			total_ammo_mod = -5,
 			damage = 3,
 			spread = -3,
 			moving_spread = 3
@@ -14303,8 +14311,8 @@ function WeaponFactoryTweakData:create_ammunition()
 			damage_near_mul = 2,
 			damage_far_mul = 2.5,
 			bullet_class = "InstantExplosiveBulletBase",
-			ammo_pickup_min_mul = 0.3,
-			ammo_pickup_max_mul = 0.5
+			ammo_pickup_min_mul = 1,
+			ammo_pickup_max_mul = 1
 		},
 		internal_part = true,
 		sub_type = "ammo_explosive"
@@ -14346,14 +14354,14 @@ function WeaponFactoryTweakData:create_ammunition()
 		is_a_unlockable = true,
 		stats = {
 			value = 5,
-			total_ammo_mod = -6,
-			damage = -2,
+			total_ammo_mod = -4,
+			damage = -6,
 			spread = -1,
 			moving_spread = 3
 		},
 		custom_stats = {
 			ignore_statistic = true,
-			rays = 6,
+			rays = 12,
 			damage_near_mul = 2,
 			damage_far_mul = 1.15,
 			armor_piercing_add = 1,
@@ -14422,7 +14430,7 @@ function WeaponFactoryTweakData:create_ammunition()
 		a_obj = "a_body",
 		unit = "units/payday2/weapons/wpn_upg_dummy/wpn_upg_dummy",
 		third_unit = "units/payday2/weapons/wpn_upg_dummy/wpn_upg_dummy",
-		stats = {damage = -30},
+		stats = {damage = -155},
 		texture_bundle_folder = "bbq",
 		is_a_unlockable = true,
 		internal_part = true,
@@ -17200,7 +17208,7 @@ function WeaponFactoryTweakData:_init_vhs()
 		unit = "units/pd2_dlc_dragan/weapons/wpn_fps_ass_vhs_pts/wpn_fps_ass_vhs_b_sniper",
 		stats = {
 			value = 1,
-			spread = 1,
+			spread = 2,
 			concealment = -2
 		},
 		texture_bundle_folder = "character_pack_dragan",
@@ -17489,9 +17497,9 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 		stats = {
 			value = 1,
 			spread = 2,
-			recoil = -8,
+			recoil = -3,
 			total_ammo_mod = -6,
-			damage = 10,
+			damage = 80,
 			concealment = -4
 		},
 		custom_stats = {ammo_pickup_min_mul = 0.5, ammo_pickup_max_mul = 0.5},
@@ -18503,7 +18511,7 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 		stats = {
 			value = 1,
 			spread = -2,
-			recoil = 9,
+			recoil = 4,
 			damage = 2
 		},
 		texture_bundle_folder = "dlc_akm4",
@@ -18541,7 +18549,7 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 		unit = "units/pd2_dlc_akm4_modpack/weapons/wpn_fps_upg_ass_m16_fg_stag/wpn_fps_upg_ass_m16_fg_stag",
 		stats = {
 			value = 1,
-			recoil = 5,
+			recoil = 2,
 			concealment = -3
 		},
 		texture_bundle_folder = "dlc_akm4",
@@ -18571,7 +18579,7 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 		stats = {
 			value = 1,
 			spread = 1,
-			recoil = 5
+			recoil = 2
 		},
 		texture_bundle_folder = "dlc_akm4",
 		dlc = "akm4_pack",
@@ -18622,11 +18630,7 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 		name_id = "bm_wp_upg_ass_m4_lower_reciever_core",
 		a_obj = "a_body",
 		unit = "units/pd2_dlc_akm4_modpack/weapons/wpn_fps_upg_ass_m4_lower_reciever_core/wpn_fps_upg_ass_m4_lower_reciever_core",
-		stats = {
-			value = 1,
-			spread = -2,
-			damage = 2
-		},
+		stats = {value = 1, damage = 2},
 		texture_bundle_folder = "dlc_akm4",
 		dlc = "akm4_pack",
 		is_a_unlockable = true
@@ -18677,10 +18681,10 @@ function WeaponFactoryTweakData:_init_modpack_m4_ak()
 		unit = "units/pd2_dlc_akm4_modpack/weapons/wpn_fps_upg_ass_m4_b_beowulf/wpn_fps_upg_ass_m4_b_beowulf",
 		stats = {
 			value = 1,
-			spread = 2,
-			recoil = -8,
+			spread = 4,
+			recoil = -10,
 			total_ammo_mod = -12,
-			damage = 12,
+			damage = 120,
 			concealment = -4
 		},
 		custom_stats = {ammo_pickup_min_mul = 0.5, ammo_pickup_max_mul = 0.5},
@@ -21065,7 +21069,7 @@ function WeaponFactoryTweakData:_init_plainsrider()
 		bullet_objects = {prefix = "g_bullet_", amount = 1},
 		unit = "units/pd2_dlc_west/weapons/wpn_fps_bow_plainsrider_pts/wpn_fps_bow_plainsrider_m_explosive",
 		third_unit = "units/pd2_dlc_west/weapons/wpn_fps_bow_plainsrider_pts/wpn_third_bow_plainsrider_m_explosive",
-		stats = {damage = 4},
+		stats = {damage = 35},
 		custom_stats = {
 			launcher_grenade = "west_arrow_exp"
 		},
@@ -21083,7 +21087,7 @@ function WeaponFactoryTweakData:_init_plainsrider()
 		bullet_objects = {prefix = "g_bullet_", amount = 1},
 		unit = "units/pd2_dlc_turtles/weapons/wpn_fps_bow_plainsrider_m_poison/wpn_fps_bow_plainsrider_m_poison",
 		third_unit = "units/pd2_dlc_turtles/weapons/wpn_third_bow_plainsrider_m_poison/wpn_third_bow_plainsrider_m_poison",
-		stats = {damage = -12, total_ammo_mod = -6},
+		stats = {damage = -64, total_ammo_mod = -6},
 		custom_stats = {
 			launcher_grenade = "bow_poison_arrow",
 			dot_data = {
@@ -21113,6 +21117,7 @@ function WeaponFactoryTweakData:_init_plainsrider()
 	}
 	self.wpn_fps_bow_plainsrider_npc = deep_clone(self.wpn_fps_bow_plainsrider)
 	self.wpn_fps_bow_plainsrider_npc.unit = "units/pd2_dlc_west/weapons/wpn_fps_bow_plainsrider/wpn_fps_bow_plainsrider_npc"
+	self.wpn_fps_bow_plainsrider_npc.skip_thq_parts = true
 end
 function WeaponFactoryTweakData:_init_mateba()
 	self.parts.wpn_fps_pis_2006m_b_long = {
@@ -22381,7 +22386,7 @@ function WeaponFactoryTweakData:_init_hunter()
 		bullet_objects = {prefix = "g_bullet_", amount = 1},
 		unit = "units/pd2_dlc_turtles/weapons/wpn_fps_bow_hunter_pts/wpn_fps_bow_hunter_m_poison",
 		third_unit = "units/pd2_dlc_turtles/weapons/wpn_third_bow_hunter_pts/wpn_third_bow_hunter_m_poison",
-		stats = {damage = -14, total_ammo_mod = -6},
+		stats = {damage = -68, total_ammo_mod = -6},
 		custom_stats = {
 			launcher_grenade = "crossbow_poison_arrow",
 			dot_data = {
@@ -22401,7 +22406,7 @@ function WeaponFactoryTweakData:_init_hunter()
 		bullet_objects = {prefix = "g_bullet_", amount = 1},
 		unit = "units/pd2_dlc_turtles/weapons/wpn_fps_bow_hunter_pts/wpn_fps_bow_hunter_m_explosive",
 		third_unit = "units/pd2_dlc_turtles/weapons/wpn_third_bow_hunter_pts/wpn_third_bow_hunter_m_explosive",
-		stats = {damage = 5},
+		stats = {damage = 50},
 		custom_stats = {
 			launcher_grenade = "crossbow_arrow_exp"
 		},
@@ -22768,7 +22773,7 @@ function WeaponFactoryTweakData:_init_arblast()
 		bullet_objects = {prefix = "g_bullet_", amount = 1},
 		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast_pts/wpn_fps_bow_arblast_m_poison",
 		third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast_pts/wpn_third_bow_arblast_m_poison",
-		stats = {damage = -14, total_ammo_mod = -6},
+		stats = {damage = -33, total_ammo_mod = -6},
 		custom_stats = {
 			launcher_grenade = "arblast_poison_arrow",
 			dot_data = {
@@ -22788,7 +22793,7 @@ function WeaponFactoryTweakData:_init_arblast()
 		bullet_objects = {prefix = "g_bullet_", amount = 1},
 		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast_pts/wpn_fps_bow_arblast_m_explosive",
 		third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_arblast_pts/wpn_third_bow_arblast_m_explosive",
-		stats = {damage = 5},
+		stats = {damage = 18},
 		custom_stats = {
 			launcher_grenade = "arblast_arrow_exp"
 		},
@@ -22868,7 +22873,7 @@ function WeaponFactoryTweakData:_init_frankish()
 		bullet_objects = {prefix = "g_bullet_", amount = 1},
 		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish_pts/wpn_fps_bow_frankish_m_poison",
 		third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish_pts/wpn_third_bow_frankish_m_poison",
-		stats = {damage = -14, total_ammo_mod = -6},
+		stats = {damage = -75, total_ammo_mod = -6},
 		custom_stats = {
 			launcher_grenade = "frankish_poison_arrow",
 			dot_data = {
@@ -22888,7 +22893,7 @@ function WeaponFactoryTweakData:_init_frankish()
 		bullet_objects = {prefix = "g_bullet_", amount = 1},
 		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish_pts/wpn_fps_bow_frankish_m_explosive",
 		third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_frankish_pts/wpn_third_bow_frankish_m_explosive",
-		stats = {damage = 5},
+		stats = {damage = 40},
 		custom_stats = {
 			launcher_grenade = "frankish_arrow_exp"
 		},
@@ -22967,7 +22972,7 @@ function WeaponFactoryTweakData:_init_long()
 		bullet_objects = {prefix = "g_bullet_", amount = 1},
 		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_fps_bow_long_m_explosive",
 		third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_third_bow_long_m_explosive",
-		stats = {damage = 4},
+		stats = {damage = 20},
 		custom_stats = {
 			launcher_grenade = "long_arrow_exp"
 		},
@@ -22984,7 +22989,7 @@ function WeaponFactoryTweakData:_init_long()
 		bullet_objects = {prefix = "g_bullet_", amount = 1},
 		unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_fps_bow_long_m_poison",
 		third_unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long_pts/wpn_third_bow_long_m_poison",
-		stats = {damage = -12, total_ammo_mod = -6},
+		stats = {damage = -35, total_ammo_mod = -6},
 		custom_stats = {
 			launcher_grenade = "long_poison_arrow",
 			dot_data = {
@@ -23014,4 +23019,97 @@ function WeaponFactoryTweakData:_init_long()
 	}
 	self.wpn_fps_bow_long_npc = deep_clone(self.wpn_fps_bow_long)
 	self.wpn_fps_bow_long_npc.unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long/wpn_fps_bow_long_npc"
+	self.wpn_fps_bow_long_npc.skip_thq_parts = true
+end
+function WeaponFactoryTweakData:_init_legendary()
+	self.parts.wpn_fps_ass_74_b_legend = {
+		type = "barrel",
+		name_id = "bm_wp_upg_ass_74_b_legend",
+		a_obj = "a_b",
+		unit = "units/payday2_cash/safes/sputnik/weapons/wpn_fps_ass_74_rodina_pts/wpn_fps_ass_74_b_legend",
+		stats = {
+			value = 1,
+			spread = 8,
+			damage = 6,
+			recoil = 7
+		},
+		unatainable = true
+	}
+	self.parts.wpn_upg_ak_fg_legend = {
+		type = "foregrip",
+		name_id = "bm_wp_upg_ass_74_fg_legend",
+		a_obj = "a_fg",
+		unit = "units/payday2_cash/safes/sputnik/weapons/wpn_fps_ass_74_rodina_pts/wpn_upg_ak_fg_legend",
+		stats = {value = 1},
+		unatainable = true
+	}
+	self.parts.wpn_upg_ak_g_legend = {
+		type = "grip",
+		name_id = "bm_wp_upg_ass_74_g_legend",
+		a_obj = "a_g",
+		unit = "units/payday2_cash/safes/sputnik/weapons/wpn_fps_ass_74_rodina_pts/wpn_upg_ak_g_legend",
+		stats = {value = 1},
+		unatainable = true
+	}
+	self.parts.wpn_upg_ak_s_legend = {
+		type = "stock",
+		name_id = "bm_wp_upg_ass_74_s_legend",
+		a_obj = "a_s",
+		unit = "units/payday2_cash/safes/sputnik/weapons/wpn_fps_ass_74_rodina_pts/wpn_upg_ak_s_legend",
+		stats = {value = 1},
+		unatainable = true
+	}
+	self.parts.wpn_upg_ak_fl_legend = {
+		type = "gadget",
+		sub_type = "laser",
+		name_id = "bm_wp_upg_ass_74_fl_legend",
+		a_obj = "a_body",
+		unit = "units/payday2_cash/safes/sputnik/weapons/wpn_fps_ass_74_rodina_pts/wpn_upg_ak_fl_legend",
+		stats = {value = 1},
+		unatainable = true,
+		perks = {"gadget"}
+	}
+	self.parts.wpn_fps_ass_74_b_legend.third_unit = "units/payday2_cash/safes/sputnik/weapons/wpn_fps_ass_74_rodina_pts/wpn_third_ass_74_b_legend"
+	self.parts.wpn_upg_ak_fg_legend.third_unit = "units/payday2_cash/safes/sputnik/weapons/wpn_fps_ass_74_rodina_pts/wpn_third_upg_ak_fg_legend"
+	self.parts.wpn_upg_ak_g_legend.third_unit = "units/payday2_cash/safes/sputnik/weapons/wpn_fps_ass_74_rodina_pts/wpn_third_upg_ak_g_legend"
+	self.parts.wpn_upg_ak_s_legend.third_unit = "units/payday2_cash/safes/sputnik/weapons/wpn_fps_ass_74_rodina_pts/wpn_third_upg_ak_s_legend"
+	self.parts.wpn_fps_pis_deagle_b_legend = {
+		type = "slide",
+		name_id = "bm_wp_deagle_b_long",
+		a_obj = "a_b",
+		unit = "units/payday2_cash/safes/cf15/weapons/wpn_fps_pis_deagle_bling_pts/wpn_fps_pis_deagle_b_legend",
+		stats = {
+			value = 1,
+			spread = 2,
+			recoil = 3,
+			damage = 2,
+			concealment = -10
+		},
+		unatainable = true,
+		forbids = {
+			"wpn_fps_pis_deagle_co_long",
+			"wpn_fps_pis_deagle_co_short",
+			"wpn_fps_upg_ns_pis_meatgrinder",
+			"wpn_fps_upg_ns_pis_ipsccomp"
+		},
+		override = {
+			wpn_upg_o_marksmansight_front = {a_obj = "a_ol"}
+		}
+	}
+	self.parts.wpn_fps_pis_deagle_b_legend.third_unit = "units/payday2_cash/safes/cf15/weapons/wpn_fps_pis_deagle_bling_pts/wpn_third_pis_deagle_b_legend"
+end
+function WeaponFactoryTweakData:_init_cc_material_config()
+	local parts = self.parts
+	parts.wpn_fps_smg_m45_s_folded.material_config = Idstring("units/pd2_dlc1/weapons/wpn_fps_smg_m45_pts/wpn_fps_smg_m45_s_standard")
+	parts.wpn_fps_smg_m45_s_folded.thq_material_config = Idstring("units/pd2_dlc1/weapons/wpn_fps_smg_m45_pts/wpn_fps_smg_m45_s_standard_thq")
+	parts.wpn_fps_smg_m45_b_small.bmaterial_config = Idstring("units/pd2_dlc1/weapons/wpn_fps_smg_m45_pts/wpn_fps_smg_m45_b_standard")
+	parts.wpn_fps_smg_m45_b_small.thq_material_config = Idstring("units/pd2_dlc1/weapons/wpn_fps_smg_m45_pts/wpn_fps_smg_m45_b_standard_thq")
+	parts.wpn_fps_pis_c96_nozzle.material_config = Idstring("units/pd2_dlc_gage_historical/weapons/wpn_fps_pis_c96_pts/wpn_fps_pis_c96_body_standard")
+	parts.wpn_fps_pis_c96_nozzle.thq_material_config = Idstring("units/pd2_dlc_gage_historical/weapons/wpn_fps_pis_c96_pts/wpn_fps_pis_c96_body_standard_thq")
+	parts.wpn_fps_pis_g18c_body_frame.material_config = Idstring("units/payday2/weapons/wpn_fps_pis_g18c_pts/wpn_fps_pis_g18c_frame")
+	parts.wpn_fps_pis_g18c_body_frame.thq_material_config = Idstring("units/payday2/weapons/wpn_fps_pis_g18c_pts/wpn_fps_pis_g18c_frame_thq")
+	parts.wpn_fps_pis_g18c_co_comp_2.material_config = Idstring("units/payday2/weapons/wpn_fps_pis_g18c_pts/wpn_fps_pis_g18c_comp_2")
+	parts.wpn_fps_pis_g18c_co_comp_2.thq_material_config = Idstring("units/payday2/weapons/wpn_fps_pis_g18c_pts/wpn_fps_pis_g18c_comp_2_thq")
+	parts.wpn_fps_upg_o_mbus_rear.material_config = Idstring("units/pd2_dlc_gage_shot/weapons/wpn_fps_upg_o_mbus/wpn_fps_upg_o_mbus_front")
+	parts.wpn_fps_upg_o_mbus_rear.thq_material_config = Idstring("units/pd2_dlc_gage_shot/weapons/wpn_fps_upg_o_mbus/wpn_fps_upg_o_mbus_front_thq")
 end

@@ -2,6 +2,7 @@ CoreMissionElement = CoreMissionElement or class()
 MissionElement = MissionElement or class(CoreMissionElement)
 MissionElement.SAVE_UNIT_POSITION = true
 MissionElement.SAVE_UNIT_ROTATION = true
+MissionElement.RANDOMS = nil
 function MissionElement:init(...)
 	CoreMissionElement.init(self, ...)
 end
@@ -30,6 +31,16 @@ function CoreMissionElement:init(unit)
 	self:_createicon()
 end
 function CoreMissionElement:post_init()
+	if self.RANDOMS then
+		for _, value_name in ipairs(self.RANDOMS) do
+			if tonumber(self._hed[value_name]) then
+				self._hed[value_name] = {
+					self._hed[value_name],
+					0
+				}
+			end
+		end
+	end
 end
 function CoreMissionElement:_createicon()
 	local iconsize = 32
@@ -473,6 +484,13 @@ function CoreMissionElement:new_save_values()
 	if self.save then
 		self:save(t)
 	end
+	if self.RANDOMS then
+		for _, value_name in ipairs(self.RANDOMS) do
+			if t[value_name][2] == 0 then
+				t[value_name] = t[value_name][1]
+			end
+		end
+	end
 	return t
 end
 function CoreMissionElement:name()
@@ -894,9 +912,9 @@ function CoreMissionElement:on_timeline()
 		self._timeline:set_visible(true)
 	end
 end
-function CoreMissionElement:_build_value_combobox(panel, sizer, value_name, options, tooltip, custom_name)
+function CoreMissionElement:_build_value_combobox(panel, sizer, value_name, options, tooltip, custom_name, params)
 	local horizontal_sizer = EWS:BoxSizer("HORIZONTAL")
-	sizer:add(horizontal_sizer, 0, 1, "EXPAND,LEFT")
+	sizer:add(horizontal_sizer, params and params.horizontal_sizer_proportions or 0, 1, "EXPAND,LEFT")
 	local combobox_params = {
 		name = string.pretty(custom_name or value_name, true) .. ":",
 		panel = panel,
@@ -958,6 +976,156 @@ function CoreMissionElement:_build_value_checkbox(panel, sizer, value_name, tool
 	sizer:add(checkbox, 0, 0, "EXPAND")
 	return checkbox
 end
+function CoreMissionElement:_build_value_random_number(panel, sizer, value_name, options, tooltip, custom_name)
+	local horizontal_sizer = EWS:BoxSizer("HORIZONTAL")
+	sizer:add(horizontal_sizer, 0, 0, "EXPAND,LEFT")
+	local number_params = {
+		name = string.pretty(custom_name or value_name, true) .. ":",
+		panel = panel,
+		sizer = horizontal_sizer,
+		value = self._hed[value_name][1],
+		floats = options.floats,
+		tooltip = tooltip or "Set a number value",
+		min = options.min,
+		max = options.max,
+		name_proportions = options.name_proportions or 2,
+		ctrlr_proportions = options.ctrlr_proportions or 2,
+		sizer_proportions = options.sizer_proportions or 2
+	}
+	local ctrlr = CoreEws.number_controller(number_params)
+	ctrlr:connect("EVT_COMMAND_TEXT_ENTER", callback(self, self, "_set_random_number_element_data"), {
+		ctrlr = ctrlr,
+		value = value_name,
+		index = 1
+	})
+	ctrlr:connect("EVT_KILL_FOCUS", callback(self, self, "_set_random_number_element_data"), {
+		ctrlr = ctrlr,
+		value = value_name,
+		index = 1
+	})
+	local number2_params = {
+		name = "+ random:",
+		panel = panel,
+		sizer = horizontal_sizer,
+		value = self._hed[value_name][2],
+		floats = options.floats,
+		tooltip = "Add a random amount",
+		min = options.min,
+		max = options.max,
+		name_proportions = options.name_proportions or 1,
+		ctrlr_proportions = options.ctrlr_proportions or 2,
+		sizer_proportions = options.sizer_proportions or 1
+	}
+	local ctrlr2 = CoreEws.number_controller(number2_params)
+	ctrlr2:connect("EVT_COMMAND_TEXT_ENTER", callback(self, self, "_set_random_number_element_data"), {
+		ctrlr = ctrlr2,
+		value = value_name,
+		index = 2
+	})
+	ctrlr2:connect("EVT_KILL_FOCUS", callback(self, self, "_set_random_number_element_data"), {
+		ctrlr = ctrlr2,
+		value = value_name,
+		index = 2
+	})
+	return ctrlr, number_params
+end
+function CoreMissionElement:_set_random_number_element_data(data)
+	print("_set_random_number_element_data", inspect(data))
+	local value = data.ctrlr:get_value()
+	value = tonumber(value)
+	print("data.ctrlr:get_value()", value, type(value))
+	print("self._hed[ data.value ]", inspect(self._hed[data.value]))
+	self._hed[data.value][data.index] = value
+end
+function CoreMissionElement:_build_add_remove_unit_from_list(panel, sizer, elements, names, exact_names)
+	local toolbar = EWS:ToolBar(panel, "", "TB_FLAT,TB_NODIVIDER")
+	toolbar:add_tool("ADD_UNIT_LIST", "Add unit from unit list", CoreEws.image_path("world_editor\\unit_by_name_list.png"), nil)
+	toolbar:connect("ADD_UNIT_LIST", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "_add_unit_list_btn"), {
+		elements = elements,
+		names = names,
+		exact_names = exact_names
+	})
+	toolbar:add_tool("REMOVE_UNIT_LIST", "Remove unit from unit list", CoreEws.image_path("toolbar\\delete_16x16.png"), nil)
+	toolbar:connect("REMOVE_UNIT_LIST", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "_remove_unit_list_btn"), {elements = elements})
+	toolbar:realize()
+	sizer:add(toolbar, 0, 1, "EXPAND,LEFT")
+end
+function CoreMissionElement:_add_unit_list_btn(params)
+	local elements = params.elements or {}
+	local script = self._unit:mission_element_data().script
+	local function f_correct_unit(unit)
+		if not params.names and not params.exact_names then
+			return true
+		end
+		local u_name = unit:name():s()
+		if params.exact_names then
+			for _, name in ipairs(params.exact_names) do
+				if u_name == name then
+					return true
+				end
+			end
+		end
+		if params.names then
+			for _, name in ipairs(params.names) do
+				if string.find(u_name, name, 1, true) then
+					return true
+				end
+			end
+		end
+		return false
+	end
+	local function f(unit)
+		if not unit:mission_element_data() or unit:mission_element_data().script ~= script then
+			return
+		end
+		local id = unit:unit_data().unit_id
+		if table.contains(elements, id) then
+			return false
+		end
+		if f_correct_unit(unit) then
+			return true
+		end
+		return false
+	end
+	local dialog = SelectUnitByNameModal:new("Add Unit", f)
+	for _, unit in ipairs(dialog:selected_units()) do
+		local id = unit:unit_data().unit_id
+		table.insert(elements, id)
+	end
+end
+function CoreMissionElement:_remove_unit_list_btn(params)
+	local elements = params.elements
+	local function f(unit)
+		return table.contains(elements, unit:unit_data().unit_id)
+	end
+	local dialog = SelectUnitByNameModal:new("Remove Unit", f)
+	for _, unit in ipairs(dialog:selected_units()) do
+		local id = unit:unit_data().unit_id
+		table.delete(elements, id)
+	end
+end
+function CoreMissionElement:_build_add_remove_static_unit_from_list(panel, sizer, params)
+	local toolbar = EWS:ToolBar(panel, "", "TB_FLAT,TB_NODIVIDER")
+	toolbar:add_tool("ADD_UNIT_LIST", "Add unit from unit list", CoreEws.image_path("world_editor\\unit_by_name_list.png"), nil)
+	toolbar:connect("ADD_UNIT_LIST", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "_add_static_unit_list_btn"), params)
+	toolbar:add_tool("REMOVE_UNIT_LIST", "Remove unit from unit list", CoreEws.image_path("toolbar\\delete_16x16.png"), nil)
+	toolbar:connect("REMOVE_UNIT_LIST", "EVT_COMMAND_MENU_SELECTED", callback(self, self, "_remove_static_unit_list_btn"), params)
+	toolbar:realize()
+	sizer:add(toolbar, 0, 1, "EXPAND,LEFT")
+end
+function CoreMissionElement:_add_static_unit_list_btn(params)
+	local dialog = params.single and SingleSelectUnitByNameModal or SelectUnitByNameModal:new("Add Unit", params.add_filter)
+	for _, unit in ipairs(dialog:selected_units()) do
+		local id = unit:unit_data().unit_id
+		params.add_result(unit)
+	end
+end
+function CoreMissionElement:_remove_static_unit_list_btn(params)
+	local dialog = params.single and SingleSelectUnitByNameModal or SelectUnitByNameModal:new("Remove Unit", params.remove_filter)
+	for _, unit in ipairs(dialog:selected_units()) do
+		params.remove_result(unit)
+	end
+end
 function CoreMissionElement:get_links_to_unit(to_unit, links, all_units)
 	if to_unit == self._unit then
 		for _, data in ipairs(self._hed.on_executed) do
@@ -985,10 +1153,10 @@ function CoreMissionElement:get_links_to_unit(to_unit, links, all_units)
 	end
 end
 function CoreMissionElement:_get_links_of_type_from_elements(elements, type, to_unit, links, all_units)
-	local links1 = type == "operator" and links.on_executed or type == "trigger" and links.executers or type == "filter" and links.executers
-	local links2 = type == "operator" and links.executers or type == "trigger" and links.on_executed or type == "filter" and links.on_executed
+	local links1 = type == "operator" and links.on_executed or type == "trigger" and links.executers or type == "filter" and links.executers or links.on_executed
+	local links2 = type == "operator" and links.executers or type == "trigger" and links.on_executed or type == "filter" and links.on_executed or links.executers
 	local to_unit_id = to_unit:unit_data().unit_id
-	for _, id in ipairs(self._hed.elements) do
+	for _, id in ipairs(elements) do
 		if to_unit == self._unit then
 			table.insert(links1, {
 				unit = all_units[id],

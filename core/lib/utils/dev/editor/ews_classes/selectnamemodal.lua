@@ -69,11 +69,13 @@ end
 function SelectNameModal:fill_asset_list()
 	self._list:delete_all_items()
 	local filter = self._filter:get_value()
+	filter = utf8.to_lower(utf8.from_latin1(filter))
 	local j = 1
 	self._assets = {}
 	self._list:freeze()
 	for _, asset in pairs(self._assets_list) do
-		if string.find(asset, filter, 1, true) then
+		local l_asset = utf8.to_lower(utf8.from_latin1(asset))
+		if string.find(l_asset, filter, 1, true) then
 			local i = self._list:append_item(asset)
 			self._assets[j] = asset
 			self._list:set_item_data(i, j)

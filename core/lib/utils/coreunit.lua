@@ -58,12 +58,23 @@ function set_unit_and_children_visible(unit, visible, filter_func)
 end
 function editor_load_unit(unit_name)
 	if Application:editor() then
-		CoreEngineAccess._editor_load(Idstring("unit"), unit_name:id())
+		local type_ids = Idstring("unit")
+		local name_ids = unit_name:id()
+		if not DB:has(type_ids, name_ids) then
+			Application:error("Unit not found in DB", name_ids)
+			Application:stack_dump("error")
+			return
+		end
+		CoreEngineAccess._editor_load(type_ids, name_ids)
+		return true
+	else
+		return true
 	end
 end
 function safe_spawn_unit(unit_name, ...)
-	editor_load_unit(unit_name)
-	return World:spawn_unit(unit_name:id(), ...)
+	if editor_load_unit(unit_name) then
+		return World:spawn_unit(unit_name:id(), ...)
+	end
 end
 function safe_spawn_unit_without_extensions(unit_name, ...)
 	editor_load_unit(unit_name)

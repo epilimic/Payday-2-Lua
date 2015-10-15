@@ -33,6 +33,7 @@ function NewUnlockDialog:init(manager, data, is_title_outside)
 		padding = 10,
 		layer = 2,
 		keep_ratio = true,
+		textures = data.textures,
 		texture = data.texture,
 		render_template = data.render_template,
 		shapes = data.shapes,
@@ -42,7 +43,7 @@ function NewUnlockDialog:init(manager, data, is_title_outside)
 		blend_mode = data.image_blend_mode,
 		video_loop = data.video_loop
 	}
-	if not data.texture and not data.video and not data.shapes then
+	if not data.texture and not data.video and not data.shapes and not data.textures then
 		image_config.w = 0
 		image_config.h = 0
 	end

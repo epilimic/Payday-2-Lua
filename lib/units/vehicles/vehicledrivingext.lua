@@ -7,6 +7,7 @@ require("lib/units/vehicles/VehicleStateLocked")
 require("lib/units/vehicles/VehicleStateParked")
 require("lib/units/vehicles/VehicleStateSecured")
 require("lib/units/vehicles/VehicleStateFrozen")
+require("lib/units/vehicles/VehicleStateBlocked")
 VehicleDrivingExt = VehicleDrivingExt or class()
 VehicleDrivingExt.SEAT_PREFIX = "v_"
 VehicleDrivingExt.INTERACTION_PREFIX = "interact_"
@@ -37,7 +38,8 @@ VehicleDrivingExt.STATE_BROKEN = "broken"
 VehicleDrivingExt.STATE_LOCKED = "locked"
 VehicleDrivingExt.STATE_SECURED = "secured"
 VehicleDrivingExt.STATE_FROZEN = "frozen"
-VehicleDrivingExt.TIME_ENTER = 1
+VehicleDrivingExt.STATE_BLOCKED = "blocked"
+VehicleDrivingExt.TIME_ENTER = 0.3
 VehicleDrivingExt.TIME_REPAIR = 10
 VehicleDrivingExt.INTERACT_ENTRY_ENABLED = "state_vis_icon_entry_enabled"
 VehicleDrivingExt.INTERACT_ENTRY_DISABLED = "state_vis_icon_entry_disabled"
@@ -129,7 +131,8 @@ function VehicleDrivingExt:_setup_states()
 		locked = VehicleStateLocked:new(unit),
 		parked = VehicleStateParked:new(unit),
 		secured = VehicleStateSecured:new(unit),
-		frozen = VehicleStateFrozen:new(unit)
+		frozen = VehicleStateFrozen:new(unit),
+		blocked = VehicleStateBlocked:new(unit)
 	}
 end
 function VehicleDrivingExt:set_tweak_data(data)
@@ -280,10 +283,17 @@ function VehicleDrivingExt:damage(damage)
 	self._unit:character_damage():damage_mission(damage)
 end
 function VehicleDrivingExt:activate()
-	self:start()
+	if self:num_players_inside() > 0 then
+		self:set_state(VehicleDrivingExt.STATE_DRIVING)
+	else
+		self:set_state(VehicleDrivingExt.STATE_PARKED)
+	end
 end
 function VehicleDrivingExt:deactivate()
 	self:set_state(VehicleDrivingExt.STATE_FROZEN)
+end
+function VehicleDrivingExt:block()
+	self:set_state(VehicleDrivingExt.STATE_BLOCKED)
 end
 function VehicleDrivingExt:add_loot(carry_id, multiplier)
 	if not carry_id or carry_id == "" then
@@ -515,7 +525,7 @@ function VehicleDrivingExt:place_player_on_seat(player, seat_name)
 			if alive(self._seats.driver.occupant) and (self._current_state_name == VehicleDrivingExt.STATE_INACTIVE or self._current_state_name == VehicleDrivingExt.STATE_PARKED) then
 				self:set_state(VehicleDrivingExt.STATE_DRIVING)
 			end
-			if count == 1 and self._current_state_name ~= VehicleDrivingExt.STATE_BROKEN then
+			if count == 1 and self._current_state_name ~= VehicleDrivingExt.STATE_BROKEN and self._current_state_name ~= VehicleDrivingExt.STATE_BLOCKED then
 				self:start(player)
 			end
 		end
@@ -543,7 +553,7 @@ function VehicleDrivingExt:exit_vehicle(player)
 	local count = self:_number_in_the_vehicle()
 	self:_unregister_drive_SO()
 	self._interaction_enter_vehicle = true
-	if not alive(self._seats.driver.occupant) and self._current_state_name ~= VehicleDrivingExt.STATE_BROKEN then
+	if not alive(self._seats.driver.occupant) and self._current_state_name ~= VehicleDrivingExt.STATE_BROKEN and self._current_state_name ~= VehicleDrivingExt.STATE_LOCKED and self._current_state_name ~= VehicleDrivingExt.STATE_BLOCKED then
 		self:set_state(VehicleDrivingExt.STATE_PARKED)
 	end
 	if count == 0 then
@@ -693,6 +703,9 @@ function VehicleDrivingExt:_start(player)
 	if seat == nil then
 		return
 	end
+	self:activate_vehicle()
+end
+function VehicleDrivingExt:activate_vehicle()
 	if not self._vehicle:is_active() then
 		self._unit:damage():run_sequence_simple("driving")
 		self._vehicle:set_active(true)
@@ -853,7 +866,7 @@ function VehicleDrivingExt:_detect_invalid_possition(t, dt)
 	end
 	local velocity = self._vehicle:velocity():length()
 	if velocity < 10 and not self._stopped_since then
-		self._stopped_since = t
+		self._sstopped_since = t
 	elseif velocity >= 10 and self._stopped_since then
 		self._stopped_since = nil
 	end
@@ -1201,7 +1214,10 @@ function VehicleDrivingExt:sync_ai_vehicle_action(action, seat_name, unit)
 	end
 end
 function VehicleDrivingExt:collision_callback(tag, unit, body, other_unit, other_body, position, normal, velocity, ...)
-	if other_unit and other_unit:damage() and other_body and other_body:extension() then
+	if other_unit and other_unit:npc_vehicle_driving() then
+		local attack_data = {damage = 1}
+		other_unit:character_damage():damage_collision(attack_data)
+	elseif other_unit and other_unit:damage() and other_body and other_body:extension() then
 		local damage = 1
 		other_body:extension().damage:damage_collision(self._unit, normal, position, velocity, damage, velocity)
 	end

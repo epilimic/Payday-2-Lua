@@ -593,7 +593,7 @@ function InstancesLayer:_add_predefined_instances_notebook_pages()
 		})
 		local page_name = c
 		self._predefined_instances_notebook_lists[page_name] = {instances = instances, filter = instance_filter}
-		self._predefined_instances_notebook:add_page(panel, page_name, true)
+		self._predefined_instances_notebook:add_page(panel, page_name, page_name == "ALL")
 	end
 end
 function InstancesLayer:_clear_predefined_instances_notebook()
@@ -603,11 +603,14 @@ function InstancesLayer:_clear_predefined_instances_notebook()
 	end
 end
 function InstancesLayer:_predefined_data_by_category()
-	local t = {}
+	local t = {
+		ALL = {}
+	}
 	for name, data in pairs(self._predefined_instances) do
 		local category = data.category or "N/A"
 		t[category] = t[category] or {}
 		table.insert(t[category], name)
+		table.insert(t.ALL, name)
 	end
 	return t
 end
@@ -903,6 +906,9 @@ function InstancesLayer:add_triggers()
 	local vc = self._editor_data.virtual_controller
 	vc:add_release_trigger(Idstring("rmb"), callback(self, self, "_mouse_create_instance"))
 	InstancesLayer.super.add_triggers(self)
+end
+function InstancesLayer:selected_amount_string()
+	return "Selected " .. self._save_name .. ": " .. (self._selected_instance and 1 or 0)
 end
 function InstancesLayer:clear()
 	self._stashed_instance_units = {}

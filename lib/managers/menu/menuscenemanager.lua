@@ -100,11 +100,13 @@ function MenuSceneManager:init()
 	self._global_poses.m134 = {
 		"husk_minigun"
 	}
+	self:_init_lobby_poses()
 	self._mask_units = {}
 	self._weapon_units = {}
 	self._character_visibilities = {}
 	self._deployable_equipped = {}
 	self:_setup_bg()
+	self:_set_up_environments()
 	self:_set_up_templates()
 	self:_setup_gui()
 	self._transition_bezier = {
@@ -116,6 +118,26 @@ function MenuSceneManager:init()
 	self._transition_time = 0
 	self._weapon_transition_time = 0
 	self._transition_done_callback_handler = CoreEvent.CallbackEventHandler:new()
+end
+function MenuSceneManager:_init_lobby_poses()
+	self._lobby_poses = {}
+	self._lobby_poses.generic = {
+		{
+			"lobby_generic_idle1"
+		},
+		{
+			"lobby_generic_idle2"
+		},
+		{
+			"lobby_generic_idle3"
+		},
+		{
+			"lobby_generic_idle4"
+		}
+	}
+	self._lobby_poses.m134 = {
+		"lobby_minigun_idle1"
+	}
 end
 function MenuSceneManager:_setup_gui()
 	self._workspace = Overlay:gui():create_screen_workspace()
@@ -334,8 +356,27 @@ function MenuSceneManager:_set_up_templates()
 	self._scene_templates.inventory.target_pos = target_pos - self._camera_start_rot:x() * 40 - self._camera_start_rot:z() * 5
 	self._scene_templates.inventory.character_pos = c_ref:position()
 	self._scene_templates.inventory.remove_infamy_card = true
+	self._scene_templates.blackmarket_crafting = {}
+	self._scene_templates.blackmarket_crafting.camera_pos = Vector3(1500, -2000, 0)
+	self._scene_templates.blackmarket_crafting.target_pos = self._scene_templates.blackmarket_crafting.camera_pos + Vector3(0, 1, 0) * 100
+	local camera_look = self._scene_templates.blackmarket_crafting.target_pos - self._scene_templates.blackmarket_crafting.camera_pos:normalized()
+	mvector3.rotate_with(camera_look, Rotation(4, 2.25, 0))
+	self._scene_templates.blackmarket_crafting.item_pos = self._scene_templates.blackmarket_crafting.camera_pos + camera_look * 240
+	self._scene_templates.blackmarket_crafting.fov = 40
+	self._scene_templates.blackmarket_crafting.use_item_grab = true
+	self._scene_templates.blackmarket_crafting.can_change_fov = true
+	self._scene_templates.blackmarket_crafting.disable_rotate = true
+	self._scene_templates.blackmarket_crafting.environment = "crafting"
+	self._scene_templates.blackmarket_crafting.lights = {}
 	if not managers.menu:is_pc_controller() then
 	end
+	self._scene_templates.safe = {}
+	self._scene_templates.safe.camera_pos = Vector3(1500, -2000, 0)
+	self._scene_templates.safe.target_pos = self._scene_templates.safe.camera_pos + Vector3(0, 1, 0) * 100
+	self._scene_templates.safe.fov = 40
+	self._scene_templates.safe.use_item_grab = true
+	self._scene_templates.safe.environment = "safe"
+	self._scene_templates.safe.ambience_event = "cash_ambience"
 	local l_pos = self._scene_templates.inventory.camera_pos
 	local rot = Rotation(self._scene_templates.inventory.target_pos - l_pos, math.UP)
 	local l1_pos = l_pos + rot:x() * -200 + rot:y() * 200
@@ -358,6 +399,43 @@ function MenuSceneManager:_set_up_templates()
 			specular_multiplier = 0
 		})
 	}
+end
+function MenuSceneManager:_set_up_environments()
+	self._environments = {}
+	self._environments.standard = {}
+	self._environments.standard.environment = "environments/env_menu/env_menu"
+	self._environments.standard.color_grading = "color_matrix"
+	self._environments.standard.angle = 0
+	self._environments.safe = {}
+	self._environments.safe.environment = "environments/pd2_cash/env_cash_01"
+	self._environments.safe.color_grading = "color_off"
+	self._environments.safe.angle = -135
+	self._environments.crafting = {}
+	self._environments.crafting.environment = "environments/pd2_cash/env_cash_02"
+	self._environments.crafting.color_grading = "color_off"
+	self._environments.crafting.angle = -135
+end
+function MenuSceneManager:_use_environment(name)
+	local setting = self._environments[name]
+	if not setting then
+		return
+	end
+	if managers.viewport:default_environment() ~= setting.environment then
+		managers.viewport:preload_environment(setting.environment)
+		managers.viewport:set_default_environment(setting.environment, nil, nil)
+	end
+	if managers.environment_controller:default_color_grading() ~= setting.color_grading then
+		managers.environment_controller:set_default_color_grading(setting.color_grading)
+		managers.environment_controller:refresh_render_settings()
+	end
+	self:_set_sky_rotation_angle(setting.angle)
+end
+function MenuSceneManager:post_ambience_event(ambience_event)
+	if self._current_ambience_event and self._current_ambience_event == ambience_event then
+		return
+	end
+	self._current_ambience_event = ambience_event
+	managers.menu:post_event(ambience_event)
 end
 function MenuSceneManager:add_one_frame_delayed_clbk(clbk)
 	table.insert(self._one_frame_delayed_clbks, clbk)
@@ -425,7 +503,7 @@ function MenuSceneManager:update(t, dt)
 			self._item_offset = math.lerp(self._item_offset_current, self._item_offset_target, bezier_value)
 		end
 	end
-	if self._item_unit and self._item_unit.unit then
+	if self._item_unit and self._item_unit.unit and not self._disable_item_updates then
 		if not self._item_grabbed then
 			if not managers.blackmarket:currently_customizing_mask() and not self._disable_rotate then
 				self._item_yaw = (self._item_yaw + 5 * dt) % 360
@@ -457,6 +535,7 @@ function MenuSceneManager:update(t, dt)
 			light:set_multiplier(0.8)
 		end
 	end
+	self:_update_safe_scene(t, dt)
 end
 function MenuSceneManager:add_callback(clbk, delay, param)
 	if not clbk then
@@ -664,18 +743,24 @@ function MenuSceneManager:_set_character_equipment()
 	else
 		local secondary = managers.blackmarket:equipped_secondary()
 		if secondary then
-			self:set_character_equipped_weapon(nil, secondary.factory_id, secondary.blueprint, "secondary")
+			self:set_character_equipped_weapon(nil, secondary.factory_id, secondary.blueprint, "secondary", secondary.cosmetics)
 		else
 			self:_delete_character_weapon(self._character_unit, "secondary")
 		end
 	end
 	local primary = managers.blackmarket:equipped_primary()
 	if primary then
-		self:set_character_equipped_weapon(nil, primary.factory_id, primary.blueprint, "primary")
+		self:set_character_equipped_weapon(nil, primary.factory_id, primary.blueprint, "primary", primary.cosmetics)
 	else
 		self:_delete_character_weapon(self._character_unit, "primary")
 	end
 	self:set_character_deployable(Global.player_manager.kit.equipment_slots[1], false, 0)
+end
+function MenuSceneManager:get_current_scene_template()
+	return self._current_scene_template
+end
+function MenuSceneManager:get_scene_template_data(scene_template)
+	return self._scene_templates[scene_template]
 end
 function MenuSceneManager:_setup_lobby_characters()
 	if self._lobby_characters then
@@ -758,7 +843,7 @@ function MenuSceneManager:test_show_all_lobby_characters(enable_card)
 				self:set_character_card(i, math.random(25), unit)
 			else
 				local state = unit:play_redirect(Idstring("idle_menu"))
-				unit:anim_state_machine():set_parameter(state, "husk" .. i, 1)
+				unit:anim_state_machine():set_parameter(state, "lobby_generic_idle" .. i, 1)
 			end
 			mrotation.set_yaw_pitch_roll(rot, self._characters_rotation[(is_me and 4 or 0) + i], 0, 0)
 			mvector3.set(pos, self._characters_offset)
@@ -824,7 +909,14 @@ function MenuSceneManager:set_lobby_character_out_fit(i, outfit_string, rank)
 	self:set_character_mask_by_id(outfit.mask.mask_id, outfit.mask.blueprint, unit, i)
 	self:set_character_armor(outfit.armor, unit)
 	self:set_character_deployable(outfit.deployable, unit, i)
-	self:set_character_card(i, rank, unit)
+	self:_delete_character_weapon(unit, "all")
+	local prio_item = self:_get_lobby_character_prio_item(rank, outfit)
+	if prio_item == "rank" then
+		self:set_character_card(i, rank, unit)
+	else
+		self:_select_lobby_character_pose(i, unit, outfit[prio_item])
+		self:set_character_equipped_weapon(unit, outfit[prio_item].factory_id, outfit[prio_item].blueprint, "primary", outfit[prio_item].cosmetics)
+	end
 	local is_me = i == managers.network:session():local_peer():id()
 	local mvec = Vector3()
 	local math_up = math.UP
@@ -843,6 +935,41 @@ function MenuSceneManager:set_lobby_character_out_fit(i, outfit_string, rank)
 	unit:set_position(pos)
 	unit:set_rotation(rot)
 	self:set_lobby_character_visible(i, true)
+end
+function MenuSceneManager:_get_lobby_character_prio_item(rank, outfit)
+	local infamous = rank and rank > 0
+	local primary_rarity, secondary_rarity
+	if outfit.primary.cosmetics and outfit.primary.cosmetics.id and outfit.primary.cosmetics.id ~= "nil" then
+		local rarity = tweak_data.blackmarket.weapon_skins[outfit.primary.cosmetics.id] and tweak_data.blackmarket.weapon_skins[outfit.primary.cosmetics.id].rarity
+		primary_rarity = tweak_data.economy.rarities[rarity].index
+	end
+	if outfit.secondary.cosmetics and outfit.secondary.cosmetics.id and outfit.secondary.cosmetics.id ~= "nil" then
+		local rarity = tweak_data.blackmarket.weapon_skins[outfit.secondary.cosmetics.id] and tweak_data.blackmarket.weapon_skins[outfit.secondary.cosmetics.id].rarity
+		secondary_rarity = tweak_data.economy.rarities[rarity].index
+	end
+	if primary_rarity and secondary_rarity then
+		return primary_rarity >= secondary_rarity and "primary" or "secondary"
+	elseif primary_rarity then
+		return "primary"
+	elseif secondary_rarity then
+		return "secondary"
+	end
+	return infamous and "rank" or "primary"
+end
+function MenuSceneManager:_select_lobby_character_pose(peer_id, unit, weapon_info)
+	local state = unit:play_redirect(Idstring("idle_menu"))
+	local weapon_id = managers.weapon_factory:get_weapon_id_by_factory_id(weapon_info.factory_id)
+	local category = tweak_data.weapon[weapon_id].category
+	local lobby_poses = self._lobby_poses[weapon_id]
+	lobby_poses = lobby_poses or self._lobby_poses[category]
+	lobby_poses = lobby_poses or self._lobby_poses.generic
+	if type(lobby_poses[1]) == "string" then
+		local pose = lobby_poses[math.random(#lobby_poses)]
+		unit:anim_state_machine():set_parameter(state, pose, 1)
+	else
+		local pose = lobby_poses[peer_id][math.random(#lobby_poses[peer_id])]
+		unit:anim_state_machine():set_parameter(state, pose, 1)
+	end
 end
 function MenuSceneManager:set_character_deployable(deployable_id, unit, peer_id)
 	unit = unit or self._character_unit
@@ -924,8 +1051,8 @@ function MenuSceneManager:set_character_armor(armor_id, unit)
 	unit:damage():run_sequence_simple(sequence)
 end
 function MenuSceneManager:set_character_card(peer_id, rank, unit)
-	local state = unit:play_redirect(Idstring("idle_menu"))
 	if rank and rank > 0 then
+		local state = unit:play_redirect(Idstring("idle_menu"))
 		unit:anim_state_machine():set_parameter(state, "husk_card" .. peer_id, 1)
 		local card = rank - 1
 		local card_unit = World:spawn_unit(Idstring("units/menu/menu_scene/infamy_card"), Vector3(0, 0, 0), Rotation(0, 0, 0))
@@ -934,11 +1061,9 @@ function MenuSceneManager:set_character_card(peer_id, rank, unit)
 		self:_delete_character_weapon(unit, "secondary")
 		self._card_units = self._card_units or {}
 		self._card_units[unit:key()] = card_unit
-	else
-		unit:anim_state_machine():set_parameter(state, "husk" .. peer_id, 1)
 	end
 end
-function MenuSceneManager:set_character_equipped_weapon(unit, factory_id, blueprint, type)
+function MenuSceneManager:set_character_equipped_weapon(unit, factory_id, blueprint, type, cosmetics)
 	unit = unit or self._character_unit
 	self:_delete_character_weapon(unit, type)
 	if factory_id then
@@ -954,6 +1079,7 @@ function MenuSceneManager:set_character_equipped_weapon(unit, factory_id, bluepr
 			owner = unit,
 			factory_id = factory_id,
 			blueprint = blueprint,
+			cosmetics = cosmetics,
 			type = type
 		})
 		managers.dyn_resource:load(ids_unit, ids_unit_name, DynamicResourceManager.DYN_RESOURCES_PACKAGE, clbk)
@@ -1020,7 +1146,10 @@ function MenuSceneManager:_set_unit_enabled_tree(unit, state)
 		self:_set_unit_enabled_tree(child_unit, state)
 	end
 end
+local null_vector = Vector3()
+local null_rotation = Rotation()
 function MenuSceneManager:clbk_weapon_base_unit_loaded(params, status, asset_type, asset_name)
+	print("[MenuSceneManager:clbk_weapon_base_unit_loaded]", inspect(params), status, asset_type, asset_name)
 	local owner = params.owner
 	if not alive(owner) then
 		return
@@ -1030,16 +1159,11 @@ function MenuSceneManager:clbk_weapon_base_unit_loaded(params, status, asset_typ
 		return
 	end
 	owner_weapon_data = owner_weapon_data[params.type]
-	self._item_pos = Vector3(0, 0, 0)
-	mrotation.set_zero(self._item_rot_mod)
-	self._item_yaw = 0
-	self._item_pitch = 0
-	self._item_roll = 0
-	mrotation.set_zero(self._item_rot)
-	local weapon_unit = World:spawn_unit(asset_name, self._item_pos, self._item_rot)
+	local weapon_unit = World:spawn_unit(asset_name, null_vector, self.null_rotation)
 	owner_weapon_data.unit = weapon_unit
 	weapon_unit:base():set_npc(true)
 	weapon_unit:base():set_factory_data(params.factory_id)
+	weapon_unit:base():set_cosmetics_data(params.cosmetics)
 	if params.blueprint then
 		weapon_unit:base():assemble_from_blueprint(params.factory_id, params.blueprint, nil, callback(self, self, "clbk_weapon_assembly_complete", params))
 	else
@@ -1194,8 +1318,7 @@ function MenuSceneManager:setup_camera()
 	self._camera_object:set_far_range(250000)
 	self._camera_object:set_fov(self._standard_fov)
 	self._camera_object:set_rotation(self._camera_start_rot)
-	managers.viewport:preload_environment("environments/env_menu/env_menu")
-	managers.viewport:set_default_environment("environments/env_menu/env_menu", nil, nil)
+	self:_use_environment("standard")
 	self._vp = managers.viewport:new_vp(0, 0, 1, 1, "menu_main")
 	self._vp:set_width_mul_enabled()
 	self._director = self._vp:director()
@@ -1209,13 +1332,12 @@ function MenuSceneManager:setup_camera()
 	self:_set_target_position(self._camera_values.camera_pos_target)
 	self._vp:set_camera(self._camera_object)
 	self._vp:set_active(true)
-	managers.environment_controller:set_default_color_grading("color_matrix")
-	managers.environment_controller:refresh_render_settings()
 	self._vp:camera():set_width_multiplier(CoreMath.width_mul(1.7777778))
 	self:_set_dimensions()
 	self._shaker:play("breathing", 0.2)
 	self._resolution_changed_callback_id = managers.viewport:add_resolution_changed_func(callback(self, self, "_resolution_changed"))
-	self._environment_modifier_id = managers.viewport:viewports()[1]:create_environment_modifier(sky_orientation_data_key, true, function()
+	self._sky_rotation_angle = 0
+	self._environment_modifier_id = managers.viewport:create_global_environment_modifier(sky_orientation_data_key, true, function()
 		return self:_sky_rotation_modifier()
 	end)
 end
@@ -1263,7 +1385,10 @@ function MenuSceneManager:_set_dimensions()
 	self._vp:camera():set_width_multiplier(CoreMath.width_mul(width_mul))
 end
 function MenuSceneManager:_sky_rotation_modifier()
-	return 345 + math.sin(Application:time() * 30) * 10
+	return self._sky_rotation_angle
+end
+function MenuSceneManager:_set_sky_rotation_angle(angle)
+	self._sky_rotation_angle = angle
 end
 function MenuSceneManager:add_transition_done_callback(callback_func)
 	self._transition_done_callback_handler:add(callback_func)
@@ -1316,6 +1441,8 @@ function MenuSceneManager:set_scene_template(template, data, custom_name, skip_t
 				self:_chk_character_visibility(unit)
 			end
 		end
+		self:_use_environment(template_data.environment or "standard")
+		self:post_ambience_event(template_data.ambience_event or "menu_main_ambience")
 		self._camera_values.camera_pos_current = self._camera_values.camera_pos_target
 		self._camera_values.target_pos_current = self._camera_values.target_pos_target
 		self._camera_values.fov_current = self._camera_values.fov_target
@@ -1333,14 +1460,16 @@ function MenuSceneManager:set_scene_template(template, data, custom_name, skip_t
 		self._use_character_grab2 = template_data.use_character_grab2
 		self._use_character_pan = template_data.use_character_pan
 		self._disable_rotate = template_data.disable_rotate or false
+		self._disable_item_updates = template_data.disable_item_updates or false
 		self._can_change_fov = template_data.can_change_fov or false
+		self._can_move_item = template_data.can_move_item or false
 		self._change_fov_sensitivity = template_data.change_fov_sensitivity or 1
 		self._characters_deployable_visible = template_data.characters_deployable_visible or false
 		self:set_character_deployable(Global.player_manager.kit.equipment_slots[1], false, 0)
 		if template_data.remove_infamy_card and self._card_units and self._card_units[self._character_unit:key()] then
 			local secondary = managers.blackmarket:equipped_secondary()
 			if secondary then
-				self:set_character_equipped_weapon(nil, secondary.factory_id, secondary.blueprint, "secondary")
+				self:set_character_equipped_weapon(nil, secondary.factory_id, secondary.blueprint, "secondary", secondary.cosmetics)
 			end
 		end
 		self:_select_character_pose()
@@ -1382,7 +1511,7 @@ function MenuSceneManager:set_scene_template(template, data, custom_name, skip_t
 			end
 		end
 	end
-	managers.network.account:refresh()
+	managers.network.account:inventory_load()
 end
 function MenuSceneManager:_chk_complete_overkill_pack_safe_visibility()
 	if not alive(self._complete_overkill_pack_safe) then
@@ -1617,22 +1746,25 @@ function MenuSceneManager:_show_item_unit()
 	end
 	self._item_unit.unit:set_visible(true)
 end
-function MenuSceneManager:spawn_item_weapon(factory_id, blueprint, texture_switches)
+function MenuSceneManager:spawn_item_weapon(factory_id, blueprint, cosmetics, texture_switches, custom_data)
 	local factory_weapon = tweak_data.weapon.factory[factory_id]
 	local ids_unit_name = Idstring(factory_weapon.unit)
 	if not managers.dyn_resource:is_resource_ready(Idstring("unit"), ids_unit_name, DynamicResourceManager.DYN_RESOURCES_PACKAGE) then
 		print("[MenuSceneManager:spawn_item_weapon]", "Weapon unit is not loaded, force loading it.", factory_weapon.unit)
 		managers.dyn_resource:load(Idstring("unit"), ids_unit_name, DynamicResourceManager.DYN_RESOURCES_PACKAGE, false)
 	end
+	if not custom_data or not custom_data.item_pos then
+	end
 	self._item_pos = Vector3(0, 0, 200)
 	mrotation.set_zero(self._item_rot_mod)
-	self._item_yaw = 0
+	self._item_yaw = custom_data and custom_data.item_yaw or 0
 	self._item_pitch = 0
 	self._item_roll = 0
 	mrotation.set_zero(self._item_rot)
 	local function spawn_weapon(pos, rot)
 		local w_unit = World:spawn_unit(ids_unit_name, pos, rot)
 		w_unit:base():set_factory_data(factory_id)
+		w_unit:base():set_cosmetics_data(cosmetics)
 		w_unit:base():set_texture_switches(texture_switches)
 		if blueprint then
 			w_unit:base():assemble_from_blueprint(factory_id, blueprint, true)
@@ -1651,18 +1783,23 @@ function MenuSceneManager:spawn_item_weapon(factory_id, blueprint, texture_switc
 	end
 	new_unit:base():tweak_data_anim_stop("unequip")
 	new_unit:base():tweak_data_anim_play("equip")
-	self:_set_item_unit(new_unit, nil, nil, nil, second_unit)
-	mrotation.set_yaw_pitch_roll(self._item_rot_mod, -90, 0, 0)
+	self:_set_item_unit(new_unit, nil, nil, nil, second_unit, custom_data)
+	mrotation.set_yaw_pitch_roll(self._item_rot_mod, 90, 0, 0)
 	return new_unit
 end
-function MenuSceneManager:_set_item_unit(unit, oobb_object, max_mod, type, second_unit)
+function MenuSceneManager:_set_item_unit(unit, oobb_object, max_mod, type, second_unit, custom_data)
 	self:remove_item()
 	self._current_weapon_id = nil
-	local scene_template = type == "mask" and self._scene_templates.blackmarket_mask or self._scene_templates.blackmarket_item
+	local scene_template = custom_data and custom_data.scene_template and self._scene_templates[custom_data.scene_template] or type == "mask" and self._scene_templates.blackmarket_mask or self._scene_templates.blackmarket_item
+	if not custom_data or not custom_data.item_pos then
+	end
 	self._item_pos = Vector3(0, 0, 200)
-	self._item_yaw = self._item_yaw or 0
-	self._item_pitch = self._item_yaw or 0
-	self._item_roll = self._item_yaw or 0
+	local item_yaw = self._item_yaw
+	local item_pitch = self._item_pitch
+	local item_roll = self._item_roll
+	self._item_yaw = 0
+	self._item_pitch = 0
+	self._item_roll = 0
 	mrotation.set_yaw_pitch_roll(self._item_rot, self._item_yaw, self._item_pitch, self._item_roll)
 	mrotation.multiply(self._item_rot, self._item_rot_mod)
 	self._item_unit = {
@@ -1680,10 +1817,15 @@ function MenuSceneManager:_set_item_unit(unit, oobb_object, max_mod, type, secon
 	max = math.max(max, oobb_size.z)
 	local offset_dir = scene_template.target_pos - scene_template.camera_pos:normalized()
 	self._item_max_size = math.max(max * (max_mod or 1), 20)
-	local pos = Vector3(0, self._item_pos.y, self._item_pos.z)
+	local pos = Vector3(self._item_pos.x, self._item_pos.y, self._item_pos.z)
 	pos = pos - offset_dir * (150 - self._item_max_size)
 	self._item_rot_pos = pos
 	self:_set_item_offset(oobb, true)
+	self._item_yaw = item_yaw or 0
+	self._item_pitch = item_pitch or 0
+	self._item_roll = item_roll or 0
+	mrotation.set_yaw_pitch_roll(self._item_rot, self._item_yaw, self._item_pitch, self._item_roll)
+	mrotation.multiply(self._item_rot, self._item_rot_mod)
 end
 function MenuSceneManager:_spawn_item(unit_name, oobb_object, max_mod, type, mask_id)
 	self._current_weapon_id = nil
@@ -1866,6 +2008,9 @@ end
 function MenuSceneManager:_release_item_grab()
 	self._item_grabbed = false
 end
+function MenuSceneManager:_release_item_move_grab()
+	self._item_move_grabbed = false
+end
 function MenuSceneManager:_release_character_grab()
 	self._character_grabbed = false
 end
@@ -1910,12 +2055,17 @@ end
 function MenuSceneManager:stop_controller_zoom()
 	self._character_grabbed = false
 end
+local target_pos_vector = Vector3()
 function MenuSceneManager:change_fov(zoom, amount)
 	if self._can_change_fov then
 		if zoom == "in" then
 			self._fov_mod = math.clamp((self._fov_mod or 0) + (amount or 0.45) * (self._change_fov_sensitivity or 1), tweak_data.gui.mod_preview_min_fov, tweak_data.gui.mod_preview_max_fov)
 		elseif zoom == "out" then
 			self._fov_mod = math.clamp((self._fov_mod or 0) - (amount or 0.45) * (self._change_fov_sensitivity or 1), tweak_data.gui.mod_preview_min_fov, tweak_data.gui.mod_preview_max_fov)
+		end
+		if self._current_scene_template and self._scene_templates[self._current_scene_template] and self._scene_templates[self._current_scene_template].item_pos then
+			mvector3.lerp(target_pos_vector, self._camera_values.target_pos_target, self._scene_templates[self._current_scene_template].item_pos, math.max(-self._fov_mod / 20, 0))
+			self:_set_target_position(target_pos_vector)
 		end
 	end
 end
@@ -1966,10 +2116,17 @@ function MenuSceneManager:mouse_pressed(o, button, x, y)
 	if not self._use_item_grab or self._disable_dragging then
 		return
 	end
-	if button == Idstring("0") and self._item_grab:inside(x, y) then
-		self._item_grabbed = true
-		self._item_grabbed_current_x = x
-		self._item_grabbed_current_y = y
+	if button == Idstring("0") then
+		if self._item_grab:inside(x, y) then
+			self._item_grabbed = true
+			self._item_grabbed_current_x = x
+			self._item_grabbed_current_y = y
+			return false
+		end
+	elseif self._can_move_item and button == Idstring("1") and self._item_grab:inside(x, y) then
+		self._item_move_grabbed = true
+		self._item_move_grabbed_current_x = x
+		self._item_move_grabbed_current_y = y
 		return false
 	end
 end
@@ -1977,6 +2134,8 @@ function MenuSceneManager:mouse_released(o, button, x, y)
 	if button == Idstring("0") then
 		self:_release_item_grab()
 		self:_release_character_grab()
+	elseif button == Idstring("1") then
+		self:_release_item_move_grab()
 	end
 end
 function MenuSceneManager:mouse_moved(o, x, y)
@@ -2024,6 +2183,17 @@ function MenuSceneManager:mouse_moved(o, x, y)
 		self._item_grabbed_current_x = x
 		self._item_grabbed_current_y = y
 		return true, "grab"
+	elseif self._item_move_grabbed and self._item_unit and alive(self._item_unit.unit) then
+		local diff_x = (x - self._item_move_grabbed_current_x) / 4
+		local diff_y = (y - self._item_move_grabbed_current_y) / 4
+		local move_v = Vector3(diff_x, 0, -diff_y):rotate_with(self._camera_object:rotation())
+		mvector3.add(self._item_rot_pos, move_v)
+		local new_pos = self._item_rot_pos + self._item_offset:rotate_with(self._item_rot)
+		self._item_unit.unit:set_position(new_pos)
+		self._item_unit.unit:set_moving(2)
+		self._item_move_grabbed_current_x = x
+		self._item_move_grabbed_current_y = y
+		return true, "grab"
 	end
 	if self._use_item_grab and self._item_grab:inside(x, y) then
 		return true, "hand"
@@ -2034,6 +2204,38 @@ function MenuSceneManager:mouse_moved(o, x, y)
 	if self._use_character_grab2 and self._character_grab2:inside(x, y) then
 		return true, "hand"
 	end
+end
+function MenuSceneManager:get_crafting_custom_data()
+	return {
+		item_yaw = self._current_scene_template == "blackmarket_crafting" and self._item_yaw,
+		item_pos = self._scene_templates.blackmarket_crafting.item_pos,
+		scene_template = "blackmarket_crafting"
+	}
+end
+function MenuSceneManager:workbench_room_name()
+	return Idstring("units/pd2_dlc_shiny/menu_showcase/menu_showcase")
+end
+function MenuSceneManager:delete_workbench_room()
+	if alive(self._workbench_room) then
+		local old_name = self._workbench_room:name()
+		World:delete_unit(self._workbench_room)
+		self._workbench_room = nil
+		if self._workbench_force_loaded then
+			managers.dyn_resource:unload(ids_unit, old_name, DynamicResourceManager.DYN_RESOURCES_PACKAGE, false)
+			self._workbench_force_loaded = nil
+		end
+	end
+end
+function MenuSceneManager:spawn_workbench_room()
+	self:delete_workbench_room()
+	local ids_unit_workbench_room_name = self:workbench_room_name()
+	if not managers.dyn_resource:is_resource_ready(Idstring("unit"), ids_unit_workbench_room_name, DynamicResourceManager.DYN_RESOURCES_PACKAGE) then
+		print("[MenuSceneManager:spawn_workbench_room]", "workbench room unit is not loaded, force loading it.")
+		managers.dyn_resource:load(Idstring("unit"), ids_unit_workbench_room_name, DynamicResourceManager.DYN_RESOURCES_PACKAGE, false)
+		self._workbench_force_loaded = true
+	end
+	local pos = self._scene_templates.blackmarket_crafting.camera_pos
+	self._workbench_room = World:spawn_unit(ids_unit_workbench_room_name, pos)
 end
 function MenuSceneManager:pre_unload()
 	self._weapon_names = {}
@@ -2071,4 +2273,298 @@ end
 function MenuSceneManager:set_lobby_character_stance(i, stance)
 	local unit = self._lobby_characters[i]
 	unit:play_redirect(Idstring(stance))
+end
+function MenuSceneManager:_update_safe_scene(t, dt)
+	if self._safe_shake and self._safe_shake_transition then
+		self._safe_shake_transition.speed = math.step(self._safe_shake_transition.speed, self._safe_shake_transition.target_speed, dt / 2)
+		self._safe_shake_transition.lerp = math.min(1, self._safe_shake_transition.lerp + dt * self._safe_shake_transition.speed)
+		self._shaker:set_parameter(self._safe_shake, "amplitude", math.bezier({
+			1,
+			1,
+			0,
+			0
+		}, self._safe_shake_transition.lerp))
+		if self._safe_shake_transition.lerp == 1 then
+			self._safe_shake_transition = nil
+		end
+	end
+	if self._safe_explosion_blur then
+		self._safe_explosion_blur.lerp = math.min(1, self._safe_explosion_blur.lerp + dt / self._safe_explosion_blur.duration)
+		local dof_setting = self._safe_explosion_blur.max_value * math.bezier({
+			1,
+			1,
+			1,
+			0
+		}, self._safe_explosion_blur.lerp)
+		managers.environment_controller:set_custom_dof_settings(dof_setting)
+		if self._safe_explosion_blur.lerp == 1 then
+			self._safe_explosion_blur = nil
+			managers.environment_controller:set_custom_dof_settings(nil)
+		end
+	end
+end
+function MenuSceneManager:_test_start_open_economy_safe(safe_entry)
+	managers.network.account:inventory_reward_unlock(safe_entry, nil, nil, callback(self, self, "_safe_result_recieved"))
+	local ready_clbk = function()
+		print("ECONOMY SAFE READY CALLBACK")
+	end
+	self:start_open_economy_safe(safe_entry, ready_clbk)
+end
+function MenuSceneManager:reset_economy_safe()
+	self._safe_scene_destroyed = true
+	self:_destroy_economy_safe()
+	managers.menu_scene:remove_item()
+end
+function MenuSceneManager:store_safe_result(error, items_new, items_removed)
+	self._safe_result_recieved_data = {
+		error,
+		items_new,
+		items_removed
+	}
+end
+function MenuSceneManager:fetch_safe_result()
+	if self._safe_result_recieved_data then
+		local data = self._safe_result_recieved_data
+		self._safe_result_recieved_data = nil
+		return data
+	end
+end
+function MenuSceneManager:create_economy_safe_scene(safe_entry, ready_clbk)
+	self:_load_economy_safe(safe_entry, ready_clbk)
+end
+function MenuSceneManager:start_open_economy_safe()
+	self._safe_scene_destroyed = false
+	if self:_check_safe_data_loaded() then
+		self._safe_shake = self._shaker:play("cash_opening", 0)
+		self._shaker:set_parameter(self._safe_shake, "amplitude", 1)
+		self._safe_shake_transition = {}
+		self._safe_shake_transition.lerp = 0
+		self._safe_shake_transition.speed = 0.05
+		self._safe_shake_transition.target_speed = self._safe_shake_transition.speed
+		self:_create_economy_safe_scene()
+		return true
+	end
+	return false
+end
+function MenuSceneManager:_load_economy_safe(safe_entry, ready_clbk)
+	self:_destroy_economy_safe()
+	local safe_entry_data = tweak_data.economy.safes[safe_entry]
+	local safe_name = Idstring(safe_entry_data.unit_name)
+	local drill_name = Idstring(tweak_data.economy.drills[safe_entry_data.drill].unit_name)
+	local saferoom_name = Idstring("units/payday2_cash/safe_room/cash_int_safehouse_saferoom")
+	local safe_data = {
+		safe_unit = false,
+		safe_name = safe_name,
+		ready = false,
+		ready_clbk = nil
+	}
+	local drill_data = {
+		safe_unit = false,
+		drill_name = drill_name,
+		ready = false,
+		ready_clbk = nil
+	}
+	local saferoom_data = {
+		saferoom_unit = false,
+		saferoom_name = saferoom_name,
+		ready = false,
+		ready_clbk = nil
+	}
+	self._safe_scene_data = {}
+	self._safe_scene_data.safe_data = safe_data
+	self._safe_scene_data.drill_data = drill_data
+	self._safe_scene_data.saferoom_data = saferoom_data
+	self._safe_scene_data.ready_clbk = ready_clbk
+	managers.blackmarket:load_economy_safe(safe_entry, self._safe_scene_data)
+end
+function MenuSceneManager:_clbk_safe_unit_loaded(safe_data_param)
+	print("A: SAFE LOADED", Application:time())
+	self._safe_scene_data.safe_data.ready = true
+	self:_check_safe_data_ready()
+end
+function MenuSceneManager:_clbk_drill_unit_loaded(drill_data_param)
+	print("A: DRILL LOADED", Application:time())
+	self._safe_scene_data.drill_data.ready = true
+	self:_check_safe_data_ready()
+end
+function MenuSceneManager:_clbk_saferoom_unit_loaded(saferoom_data)
+	print("A: SAFEROOM LOADED", Application:time())
+	self._safe_scene_data.saferoom_data.ready = true
+	self:_check_safe_data_ready()
+end
+function MenuSceneManager:_check_safe_data_loaded()
+	print(inspect(self._safe_scene_data))
+	if not self._safe_scene_data.drill_data.ready then
+		return false
+	end
+	if not self._safe_scene_data.safe_data.ready then
+		return false
+	end
+	if not self._safe_scene_data.saferoom_data.ready then
+		return false
+	end
+	return true
+end
+function MenuSceneManager:_check_safe_data_ready()
+	if self:_check_safe_data_loaded() and self._safe_scene_data.ready_clbk then
+		self._safe_scene_data.ready_clbk()
+	end
+end
+function MenuSceneManager:_calc_angles()
+	local cx = 200
+	local cy = 100
+	local cz = 50
+	local spin = 90 - math.atan((self:_scene_offset_from_camera().y + cy) / cx)
+	local tilt = 90 - math.atan((self:_scene_offset_from_camera().y + cy) / cz)
+	return math.rad(spin), math.rad(tilt)
+end
+function MenuSceneManager:_scene_offset_from_camera()
+	return Vector3(0, 600, -80)
+end
+function MenuSceneManager:_create_economy_safe_scene()
+	local pos = self._scene_templates.safe.camera_pos + self:_scene_offset_from_camera()
+	self._economy_safe = World:spawn_unit(self._safe_scene_data.safe_data.safe_name, pos)
+	self._economy_drill = World:spawn_unit(self._safe_scene_data.drill_data.drill_name, self._economy_safe:get_object(Idstring("spawn_drill")):position())
+	self._economy_saferoom = World:spawn_unit(self._safe_scene_data.saferoom_data.saferoom_name, pos)
+	self:_start_safe_drill_sequence()
+end
+function MenuSceneManager:_safe_result_recieved(error, items_new, items_removed)
+	local load_start_time = Application:time()
+	local result = items_new[1]
+	print("B: RESULT RECIEVED", result.weapon_skin, Application:time())
+	local function ready_clbk()
+		local min_time_left = math.max(3 - (Application:time() - load_start_time), 0)
+		print("READY CALLBACK", min_time_left)
+		self:add_callback(callback(self, self, "create_safe_content"), min_time_left, nil)
+	end
+	self:load_safe_result_content(result, ready_clbk)
+end
+function MenuSceneManager:load_safe_result_content(result, ready_clbk)
+	local item_data = tweak_data.blackmarket[result.category][result.entry]
+	self._safe_result_content_data = {
+		result = result,
+		item_data = item_data,
+		min_time_ready = nil,
+		ready_flags = {},
+		ready_clbk = ready_clbk
+	}
+	if result.category == "weapon_skins" then
+		local weapon_id = item_data.weapon_id or item_data.weapons[1]
+		local factory_id = managers.weapon_factory:get_factory_id_by_weapon_id(weapon_id)
+		local blueprint = item_data.default_blueprint or deep_clone(managers.weapon_factory:get_default_blueprint_by_factory_id(factory_id))
+		local weapon_name = Idstring(tweak_data.weapon.factory[factory_id].unit)
+		self._safe_result_content_data.weapon_name = weapon_name
+		self._safe_result_content_data.factory_id = factory_id
+		self._safe_result_content_data.ready_flags.parts_ready = false
+		self._safe_result_content_data.ready_flags.weapon_ready = false
+		managers.dyn_resource:load(ids_unit, weapon_name, DynamicResourceManager.DYN_RESOURCES_PACKAGE, callback(self, self, "_set_safe_result_ready_flag", "weapon_ready"))
+		local parts = managers.weapon_factory:preload_blueprint(factory_id, blueprint, false, callback(self, self, "_safe_result_parts_loaded"), false)
+	end
+end
+function MenuSceneManager:_set_safe_result_ready_flag(flag)
+	print("B: RESULT CONTENT LOADED", Application:time(), flag)
+	self._safe_result_content_data.ready_flags[flag] = true
+	self:_check_safe_result_content_loaded()
+end
+function MenuSceneManager:_safe_result_parts_loaded(part, blueprint)
+	print("B: RESULT WEAPON PARTS LOADED", Application:time())
+	self._safe_result_content_data.ready_flags.parts_ready = true
+	self._safe_result_content_data.blueprint = blueprint
+	self:_check_safe_result_content_loaded()
+end
+function MenuSceneManager:_safe_open_minimum_time()
+	print("B: SAFE OPEN MINIMUM TIME", Application:time())
+	self._safe_result_content_data.min_time_ready = true
+	self:_check_safe_result_content_loaded()
+end
+function MenuSceneManager:_check_safe_result_content_loaded()
+	for flag, ready in pairs(self._safe_result_content_data.ready_flags) do
+		if not ready then
+			return
+		end
+	end
+	print("B: COMPLETED", Application:time())
+	if self._safe_result_content_data.ready_clbk then
+		self._safe_result_content_data.ready_clbk()
+	end
+end
+function MenuSceneManager:create_safe_content(created_clbk)
+	if self._safe_shake_transition then
+		self._safe_shake_transition.target_speed = 0.5
+	end
+	print("C: CREATE SAFE CONTENT", Application:time())
+	self:_push_through_safe_drill_sequence()
+	self:_open_safe_sequence()
+	self._economy_safe:damage():add_trigger_callback("create_safe_result", callback(self, self, "_create_safe_result_trigger", created_clbk))
+end
+function MenuSceneManager:_create_safe_result_trigger(created_clbk)
+	self:add_callback(callback(self, self, "_create_safe_result", created_clbk), 0.1, nil)
+end
+function MenuSceneManager:_create_safe_result(created_clbk)
+	if self._safe_scene_destroyed then
+		return
+	end
+	self:_start_safe_explosion_blur()
+	self._shaker:play("player_fall_damage")
+	managers.environment_controller:set_dof_distance(100, true)
+	if self._safe_result_content_data.factory_id then
+		local item_pos = self._scene_templates.safe.camera_pos + self._scene_templates.safe.target_pos - self._scene_templates.safe.camera_pos:normalized() * 200
+		local custom_data = {item_pos = item_pos, scene_template = "safe"}
+		local cosmetics = {
+			id = self._safe_result_content_data.result.entry,
+			quality = self._safe_result_content_data.result.quality
+		}
+		local weapon_unit = self:spawn_item_weapon(self._safe_result_content_data.factory_id, self._safe_result_content_data.blueprint, cosmetics, nil, custom_data)
+	end
+	self._can_change_fov = true
+	if created_clbk then
+		created_clbk()
+	end
+	self._economy_saferoom:damage():run_sequence_simple("int_seq_darken_background")
+	managers.menu:set_cash_safe_scene_done(true)
+end
+function MenuSceneManager:_start_safe_explosion_blur()
+	self._safe_explosion_blur = {}
+	self._safe_explosion_blur.max_value = Vector3(0, 1, 4)
+	self._safe_explosion_blur.lerp = 0
+	self._safe_explosion_blur.duration = 1
+end
+function MenuSceneManager:_start_safe_drill_sequence()
+	self._economy_drill:damage():run_sequence_simple("anim_start_drilling")
+end
+function MenuSceneManager:_push_through_safe_drill_sequence()
+	self._economy_drill:damage():run_sequence_simple("anim_push_through")
+end
+function MenuSceneManager:_done_safe_drill_sequence()
+	self._economy_drill:damage():run_sequence_simple("anim_fall_off")
+end
+function MenuSceneManager:_open_safe_sequence()
+	local rarity = self._safe_result_content_data.item_data.rarity
+	print("rarity", rarity)
+	local sequence = tweak_data.economy.rarities[rarity].open_safe_sequence
+	self._economy_safe:damage():run_sequence_simple(sequence)
+end
+function MenuSceneManager:_destroy_economy_safe()
+	if alive(self._economy_safe) then
+		local old_name = self._economy_safe:name()
+		World:delete_unit(self._economy_safe)
+		self._economy_safe = nil
+	end
+	if alive(self._economy_drill) then
+		local old_name = self._economy_drill:name()
+		World:delete_unit(self._economy_drill)
+		self._economy_drill = nil
+	end
+	if alive(self._economy_saferoom) then
+		local old_name = self._economy_saferoom:name()
+		World:delete_unit(self._economy_saferoom)
+		self._economy_saferoom = nil
+	end
+	if self._safe_shake then
+		self._shaker:stop(self._safe_shake)
+		self._safe_shake = nil
+	end
+	managers.blackmarket:release_preloaded_category("economy_safe")
+end
+function MenuSceneManager:set_blackmarket_tradable_loaded()
 end

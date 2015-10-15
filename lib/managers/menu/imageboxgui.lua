@@ -11,7 +11,9 @@ end
 function ImageBoxGui:_create_image_box(image_config)
 	image_config = image_config or {}
 	local image_shapes = image_config.shapes or {}
-	local image_texture = image_config.texture or nil
+	local image_textures = image_config.textures or image_config.texture and {
+		image_config.texture
+	} or {}
 	local image_video = image_config.video or nil
 	local video_loop = image_config.video_loop or false
 	local keep_texure_ratio = image_config.keep_ratio or false
@@ -83,25 +85,10 @@ function ImageBoxGui:_create_image_box(image_config)
 	else
 		image_panel:set_top(10)
 	end
-	if image_texture and DB:has(Idstring("texture"), image_texture) then
-		local image = image_panel:bitmap({
-			texture = image_texture,
-			w = image_width,
-			h = image_height,
-			blend_mode = image_blend_mode
-		})
-		if image_render_template then
-			image:set_render_template(image_render_template)
-		end
-		if keep_texure_ratio then
-			local texture_width, texture_height = image:texture_width(), image:texture_height()
-			local image_aspect = math.max(image_width, 1) / math.max(image_height, 1)
-			local texture_aspect = math.max(texture_width, 1) / math.max(texture_height, 1)
-			local aspect = texture_aspect / image_aspect
-			local sw = math.min(image_width, image_width * aspect)
-			local sh = math.min(image_height, image_height / aspect)
-			image:set_size(sw, sh)
-			image:set_center(image_panel:w() / 2, image_panel:h() / 2)
+	self._requested_textures = {}
+	for i, image_texture in ipairs(image_textures) do
+		if image_texture and DB:has(Idstring("texture"), image_texture) then
+			self:request_texture(image_texture, image_panel, keep_texure_ratio, image_blend_mode, i, image_render_template)
 		end
 	end
 	if image_video then
@@ -162,4 +149,70 @@ function ImageBoxGui:_create_image_box(image_config)
 	})
 	self:_set_scroll_indicator()
 	main:set_center(main:parent():w() / 2, main:parent():h() / 2)
+end
+function ImageBoxGui:request_texture(texture_path, panel, keep_aspect_ratio, blend_mode, layer, render_template)
+	if not managers.menu_component then
+		return
+	end
+	local texture_count = managers.menu_component:request_texture(texture_path, callback(self, self, "texture_done_clbk", {
+		panel = panel,
+		blend_mode = blend_mode,
+		layer = layer,
+		render_template = render_template,
+		keep_aspect_ratio = keep_aspect_ratio
+	}))
+	table.insert(self._requested_textures, {texture_count = texture_count, texture = texture_path})
+end
+function ImageBoxGui:unretrieve_textures()
+	if self._requested_textures then
+		for i, data in pairs(self._requested_textures) do
+			managers.menu_component:unretrieve_texture(data.texture, data.texture_count)
+		end
+	end
+	self._requested_textures = {}
+end
+function ImageBoxGui:texture_done_clbk(params, texture_ids)
+	params = params or {}
+	local panel = params.panel or params[1]
+	local keep_aspect_ratio = params.keep_aspect_ratio
+	local blend_mode = params.blend_mode
+	local layer = params.layer
+	local render_template = params.render_template
+	local name = params.name or "streamed_texture_" .. tostring(panel:num_children())
+	if not alive(panel) then
+		Application:error("[MenuNodeBaseGui:texture_done_clbk] Missing GUI panel", "texture_ids", texture_ids, "params", inspect(params))
+		return
+	end
+	local image = panel:bitmap({
+		name = name,
+		texture = texture_ids,
+		blend_mode = blend_mode,
+		render_template = render_template,
+		layer = layer
+	})
+	if keep_aspect_ratio then
+		local texture_width = image:texture_width()
+		local texture_height = image:texture_height()
+		local panel_width = panel:w()
+		local panel_height = panel:h()
+		local tw = texture_width
+		local th = texture_height
+		local pw = panel_width
+		local ph = panel_height
+		if tw == 0 or th == 0 then
+			Application:error("[MenuNodeBaseGui:texture_done_clbk] Texture size error!:", "width", tw, "height", th)
+			tw = 1
+			th = 1
+		end
+		local sw = math.min(pw, ph * (tw / th))
+		local sh = math.min(ph, pw / (tw / th))
+		image:set_size(math.round(sw), math.round(sh))
+		image:set_center(panel:w() * 0.5, panel:h() * 0.5)
+	else
+		image:set_size(panel:size())
+	end
+end
+function ImageBoxGui:close()
+	self:unretrieve_textures()
+	ImageBoxGui.super.close(self)
 end

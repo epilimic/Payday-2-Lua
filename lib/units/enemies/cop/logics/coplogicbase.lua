@@ -300,7 +300,7 @@ function CopLogicBase._upd_attention_obj_detection(data, min_reaction, max_react
 	local my_tracker = data.unit:movement():nav_tracker()
 	local chk_vis_func = my_tracker.check_visibility
 	local is_detection_persistent = managers.groupai:state():is_detection_persistent()
-	local delay = 1
+	local delay = 2
 	local player_importance_wgt = data.unit:in_slot(managers.slot:get_mask("enemies")) and {}
 	local function _angle_chk(attention_pos, dis, strictness)
 		mvector3.direction(tmp_vec1, my_pos, attention_pos)
@@ -367,7 +367,7 @@ function CopLogicBase._upd_attention_obj_detection(data, min_reaction, max_react
 			end
 		end
 	end
-	local function _chk_record_pl_importance_wgt(attention_info)
+	local function _chk_record_acquired_attention_importance_wgt(attention_info)
 		if not player_importance_wgt or not attention_info.is_human_player then
 			return
 		end
@@ -383,23 +383,55 @@ function CopLogicBase._upd_attention_obj_detection(data, min_reaction, max_react
 		table.insert(player_importance_wgt, attention_info.u_key)
 		table.insert(player_importance_wgt, weight)
 	end
+	local function _chk_record_attention_obj_importance_wgt(u_key, attention_info)
+		if not player_importance_wgt then
+			return
+		end
+		local is_human_player, is_local_player, is_husk_player
+		if attention_info.unit:base() then
+			is_local_player = attention_info.unit:base().is_local_player
+			is_husk_player = not is_local_player and attention_info.unit:base().is_husk_player
+			is_human_player = is_local_player or is_husk_player
+		end
+		if not is_human_player then
+			return
+		end
+		local weight = mvector3.direction(tmp_vec1, attention_info.handler:get_detection_m_pos(), my_pos)
+		local e_fwd
+		if is_husk_player then
+			e_fwd = attention_info.unit:movement():detect_look_dir()
+		else
+			e_fwd = attention_info.unit:movement():m_head_rot():y()
+		end
+		local dot = mvector3.dot(e_fwd, tmp_vec1)
+		weight = weight * weight * (1 - dot)
+		table.insert(player_importance_wgt, u_key)
+		table.insert(player_importance_wgt, weight)
+	end
 	for u_key, attention_info in pairs(all_attention_objects) do
 		if u_key ~= my_key and not detected_obj[u_key] and (not attention_info.nav_tracker or chk_vis_func(my_tracker, attention_info.nav_tracker)) then
 			local settings = attention_info.handler:get_attention(my_access, min_reaction, max_reaction, data.team)
 			if settings then
+				local acquired
 				local attention_pos = attention_info.handler:get_detection_m_pos()
 				if _angle_and_dis_chk(attention_info.handler, settings, attention_pos) then
 					local vis_ray = World:raycast("ray", my_pos, attention_pos, "slot_mask", data.visibility_slotmask, "ray_type", "ai_vision")
 					if not vis_ray or vis_ray.unit:key() == u_key then
+						acquired = true
 						detected_obj[u_key] = CopLogicBase._create_detected_attention_object_data(data.t, data.unit, u_key, attention_info, settings)
 					end
+				end
+				if not acquired then
+					_chk_record_attention_obj_importance_wgt(u_key, attention_info)
 				end
 			end
 		end
 	end
 	for u_key, attention_info in pairs(detected_obj) do
-		if not data.important and t < attention_info.next_verify_t then
-			delay = math.min(attention_info.next_verify_t - t, delay)
+		if t < attention_info.next_verify_t then
+			if attention_info.reaction >= AIAttentionObject.REACT_SUSPICIOUS then
+				delay = math.min(attention_info.next_verify_t - t, delay)
+			end
 		else
 			attention_info.next_verify_t = t + (attention_info.identified and attention_info.verified and attention_info.settings.verification_interval or attention_info.settings.notice_interval or attention_info.settings.verification_interval)
 			delay = math.min(delay, attention_info.settings.verification_interval)
@@ -515,7 +547,7 @@ function CopLogicBase._upd_attention_obj_detection(data, min_reaction, max_react
 				end
 			end
 		end
-		_chk_record_pl_importance_wgt(attention_info)
+		_chk_record_acquired_attention_importance_wgt(attention_info)
 	end
 	if player_importance_wgt then
 		managers.groupai:state():set_importance_weight(data.key, player_importance_wgt)
@@ -875,7 +907,7 @@ function CopLogicBase._get_logic_state_from_reaction(data, reaction)
 		end
 	elseif reaction == AIAttentionObject.REACT_ARREST and not data.is_converted then
 		return "arrest"
-	elseif not data.char_tweak.no_arrest and not police_is_being_called and not managers.groupai:state():is_police_called() and not data.unit:movement():cool() and not data.is_converted and (not data.attention_obj or not data.attention_obj.verified or not (data.attention_obj.dis < 1500)) then
+	elseif (data.char_tweak.calls_in or not data.char_tweak.no_arrest) and not police_is_being_called and not managers.groupai:state():is_police_called() and not data.unit:movement():cool() and not data.is_converted and (not data.attention_obj or not data.attention_obj.verified or not (data.attention_obj.dis < 1500)) then
 		return "arrest"
 	else
 		return "attack"

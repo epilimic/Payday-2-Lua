@@ -1,10 +1,11 @@
-WeaponLionGadget1 = WeaponLionGadget1 or class(WeaponGadgetBase)
+WeaponLionGadget1 = WeaponLionGadget1 or class()
 WeaponLionGadget1.GADGET_TYPE = "bipod"
 WeaponLionGadget1._previous_state = nil
 WeaponLionGadget1.bipod_length = nil
 function WeaponLionGadget1:init(unit)
-	WeaponLionGadget1.super.init(self, unit)
+	self._unit = unit
 	self._is_npc = false
+	self._deployed = false
 end
 function WeaponLionGadget1:update(unit, t, dt)
 end
@@ -17,6 +18,17 @@ end
 function WeaponLionGadget1:bipod_state()
 	return self._on
 end
+function WeaponLionGadget1:is_deployed()
+	return self._deployed
+end
+function WeaponLionGadget1:toggle()
+	Application:trace("WeaponLionGadget1:toggle() is_deployed: ", self:is_deployed())
+	if self:is_deployed() then
+		self:_unmount()
+	else
+		self:check_state()
+	end
+end
 function WeaponLionGadget1:is_usable()
 	if not self._center_ray_from or not self._center_ray_to then
 		return nil
@@ -26,6 +38,11 @@ function WeaponLionGadget1:is_usable()
 	local ray_bipod_right = self._unit:raycast(self._right_ray_from, self._right_ray_to)
 	return ray_bipod_center and (ray_bipod_left or ray_bipod_right)
 end
+function WeaponLionGadget1:_unmount()
+	managers.player:set_player_state(self._previous_state or "standard")
+	self._previous_state = nil
+	self._deployed = false
+end
 function WeaponLionGadget1:_is_deployable()
 	if self._is_npc then
 		return false
@@ -34,8 +51,10 @@ function WeaponLionGadget1:_is_deployable()
 		print("No Bipod object. Trying to recover.")
 		self._bipod_obj = self._unit:parent():get_object(Idstring("a_bp"))
 		if not self._bipod_obj then
+			print("Fail.")
 			return false
 		end
+		print("Success.")
 	end
 	local is_reloading = false
 	if managers.player:current_state() == "standard" and managers.player:player_unit():movement()._current_state then
@@ -176,28 +195,28 @@ function WeaponLionGadget1:_shoot_bipod_rays(debug_draw)
 		forward = ray_bipod_forward
 	}
 end
-function WeaponLionGadget1:_check_state()
+function WeaponLionGadget1:check_state()
+	if self._is_npc then
+		return false
+	end
 	local bipod_deployable = self:_is_deployable()
-	if not bipod_deployable and not self._on then
+	if not bipod_deployable and not self:is_deployed() then
 		managers.hud:show_hint({
 			text = managers.localization:text("hud_hint_bipod_nomount"),
 			time = 2
 		})
 	end
-	self._on = false
+	self._deployed = false
 	if not self._is_npc then
 		if managers.player:current_state() ~= "bipod" and bipod_deployable then
 			self._previous_state = managers.player:current_state()
 			managers.player:set_player_state("bipod")
-			self._on = true
+			self._deployed = true
 		elseif managers.player:current_state() == "bipod" then
-			managers.player:set_player_state(self._previous_state or "standard")
-			self._previous_state = nil
+			self:_unmount()
 		end
 	end
-	WeaponLionGadget1.super._check_state(self)
-	self._unit:set_extension_update_enabled(Idstring("base"), self._on)
+	self._unit:set_extension_update_enabled(Idstring("base"), self._deployed)
 end
 function WeaponLionGadget1:destroy(unit)
-	WeaponLionGadget1.super.destroy(self, unit)
 end

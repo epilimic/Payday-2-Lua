@@ -11,6 +11,13 @@ function SimpleGUIEffectSpewer:_particles_update(t, dt)
 		particle_data.pt = particle_data.pt + dt
 		particle_live_p = particle_data.plive_time == 0 and 1 or particle_data.pt / particle_data.plive_time
 		particle_data.particle:set_alpha(math.clamp(math.sin((particle_live_p + 0.2) * 150), 0, 1))
+		if self._particle_acceleration ~= 0 then
+			particle_data.particle_speed = particle_data.particle_speed + self._particle_acceleration * dt
+		end
+		if particle_data.speed_sway_speed ~= 0 and particle_data.speed_sway_distance ~= 0 then
+			particle_data.speed_sway_t = particle_data.speed_sway_t + dt
+			particle_data.particle_speed = particle_data.particle_speed + math.sin(particle_data.speed_sway_speed * particle_data.speed_sway_t) * particle_data.speed_sway_distance
+		end
 		local sx, sy = particle_data.particle:center()
 		particle_data.particle:move(particle_data.dir_x * particle_data.particle_speed * dt, particle_data.dir_y * particle_data.particle_speed * dt)
 		if self._particle_gravity ~= 0 then
@@ -46,13 +53,19 @@ function SimpleGUIEffectSpewer:_particles_update(t, dt)
 			local dir_x = ex - sx
 			local dir_y = ey - sy
 			local magnitude = (dir_x * dir_x + dir_y * dir_y) ^ 0.5
-			if magnitude ~= 0 then
+			local rotation = particle_data.particle:rotation()
+			local can_rotate = false
+			if self._particle_rotation_speed ~= 0 then
+				rotation = rotation + self._particle_rotation_speed * dt
+				can_rotate = true
+			elseif magnitude ~= 0 then
 				dir_x = dir_x / magnitude
 				dir_y = dir_y / magnitude
-				local rotation = math.atan2(dir_y, dir_x)
-				if math.abs(rotation - particle_data.start_rotation) < 90 then
-					particle_data.particle:set_rotation(rotation)
-				end
+				rotation = math.atan2(dir_y, dir_x)
+				can_rotate = math.abs(rotation - particle_data.start_rotation) < 90
+			end
+			if can_rotate then
+				particle_data.particle:set_rotation(rotation)
 			end
 		end
 	end
@@ -106,6 +119,8 @@ function SimpleGUIEffectSpewer:_spew_update(t, dt)
 			local dir_y = math.sin(rot)
 			local sway_distance = math.rand(self._min_particle_sway_distance, self._max_particle_sway_distance)
 			local sway_speed = math.rand(self._min_particle_sway_speed, self._max_particle_sway_speed)
+			local speed_sway_distance = math.rand(self._min_particle_speed_sway_distance, self._max_particle_speed_sway_distance)
+			local speed_sway_speed = math.rand(self._min_particle_speed_sway_speed, self._max_particle_speed_sway_speed)
 			local particle_speed = math.rand(self._min_particle_speed, self._max_particle_speed)
 			local plive_time = math.rand(self._min_plive_time, self._max_plive_time)
 			local particle_flip_speed = math.rand(self._min_particle_flip_speed, self._max_particle_flip_speed)
@@ -128,6 +143,9 @@ function SimpleGUIEffectSpewer:_spew_update(t, dt)
 				sway_distance = sway_distance,
 				sway_speed = sway_speed,
 				sway_t = math.rand(1),
+				speed_sway_speed = speed_sway_speed,
+				speed_sway_distance = speed_sway_distance,
+				speed_sway_t = math.rand(1),
 				flip_speed = particle_flip_speed,
 				flip_dir = math.random() < 0.5 and -1 or 1
 			}
@@ -203,15 +221,24 @@ function SimpleGUIEffectSpewer:init(params)
 	self._max_particle_w = params.max_particle_w or params.particle_w or 32
 	self._min_particle_h = params.min_particle_h or params.particle_h or 32
 	self._max_particle_h = params.max_particle_h or params.particle_h or 32
+	self._min_particle_end_w = params.min_particle_end_w or params.particle_w or 32
+	self._max_particle_end_w = params.max_particle_end_w or params.particle_w or 32
+	self._min_particle_end_h = params.min_particle_end_h or params.particle_h or 32
+	self._max_particle_end_h = params.max_particle_end_h or params.particle_h or 32
 	self._min_particle_sway_distance = params.min_particle_sway_distance or params.min_sway_distance or params.particle_sway_distance or params.sway_distance or 0
 	self._max_particle_sway_distance = params.max_particle_sway_distance or params.max_sway_distance or params.particle_sway_distance or params.sawy_distance or 0
 	self._min_particle_sway_speed = params.min_particle_sway_speed or params.min_sway_speed or params.particle_sway_speed or params.sway_speed or 0
 	self._max_particle_sway_speed = params.max_particle_sway_speed or params.max_sway_speed or params.particle_sway_speed or params.sawy_speed or 0
+	self._min_particle_speed_sway_distance = params.min_particle_speed_sway_distance or params.min_speed_sway_distance or params.particle_speed_sway_distance or params.speed_sway_distance or 0
+	self._max_particle_speed_sway_distance = params.max_particle_speed_sway_distance or params.max_speed_sway_distance or params.particle_speed_sway_distance or params.speed_sawy_distance or 0
+	self._min_particle_speed_sway_speed = params.min_particle_speed_sway_speed or params.min_speed_sway_speed or params.particle_speed_sway_speed or params.speed_sway_speed or 0
+	self._max_particle_speed_sway_speed = params.max_particle_speed_sway_speed or params.max_speed_sway_speed or params.particle_speed_sway_speed or params.speed_sawy_speed or 0
 	self._min_particle_flip_speed = params.min_particle_flip_speed or params.particle_flip_speed or 0
 	self._max_particle_flip_speed = params.max_particle_flip_speed or params.particle_flip_speed or 0
 	self._particle_flip_dimension = params.particle_flip_dimension or nil
 	self._particle_acceleration = params.particle_acceleration or 0
 	self._particle_gravity = params.particle_gravity or params.gravity or 0
+	self._particle_rotation_speed = params.particle_rotation_speed or params.rotation_speed or 0
 	self._particle_blend_mode = params.particle_blend_mode or "add"
 	self._particle_colors = params.particle_colors
 	self._particle_textures = params.particle_textures or self.DEFAULT_PARTICLE_TEXTURES or {}
@@ -226,6 +253,205 @@ function SimpleGUIEffectSpewer:init(params)
 	})
 	self._update_thread = self._particle_panel:animate(callback(self, self, "animation_update"))
 	self._particle_panel:set_layer(self._layer)
+end
+function SimpleGUIEffectSpewer.lootdrop_steam_drop_flip_wait(panel)
+end
+function SimpleGUIEffectSpewer.lootdrop_steam_drop_flip_card(panel)
+	local color = tweak_data.economy.rarities.legendary.color
+	local particle_colors = {
+		red = 1,
+		green = 1,
+		blue = 1
+	}
+	SimpleGUIEffectSpewer:new({
+		spew_time = 0,
+		spew_at_start = true,
+		plive_time = 6,
+		particle_speed = 0,
+		max_num_particles = 1,
+		spawn_interval = 0.1,
+		particle_colors = particle_colors,
+		particle_w = panel:h() * 4,
+		particle_h = panel:h() * 4,
+		particle_textures = {
+			"guis/dlcs/infamous/textures/pd2/infamous_tree/spinner_01_df"
+		},
+		particle_alpha = 0.6,
+		layer = panel:world_layer() - 1,
+		parent_panel = panel,
+		particle_rotation_speed = 180
+	})
+	SimpleGUIEffectSpewer:new({
+		spew_time = 0,
+		spew_at_start = true,
+		plive_time = 6,
+		particle_speed = 0,
+		max_num_particles = 1,
+		spawn_interval = 0.1,
+		particle_colors = particle_colors,
+		particle_w = panel:h() * 4,
+		particle_h = panel:h() * 4,
+		particle_textures = {
+			"guis/dlcs/infamous/textures/pd2/infamous_tree/spinner_02_df"
+		},
+		particle_alpha = 0.6,
+		layer = panel:world_layer() - 1,
+		parent_panel = panel,
+		particle_rotation_speed = -180
+	})
+end
+function SimpleGUIEffectSpewer.lootdrop_steam_drop_show_wait(panel)
+	managers.menu_component:post_event("cash_loot_drop_intro")
+end
+function SimpleGUIEffectSpewer.lootdrop_steam_drop_show_item(panel)
+	local color = tweak_data.economy.rarities.legendary.color
+	local particle_colors = {
+		red = {
+			color.red - 0.2,
+			color.red + 0.2
+		},
+		green = {
+			color.green - 0.2,
+			color.green + 0.2
+		},
+		blue = {
+			color.blue - 0.2,
+			color.blue + 0.2
+		}
+	}
+	for i = 1, 4 do
+		SimpleGUIEffectSpewer:new({
+			spew_time = 0.44,
+			min_plive_time = 0.65,
+			max_plive_time = 1.9,
+			spawn_interval = 0.09,
+			min_particle_speed = 10,
+			max_particle_speed = 30,
+			max_num_particles = 25,
+			particle_colors = particle_colors,
+			particle_textures = {
+				"guis/textures/pd2/particles/bulb"
+			},
+			particle_sway_distance = 4.4,
+			particle_sway_speed = 180,
+			particle_w = 8,
+			particle_h = 8,
+			parent_panel = panel,
+			layer = panel:world_layer() + 10,
+			gravity = 50,
+			particle_rotation_speed = 180
+		})
+		SimpleGUIEffectSpewer:new({
+			spew_time = 0.44,
+			min_plive_time = 0.65,
+			max_plive_time = 1.9,
+			spawn_interval = 0.09,
+			min_particle_speed = 15,
+			max_particle_speed = 45,
+			max_num_particles = 35,
+			particle_colors = particle_colors,
+			particle_textures = {
+				"guis/textures/pd2/particles/bulb"
+			},
+			particle_sway_distance = 4.4,
+			particle_sway_speed = 180,
+			particle_speed_sway_distance = 5,
+			particle_speed_sway_speed = 90,
+			particle_alpha = 0.6,
+			particle_w = 12,
+			particle_h = 12,
+			parent_panel = panel,
+			layer = panel:world_layer() + 10,
+			gravity = 75,
+			particle_rotation_speed = 90
+		})
+		SimpleGUIEffectSpewer:new({
+			spew_time = 0.2,
+			min_plive_time = 0.1,
+			max_plive_time = 0.45,
+			spawn_interval = 0.09,
+			min_particle_speed = 415,
+			max_particle_speed = 605,
+			max_num_particles = 60,
+			particle_colors = particle_colors,
+			particle_textures = {
+				"guis/textures/pd2/particles/spark"
+			},
+			particle_w = 4,
+			particle_h = 4,
+			parent_panel = panel,
+			layer = panel:world_layer() + 10
+		})
+		SimpleGUIEffectSpewer:new({
+			spew_time = 0.4,
+			min_plive_time = 0.2,
+			max_plive_time = 0.35,
+			spawn_interval = 0.08,
+			min_particle_speed = 395,
+			max_particle_speed = 505,
+			max_num_particles = 35,
+			particle_colors = particle_colors,
+			particle_textures = {
+				"guis/textures/pd2/particles/spark"
+			},
+			particle_w = 8,
+			particle_h = 8,
+			parent_panel = panel,
+			layer = panel:world_layer() + 10
+		})
+		SimpleGUIEffectSpewer:new({
+			spew_time = 0,
+			spew_at_start = true,
+			plive_time = 1.9,
+			particle_speed = 0,
+			max_num_particles = 2,
+			spawn_interval = 0.1,
+			particle_colors = particle_colors,
+			particle_w = panel:h() * 2.5,
+			particle_h = panel:h() * 2.5,
+			particle_textures = {
+				"guis/textures/pd2/particles/fill"
+			},
+			parent_panel = panel,
+			particle_alpha = 0.2,
+			layer = panel:world_layer() + 10
+		})
+		SimpleGUIEffectSpewer:new({
+			spew_time = 0,
+			spew_at_start = true,
+			plive_time = 1.5,
+			particle_speed = 0,
+			max_num_particles = 1,
+			spawn_interval = 0.1,
+			particle_colors = particle_colors,
+			particle_w = panel:h() * 1.55,
+			particle_h = panel:h() * 1.55,
+			particle_textures = {
+				"guis/textures/pd2/particles/fill"
+			},
+			parent_panel = panel,
+			particle_alpha = 0.4,
+			layer = panel:world_layer() + 10
+		})
+		SimpleGUIEffectSpewer:new({
+			spew_time = 0,
+			spew_at_start = true,
+			plive_time = 2,
+			particle_speed = 0,
+			max_num_particles = 2,
+			spawn_interval = 0.1,
+			particle_colors = particle_colors,
+			particle_w = panel:h() * 4,
+			particle_h = panel:h() * 4,
+			particle_textures = {
+				"guis/textures/pd2/particles/fill"
+			},
+			parent_panel = panel,
+			particle_alpha = 0.1,
+			layer = panel:world_layer() + 10
+		})
+	end
+	managers.menu_component:post_event("cash_loot_drop_reveal")
 end
 function SimpleGUIEffectSpewer.sample_boom()
 	local ws = managers.menu_component:fullscreen_ws()

@@ -6,7 +6,8 @@ function AiGlobalEventUnitElement:init(unit)
 	table.insert(self._save_values, "AI_event")
 	table.insert(self._save_values, "blame")
 end
-function AiGlobalEventUnitElement:post_init()
+function AiGlobalEventUnitElement:post_init(...)
+	AiGlobalEventUnitElement.super.post_init(self, ...)
 	if self._hed.event then
 		self._hed.wave_mode = self._hed.event
 		self._hed.event = nil

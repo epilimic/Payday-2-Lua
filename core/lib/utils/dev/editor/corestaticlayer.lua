@@ -102,6 +102,19 @@ function StaticLayer:set_unit_positions(pos)
 	if not self._grab then
 		managers.editor:set_grid_altitude(pos.z)
 	end
+	if managers.editor:use_beta_undo() then
+		if not self._undo_last_move_t or TimerManager:now() - self._undo_last_move_t > 1 then
+			self._undo_last_move_pos = {}
+			for _, unit in ipairs(self._selected_units) do
+				self._undo_last_move_pos[#self._undo_last_move_pos + 1] = {
+					unit = unit,
+					pos = unit:position(),
+					rot = unit:rotation()
+				}
+			end
+		end
+		self._undo_last_move_t = TimerManager:now()
+	end
 	local reference = self._selected_unit
 	for _, unit in ipairs(self._selected_units) do
 		if unit ~= reference then
@@ -120,6 +133,19 @@ function StaticLayer:set_unit_position(unit, pos, rot)
 	unit:set_moving()
 end
 function StaticLayer:set_unit_rotations(rot)
+	if managers.editor:use_beta_undo() then
+		if not self._undo_last_move_t or TimerManager:now() - self._undo_last_move_t > 1 then
+			self._undo_last_move_pos = {}
+			for _, unit in ipairs(self._selected_units) do
+				self._undo_last_move_pos[#self._undo_last_move_pos + 1] = {
+					unit = unit,
+					pos = unit:position(),
+					rot = unit:rotation()
+				}
+			end
+		end
+		self._undo_last_move_t = TimerManager:now()
+	end
 	local reference = self._selected_unit
 	local rot = rot * reference:rotation()
 	reference:set_rotation(rot)
@@ -431,6 +457,34 @@ function StaticLayer:get_help(text)
 	text = text .. "Reset rotation:     Numpad-Enter (reset but keeps Z-rotation, combine with shift to reset Z as well)" .. n
 	text = text .. "Hide / Unide:       Ctrl+J will hide the selected units, CTRL+SHIFT+J will unide all hidden units" .. n
 	return text
+end
+function StaticLayer:undo()
+	if not managers.editor:use_beta_undo() then
+		return
+	end
+	if self._undo_last_move_pos then
+		self._redo_last_move_pos = {}
+		for _, pos_info in ipairs(self._undo_last_move_pos) do
+			local unit = pos_info.unit
+			if alive(unit) then
+				local new_pos = pos_info.pos
+				local new_rot = pos_info.rot
+				self._redo_last_move_pos[#self._redo_last_move_pos + 1] = {
+					unit = unit,
+					pos = unit:position(),
+					rot = unit:rotation()
+				}
+				unit:set_position(new_pos)
+				unit:unit_data().world_pos = new_pos
+				self:_on_unit_moved(unit, new_pos)
+				unit:set_moving()
+				unit:set_rotation(new_rot)
+				self:_on_unit_rotated(unit, new_rot)
+			end
+		end
+		self._undo_last_move_pos = self._redo_last_move_pos
+		self._redo_last_move_pos = nil
+	end
 end
 function StaticLayer:deactivate()
 	StaticLayer.super.deactivate(self)

@@ -553,6 +553,13 @@ function MenuNodeGui:_create_menu_item(row_item)
 			h = 2
 		})
 		self:_align_chat(row_item)
+	elseif row_item.type == "input" then
+		row_item.gui_panel = self:_text_item_part(row_item, self.item_panel, self:_right_align())
+		self.ws:connect_keyboard(Input:keyboard())
+		self.item_panel:enter_text(callback(self, self, "enter_text"))
+		self.item_panel:key_press(callback(self, self, "key_press"))
+		self.item_panel:key_release(callback(self, self, "key_release"))
+		self:_align_normal(row_item)
 	elseif row_item.type == "friend" then
 		local cot_align = row_item.align == "right" and "left" or row_item.align == "left" and "right" or row_item.align
 		row_item.gui_panel = self.item_panel:panel({
@@ -651,6 +658,84 @@ function MenuNodeGui:_create_info_panel(row_item)
 		wrap = true,
 		word_wrap = true
 	})
+end
+function MenuNodeGui:_shift()
+	local k = Input:keyboard()
+	return not k:down("left shift") and not k:down("right shift") and k:has_button("shift") and k:down("shift")
+end
+function MenuNodeGui.blink(o)
+	while true do
+		o:set_color(Color(0, 1, 1, 1))
+		wait(0.3)
+		o:set_color(Color.white)
+		wait(0.3)
+	end
+end
+function MenuNodeGui:enter_text(o, s)
+	local row_item = self._highlighted_item and self:row_item(self._highlighted_item)
+	if row_item and row_item.type == "input" then
+		self._highlighted_item:set_input_text(self._highlighted_item:input_text() .. s)
+		row_item.gui_panel:set_text(self._highlighted_item:input_text())
+	end
+end
+function MenuNodeGui:update_key_down(o, k)
+	local row_item = self._highlighted_item and self:row_item(self._highlighted_item)
+	if row_item and row_item.type == "input" then
+		wait(0.6)
+		row_item = self._highlighted_item and self:row_item(self._highlighted_item)
+		while row_item and row_item.type == "input" and self._key_pressed == k do
+			local text = self._highlighted_item:input_text()
+			local n = utf8.len(text)
+			if self._key_pressed == Idstring("backspace") then
+				text = utf8.sub(text, 0, math.max(n - 1, 0))
+			elseif self._key_pressed == Idstring("delete") then
+			elseif self._key_pressed == Idstring("left") then
+			elseif self._key_pressed == Idstring("right") then
+				self._key_pressed = false
+			elseif self._key_ctrl_pressed == true and k == Idstring("v") then
+				return
+			end
+			self._highlighted_item:set_input_text(text)
+			row_item.gui_panel:set_text(self._highlighted_item:input_text())
+			wait(0.03)
+			row_item = self._highlighted_item and self:row_item(self._highlighted_item)
+		end
+	end
+end
+function MenuNodeGui:key_release(o, k)
+	if self._key_pressed == k then
+		self._key_pressed = false
+	end
+	if k == Idstring("left ctrl") or k == Idstring("right ctrl") then
+		self._key_ctrl_pressed = false
+	end
+end
+function MenuNodeGui:key_press(o, k)
+	local row_item = self._highlighted_item and self:row_item(self._highlighted_item)
+	if row_item and row_item.type == "input" then
+		local text = self._highlighted_item:input_text()
+		local n = utf8.len(text)
+		self._key_pressed = k
+		o:stop()
+		o:animate(callback(self, self, "update_key_down"), k)
+		if k == Idstring("backspace") then
+			text = utf8.sub(text, 0, math.max(n - 1, 0))
+		elseif k == Idstring("delete") then
+		elseif k == Idstring("left") then
+		elseif k == Idstring("right") then
+		elseif self._key_pressed == Idstring("end") then
+		elseif self._key_pressed == Idstring("home") then
+		elseif k == Idstring("enter") then
+		elseif k == Idstring("esc") then
+			return
+		elseif k == Idstring("left ctrl") or k == Idstring("right ctrl") then
+			self._key_ctrl_pressed = true
+		elseif self._key_ctrl_pressed == true and k == Idstring("v") then
+			return
+		end
+		self._highlighted_item:set_input_text(text)
+		row_item.gui_panel:set_text(self._highlighted_item:input_text())
+	end
 end
 function MenuNodeGui:_set_lobby_campaign(row_item)
 	if not MenuNodeGui.lobby_campaign then

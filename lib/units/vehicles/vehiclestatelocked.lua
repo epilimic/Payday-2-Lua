@@ -8,3 +8,12 @@ function VehicleStateLocked:enter(state_data, enter_data)
 	self:disable_interactions()
 	self._unit:vehicle_driving():set_input(0, 0, 1, 1, false, false, 2)
 end
+function VehicleStateLocked:allow_exit()
+	return true
+end
+function VehicleStateLocked:stop_vehicle()
+	return true
+end
+function VehicleStateLocked:is_vulnerable()
+	return false
+end

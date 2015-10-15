@@ -172,7 +172,7 @@ function CoreEditor:build_ref_coordinate_system()
 		})
 	end
 	self._ref_coordinate_system:set_value(self._coordinate_system)
-	self._ref_coordinate_system:set_size(Vector3(60, 0, 0))
+	self._ref_coordinate_system:set_size(Vector3(60, -1, 0))
 	self._toolbar:add_control(self._ref_coordinate_system)
 	self._ref_coordinate_system:connect("EVT_COMMAND_COMBOBOX_SELECTED", callback(self, self, "change_combo_box"), {
 		value = "_coordinate_system",
@@ -203,7 +203,7 @@ function CoreEditor:build_grid_sizes(icons_path)
 	end
 	sizes:set_value(self._grid_size)
 	sizes:set_tool_tip(tip)
-	sizes:set_size(Vector3(55, 0, 0))
+	sizes:set_size(Vector3(55, -1, 0))
 	self._toolbar:add_control(sizes)
 	sizes:connect("EVT_COMMAND_COMBOBOX_SELECTED", callback(self, self, "change_combo_box"), {
 		value = "_grid_size",
@@ -236,7 +236,7 @@ function CoreEditor:build_snap_rotations()
 	end
 	rotations:set_value(self._snap_rotation)
 	rotations:set_tool_tip(tip)
-	rotations:set_size(Vector3(55, 0, 0))
+	rotations:set_size(Vector3(55, -1, 0))
 	self._toolbar:add_control(rotations)
 	rotations:connect("EVT_COMMAND_COMBOBOX_SELECTED", callback(self, self, "change_combo_box"), {
 		value = "_snap_rotation",

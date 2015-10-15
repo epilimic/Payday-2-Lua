@@ -14,6 +14,7 @@ function ItemSlider:init(data_node, parameters)
 		self._max = data_node.max or self._max
 		self._step = data_node.step or self._step
 		self._show_value = data_node.show_value
+		self._show_slider_text = self._show_value or data_node.show_slider_text
 	end
 	self._min = tonumber(self._min)
 	self._max = tonumber(self._max)
@@ -126,7 +127,8 @@ function ItemSlider:setup_gui(node, row_item)
 		layer = node.layers.items + 1,
 		text = "" .. math.floor(0) .. "%",
 		blend_mode = node.row_item_blend_mode or "normal",
-		render_template = Idstring("VertexColorTextured")
+		render_template = Idstring("VertexColorTextured"),
+		visible = self._show_slider_text
 	})
 	if row_item.help_text then
 	end
@@ -137,8 +139,9 @@ function ItemSlider:reload(row_item, node)
 	if not row_item then
 		return
 	end
-	local value = self:show_value() and string.format("%.0f", self:value()) or string.format("%.0f", self:percentage()) .. "%"
+	local value = self:show_value() and string.format("%.5f", self:value()) or string.format("%.0f", self:percentage()) .. "%"
 	row_item.gui_slider_text:set_text(value)
+	row_item.gui_slider_text:set_visible(self._show_slider_text)
 	local where = row_item.gui_slider:left() + row_item.gui_slider:w() * (self:percentage() / 100)
 	row_item.gui_slider_marker:set_center_x(where)
 	row_item.gui_slider_gfx:set_w(row_item.gui_slider:w() * (self:percentage() / 100))
@@ -190,7 +193,7 @@ function ItemSlider:_layout(node, row_item)
 	row_item.gui_slider_bg:set_w(row_item.gui_panel:w())
 	row_item.gui_slider_bg:set_x(0)
 	row_item.gui_slider_bg:set_center_y(h / 2)
-	row_item.gui_slider_text:set_font_size(row_item.font and Idstring(row_item.font) or _G.tweak_data.menu.stats_font_size)
+	row_item.gui_slider_text:set_font_size(row_item.font_size or _G.tweak_data.menu.stats_font_size)
 	row_item.gui_slider_text:set_size(row_item.gui_slider_bg:size())
 	row_item.gui_slider_text:set_position(row_item.gui_slider_bg:position())
 	row_item.gui_slider_text:set_y(row_item.gui_slider_text:y())

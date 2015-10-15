@@ -3,8 +3,9 @@ local CoreMaterialEditorParameter = require("core/lib/utils/dev/tools/material_e
 local CoreMaterialEditorTexture = CoreMaterialEditorTexture or class(CoreMaterialEditorParameter)
 function CoreMaterialEditorTexture:init(parent, editor, parameter_info, parameter_node)
 	CoreMaterialEditorParameter.init(self, parent, editor, parameter_info, parameter_node)
-	local text = self._global_texture and "environment_cubemap (Global)" or self._value
-	self._text = EWS:StaticText(self._right_panel, text, "", "")
+	local text = self._value .. (self._global_texture and " (Global)" or "")
+	self._text = EWS:TextCtrl(self._right_panel, text, "", "TE_READONLY")
+	self._text:set_background_colour(EWS:get_system_colour("3DFACE") * 255:unpack())
 	self._text:set_font_family("FONTFAMILY_TELETYPE")
 	self._text:set_font_weight("FONTWEIGHT_BOLD")
 	self._right_box:add(self._text, 1, 4, "ALL,EXPAND")
@@ -42,19 +43,21 @@ function CoreMaterialEditorTexture:on_open_texture()
 	end
 end
 function CoreMaterialEditorTexture:on_pick_global_texture()
-	local dialog = EWS:SingleChoiceDialog(self._editor._main_frame, "Pick a global texture.", "Global Textures", {
-		"environment_cubemap"
-	}, "")
+	local texture_list = {}
+	for _, texture_id in ipairs(GlobalTextureManager:list_textures()) do
+		table.insert(texture_list, texture_id:t())
+	end
+	local dialog = EWS:SingleChoiceDialog(self._editor._main_frame, "Pick a global texture.", "Global Textures", texture_list, "")
 	dialog:show_modal()
 	local str = dialog:get_string_selection()
 	if str ~= "" then
-		self._value = "current_global_texture"
+		self._value = str
 		self._global_texture = true
-		self._global_texture_type = "cube"
+		self._global_texture_type = str == "current_global_texture" and "cube" or "texture"
 		self._node:clear_parameter("file")
 		self._node:set_parameter("global_texture", self._value)
 		self._node:set_parameter("type", self._global_texture_type)
-		self._text:set_value("environment_cubemap (Global)")
+		self._text:set_value(self._value .. " (Global)")
 		self._editor:_update_output()
 		self:update_live()
 	end

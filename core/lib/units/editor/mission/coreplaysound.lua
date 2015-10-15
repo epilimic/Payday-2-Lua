@@ -99,6 +99,11 @@ function CorePlaySoundUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	local names = {
+		"ai_spawn_enemy",
+		"ai_spawn_civilian"
+	}
+	self:_build_add_remove_unit_from_list(panel, panel_sizer, self._hed.elements, names)
 	local paths = managers.sound_environment:scene_paths()
 	if #paths <= 0 then
 		local help = {panel = panel, sizer = panel_sizer}

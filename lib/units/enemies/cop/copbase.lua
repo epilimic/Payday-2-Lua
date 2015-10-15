@@ -163,8 +163,9 @@ function CopBase:load(data)
 	end
 end
 function CopBase:swap_material_config(material_applied_clbk)
-	local new_material = self._material_translation_map[tostring(self._unit:material_config():key())]
+	local new_material = self._material_translation_map[self._loading_material_key or tostring(self._unit:material_config():key())]
 	if new_material then
+		self._loading_material_key = new_material:key()
 		self._is_in_original_material = not self._is_in_original_material
 		self._unit:set_material_config(new_material, true, material_applied_clbk and callback(self, self, "on_material_applied", material_applied_clbk), 100)
 		if not material_applied_clbk then
@@ -179,6 +180,7 @@ function CopBase:on_material_applied(material_applied_clbk)
 	if not alive(self._unit) then
 		return
 	end
+	self._loading_material_key = nil
 	if self._unit:interaction() then
 		self._unit:interaction():refresh_material()
 	end

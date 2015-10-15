@@ -18,6 +18,8 @@ function EnvironmentManager:init()
 		CoreEnvironmentFeeder.GlobalLightColorFeeder,
 		CoreEnvironmentFeeder.GlobalLightColorScaleFeeder,
 		CoreEnvironmentFeeder.CubeMapTextureFeeder,
+		CoreEnvironmentFeeder.WorldOverlayTextureFeeder,
+		CoreEnvironmentFeeder.WorldOverlayMaskTextureFeeder,
 		CoreEnvironmentFeeder.SkyRotationFeeder,
 		CoreEnvironmentFeeder.UnderlaySkyTopColorFeeder,
 		CoreEnvironmentFeeder.UnderlaySkyTopColorScaleFeeder,

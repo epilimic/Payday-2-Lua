@@ -27,6 +27,10 @@ function PlayerInventory:init(unit)
 	self._melee_weapon_unit_name = nil
 end
 function PlayerInventory:pre_destroy(unit)
+	if self._weapon_add_clbk then
+		managers.enemy:remove_delayed_clbk(self._weapon_add_clbk)
+		self._weapon_add_clbk = nil
+	end
 	self:destroy_all_items()
 end
 function PlayerInventory:destroy_all_items()
@@ -134,7 +138,7 @@ function PlayerInventory:add_unit_by_name(new_unit_name, equip, instant)
 	new_unit:base():setup(setup_data)
 	self:add_unit(new_unit, equip, instant)
 end
-function PlayerInventory:add_unit_by_factory_name(factory_name, equip, instant, blueprint, texture_switches)
+function PlayerInventory:add_unit_by_factory_name(factory_name, equip, instant, blueprint, cosmetics, texture_switches)
 	local factory_weapon = tweak_data.weapon.factory[factory_name]
 	local ids_unit_name = Idstring(factory_weapon.unit)
 	if not managers.dyn_resource:is_resource_ready(Idstring("unit"), ids_unit_name, managers.dyn_resource.DYN_RESOURCES_PACKAGE) then
@@ -142,6 +146,7 @@ function PlayerInventory:add_unit_by_factory_name(factory_name, equip, instant, 
 	end
 	local new_unit = World:spawn_unit(ids_unit_name, Vector3(), Rotation())
 	new_unit:base():set_factory_data(factory_name)
+	new_unit:base():set_cosmetics_data(cosmetics)
 	new_unit:base():set_texture_switches(texture_switches)
 	if blueprint then
 		new_unit:base():assemble_from_blueprint(factory_name, blueprint)
@@ -236,7 +241,19 @@ function PlayerInventory:_send_equipped_weapon()
 		return
 	end
 	local blueprint_string = self:equipped_unit():base().blueprint_to_string and self:equipped_unit():base():blueprint_to_string() or ""
-	self._unit:network():send("set_equipped_weapon", index, blueprint_string)
+	local cosmetics_string = ""
+	local cosmetics_id = self:equipped_unit():base().get_cosmetics_id and self:equipped_unit():base():get_cosmetics_id() or nil
+	if cosmetics_id then
+		local cosmetics_quality = self:equipped_unit():base().get_cosmetics_quality and self:equipped_unit():base():get_cosmetics_quality() or nil
+		local cosmetics_bonus = self:equipped_unit():base().get_cosmetics_bonus and self:equipped_unit():base():get_cosmetics_bonus() or nil
+		local entry = tostring(cosmetics_id)
+		local quality = tostring(tweak_data.economy:get_index_from_entry("qualities", cosmetics_quality) or 1)
+		local bonus = cosmetics_bonus and "1" or "0"
+		cosmetics_string = entry .. "-" .. quality .. "-" .. bonus
+	else
+		cosmetics_string = "nil-1-0"
+	end
+	self._unit:network():send("set_equipped_weapon", index, blueprint_string, cosmetics_string)
 end
 function PlayerInventory:unequip_selection(selection_index, instant)
 	if not selection_index or selection_index == self._equipped_selection then
@@ -366,23 +383,61 @@ function PlayerInventory:save(data)
 		data.mask_visibility = self._mask_visibility
 		data.blueprint_string = self:equipped_unit():base().blueprint_to_string and self:equipped_unit():base():blueprint_to_string() or nil
 		data.gadget_on = self:equipped_unit():base().gadget_on and self:equipped_unit():base()._gadget_on
+		local cosmetics_string = ""
+		local cosmetics_id = self:equipped_unit():base().get_cosmetics_id and self:equipped_unit():base():get_cosmetics_id() or nil
+		if cosmetics_id then
+			local cosmetics_quality = self:equipped_unit():base().get_cosmetics_quality and self:equipped_unit():base():get_cosmetics_quality() or nil
+			local cosmetics_bonus = self:equipped_unit():base().get_cosmetics_bonus and self:equipped_unit():base():get_cosmetics_bonus() or nil
+			local entry = tostring(cosmetics_id)
+			local quality = tostring(tweak_data.economy:get_index_from_entry("qualities", cosmetics_quality) or 1)
+			local bonus = cosmetics_bonus and "1" or "0"
+			cosmetics_string = entry .. "-" .. quality .. "-" .. bonus
+		else
+			cosmetics_string = "nil-1-0"
+		end
+		data.cosmetics_string = cosmetics_string
+	end
+end
+function PlayerInventory:cosmetics_string_from_peer(peer, weapon_name)
+	if peer then
+		local outfit = peer:blackmarket_outfit()
+		local cosmetics = outfit.primary.factory_id .. "_npc" == weapon_name and outfit.primary.cosmetics or outfit.secondary.factory_id .. "_npc" == weapon_name and outfit.secondary.cosmetics
+		if cosmetics then
+			local quality = tostring(tweak_data.economy:get_index_from_entry("qualities", cosmetics.quality) or 1)
+			return cosmetics.id .. "-" .. quality .. "-" .. (cosmetics.bonus and "1" or "0")
+		else
+			return "nil-1-0"
+		end
 	end
 end
 function PlayerInventory:load(data)
 	if data.equipped_weapon_index then
-		local eq_weap_name = self._get_weapon_name_from_sync_index(data.equipped_weapon_index)
-		if type(eq_weap_name) == "string" then
-			self:add_unit_by_factory_name(eq_weap_name, true, true, data.blueprint_string)
-			self:synch_weapon_gadget_state(data.gadget_on)
-		else
-			self._unit:inventory():add_unit_by_name(eq_weap_name, true, true)
-		end
-		if self._unit:unit_data().mugshot_id then
-			local icon = self:equipped_unit():base():weapon_tweak_data().hud_icon
-			managers.hud:set_mugshot_weapon(self._unit:unit_data().mugshot_id, icon, self:equipped_unit():base():weapon_tweak_data().use_data.selection_index)
-		end
+		self._weapon_add_clbk = "playerinventory_load"
+		local delayed_data = {}
+		delayed_data.equipped_weapon_index = data.equipped_weapon_index
+		delayed_data.blueprint_string = data.blueprint_string
+		delayed_data.cosmetics_string = data.cosmetics_string
+		delayed_data.gadget_on = data.gadget_on
+		managers.enemy:add_delayed_clbk(self._weapon_add_clbk, callback(self, self, "_clbk_weapon_add", delayed_data), Application:time() + 1)
 	end
 	self._mask_visibility = data.mask_visibility and true or false
+end
+function PlayerInventory:_clbk_weapon_add(data)
+	self._weapon_add_clbk = nil
+	if not alive(self._unit) then
+		return
+	end
+	local eq_weap_name = self._get_weapon_name_from_sync_index(data.equipped_weapon_index)
+	if type(eq_weap_name) == "string" then
+		self:add_unit_by_factory_name(eq_weap_name, true, true, data.blueprint_string, self:cosmetics_string_from_peer(managers.network:session():peer_by_unit(self._unit), eq_weap_name) or data.cosmetics_string)
+		self:synch_weapon_gadget_state(data.gadget_on)
+	else
+		self._unit:inventory():add_unit_by_name(eq_weap_name, true, true)
+	end
+	if self._unit:unit_data().mugshot_id then
+		local icon = self:equipped_unit():base():weapon_tweak_data().hud_icon
+		managers.hud:set_mugshot_weapon(self._unit:unit_data().mugshot_id, icon, self:equipped_unit():base():weapon_tweak_data().use_data.selection_index)
+	end
 end
 function PlayerInventory:set_mask_visibility(state)
 	self._mask_visibility = state

@@ -12,7 +12,8 @@ function SpecialObjectiveGroupElement:init(unit)
 	table.insert(self._save_values, "spawn_instigator_ids")
 	table.insert(self._save_values, "mode")
 end
-function SpecialObjectiveGroupElement:post_init()
+function SpecialObjectiveGroupElement:post_init(...)
+	SpecialObjectiveGroupElement.super.post_init(self, ...)
 end
 function SpecialObjectiveGroupElement:draw_links(t, dt, selected_unit, all_units)
 	SpecialObjectiveUnitElement.super.draw_links(self, t, dt, selected_unit)

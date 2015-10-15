@@ -154,7 +154,7 @@ function GroupAIStateStreet:_begin_assault()
 	assault_data.use_smoke_timer = 0
 	assault_data.force_spawned = 0
 	if 0 < self._hostage_headcount then
-		assault_data.phase_end_t = assault_task.phase_end_t + self:_get_difficulty_dependent_value(tweak_data.group_ai.street.assault.hostage_hesitation_delay)
+		assault_data.phase_end_t = assault_data.phase_end_t + self:_get_difficulty_dependent_value(tweak_data.group_ai.street.assault.hostage_hesitation_delay)
 		assault_data.is_hesitating = true
 		assault_data.voice_delay = self._t + (assault_data.phase_end_t - self._t) / 2
 	end
