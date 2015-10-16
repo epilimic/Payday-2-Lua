@@ -2241,6 +2241,66 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.mason_vanguard_veteran.dlc = "steel"
 	self.masks.mason_vanguard_veteran.texture_bundle_folder = "steel"
 	self.masks.mason_vanguard_veteran.type = "helmet"
+	self.masks.rus_hat = {}
+	self.masks.rus_hat.unit = "units/pd2_crimefest_2015/update_2/masks/rus_hat/msk_rus_hat"
+	self.masks.rus_hat.name_id = "bm_msk_rus_hat"
+	self.masks.rus_hat.pcs = {
+		10,
+		20,
+		30,
+		40
+	}
+	self.masks.rus_hat.sort_number = 8
+	self.masks.rus_hat.value = 0
+	self.masks.rus_hat.type = "helmet"
+	self.masks.sputnik = {}
+	self.masks.sputnik.unit = "units/pd2_crimefest_2015/update_2/masks/sputnik/msk_sputnik"
+	self.masks.sputnik.name_id = "bm_msk_sputnik"
+	self.masks.sputnik.pcs = {
+		10,
+		20,
+		30,
+		40
+	}
+	self.masks.sputnik.sort_number = 8
+	self.masks.sputnik.value = 0
+	self.masks.sputnik.type = "helmet"
+	self.masks.tiara = {}
+	self.masks.tiara.unit = "units/pd2_crimefest_2015/update_2/masks/tiara/msk_tiara"
+	self.masks.tiara.name_id = "bm_msk_tiara"
+	self.masks.tiara.pcs = {
+		10,
+		20,
+		30,
+		40
+	}
+	self.masks.tiara.sort_number = 8
+	self.masks.tiara.value = 0
+	self.masks.tiara.type = "tiara"
+	self.masks.tiara.skip_mask_on_sequence = true
+	self.masks.baba_yaga = {}
+	self.masks.baba_yaga.unit = "units/pd2_crimefest_2015/update_2/masks/baba_yaga/msk_baba_yaga"
+	self.masks.baba_yaga.name_id = "bm_msk_baba_yaga"
+	self.masks.baba_yaga.pcs = {
+		10,
+		20,
+		30,
+		40
+	}
+	self.masks.baba_yaga.sort_number = 8
+	self.masks.baba_yaga.value = 0
+	self.masks.vlad_armor = {}
+	self.masks.vlad_armor.unit = "units/pd2_crimefest_2015/update_2/masks/vlad_armor/msk_vlad_armor"
+	self.masks.vlad_armor.name_id = "bm_msk_vlad_armor"
+	self.masks.vlad_armor.pcs = {
+		10,
+		20,
+		30,
+		40
+	}
+	self.masks.vlad_armor.value = 0
+	self.masks.vlad_armor.sort_number = 8
+	self.masks.vlad_armor.type = "helmet"
 	if SystemInfo:platform() == Idstring("PS3") then
 		self.masks.sweettooth = {}
 		self.masks.sweettooth.unit = "units/pd2_dlc_consoles/masks/msk_sweettooth/msk_sweettooth"

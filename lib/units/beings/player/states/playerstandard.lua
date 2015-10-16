@@ -148,6 +148,8 @@ function PlayerStandard:_enter(enter_data)
 				self._camera_unit:anim_state_machine():set_global("helmet_equip", 1)
 			elseif equipped_mask_type == "beard" then
 				self._camera_unit:anim_state_machine():set_global("beard_equip", 1)
+			elseif equipped_mask_type == "tiara" then
+				self._camera_unit:anim_state_machine():set_global("tiara_equip", 1)
 			end
 			self:_start_action_equip(self.IDS_MASK_EQUIP, 1.6)
 		else

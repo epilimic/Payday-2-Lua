@@ -330,6 +330,37 @@ function DLCTweakData:init(tweak_data)
 	self.freed_old_hoxton.content.loot_global_value = "pd2_clan"
 	self.freed_old_hoxton.content.loot_drops = {}
 	self.freed_old_hoxton.content.upgrades = {"toothbrush"}
+	self.crimefest2_u2 = {}
+	self.crimefest2_u2.content = {}
+	self.crimefest2_u2.free = true
+	self.crimefest2_u2.content.loot_global_value = "normal"
+	self.crimefest2_u2.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "rus_hat",
+			amount = 1
+		},
+		{
+			type_items = "masks",
+			item_entry = "sputnik",
+			amount = 1
+		},
+		{
+			type_items = "masks",
+			item_entry = "tiara",
+			amount = 1
+		},
+		{
+			type_items = "masks",
+			item_entry = "baba_yaga",
+			amount = 1
+		},
+		{
+			type_items = "masks",
+			item_entry = "vlad_armor",
+			amount = 1
+		}
+	}
 	self.pd2_clan_bonnie = {}
 	self.pd2_clan_bonnie.content = {}
 	self.pd2_clan_bonnie.dlc = "has_pd2_clan"
