@@ -3187,18 +3187,18 @@ function NarrativeTweakData:init()
 		"cn_jewel3"
 	}
 	self.jobs.jolly.payout = {
-		31000,
-		62000,
-		155000,
-		310000,
-		400000
+		124000,
+		248000,
+		620000,
+		1150000,
+		1600000
 	}
 	self.jobs.jolly.contract_cost = {
-		250000,
-		500000,
-		1250000,
-		2500000,
-		3200000
+		105000,
+		150000,
+		550000,
+		1050000,
+		1400000
 	}
 	self.jobs.jolly_prof = deep_clone(self.jobs.jolly)
 	self.jobs.jolly_prof.jc = 40
