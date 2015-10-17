@@ -6660,6 +6660,18 @@ function CharacterTweakData:character_map()
 				"ene_vip_1",
 				"ene_phalanx_1"
 			}
+		},
+		holly = {
+			path = "units/pd2_dlc_holly/characters/",
+			list = {
+				"civ_male_hobo_1",
+				"civ_male_hobo_2",
+				"civ_male_hobo_3",
+				"civ_male_hobo_4",
+				"ene_gang_hispanic_1",
+				"ene_gang_hispanic_3",
+				"ene_gang_hispanic_2"
+			}
 		}
 	}
 	if TweakData._init_wip_character_map then

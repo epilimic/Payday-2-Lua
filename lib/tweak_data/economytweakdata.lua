@@ -144,7 +144,7 @@ function EconomyTweakData:init()
 	self.drills.event_01 = {}
 	self.drills.event_01.safe = "event_01"
 	self.drills.event_01.def_id = 70001
-	self.drills.event_01.price = 2.49
+	self.drills.event_01.price = "2.49"
 	self.drills.event_01.unit_name = "units/payday2_cash/drills/eco_drill_event_01/eco_drill_event_01"
 	self.drills.event_01.name_id = "bm_menu_drill_event_01"
 	self.drills.event_01.desc_id = "bm_menu_drill_event_01_desc"
@@ -152,7 +152,7 @@ function EconomyTweakData:init()
 	self.drills.weapon_01 = {}
 	self.drills.weapon_01.safe = "weapon_01"
 	self.drills.weapon_01.def_id = 70002
-	self.drills.weapon_01.price = 2.49
+	self.drills.weapon_01.price = "2.49"
 	self.drills.weapon_01.unit_name = "units/payday2_cash/drills/eco_drill_weapon_01/eco_drill_weapon_01"
 	self.drills.weapon_01.name_id = "bm_menu_drill_weapon_01"
 	self.drills.weapon_01.desc_id = "bm_menu_drill_weapon_01_desc"

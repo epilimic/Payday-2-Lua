@@ -943,6 +943,17 @@ function LevelsTweakData:init()
 	self.kenaz.cube = "cube_apply_heist_bank"
 	self.kenaz.ghost_bonus = 0.1
 	self.kenaz.max_bags = 40
+	self.jolly = {}
+	self.jolly.name_id = "heist_jolly_hl"
+	self.jolly.briefing_id = "heist_jolly_briefing"
+	self.jolly.briefing_dialog = "Play_pln_as1_brf_01"
+	self.jolly.world_name = "narratives/vlad/jolly"
+	self.jolly.intro_event = "Play_plt_as1_intro_01"
+	self.jolly.outro_event = {"vld_as1_17", "vld_as1_17"}
+	self.jolly.music = "heist"
+	self.jolly.package = "packages/jolly"
+	self.jolly.cube = "cube_apply_heist_bank"
+	self.jolly.max_bags = 15
 	self._level_index = {
 		"welcome_to_the_jungle_1",
 		"welcome_to_the_jungle_1_night",
@@ -1007,7 +1018,8 @@ function LevelsTweakData:init()
 		"arena",
 		"kenaz",
 		"driving_escapes_industry_day",
-		"driving_escapes_city_day"
+		"driving_escapes_city_day",
+		"jolly"
 	}
 	if SystemInfo:platform() == Idstring("WIN32") then
 		table.insert(self._level_index, "roberts")

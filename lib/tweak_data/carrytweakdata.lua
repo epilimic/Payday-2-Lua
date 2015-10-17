@@ -340,6 +340,22 @@ function CarryTweakData:init(tweak_data)
 	self.unknown.AI_carry = {SO_category = "enemies"}
 	self.unknown.visual_object = "g_cagebag"
 	self.unknown.unit = "units/payday2/pickups/gen_pku_cage_bag/gen_pku_cage_bag"
+	self.safe_wpn = {}
+	self.safe_wpn.type = "slightly_very_heavy"
+	self.safe_wpn.name_id = "hud_carry_safe"
+	self.safe_wpn.visual_object = "g_safe"
+	self.safe_wpn.unit = "units/pd2_dlc_jolly/pickups/gen_pku_safe_wpn_bag/gen_pku_safe_wpn_bag"
+	self.safe_ovk = {}
+	self.safe_ovk.type = "slightly_very_heavy"
+	self.safe_ovk.name_id = "hud_carry_compl_ovk_safe"
+	self.safe_ovk.visual_object = "g_safe_ovk"
+	self.safe_ovk.unit = "units/pd2_dlc_jolly/pickups/gen_pku_safe_ovk_bag/gen_pku_safe_ovk_bag"
+	self.safe_secure_dummy = {}
+	self.safe_secure_dummy.type = "slightly_very_heavy"
+	self.safe_secure_dummy.name_id = "hud_carry_safe"
+	self.safe_secure_dummy.bag_value = "safe"
+	self.safe_secure_dummy.visual_object = "g_safe"
+	self.safe_secure_dummy.unit = "units/pd2_dlc_jolly/pickups/gen_safe_secure_dummy/gen_safe_secure_dummy"
 end
 function CarryTweakData:get_carry_ids()
 	local t = {}

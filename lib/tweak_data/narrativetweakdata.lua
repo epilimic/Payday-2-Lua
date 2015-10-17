@@ -3147,6 +3147,70 @@ function NarrativeTweakData:init()
 		12.5,
 		12.5
 	}
+	self.jobs.jolly = {}
+	self.jobs.jolly.name_id = "heist_jolly"
+	self.jobs.jolly.briefing_id = "heist_jolly_crimenet"
+	self.jobs.jolly.package = "packages/jolly"
+	self.jobs.jolly.contact = "vlad"
+	self.jobs.jolly.region = "street"
+	self.jobs.jolly.jc = 30
+	self.jobs.jolly.chain = {
+		{
+			level_id = "jolly",
+			type_id = "heist_type_assault",
+			type = "d"
+		}
+	}
+	self.jobs.jolly.contract_visuals = {}
+	self.jobs.jolly.contract_visuals.min_mission_xp = {
+		30000,
+		30000,
+		30000,
+		30000,
+		30000
+	}
+	self.jobs.jolly.contract_visuals.max_mission_xp = {
+		34000,
+		34000,
+		34000,
+		34000,
+		34000
+	}
+	self.jobs.jolly.briefing_event = "vld_as1_cbf_01"
+	self.jobs.jolly.debrief_event = "vld_as1_17"
+	self.jobs.jolly.crimenet_callouts = {
+		"vld_as1_cnc_01"
+	}
+	self.jobs.jolly.crimenet_videos = {
+		"cn_jewel1",
+		"cn_jewel2",
+		"cn_jewel3"
+	}
+	self.jobs.jolly.payout = {
+		31000,
+		62000,
+		155000,
+		310000,
+		400000
+	}
+	self.jobs.jolly.contract_cost = {
+		250000,
+		500000,
+		1250000,
+		2500000,
+		3200000
+	}
+	self.jobs.jolly_prof = deep_clone(self.jobs.jolly)
+	self.jobs.jolly_prof.jc = 40
+	self.jobs.jolly_prof.professional = true
+	self.jobs.jolly_prof.region = "professional"
+	self.jobs.jolly_prof.payout = {
+		10000,
+		20000,
+		30000,
+		40000,
+		80000
+	}
 	self._jobs_index = {
 		"jewelry_store",
 		"four_stores",
@@ -3199,7 +3263,8 @@ function NarrativeTweakData:init()
 		"rat",
 		"shoutout_raid",
 		"arena",
-		"kenaz"
+		"kenaz",
+		"jolly"
 	}
 	if SystemInfo:platform() == Idstring("WIN32") then
 		table.insert(self._jobs_index, "roberts")

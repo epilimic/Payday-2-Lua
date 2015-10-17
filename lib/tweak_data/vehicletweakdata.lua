@@ -4,6 +4,7 @@ function VehicleTweakData:init(tweak_data)
 	self:_init_data_muscle()
 	self:_init_data_forklift()
 	self:_init_data_forklift_2()
+	self:_init_data_box_truck_1()
 end
 function VehicleTweakData:_init_data_falcogini()
 	self.falcogini = {}
@@ -207,4 +208,66 @@ function VehicleTweakData:_init_data_forklift_2()
 	self.forklift_2.interact_distance = 350
 	self.forklift_2.driver_camera_offset = Vector3(0, 0, 7.5)
 	self.forklift_2.fov = 70
+end
+function VehicleTweakData:_init_data_box_truck_1()
+	self.box_truck_1 = {}
+	self.box_truck_1.name = "Truck"
+	self.box_truck_1.hud_label_offset = 325
+	self.box_truck_1.animations = {
+		vehicle_id = "truck",
+		driver = "drive_truck_driver",
+		passenger_front = "drive_truck_passanger",
+		passenger_back_left = "drive_truck_back_left",
+		passenger_back_right = "drive_truck_back_right"
+	}
+	self.box_truck_1.sound = {
+		bump_treshold = 8,
+		lateral_slip_treshold = 0.35,
+		longitudal_slip_treshold = 0.98,
+		engine_sound_event = "drive_truck",
+		broken_engine = "falcogini_engine_broken_loop",
+		door_close = "car_door_open",
+		slip = "car_skid_01",
+		slip_stop = "car_skid_stop_01",
+		bump = "car_bumper_01",
+		bump_rtpc = "car_bump_vel",
+		hit = "car_hit_gen_01",
+		hit_rtpc = "car_hit_vel",
+		engine_speed_rtpc = "car_falcogini_speed",
+		engine_rpm_rtpc = "car_falcogini_rpm"
+	}
+	self.box_truck_1.seats = {
+		driver = {name = "driver", driving = true},
+		passenger_front = {
+			name = "passenger_front",
+			driving = false,
+			allow_shooting = false,
+			has_shooting_mode = true,
+			shooting_pos = Vector3(50, 0, 50)
+		},
+		passenger_back_left = {
+			name = "passenger_back_left",
+			driving = false,
+			allow_shooting = true,
+			has_shooting_mode = true
+		},
+		passenger_back_right = {
+			name = "passenger_back_right",
+			driving = false,
+			allow_shooting = true,
+			has_shooting_mode = true
+		}
+	}
+	self.box_truck_1.loot_points = {
+		loot_left = {name = "loot_left"},
+		loot_right = {name = "loot_right"}
+	}
+	self.box_truck_1.damage = {max_health = 900000}
+	self.box_truck_1.max_speed = 160
+	self.box_truck_1.max_rpm = 8000
+	self.box_truck_1.loot_drop_point = "v_repair_engine"
+	self.box_truck_1.max_loot_bags = 50
+	self.box_truck_1.interact_distance = 350
+	self.box_truck_1.driver_camera_offset = Vector3(0, 0.2, 2.5)
+	self.box_truck_1.fov = 75
 end
