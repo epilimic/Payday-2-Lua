@@ -2,6 +2,7 @@ HUDPlayerCustody = HUDPlayerCustody or class()
 function HUDPlayerCustody:init(hud)
 	self._hud = hud
 	self._hud_panel = hud.panel
+	self._last_respawn_type_is_ai_trade = false
 	if self._hud_panel:child("custody_panel") then
 		self._hud_panel:remove(self._hud_panel:child("custody_panel"))
 	end
@@ -156,5 +157,12 @@ function HUDPlayerCustody:_animate_text_pulse(text)
 		t = t + dt
 		local alpha = 0.5 + math.abs((math.sin(t * 360 * 0.5))) / 2
 		text:set_alpha(alpha)
+	end
+end
+function HUDPlayerCustody:set_respawn_type(is_ai_trade)
+	if self._last_respawn_type_is_ai_trade ~= is_ai_trade then
+		local text = utf8.to_upper(managers.localization:text(is_ai_trade and "hud_ai_traded_in" or "hud_respawning_in"))
+		self._hud_panel:child("custody_panel"):child("timer_msg"):set_text(text)
+		self._last_respawn_type_is_ai_trade = is_ai_trade
 	end
 end

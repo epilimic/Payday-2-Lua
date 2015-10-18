@@ -89,6 +89,7 @@ function IngameWaitingForRespawnState:_begin_game_enter_transition()
 		return
 	end
 	self._auto_respawn_t = nil
+	self._ai_trade_respawn_gui_enabled = nil
 	local overlay_effect_desc = tweak_data.overlay_effects.spectator
 	local fade_in_duration = overlay_effect_desc.fade_in
 	self._fade_in_overlay_eff_id = managers.overlay_effect:play_effect(overlay_effect_desc)
@@ -137,11 +138,20 @@ function IngameWaitingForRespawnState:update(t, dt)
 		self._stats_screen = false
 		managers.hud:hide_stats_screen()
 	end
-	if self.LONELY4 and self:LONELY4(t) then
-	elseif self._auto_respawn_t then
-		if managers.hud.LONELY6 then
-			managers.hud:LONELY6(false)
+	local ai_trade_time = managers.trade:get_auto_assault_ai_trade_time()
+	if not ai_trade_time and self._ai_trade_respawn_gui_enabled then
+		managers.hud:set_custody_timer_visibility(false)
+		self._ai_trade_respawn_gui_enabled = false
+	end
+	if ai_trade_time and (not self._auto_respawn_t or self._auto_respawn_t - t > math.max(0, ai_trade_time)) and not self._ready_to_spawn_t then
+		if not self._auto_respawn_t and not self._ai_trade_respawn_gui_enabled then
+			managers.hud:set_custody_timer_visibility(true)
+			self._ai_trade_respawn_gui_enabled = true
 		end
+		managers.hud:set_custody_respawn_type(true)
+		managers.hud:set_custody_respawn_time(ai_trade_time)
+	elseif self._auto_respawn_t then
+		managers.hud:set_custody_respawn_type(false)
 		managers.hud:set_custody_respawn_time(self._auto_respawn_t - t)
 		if t > self._auto_respawn_t then
 			self._auto_respawn_t = nil
@@ -152,7 +162,7 @@ function IngameWaitingForRespawnState:update(t, dt)
 	end
 	if self._respawn_delay then
 		self._respawn_delay = managers.trade:respawn_delay_by_name(managers.criminals:local_character_name())
-		if self._respawn_delay <= 0 then
+		if 0 >= self._respawn_delay then
 			self._respawn_delay = nil
 			managers.hud:set_custody_negotiating_visible(false)
 			managers.hud:set_custody_trade_delay_visible(false)
@@ -327,7 +337,7 @@ function IngameWaitingForRespawnState:at_enter()
 		local hostages_killed = managers.trade:hostages_killed_by_name(managers.criminals:local_character_name())
 		self:trade_death(respawn_delay, hostages_killed)
 	end
-	if Global.game_settings.single_player and (not managers.groupai:state().LONELY2 or not managers.groupai:state():LONELY2()) then
+	if Global.game_settings.single_player and not managers.groupai:state():is_ai_trade_possible() then
 		managers.hud:set_custody_negotiating_visible(false)
 		managers.hud:set_custody_trade_delay_visible(false)
 	end
@@ -344,6 +354,7 @@ function IngameWaitingForRespawnState:at_exit()
 	if managers.hud:visible(self.GUI_SPECTATOR_FULLSCREEN) then
 		managers.hud:hide(self.GUI_SPECTATOR_FULLSCREEN)
 	end
+	self._ai_trade_respawn_gui_enabled = nil
 	self:_clear_controller()
 	self:_clear_camera()
 	self:_clear_sound_listener()
@@ -439,10 +450,12 @@ function IngameWaitingForRespawnState:trade_death(respawn_delay, hostages_killed
 		managers.hud:set_custody_trade_delay(self._respawn_delay)
 		managers.hud:set_custody_negotiating_visible(true)
 	end
-	local LONELY2 = managers.groupai:state().LONELY2 and managers.groupai:state():LONELY2()
-	if (not Global.game_settings.single_player or LONELY2) and managers.groupai:state():bain_state() then
-		if managers.groupai:state():get_assault_mode() and not LONELY2 then
+	local is_ai_trade_possible = managers.groupai:state():is_ai_trade_possible()
+	if (not Global.game_settings.single_player or is_ai_trade_possible) and managers.groupai:state():bain_state() then
+		if managers.groupai:state():get_assault_mode() and not is_ai_trade_possible then
 			managers.dialog:queue_dialog("ban_h31x", {})
+		elseif is_ai_trade_possible then
+			managers.dialog:queue_dialog("Play_ban_h51", {})
 		elseif hostages_killed == 0 then
 			managers.dialog:queue_dialog("Play_ban_h32x", {})
 		elseif hostages_killed < 3 then
