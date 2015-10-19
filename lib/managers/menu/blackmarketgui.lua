@@ -688,15 +688,15 @@ function BlackMarketGuiTabItem:select_slot(slot, instant)
 		end
 	end
 	local no_sound = false
+	if slot ~= 1 and self._slots[self._slot_selected] and self._slots[self._slot_selected]._name == "empty" then
+		return self:select_slot(1, instant)
+	end
 	if self._slots[slot] and self._slots[slot]._name == "empty" then
 		if slot > self._slot_selected then
 			return self:select_slot(slot - 1, instant)
 		end
 		slot = self._slot_selected
 		no_sound = true
-	end
-	if slot ~= 1 and self._slots[self._slot_selected] and self._slots[self._slot_selected]._name == "empty" then
-		return self:select_slot(1, instant)
 	end
 	if self._slots[self._slot_selected] then
 		self._slots[self._slot_selected]:deselect(instant)
@@ -5026,8 +5026,9 @@ function BlackMarketGui:update_info_text()
 		local is_gadget = part_id and tweak_data.weapon.factory.parts[part_id].type == "gadget" or perks and table.contains(perks, "gadget")
 		local is_ammo = part_id and tweak_data.weapon.factory.parts[part_id].type == "ammo" or perks and table.contains(perks, "ammo")
 		local is_bayonet = part_id and tweak_data.weapon.factory.parts[part_id].type == "bayonet" or perks and table.contains(perks, "bayonet")
+		local is_bipod = part_id and tweak_data.weapon.factory.parts[part_id].type == "bipod" or perks and table.contains(perks, "bipod")
 		local has_desc = part_id and tweak_data.weapon.factory.parts[part_id].has_description == true
-		if is_gadget or is_ammo or is_bayonet or has_desc then
+		if is_gadget or is_ammo or is_bayonet or is_bipod or has_desc then
 			local crafted = managers.blackmarket:get_crafted_category_slot(prev_data.category, prev_data.slot)
 			updated_texts[4].text = managers.weapon_factory:get_part_desc_by_part_id_from_weapon(part_id, crafted.factory_id, crafted.blueprint)
 		end

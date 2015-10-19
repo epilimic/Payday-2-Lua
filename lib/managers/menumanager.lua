@@ -3866,7 +3866,8 @@ MenuCustomizeControllerCreator.CONTROLS = {
 	"use_item",
 	"toggle_chat",
 	"push_to_talk",
-	"cash_inspect"
+	"cash_inspect",
+	"deploy_bipod"
 }
 MenuCustomizeControllerCreator.AXIS_ORDERED = {
 	move = {
@@ -3945,6 +3946,9 @@ MenuCustomizeControllerCreator.CONTROLS_INFO.weapon_firemode = {
 }
 MenuCustomizeControllerCreator.CONTROLS_INFO.cash_inspect = {
 	text_id = "menu_button_cash_inspect"
+}
+MenuCustomizeControllerCreator.CONTROLS_INFO.deploy_bipod = {
+	text_id = "menu_button_deploy_bipod"
 }
 function MenuCustomizeControllerCreator:modify_node(node)
 	local new_node = deep_clone(node)

@@ -751,6 +751,9 @@ end
 function NewRaycastWeaponBase:_get_spread(user_unit)
 	local current_state = user_unit:movement()._current_state
 	local spread = self._spread
+	if current_state and current_state._unit_deploy_position then
+		spread = tweak_data.weapon.stats.spread[20]
+	end
 	local spread_multiplier = self:spread_multiplier(current_state)
 	local spread_addend = self:spread_addend(current_state)
 	return math.max((spread + spread_addend) * spread_multiplier, 0)

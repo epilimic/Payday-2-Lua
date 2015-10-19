@@ -101,6 +101,7 @@ function WeaponTweakData:init(tweak_data)
 	self:_init_data_arblast_npc()
 	self:_init_data_frankish_npc()
 	self:_init_data_long_npc()
+	self:_init_data_par_npc()
 	self:_precalculate_values()
 end
 function WeaponTweakData:_set_easy()
@@ -1605,6 +1606,22 @@ function WeaponTweakData:_init_data_long_npc()
 	self.long_npc.has_fire_animation = true
 	self.long_npc.alert_size = 2800
 	self.long_npc.suppression = 1
+end
+function WeaponTweakData:_init_data_par_npc()
+	self.par_npc.sounds.prefix = "svinet_npc"
+	self.par_npc.use_data.selection_index = 2
+	self.par_npc.DAMAGE = 2
+	self.par_npc.muzzleflash = "effects/payday2/particles/weapons/big_762_auto"
+	self.par_npc.shell_ejection = "effects/payday2/particles/weapons/shells/shell_556_lmg"
+	self.par_npc.CLIP_AMMO_MAX = 200
+	self.par_npc.NR_CLIPS_MAX = 2
+	self.par_npc.auto.fire_rate = 0.08
+	self.par_npc.hold = "rifle"
+	self.par_npc.alert_size = 5000
+	self.par_npc.suppression = 1
+	self.par_secondary_npc = deep_clone(self.par_npc)
+	self.par_secondary_npc.use_data.selection_index = 1
+	self.par_secondary_npc.armor_piercing = true
 end
 function WeaponTweakData:_init_data_player_weapons(tweak_data)
 	local autohit_rifle_default, autohit_pistol_default, autohit_shotgun_default, autohit_lmg_default, autohit_snp_default, autohit_smg_default, autohit_minigun_default, aim_assist_rifle_default, aim_assist_pistol_default, aim_assist_shotgun_default, aim_assist_lmg_default, aim_assist_snp_default, aim_assist_smg_default, aim_assist_minigun_default
@@ -10152,6 +10169,105 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 		value = 1
 	}
 	self.long.stats_modifiers = {damage = 10}
+	self.par = {}
+	self.par.category = "lmg"
+	self.par.damage_melee = damage_melee_default
+	self.par.damage_melee_effect_mul = damage_melee_effect_multiplier_default
+	self.par.sounds = {}
+	self.par.sounds.fire = "svinet_fire_single"
+	self.par.sounds.fire_single = "svinet_fire_single"
+	self.par.sounds.fire_auto = "svinet_fire"
+	self.par.sounds.stop_fire = "svinet_stop"
+	self.par.sounds.dryfire = "primary_dryfire"
+	self.par.sounds.enter_steelsight = "lmg_steelsight_enter"
+	self.par.sounds.leave_steelsight = "lmg_steelsight_exit"
+	self.par.timers = {}
+	self.par.timers.reload_not_empty = 5.62
+	self.par.timers.reload_empty = 5.62
+	self.par.timers.unequip = 0.9
+	self.par.timers.equip = 0.9
+	self.par.timers.deploy_bipod = 0.85
+	self.par.bipod_camera_spin_limit = 40
+	self.par.bipod_camera_pitch_limit = 15
+	self.par.bipod_weapon_translation = Vector3(-8.5, 20, -5)
+	self.par.name_id = "bm_w_par"
+	self.par.desc_id = "bm_w_par_desc"
+	self.par.description_id = "des_par"
+	self.par.muzzleflash = "effects/payday2/particles/weapons/big_762_auto_fps"
+	self.par.shell_ejection = "effects/payday2/particles/weapons/shells/shell_556_lmg"
+	self.par.use_data = {}
+	self.par.use_data.selection_index = 2
+	self.par.DAMAGE = 1
+	self.par.CLIP_AMMO_MAX = 200
+	self.par.NR_CLIPS_MAX = 2
+	self.par.AMMO_MAX = self.par.CLIP_AMMO_MAX * self.par.NR_CLIPS_MAX
+	self.par.AMMO_PICKUP = self:_pickup_chance(self.par.AMMO_MAX, 1)
+	self.par.FIRE_MODE = "auto"
+	self.par.fire_mode_data = {}
+	self.par.fire_mode_data.fire_rate = 0.066
+	self.par.CAN_TOGGLE_FIREMODE = false
+	self.par.auto = {}
+	self.par.auto.fire_rate = 0.076
+	self.par.spread = {}
+	self.par.spread.standing = self.new_m4.spread.standing
+	self.par.spread.crouching = self.new_m4.spread.standing
+	self.par.spread.steelsight = self.new_m4.spread.steelsight
+	self.par.spread.moving_standing = self.new_m4.spread.standing
+	self.par.spread.moving_crouching = self.new_m4.spread.standing
+	self.par.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
+	self.par.kick = {}
+	self.par.kick.standing = {
+		-0.2,
+		0.8,
+		-1,
+		1.4
+	}
+	self.par.kick.crouching = self.par.kick.standing
+	self.par.kick.steelsight = self.par.kick.standing
+	self.par.crosshair = {}
+	self.par.crosshair.standing = {}
+	self.par.crosshair.crouching = {}
+	self.par.crosshair.steelsight = {}
+	self.par.crosshair.standing.offset = 0.16
+	self.par.crosshair.standing.moving_offset = 1
+	self.par.crosshair.standing.kick_offset = 0.8
+	self.par.crosshair.crouching.offset = 0.1
+	self.par.crosshair.crouching.moving_offset = 0.6
+	self.par.crosshair.crouching.kick_offset = 0.4
+	self.par.crosshair.steelsight.hidden = true
+	self.par.crosshair.steelsight.offset = 0
+	self.par.crosshair.steelsight.moving_offset = 0
+	self.par.crosshair.steelsight.kick_offset = 0.14
+	self.par.shake = {}
+	self.par.shake.fire_multiplier = 0.5
+	self.par.shake.fire_steelsight_multiplier = -0.5
+	self.par.autohit = autohit_lmg_default
+	self.par.aim_assist = aim_assist_lmg_default
+	self.par.weapon_hold = "par"
+	self.par.animations = {}
+	self.par.animations.equip_id = "equip_par"
+	self.par.animations.recoil_steelsight = true
+	self.par.animations.bipod_enter = "bipod_enter"
+	self.par.animations.bipod_exit = "bipod_exit"
+	self.par.animations.bipod_recoil = "bipod_recoil"
+	self.par.animations.bipod_recoil_enter = "bipod_recoil"
+	self.par.animations.bipod_recoil_loop = "bipod_recoil_loop"
+	self.par.animations.bipod_recoil_exit = "bipod_recoil_exit"
+	self.par.texture_bundle_folder = "par"
+	self.par.panic_suppression_chance = 0.1
+	self.par.stats = {
+		damage = 37,
+		spread = 9,
+		recoil = 10,
+		spread_moving = 8,
+		zoom = 1,
+		concealment = 2,
+		suppression = 4,
+		alert_size = 8,
+		extra_ammo = 6,
+		total_ammo_mod = 21,
+		value = 9
+	}
 end
 function WeaponTweakData:_init_data_offhand_weapons()
 	self.b92fs_primary = deep_clone(self.b92fs)
@@ -10833,6 +10949,12 @@ function WeaponTweakData:_create_table_structure()
 		use_data = {},
 		auto = {}
 	}
+	self.par_npc = {
+		usage = "ak47",
+		sounds = {},
+		use_data = {},
+		auto = {}
+	}
 end
 function WeaponTweakData:_precalculate_values_wip()
 end
@@ -10934,4 +11056,5 @@ function WeaponTweakData:_precalculate_values()
 	self.arblast_npc.AMMO_MAX = self.arblast_npc.CLIP_AMMO_MAX * self.arblast_npc.NR_CLIPS_MAX
 	self.frankish_npc.AMMO_MAX = self.frankish_npc.CLIP_AMMO_MAX * self.frankish_npc.NR_CLIPS_MAX
 	self.long_npc.AMMO_MAX = self.long_npc.CLIP_AMMO_MAX * self.long_npc.NR_CLIPS_MAX
+	self.par_npc.AMMO_MAX = self.par_npc.CLIP_AMMO_MAX * self.par_npc.NR_CLIPS_MAX
 end

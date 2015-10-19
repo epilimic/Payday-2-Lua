@@ -184,8 +184,10 @@ function WeaponFactoryTweakData:init()
 	self:_init_frankish()
 	self:_init_long()
 	self:_init_legendary()
+	self:_init_par()
 	self:create_ammunition()
 	self:_init_cc_material_config()
+	self:_init_bipods()
 	self:_init_content_unfinished()
 end
 function WeaponFactoryTweakData:_init_silencers()
@@ -18757,10 +18759,9 @@ function WeaponFactoryTweakData:_init_m134()
 			concealment = 3,
 			total_ammo_mod = -8
 		},
-		has_description = true,
+		has_description = false,
 		texture_bundle_folder = "dlc_pack_overkill",
-		dlc = "overkill_pack",
-		custom_stats = {movement_speed = 1.155}
+		dlc = "overkill_pack"
 	}
 	self.parts.wpn_fps_lmg_m134_barrel = {
 		type = "barrel",
@@ -18787,10 +18788,9 @@ function WeaponFactoryTweakData:_init_m134()
 			recoil = 3,
 			concealment = 3
 		},
-		has_description = true,
+		has_description = false,
 		texture_bundle_folder = "dlc_pack_overkill",
 		dlc = "overkill_pack",
-		custom_stats = {movement_speed = 1.155},
 		animations = {fire = "recoil", fire_steelsight = "recoil"}
 	}
 	self.parts.wpn_fps_lmg_m134_barrel_extreme = {
@@ -18843,6 +18843,8 @@ function WeaponFactoryTweakData:_init_m134()
 		"wpn_fps_lmg_m134_barrel",
 		"wpn_fps_lmg_m134_barrel_short",
 		"wpn_fps_lmg_m134_barrel_extreme",
+		"wpn_fps_lmg_m134_barrel_legendary",
+		"wpn_fps_lmg_m134_body_upper_spikey",
 		"wpn_fps_upg_fl_ass_smg_sho_peqbox",
 		"wpn_fps_upg_fl_ass_smg_sho_surefire",
 		"wpn_fps_upg_fl_ass_peq15",
@@ -18977,7 +18979,8 @@ function WeaponFactoryTweakData:_init_rpg7()
 		"wpn_fps_upg_o_reflex",
 		"wpn_fps_upg_o_rx01",
 		"wpn_fps_upg_o_rx30",
-		"wpn_fps_upg_o_cs"
+		"wpn_fps_upg_o_cs",
+		"wpn_fps_rpg7_m_grinclown"
 	}
 	self.wpn_fps_rpg7_npc = deep_clone(self.wpn_fps_rpg7)
 	self.wpn_fps_rpg7_npc.unit = "units/pd2_dlc_overkill_pack/weapons/wpn_fps_rpg7/wpn_fps_rpg7_npc"
@@ -20310,7 +20313,8 @@ function WeaponFactoryTweakData:_init_flamethrower_mk2()
 		"wpn_fps_fla_mk2_body",
 		"wpn_fps_fla_mk2_mag_rare",
 		"wpn_fps_fla_mk2_mag",
-		"wpn_fps_fla_mk2_mag_welldone"
+		"wpn_fps_fla_mk2_mag_welldone",
+		"wpn_fps_fla_mk2_body_fierybeast"
 	}
 	self.wpn_fps_fla_mk2_npc = deep_clone(self.wpn_fps_fla_mk2)
 	self.wpn_fps_fla_mk2_npc.unit = "units/pd2_dlc_bbq/weapons/wpn_fps_fla_mk2/wpn_fps_fla_mk2_npc"
@@ -23021,6 +23025,137 @@ function WeaponFactoryTweakData:_init_long()
 	self.wpn_fps_bow_long_npc.unit = "units/pd2_dlc_steel/weapons/wpn_fps_bow_long/wpn_fps_bow_long_npc"
 	self.wpn_fps_bow_long_npc.skip_thq_parts = true
 end
+function WeaponFactoryTweakData:_init_par()
+	self.parts.wpn_fps_lmg_par_b_short = {
+		pcs = {
+			10,
+			20,
+			30,
+			40
+		},
+		type = "barrel",
+		name_id = "bm_wp_par_b_short",
+		a_obj = "a_b",
+		unit = "units/pd2_dlc_par/weapons/wpn_fps_lmg_par_pts/wpn_fps_lmg_par_b_short",
+		stats = {value = 0, concealment = 2},
+		texture_bundle_folder = "par"
+	}
+	self.parts.wpn_fps_lmg_par_b_standard = {
+		type = "barrel",
+		name_id = "bm_wp_par_b_standard",
+		a_obj = "a_b",
+		unit = "units/pd2_dlc_par/weapons/wpn_fps_lmg_par_pts/wpn_fps_lmg_par_b_standard",
+		stats = {value = 1}
+	}
+	self.parts.wpn_fps_lmg_par_body_standard = {
+		type = "lower_reciever",
+		name_id = "bm_wp_par_body_standard",
+		a_obj = "a_body",
+		unit = "units/pd2_dlc_par/weapons/wpn_fps_lmg_par_pts/wpn_fps_lmg_par_body_standard",
+		stats = {value = 1},
+		animations = {
+			reload = "reload",
+			reload_not_empty = "reload_not_empty"
+		}
+	}
+	self.parts.wpn_fps_lmg_par_m_standard = {
+		type = "magazine",
+		name_id = "bm_wp_par_m_standard",
+		a_obj = "a_m",
+		unit = "units/pd2_dlc_par/weapons/wpn_fps_lmg_par_pts/wpn_fps_lmg_par_m_standard",
+		stats = {value = 1},
+		animations = {
+			reload = "reload",
+			reload_not_empty = "reload_not_empty",
+			fire = "recoil",
+			fire_steelsight = "recoil"
+		}
+	}
+	self.parts.wpn_fps_lmg_par_s_plastic = {
+		pcs = {
+			10,
+			20,
+			30,
+			40
+		},
+		type = "stock",
+		name_id = "bm_wp_par_s_plastic",
+		a_obj = "a_s",
+		unit = "units/pd2_dlc_par/weapons/wpn_fps_lmg_par_pts/wpn_fps_lmg_par_s_plastic",
+		stats = {
+			value = 0,
+			recoil = 1,
+			concealment = -2
+		},
+		texture_bundle_folder = "par"
+	}
+	self.parts.wpn_fps_lmg_par_s_standard = {
+		type = "stock",
+		name_id = "bm_wp_par_s_standard",
+		a_obj = "a_s",
+		unit = "units/pd2_dlc_par/weapons/wpn_fps_lmg_par_pts/wpn_fps_lmg_par_s_standard",
+		stats = {value = 1}
+	}
+	self.parts.wpn_fps_lmg_par_upper_reciever = {
+		type = "upper_reciever",
+		name_id = "bm_wp_par_body_upper",
+		a_obj = "a_upper",
+		unit = "units/pd2_dlc_par/weapons/wpn_fps_lmg_par_pts/wpn_fps_lmg_par_upper_reciever",
+		stats = {value = 1},
+		animations = {
+			reload = "reload",
+			reload_not_empty = "reload_not_empty"
+		}
+	}
+	self.parts.wpn_fps_lmg_par_b_short.third_unit = "units/pd2_dlc_par/weapons/wpn_third_lmg_par_pts/wpn_third_lmg_par_b_short"
+	self.parts.wpn_fps_lmg_par_b_standard.third_unit = "units/pd2_dlc_par/weapons/wpn_third_lmg_par_pts/wpn_third_lmg_par_b_standard"
+	self.parts.wpn_fps_lmg_par_body_standard.third_unit = "units/pd2_dlc_par/weapons/wpn_third_lmg_par_pts/wpn_third_lmg_par_body_standard"
+	self.parts.wpn_fps_lmg_par_m_standard.third_unit = "units/pd2_dlc_par/weapons/wpn_third_lmg_par_pts/wpn_third_lmg_par_m_standard"
+	self.parts.wpn_fps_lmg_par_s_plastic.third_unit = "units/pd2_dlc_par/weapons/wpn_third_lmg_par_pts/wpn_third_lmg_par_s_plastic"
+	self.parts.wpn_fps_lmg_par_s_standard.third_unit = "units/pd2_dlc_par/weapons/wpn_third_lmg_par_pts/wpn_third_lmg_par_s_standard"
+	self.parts.wpn_fps_lmg_par_upper_reciever.third_unit = "units/pd2_dlc_par/weapons/wpn_third_lmg_par_pts/wpn_third_lmg_par_upper_reciever"
+	self.wpn_fps_lmg_par = {}
+	self.wpn_fps_lmg_par.unit = "units/pd2_dlc_par/weapons/wpn_fps_lmg_par/wpn_fps_lmg_par"
+	self.wpn_fps_lmg_par.optional_types = {
+		"barrel_ext",
+		"gadget",
+		"sight",
+		"vertical_grip"
+	}
+	self.wpn_fps_lmg_par.default_blueprint = {
+		"wpn_fps_lmg_par_b_standard",
+		"wpn_fps_lmg_par_body_standard",
+		"wpn_fps_lmg_par_m_standard",
+		"wpn_fps_lmg_par_s_standard",
+		"wpn_fps_lmg_par_upper_reciever"
+	}
+	self.wpn_fps_lmg_par.uses_parts = {
+		"wpn_fps_lmg_par_b_short",
+		"wpn_fps_lmg_par_b_standard",
+		"wpn_fps_lmg_par_body_standard",
+		"wpn_fps_lmg_par_m_standard",
+		"wpn_fps_lmg_par_s_standard",
+		"wpn_fps_lmg_par_s_plastic",
+		"wpn_fps_lmg_par_upper_reciever",
+		"wpn_fps_upg_ns_ass_smg_firepig",
+		"wpn_fps_upg_ns_ass_smg_stubby",
+		"wpn_fps_upg_ns_ass_smg_tank",
+		"wpn_fps_upg_ns_ass_smg_large",
+		"wpn_fps_upg_ns_ass_smg_medium",
+		"wpn_fps_upg_ns_ass_smg_small",
+		"wpn_fps_upg_fl_ass_smg_sho_peqbox",
+		"wpn_fps_upg_fl_ass_smg_sho_surefire",
+		"wpn_fps_upg_ass_ns_jprifles",
+		"wpn_fps_upg_ass_ns_linear",
+		"wpn_fps_upg_ass_ns_surefire",
+		"wpn_fps_upg_fl_ass_peq15",
+		"wpn_fps_upg_fl_ass_laser",
+		"wpn_fps_upg_ass_ns_battle",
+		"wpn_fps_upg_fl_ass_utg"
+	}
+	self.wpn_fps_lmg_par_npc = deep_clone(self.wpn_fps_lmg_par)
+	self.wpn_fps_lmg_par_npc.unit = "units/pd2_dlc_par/weapons/wpn_fps_lmg_par/wpn_fps_lmg_par_npc"
+end
 function WeaponFactoryTweakData:_init_legendary()
 	self.parts.wpn_fps_ass_74_b_legend = {
 		type = "barrel",
@@ -23097,6 +23232,53 @@ function WeaponFactoryTweakData:_init_legendary()
 		}
 	}
 	self.parts.wpn_fps_pis_deagle_b_legend.third_unit = "units/payday2_cash/safes/cf15/weapons/wpn_fps_pis_deagle_bling_pts/wpn_third_pis_deagle_b_legend"
+	self.parts.wpn_fps_fla_mk2_body_fierybeast = {
+		type = "lower_reciever",
+		name_id = "bm_wp_huntsman_body_standard",
+		a_obj = "a_body",
+		unit = "units/payday2_cash/safes/cop/weapons/wpn_fps_fla_mk2_body_fierybeast_pts/wpn_fps_fla_mk2_body_fierybeast",
+		stats = {
+			value = 1,
+			total_ammo_mod = 5,
+			damage = -2
+		},
+		unatainable = true,
+		animations = {
+			reload = "reload",
+			reload_not_empty = "reload",
+			fire = "recoil",
+			fire_steelsight = "recoil"
+		}
+	}
+	self.parts.wpn_fps_rpg7_m_grinclown = {
+		type = "magazine",
+		name_id = "bm_wp_rpg7_m_rocket",
+		bullet_objects = {prefix = "g_bullet_", amount = 1},
+		a_obj = "a_m",
+		unit = "units/payday2_cash/safes/cop/weapons/wpn_fps_rpg7_m_grinclown/wpn_fps_rpg7_m_grinclown",
+		stats = {value = 1},
+		unatainable = true,
+		animations = {reload = "reload"}
+	}
+	self.parts.wpn_fps_lmg_m134_body_upper_spikey = {
+		type = "extra",
+		name_id = "bm_wp_m134_body_upper_spikey",
+		a_obj = "a_body",
+		unit = "units/payday2_cash/safes/cop/weapons/wpn_fps_lmg_m134_legend_pts/wpn_fps_lmg_m134_body_upper_spikey",
+		stats = {value = 1},
+		unatainable = true
+	}
+	self.parts.wpn_fps_lmg_m134_barrel_legendary = {
+		type = "barrel",
+		name_id = "bm_wp_m134_barrel_legendary",
+		a_obj = "a_b",
+		unit = "units/payday2_cash/safes/cop/weapons/wpn_fps_lmg_m134_legend_pts/wpn_fps_lmg_m134_barrel_legendary",
+		stats = {value = 1},
+		unatainable = true,
+		animations = {fire = "recoil", fire_steelsight = "recoil"}
+	}
+	self.parts.wpn_fps_lmg_m134_body_upper_spikey.third_unit = "units/payday2_cash/safes/cop/weapons/wpn_fps_lmg_m134_legend_pts/wpn_third_lmg_m134_body_upper_spikey"
+	self.parts.wpn_fps_lmg_m134_barrel_legendary.third_unit = "units/payday2_cash/safes/cop/weapons/wpn_fps_lmg_m134_legend_pts/wpn_third_lmg_m134_barrel_legendary"
 end
 function WeaponFactoryTweakData:_init_cc_material_config()
 	local parts = self.parts
@@ -23112,4 +23294,50 @@ function WeaponFactoryTweakData:_init_cc_material_config()
 	parts.wpn_fps_pis_g18c_co_comp_2.thq_material_config = Idstring("units/payday2/weapons/wpn_fps_pis_g18c_pts/wpn_fps_pis_g18c_comp_2_thq")
 	parts.wpn_fps_upg_o_mbus_rear.material_config = Idstring("units/pd2_dlc_gage_shot/weapons/wpn_fps_upg_o_mbus/wpn_fps_upg_o_mbus_front")
 	parts.wpn_fps_upg_o_mbus_rear.thq_material_config = Idstring("units/pd2_dlc_gage_shot/weapons/wpn_fps_upg_o_mbus/wpn_fps_upg_o_mbus_front_thq")
+end
+function WeaponFactoryTweakData:_init_bipods()
+	self.parts.wpn_fps_upg_bp_lmg_lionbipod = {
+		pcs = {
+			10,
+			20,
+			30,
+			40
+		},
+		type = "bipod",
+		sub_type = "bipod",
+		name_id = "bm_wp_upg_lmg_lionbipod",
+		a_obj = "a_bp",
+		unit = "units/pd2_dlc_cro/weapons/wpn_fps_upg_g_lmg_lionbipod/wpn_fps_upg_bp_lmg_lionbipod",
+		stats = {value = 0, zoom = 1},
+		adds = {
+			"wpn_fps_addon_ris"
+		},
+		animations = {deploy = "deploy", undeploy = "undeploy"},
+		forbids = {
+			"wpn_fps_lmg_hk21_fg_short"
+		},
+		texture_bundle_folder = "par",
+		perks = {"bipod"}
+	}
+	self.parts.wpn_fps_upg_bp_lmg_lionbipod.third_unit = "units/pd2_dlc_cro/weapons/wpn_third_upg_g_lmg_lionbipod/wpn_third_upg_g_lmg_lionbipod"
+	table.map_append(self.parts.wpn_fps_lmg_hk21_fg_short, {
+		forbids = {
+			"wpn_fps_upg_bp_lmg_lionbipod"
+		}
+	})
+	table.list_append(self.wpn_fps_lmg_hk21.uses_parts, {
+		"wpn_fps_upg_bp_lmg_lionbipod"
+	})
+	table.list_append(self.wpn_fps_lmg_m249.uses_parts, {
+		"wpn_fps_upg_bp_lmg_lionbipod"
+	})
+	table.list_append(self.wpn_fps_lmg_rpk.uses_parts, {
+		"wpn_fps_upg_bp_lmg_lionbipod"
+	})
+	table.list_append(self.wpn_fps_lmg_mg42.uses_parts, {
+		"wpn_fps_upg_bp_lmg_lionbipod"
+	})
+	table.list_append(self.wpn_fps_lmg_par.uses_parts, {
+		"wpn_fps_upg_bp_lmg_lionbipod"
+	})
 end

@@ -22,7 +22,9 @@ function PlayerBipod:_enter(enter_data)
 		self._unit_deploy_position = player:position()
 		self._unit:camera():camera_unit():base():set_limits(tweak_data.bipod_camera_spin_limit, tweak_data.bipod_camera_pitch_limit)
 		PlayerBipod.super:start_deploying_bipod(tweak_data.timers.deploy_bipod)
+		self._equipped_unit:base():tweak_data_anim_stop("undeploy")
 		local result = self._ext_camera:play_redirect(Idstring(tweak_data.animations.bipod_enter .. "_" .. equipped_unit_id), speed_multiplier)
+		local result_deploy = self._equipped_unit:base():tweak_data_anim_play("deploy", speed_multiplier)
 		self._headbob = 0
 		self._target_headbob = 0
 		self._ext_camera:set_shaker_parameter("headbob", "amplitude", 0)
@@ -30,6 +32,8 @@ function PlayerBipod:_enter(enter_data)
 		PlayerStandard.IDS_RECOIL_ENTER = Idstring(tweak_data.animations.bipod_recoil_enter .. "_" .. equipped_unit_id)
 		PlayerStandard.IDS_RECOIL_LOOP = Idstring(tweak_data.animations.bipod_recoil_loop .. "_" .. equipped_unit_id)
 		PlayerStandard.IDS_RECOIL_EXIT = Idstring(tweak_data.animations.bipod_recoil_exit .. "_" .. equipped_unit_id)
+		self._unit:sound_source():post_event("wp_steady_in")
+		self:_stance_entered()
 	end
 end
 function PlayerBipod:exit(state_data, new_state_name)
@@ -37,7 +41,9 @@ function PlayerBipod:exit(state_data, new_state_name)
 	local tweak_data = self._equipped_unit:base():weapon_tweak_data()
 	local speed_multiplier = self._equipped_unit:base():reload_speed_multiplier()
 	local equipped_unit_id = self._equipped_unit:base().name_id
+	self._equipped_unit:base():tweak_data_anim_stop("deploy")
 	local result = self._ext_camera:play_redirect(Idstring(tweak_data.animations.bipod_exit .. "_" .. equipped_unit_id), speed_multiplier)
+	local result_deploy = self._equipped_unit:base():tweak_data_anim_play("undeploy", speed_multiplier)
 	self._unit:camera():camera_unit():base():set_target_tilt(0)
 	self._unit:camera():camera_unit():base():remove_limits()
 	self._unit:camera():camera_unit():base().bipod_location = nil
@@ -48,6 +54,7 @@ function PlayerBipod:exit(state_data, new_state_name)
 	PlayerStandard.IDS_RECOIL_ENTER = Idstring("recoil_enter")
 	PlayerStandard.IDS_RECOIL_LOOP = Idstring("recoil_loop")
 	PlayerStandard.IDS_RECOIL_EXIT = Idstring("recoil_exit")
+	self._unit:sound_source():post_event("wp_steady_out")
 	return exit_data
 end
 function PlayerBipod:update(t, dt)
@@ -55,7 +62,6 @@ function PlayerBipod:update(t, dt)
 	local deploy_valid = self._equipped_unit:base():is_bipod_usable()
 	local movement_distance = self._unit_deploy_position - managers.player:player_unit():position():length()
 	if not managers.player:player_unit():mover():standing() or movement_distance > 10 or not deploy_valid then
-		print("PlayerBipod:update( t, dt ): Exit bipod state.")
 		self:exit(nil, "standard")
 		managers.player:set_player_state("standard")
 	end

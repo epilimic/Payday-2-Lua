@@ -361,6 +361,27 @@ function DLCTweakData:init(tweak_data)
 			amount = 1
 		}
 	}
+	self.crimefest2_par = {}
+	self.crimefest2_par.content = {}
+	self.crimefest2_par.free = true
+	self.crimefest2_par.content.loot_global_value = "normal"
+	self.crimefest2_par.content.loot_drops = {
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_upg_bp_lmg_lionbipod",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_lmg_par_b_short",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_lmg_par_s_plastic",
+			amount = 1
+		}
+	}
 	self.pd2_clan_bonnie = {}
 	self.pd2_clan_bonnie.content = {}
 	self.pd2_clan_bonnie.dlc = "has_pd2_clan"

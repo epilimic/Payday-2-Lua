@@ -361,7 +361,6 @@ function FPCameraPlayerBase:_update_rot(axis)
 		self:set_position(PlayerBipod._shoulder_pos or new_shoulder_pos)
 		self:set_rotation(bipod_rot)
 		self._parent_unit:camera():set_position(PlayerBipod._camera_pos or self._output_data.position)
-		self:set_fov_instant(40)
 	elseif not self._parent_unit:movement()._current_state:in_steelsight() then
 		PlayerBipod:set_camera_positions(bipod_pos, self._output_data.position)
 	end

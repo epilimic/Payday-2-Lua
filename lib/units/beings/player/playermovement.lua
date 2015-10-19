@@ -285,7 +285,7 @@ function PlayerMovement:on_cuffed()
 	if self._unit:character_damage()._god_mode then
 		return
 	end
-	if self._current_state_name == "standard" or self._current_state_name == "bleed_out" or self._current_state_name == "carry" or self._current_state_name == "mask_off" or self._current_state_name == "clean" or self._current_state_name == "civilian" then
+	if self._current_state_name == "standard" or self._current_state_name == "bipod" or self._current_state_name == "bleed_out" or self._current_state_name == "carry" or self._current_state_name == "mask_off" or self._current_state_name == "clean" or self._current_state_name == "civilian" then
 		managers.player:set_player_state("arrested")
 	else
 		debug_pause("[PlayerMovement:on_cuffed] transition failed", self._current_state_name)

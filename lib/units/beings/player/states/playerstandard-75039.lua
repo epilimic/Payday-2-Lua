@@ -622,6 +622,9 @@ function PlayerStandard:_update_movement(t, dt)
 		mvector3.set_static(self._last_velocity_xy, 0, 0, 0)
 	end
 	local cur_pos = pos_new or self._pos
+	if self.JORDAN then
+		self:JORDAN(cur_pos, false)
+	end
 	local move_dis = mvector3.distance_sq(cur_pos, self._last_sent_pos)
 	if self:is_network_move_allowed() and (move_dis > 22500 or move_dis > 400 and (t - self._last_sent_pos_t > 1.5 or not pos_new)) then
 		self._ext_network:send("action_walk_nav_point", cur_pos)
@@ -738,7 +741,7 @@ function PlayerStandard:_stance_entered(unequipped)
 		stances = tweak_data.player.stances[stance_id] or tweak_data.player.stances.default
 	end
 	local misc_attribs = stances.standard
-	if self:_is_using_bipod() and not self:_is_throwing_projectile() then
+	if self:_is_using_bipod() and not self:_is_throwing_grenade() then
 		misc_attribs = stances.bipod
 	else
 		misc_attribs = self._state_data.in_steelsight and stances.steelsight or self._state_data.ducking and stances.crouched or stances.standard
@@ -2419,7 +2422,7 @@ function PlayerStandard:_check_action_deploy_bipod(t, input)
 	if not input.btn_deploy_bipod then
 		return
 	end
-	if self:in_steelsight() or self:_on_zipline() or self:_is_throwing_projectile() then
+	if self:in_steelsight() or self:_on_zipline() or self:_is_throwing_grenade() then
 		return
 	end
 	local weapon = self._equipped_unit:base()

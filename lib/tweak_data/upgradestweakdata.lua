@@ -1663,7 +1663,11 @@ function UpgradesTweakData:init()
 	}
 	self.level_tree[23] = {
 		name_id = "weapons",
-		upgrades = {"bullseye", "c96"}
+		upgrades = {
+			"bullseye",
+			"c96",
+			"par"
+		}
 	}
 	self.level_tree[24] = {
 		name_id = "weapons",
@@ -2131,6 +2135,7 @@ function UpgradesTweakData:init()
 	self:_arblast_weapon_definitions()
 	self:_frankish_weapon_definitions()
 	self:_long_weapon_definitions()
+	self:_par_weapon_definitions()
 	self:_melee_weapon_definitions()
 	self:_grenades_definitions()
 	self:_carry_definitions()
@@ -9448,5 +9453,12 @@ function UpgradesTweakData:_long_weapon_definitions()
 		weapon_id = "long",
 		factory_id = "wpn_fps_bow_long",
 		dlc = "steel"
+	}
+end
+function UpgradesTweakData:_par_weapon_definitions()
+	self.definitions.par = {
+		category = "weapon",
+		weapon_id = "par",
+		factory_id = "wpn_fps_lmg_par"
 	}
 end
