@@ -14,7 +14,7 @@ function PlayerBipod:enter(state_data, enter_data)
 end
 function PlayerBipod:_enter(enter_data)
 	local player = managers.player:player_unit()
-	if player then
+	if player and self._unit:base().is_local_player then
 		local tweak_data = self._equipped_unit:base():weapon_tweak_data()
 		local speed_multiplier = self._equipped_unit:base():reload_speed_multiplier()
 		local reload_name_id = tweak_data.animations.reload_name_id or self._equipped_unit:base().name_id

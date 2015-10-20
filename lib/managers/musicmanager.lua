@@ -229,6 +229,7 @@ function MusicManager:jukebox_default_tracks()
 		heistlost = "resultscreen_lose",
 		heistfinish = "music_loot_drop",
 		credits = "criminals_ambition",
+		heist_red2 = "track_31",
 		heist_jolly = "track_30",
 		heist_gallery = "track_05",
 		heist_branchbank = "track_03",

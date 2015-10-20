@@ -663,10 +663,9 @@ function WeaponTweakData:_init_data_swat_van_turret_module_npc()
 	self.swat_van_turret_module.FLASH_GRENADE = {
 		range = 300,
 		effect_duration = 6,
-		chance = 0.8,
-		check_interval = {3, 6},
-		quiet_time = {10, 13},
-		requirements = {aggression_history = 10}
+		chance = 1,
+		check_interval = {1, 1},
+		quiet_time = {10, 13}
 	}
 	self.swat_van_turret_module.HACKABLE_WITH_ECM = true
 	self.swat_van_turret_module.VELOCITY_COMPENSATION = {SNAPSHOT_INTERVAL = 0.3, OVERCOMPENSATION = 50}
@@ -7687,11 +7686,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 		value = 9
 	}
 	self.mosin.armor_piercing_chance = 1
-	self.mosin.stats_modifiers = {
-		damage = 2,
-		suppression = 3,
-		spread = 0.6
-	}
+	self.mosin.stats_modifiers = {damage = 2}
 	self.m1928 = {}
 	self.m1928.category = "smg"
 	self.m1928.damage_melee = damage_melee_default
@@ -10182,14 +10177,14 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.par.sounds.enter_steelsight = "lmg_steelsight_enter"
 	self.par.sounds.leave_steelsight = "lmg_steelsight_exit"
 	self.par.timers = {}
-	self.par.timers.reload_not_empty = 5.62
-	self.par.timers.reload_empty = 5.62
+	self.par.timers.reload_not_empty = 6.5
+	self.par.timers.reload_empty = 6.5
 	self.par.timers.unequip = 0.9
 	self.par.timers.equip = 0.9
 	self.par.timers.deploy_bipod = 0.85
 	self.par.bipod_camera_spin_limit = 40
 	self.par.bipod_camera_pitch_limit = 15
-	self.par.bipod_weapon_translation = Vector3(-8.5, 20, -5)
+	self.par.bipod_weapon_translation = Vector3(-8.5, 10, -5)
 	self.par.name_id = "bm_w_par"
 	self.par.desc_id = "bm_w_par_desc"
 	self.par.description_id = "des_par"

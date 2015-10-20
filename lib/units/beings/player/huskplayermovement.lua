@@ -239,7 +239,6 @@ HuskPlayerMovement._look_modifier_name = Idstring("action_upper_body")
 HuskPlayerMovement._head_modifier_name = Idstring("look_head")
 HuskPlayerMovement._arm_modifier_name = Idstring("aim_r_arm")
 HuskPlayerMovement._mask_off_modifier_name = Idstring("look_mask_off")
-HuskPlayerMovement._bipod_start_position = nil
 function HuskPlayerMovement:init(unit)
 	self._unit = unit
 	self._machine = unit:anim_state_machine()
@@ -300,6 +299,7 @@ function HuskPlayerMovement:init(unit)
 	self._SO_access = managers.navigation:convert_access_flag("teamAI1")
 	self._slotmask_gnd_ray = managers.slot:get_mask("player_ground_check")
 	self:set_friendly_fire(true)
+	self._bipod_start_position = nil
 end
 function HuskPlayerMovement:post_init()
 	self._ext_anim = self._unit:anim_data()
@@ -1497,54 +1497,59 @@ function HuskPlayerMovement:_upd_move_bipod(t, dt)
 	elseif not self._ext_anim.crouch then
 		self:play_redirect("crouch")
 	end
-	if not HuskPlayerMovement._bipod_start_position then
+	local peer_id = managers.network:session():peer_by_unit(self._unit):id()
+	if not self._bipod_start_position then
 		return
 	end
-	if not self._sync_look_dir then
-		self._sync_look_dir = self._look_dir
+	if not self._bipod_start_position.pos or not self._bipod_start_position.peer_id then
+		return
 	end
-	if not self._bipod_last_angle then
-		self._bipod_last_angle = 0
+	if self._bipod_start_position.peer_id == peer_id then
+		self._stance.owner_stance_code = 3
+		self:_chk_change_stance()
+		if not self._sync_look_dir then
+			self._sync_look_dir = self._look_dir
+		end
+		if not self._bipod_last_angle then
+			self._bipod_last_angle = 0
+		end
+		self._unit:set_driving("script")
+		local husk_original_position = self._bipod_start_position.pos
+		local husk_original_look_direction = Vector3(self._look_dir.x, self._look_dir.y, 0)
+		local weapon = self._unit:inventory():equipped_unit()
+		local bipod_obj = weapon:get_object(Idstring("a_bp"))
+		local bipod_estimate_vec = husk_original_look_direction * 100
+		local bipod_pos = husk_original_position + bipod_estimate_vec
+		if bipod_obj then
+			bipod_pos = bipod_obj:position()
+		end
+		local body_pos = husk_original_position
+		local target_angle = self._sync_look_dir:angle(self._look_dir)
+		local rotate_direction = math.sign(self._sync_look_dir - self._look_dir:to_polar_with_reference(self._look_dir, math.UP).spin)
+		local rotate_angle = target_angle * rotate_direction
+		rotate_angle = math.lerp(self._bipod_last_angle, rotate_angle, dt * 2)
+		if self._anim_playing == nil then
+			self._anim_playing = false
+		end
+		local stop_threshold = 0.115
+		if stop_threshold < math.abs(self._bipod_last_angle - rotate_angle) and not self._anim_playing and rotate_direction == -1 then
+			self:play_redirect("walk_r", nil)
+			self._anim_playing = true
+		elseif stop_threshold < math.abs(self._bipod_last_angle - rotate_angle) and not self._anim_playing and rotate_direction == 1 then
+			self:play_redirect("walk_l", nil)
+			self._anim_playing = true
+		elseif stop_threshold > math.abs(self._bipod_last_angle - rotate_angle) and self._anim_playing then
+			self:play_redirect("idle", nil)
+			self._anim_playing = false
+		end
+		self._bipod_last_angle = rotate_angle
+		local new_x = math.cos(rotate_angle) * (body_pos.x - bipod_pos.x) - math.sin(rotate_angle) * (body_pos.y - bipod_pos.y) + bipod_pos.x
+		local new_y = math.sin(rotate_angle) * (body_pos.x - bipod_pos.x) + math.cos(rotate_angle) * (body_pos.y - bipod_pos.y) + bipod_pos.y
+		local new_pos = Vector3(new_x, new_y, self._m_pos.z)
+		self:set_position(new_pos)
+		local body_rotation = Rotation(husk_original_look_direction, math.UP) * Rotation(rotate_angle)
+		self:set_rotation(body_rotation)
 	end
-	self._unit:set_driving("script")
-	local husk_original_position = HuskPlayerMovement._bipod_start_position
-	local husk_original_look_direction = Vector3(self._look_dir.x, self._look_dir.y, 0)
-	local weapon = self._unit:inventory():equipped_unit()
-	local bipod_obj = weapon:get_object(Idstring("a_bp"))
-	local bipod_estimate_vec = husk_original_look_direction * 100
-	local bipod_pos = husk_original_position + bipod_estimate_vec
-	if bipod_obj then
-		bipod_pos = bipod_obj:position()
-	end
-	local body_pos = husk_original_position
-	local target_angle = self._sync_look_dir:angle(self._look_dir)
-	local rotate_direction = math.sign(self._sync_look_dir - self._look_dir:to_polar_with_reference(self._look_dir, math.UP).spin)
-	local rotate_angle = target_angle * rotate_direction
-	rotate_angle = math.lerp(self._bipod_last_angle, rotate_angle, dt * 2)
-	if self._anim_playing == nil then
-		self._anim_playing = false
-	end
-	local stop_threshold = 0.115
-	if stop_threshold < math.abs(self._bipod_last_angle - rotate_angle) and not self._anim_playing and rotate_direction == -1 then
-		Application:trace("WALK RIGHT ", self._bipod_last_angle, rotate_angle, target_angle, self._anim_playing)
-		self:play_redirect("walk_r", nil)
-		self._anim_playing = true
-	elseif stop_threshold < math.abs(self._bipod_last_angle - rotate_angle) and not self._anim_playing and rotate_direction == 1 then
-		Application:trace("WALK LEFT", self._bipod_last_angle, rotate_angle, target_angle, self._anim_playing)
-		self:play_redirect("walk_l", nil)
-		self._anim_playing = true
-	elseif stop_threshold > math.abs(self._bipod_last_angle - rotate_angle) and self._anim_playing then
-		Application:debug("STOP")
-		self:play_redirect("idle", nil)
-		self._anim_playing = false
-	end
-	self._bipod_last_angle = rotate_angle
-	local new_x = math.cos(rotate_angle) * (body_pos.x - bipod_pos.x) - math.sin(rotate_angle) * (body_pos.y - bipod_pos.y) + bipod_pos.x
-	local new_y = math.sin(rotate_angle) * (body_pos.x - bipod_pos.x) + math.cos(rotate_angle) * (body_pos.y - bipod_pos.y) + bipod_pos.y
-	local new_pos = Vector3(new_x, new_y, self._m_pos.z)
-	self:set_position(new_pos)
-	local body_rotation = Rotation(husk_original_look_direction, math.UP) * Rotation(rotate_angle)
-	self:set_rotation(body_rotation)
 end
 function HuskPlayerMovement:_start_standard(event_desc)
 	self:set_need_revive(false)
@@ -1593,7 +1598,11 @@ function HuskPlayerMovement:_start_standard(event_desc)
 		self._movement_updator = callback(self, self, "_upd_move_standard")
 		self._mask_off_modifier:set_target_z(self._look_dir)
 	elseif self._state == "bipod" then
-		HuskPlayerMovement._bipod_start_position = Vector3(self._m_pos.x, self._m_pos.y, self._m_pos.z)
+		local peer_id = managers.network:session():peer_by_unit(self._unit):id()
+		self._bipod_start_position = {
+			peer_id = peer_id,
+			pos = Vector3(self._m_pos.x, self._m_pos.y, self._m_pos.z)
+		}
 		self._attention_updator = callback(self, self, "_upd_attention_bipod")
 		self._movement_updator = callback(self, self, "_upd_move_bipod")
 		self._look_modifier:set_target_y(self._look_dir)

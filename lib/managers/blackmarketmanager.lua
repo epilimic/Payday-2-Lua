@@ -799,7 +799,7 @@ function BlackMarketManager:outfit_string()
 	local equipped_grenade = self:equipped_grenade()
 	s = s .. " " .. tostring(equipped_grenade)
 	s = s .. " " .. tostring(managers.skilltree:pack_to_string())
-	if equipped_primary.cosmetics then
+	if equipped_primary and equipped_primary.cosmetics then
 		local entry = tostring(equipped_primary.cosmetics.id)
 		local quality = tostring(tweak_data.economy:get_index_from_entry("qualities", equipped_primary.cosmetics.quality) or 1)
 		local bonus = equipped_primary.cosmetics.bonus and "1" or "0"
@@ -807,7 +807,7 @@ function BlackMarketManager:outfit_string()
 	else
 		s = s .. " " .. "nil-1-0"
 	end
-	if equipped_secondary.cosmetics then
+	if equipped_secondary and equipped_secondary.cosmetics then
 		local entry = tostring(equipped_secondary.cosmetics.id)
 		local quality = tostring(tweak_data.economy:get_index_from_entry("qualities", equipped_secondary.cosmetics.quality) or 1)
 		local bonus = equipped_secondary.cosmetics.bonus and "1" or "0"
@@ -843,14 +843,20 @@ function BlackMarketManager:outfit_string_from_list(outfit)
 	s = s .. " " .. tostring(outfit.grenade)
 	s = s .. " " .. managers.skilltree:pack_to_string_from_list(outfit.skills)
 	if outfit.primary.cosmetics then
-		s = s .. " " .. tostring(outfit.primary.cosmetics.id)
+		local entry = tostring(outfit.primary.cosmetics.id)
+		local quality = tostring(tweak_data.economy:get_index_from_entry("qualities", outfit.primary.cosmetics.quality) or 1)
+		local bonus = outfit.primary.cosmetics.bonus and "1" or "0"
+		s = s .. " " .. entry .. "-" .. quality .. "-" .. bonus
 	else
-		s = s .. " " .. "nil"
+		s = s .. " " .. "nil-1-0"
 	end
 	if outfit.secondary.cosmetics then
-		s = s .. " " .. tostring(outfit.secondary.cosmetics.id)
+		local entry = tostring(outfit.secondary.cosmetics.id)
+		local quality = tostring(tweak_data.economy:get_index_from_entry("qualities", outfit.secondary.cosmetics.quality) or 1)
+		local bonus = outfit.secondary.cosmetics.bonus and "1" or "0"
+		s = s .. " " .. entry .. "-" .. quality .. "-" .. bonus
 	else
-		s = s .. " " .. "nil"
+		s = s .. " " .. "nil-1-0"
 	end
 	return s
 end
@@ -1589,12 +1595,17 @@ function BlackMarketManager:get_melee_weapon_stats(melee_weapon_id)
 	end
 	return {}
 end
-function BlackMarketManager:_get_weapon_stats(weapon_id, blueprint)
+function BlackMarketManager:_get_weapon_stats(weapon_id, blueprint, cosmetics)
 	local factory_id = managers.weapon_factory:get_factory_id_by_weapon_id(weapon_id)
 	local weapon_tweak_data = tweak_data.weapon[weapon_id] or {}
 	local weapon_stats = managers.weapon_factory:get_stats(factory_id, blueprint)
+	local bonus_stats = {}
+	bonus_stats = cosmetics and cosmetics.id and cosmetics.bonus and (tweak_data:get_raw_value("economy", "bonuses", tweak_data.blackmarket.weapon_skins[cosmetics.id].bonus, "stats") or {})
 	for stat, value in pairs(weapon_tweak_data.stats) do
 		weapon_stats[stat] = (weapon_stats[stat] or 0) + weapon_tweak_data.stats[stat]
+	end
+	for stat, value in pairs(bonus_stats) do
+		weapon_stats[stat] = (weapon_stats[stat] or 0) + value
 	end
 	return weapon_stats
 end
@@ -1608,7 +1619,7 @@ function BlackMarketManager:get_weapon_stats(category, slot, blueprint)
 	if not blueprint or not crafted then
 		return
 	end
-	return self:_get_weapon_stats(crafted.weapon_id, blueprint)
+	return self:_get_weapon_stats(crafted.weapon_id, blueprint, crafted.cosmetics)
 end
 function BlackMarketManager:get_weapon_stats_without_mod(category, slot, part_id)
 	return self:get_weapon_stats_with_mod(category, slot, part_id, true)
@@ -1624,7 +1635,7 @@ function BlackMarketManager:get_weapon_stats_with_mod(category, slot, part_id, r
 		return
 	end
 	managers.weapon_factory:change_part_blueprint_only(crafted.factory_id, part_id, blueprint, remove_mod)
-	return self:_get_weapon_stats(crafted.weapon_id, blueprint)
+	return self:_get_weapon_stats(crafted.weapon_id, blueprint, crafted.cosmetics)
 end
 function BlackMarketManager:calculate_weapon_visibility(weapon)
 	return #tweak_data.weapon.stats.concealment - self:calculate_weapon_concealment(weapon)
@@ -1653,8 +1664,10 @@ function BlackMarketManager:_calculate_weapon_concealment(weapon)
 	if not base_stats or not base_stats.concealment then
 		return 0
 	end
+	local bonus_stats = {}
+	bonus_stats = weapon.cosmetics and weapon.cosmetics.id and weapon.cosmetics.bonus and (tweak_data:get_raw_value("economy", "bonuses", tweak_data.blackmarket.weapon_skins[weapon.cosmetics.id].bonus, "stats") or {})
 	local parts_stats = managers.weapon_factory:get_stats(factory_id, blueprint)
-	return (base_stats.concealment + (parts_stats.concealment or 0)) * (modifiers_stats and modifiers_stats.concealment or 1)
+	return (base_stats.concealment + (parts_stats.concealment or 0) + (bonus_stats.concealment or 0)) * (modifiers_stats and modifiers_stats.concealment or 1)
 end
 function BlackMarketManager:_calculate_armor_concealment(armor)
 	local armor_data = tweak_data.blackmarket.armors[armor]
@@ -4402,11 +4415,13 @@ function BlackMarketManager:tradable_verify(category, entry, quality, bonus, tra
 	if not tradable_list then
 		return false
 	end
+	print("[BlackMarketManager:tradable_verify]", "category", category, "entry", entry, "quality", quality, "bonus", bonus, "tradable_list", inspect(tradable_list))
 	for _, item in pairs(tradable_list) do
 		if item.category == category and item.entry == entry and item.quality == quality and item.bonus == bonus then
 			return true
 		end
 	end
+	print("[BlackMarketManager:tradable_verify] Verification FAILED")
 	return false
 end
 function BlackMarketManager:reset()

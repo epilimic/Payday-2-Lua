@@ -254,9 +254,204 @@ function SimpleGUIEffectSpewer:init(params)
 	self._update_thread = self._particle_panel:animate(callback(self, self, "animation_update"))
 	self._particle_panel:set_layer(self._layer)
 end
-function SimpleGUIEffectSpewer.lootdrop_steam_drop_flip_wait(panel)
+function SimpleGUIEffectSpewer.lootdrop_drill_drop_flip_card(panel)
+	local color = tweak_data.economy.rarities.legendary.color
+	local particle_colors = {
+		red = 1,
+		green = 0,
+		blue = 0
+	}
+	SimpleGUIEffectSpewer:new({
+		spew_time = 0,
+		spew_at_start = true,
+		plive_time = 6,
+		particle_speed = 0,
+		max_num_particles = 1,
+		spawn_interval = 0.1,
+		particle_colors = particle_colors,
+		particle_w = panel:h() * 6,
+		particle_h = panel:h() * 6,
+		particle_textures = {
+			"guis/dlcs/infamous/textures/pd2/infamous_tree/spinner_01_df"
+		},
+		particle_alpha = 1,
+		layer = panel:world_layer() - 1,
+		parent_panel = panel,
+		particle_rotation_speed = 180
+	})
+	SimpleGUIEffectSpewer:new({
+		spew_time = 0,
+		spew_at_start = true,
+		plive_time = 6,
+		particle_speed = 0,
+		max_num_particles = 1,
+		spawn_interval = 0.1,
+		particle_colors = particle_colors,
+		particle_w = panel:h() * 6,
+		particle_h = panel:h() * 6,
+		particle_textures = {
+			"guis/dlcs/infamous/textures/pd2/infamous_tree/spinner_02_df"
+		},
+		particle_alpha = 1,
+		layer = panel:world_layer() - 1,
+		parent_panel = panel,
+		particle_rotation_speed = -180
+	})
 end
-function SimpleGUIEffectSpewer.lootdrop_steam_drop_flip_card(panel)
+function SimpleGUIEffectSpewer.lootdrop_drill_drop_show_wait(panel)
+	managers.menu_component:post_event("cash_loot_drop_drill_intro")
+end
+function SimpleGUIEffectSpewer.lootdrop_drill_drop_show_item(panel)
+	managers.menu_component:post_event("cash_loot_drop_drill_reveal")
+	local color = tweak_data.economy.rarities.legendary.color
+	local particle_colors = {
+		red = {
+			color.red - 0.2,
+			color.red + 0.8
+		},
+		green = {
+			color.green - 0.8,
+			color.green + 0.2
+		},
+		blue = {
+			color.blue - 0.8,
+			color.blue + 0.2
+		}
+	}
+	for i = 1, 4 do
+		SimpleGUIEffectSpewer:new({
+			spew_time = 0.44,
+			min_plive_time = 0.65,
+			max_plive_time = 1.9,
+			spawn_interval = 0.09,
+			min_particle_speed = 10,
+			max_particle_speed = 30,
+			max_num_particles = 25,
+			particle_colors = particle_colors,
+			particle_textures = {
+				"guis/textures/pd2/particles/bulb"
+			},
+			particle_sway_distance = 4.4,
+			particle_sway_speed = 180,
+			particle_w = 8,
+			particle_h = 8,
+			parent_panel = panel,
+			layer = panel:world_layer() + 10,
+			gravity = 50,
+			particle_rotation_speed = 180
+		})
+		SimpleGUIEffectSpewer:new({
+			spew_time = 0.44,
+			min_plive_time = 0.65,
+			max_plive_time = 1.9,
+			spawn_interval = 0.09,
+			min_particle_speed = 15,
+			max_particle_speed = 45,
+			max_num_particles = 35,
+			particle_colors = particle_colors,
+			particle_textures = {
+				"guis/textures/pd2/particles/bulb"
+			},
+			particle_sway_distance = 4.4,
+			particle_sway_speed = 180,
+			particle_speed_sway_distance = 5,
+			particle_speed_sway_speed = 90,
+			particle_alpha = 0.6,
+			particle_w = 12,
+			particle_h = 12,
+			parent_panel = panel,
+			layer = panel:world_layer() + 10,
+			gravity = 75,
+			particle_rotation_speed = 90
+		})
+		SimpleGUIEffectSpewer:new({
+			spew_time = 0.2,
+			min_plive_time = 0.1,
+			max_plive_time = 0.45,
+			spawn_interval = 0.09,
+			min_particle_speed = 415,
+			max_particle_speed = 605,
+			max_num_particles = 60,
+			particle_colors = particle_colors,
+			particle_textures = {
+				"guis/textures/pd2/particles/spark"
+			},
+			particle_w = 4,
+			particle_h = 4,
+			parent_panel = panel,
+			layer = panel:world_layer() + 10
+		})
+		SimpleGUIEffectSpewer:new({
+			spew_time = 0.4,
+			min_plive_time = 0.2,
+			max_plive_time = 0.35,
+			spawn_interval = 0.08,
+			min_particle_speed = 395,
+			max_particle_speed = 505,
+			max_num_particles = 35,
+			particle_colors = particle_colors,
+			particle_textures = {
+				"guis/textures/pd2/particles/spark"
+			},
+			particle_w = 8,
+			particle_h = 8,
+			parent_panel = panel,
+			layer = panel:world_layer() + 10
+		})
+		SimpleGUIEffectSpewer:new({
+			spew_time = 0,
+			spew_at_start = true,
+			plive_time = 1.9,
+			particle_speed = 0,
+			max_num_particles = 2,
+			spawn_interval = 0.1,
+			particle_colors = particle_colors,
+			particle_w = panel:h() * 2.5,
+			particle_h = panel:h() * 2.5,
+			particle_textures = {
+				"guis/textures/pd2/particles/fill"
+			},
+			parent_panel = panel,
+			particle_alpha = 0.2,
+			layer = panel:world_layer() + 10
+		})
+		SimpleGUIEffectSpewer:new({
+			spew_time = 0,
+			spew_at_start = true,
+			plive_time = 1.5,
+			particle_speed = 0,
+			max_num_particles = 1,
+			spawn_interval = 0.1,
+			particle_colors = particle_colors,
+			particle_w = panel:h() * 1.55,
+			particle_h = panel:h() * 1.55,
+			particle_textures = {
+				"guis/textures/pd2/particles/fill"
+			},
+			parent_panel = panel,
+			particle_alpha = 0.4,
+			layer = panel:world_layer() + 10
+		})
+		SimpleGUIEffectSpewer:new({
+			spew_time = 0,
+			spew_at_start = true,
+			plive_time = 2,
+			particle_speed = 0,
+			max_num_particles = 2,
+			spawn_interval = 0.1,
+			particle_colors = particle_colors,
+			particle_w = panel:h() * 4,
+			particle_h = panel:h() * 4,
+			particle_textures = {
+				"guis/textures/pd2/particles/fill"
+			},
+			parent_panel = panel,
+			particle_alpha = 0.1,
+			layer = panel:world_layer() + 10
+		})
+	end
+end
+function SimpleGUIEffectSpewer.lootdrop_safe_drop_flip_card(panel)
 	local color = tweak_data.economy.rarities.legendary.color
 	local particle_colors = {
 		red = 1,
@@ -300,10 +495,10 @@ function SimpleGUIEffectSpewer.lootdrop_steam_drop_flip_card(panel)
 		particle_rotation_speed = -180
 	})
 end
-function SimpleGUIEffectSpewer.lootdrop_steam_drop_show_wait(panel)
+function SimpleGUIEffectSpewer.lootdrop_safe_drop_show_wait(panel)
 	managers.menu_component:post_event("cash_loot_drop_intro")
 end
-function SimpleGUIEffectSpewer.lootdrop_steam_drop_show_item(panel)
+function SimpleGUIEffectSpewer.lootdrop_safe_drop_show_item(panel)
 	local color = tweak_data.economy.rarities.legendary.color
 	local particle_colors = {
 		red = {

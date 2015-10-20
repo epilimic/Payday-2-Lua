@@ -28,6 +28,9 @@ function ElementAwardAchievment:on_executed(instigator)
 		end
 	else
 	end
+	if self._values.players_from_start and (managers.statistics:is_dropin() or game_state_machine:current_state_name() == "ingame_waiting_for_players") then
+		award_achievement = false
+	end
 	if award_achievement then
 		print("[ElementAwardAchievment:on_executed]", "achievment", self._values.achievment)
 		managers.achievment:award(self._values.achievment)

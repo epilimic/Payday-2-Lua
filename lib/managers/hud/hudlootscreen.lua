@@ -585,10 +585,30 @@ function HUDLootScreen:make_lootdrop(lootdrop_data)
 				texture_path = guis_catalog .. path .. item_id
 				self._peer_data[peer_id].steam_drop = true
 				self._peer_data[peer_id].effects = {
-					flip_wait = "lootdrop_steam_drop_flip_wait",
-					flip_card = "lootdrop_steam_drop_flip_card",
-					show_wait = "lootdrop_steam_drop_show_wait",
-					show_item = "lootdrop_steam_drop_show_item"
+					flip_wait = nil,
+					flip_card = "lootdrop_safe_drop_flip_card",
+					show_wait = "lootdrop_safe_drop_show_wait",
+					show_item = "lootdrop_safe_drop_show_item"
+				}
+			else
+				texture_path = "guis/textures/pd2/endscreen/what_is_this"
+			end
+		elseif category == "drills" then
+			local td = tweak_data.economy[category] and tweak_data.economy[category][item_id]
+			if td then
+				local guis_catalog = "guis/"
+				local bundle_folder = td.texture_bundle_folder
+				if bundle_folder then
+					guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
+				end
+				local path = category .. "/"
+				texture_path = guis_catalog .. path .. item_id
+				self._peer_data[peer_id].steam_drop = true
+				self._peer_data[peer_id].effects = {
+					flip_wait = nil,
+					flip_card = "lootdrop_drill_drop_flip_card",
+					show_wait = "lootdrop_drill_drop_show_wait",
+					show_item = "lootdrop_drill_drop_show_item"
 				}
 			else
 				texture_path = "guis/textures/pd2/endscreen/what_is_this"
@@ -701,7 +721,8 @@ function HUDLootScreen:begin_choose_card(peer_id, card_id)
 		colors = 6,
 		textures = 7,
 		xp = 4,
-		safes = 8
+		safes = 8,
+		drills = 9
 	}
 	local card_nums = {
 		"upcard_mask",
@@ -711,7 +732,8 @@ function HUDLootScreen:begin_choose_card(peer_id, card_id)
 		"upcard_material",
 		"upcard_color",
 		"upcard_pattern",
-		"upcard_safe"
+		"upcard_safe",
+		"upcard_drill"
 	}
 	for i, pc in ipairs(cards) do
 		local my_card = i == card_id
@@ -760,7 +782,8 @@ function HUDLootScreen:begin_flip_card(peer_id)
 		colors = 6,
 		textures = 7,
 		xp = 4,
-		safes = 8
+		safes = 8,
+		drills = 9
 	}
 	local card_nums = {
 		"upcard_mask",
@@ -770,7 +793,8 @@ function HUDLootScreen:begin_flip_card(peer_id)
 		"upcard_material",
 		"upcard_color",
 		"upcard_pattern",
-		"upcard_safe"
+		"upcard_safe",
+		"upcard_drill"
 	}
 	local lootdrop_data = self._peer_data[peer_id].lootdrops
 	local item_category = lootdrop_data[3]

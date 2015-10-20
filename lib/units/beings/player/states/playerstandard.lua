@@ -2419,7 +2419,7 @@ function PlayerStandard:_check_action_deploy_bipod(t, input)
 	if not input.btn_deploy_bipod then
 		return
 	end
-	if self:in_steelsight() or self:_on_zipline() or self:_is_throwing_projectile() then
+	if self:in_steelsight() or self:_on_zipline() or self:_is_throwing_projectile() or self:_is_meleeing() then
 		return
 	end
 	local weapon = self._equipped_unit:base()

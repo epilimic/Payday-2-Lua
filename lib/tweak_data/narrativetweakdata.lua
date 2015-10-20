@@ -189,6 +189,11 @@ function NarrativeTweakData:init()
 	self.contacts.bain.assets_gui = Idstring("guis/mission_briefing/preload_contact_bain")
 	self.contacts.bain_no_variation = deep_clone(self.contacts.bain)
 	self.contacts.bain_no_variation.assets_gui = Idstring("guis/mission_briefing/preload_contact_bain_no_variation")
+	self.contacts.classic = {}
+	self.contacts.classic.name_id = "heist_contact_classic"
+	self.contacts.classic.description_id = "heist_contact_classic_description"
+	self.contacts.classic.package = "packages/contact_bain"
+	self.contacts.classic.assets_gui = Idstring("guis/mission_briefing/preload_contact_bain")
 	self.contacts.the_dentist = {}
 	self.contacts.the_dentist.name_id = "heist_contact_the_dentist"
 	self.contacts.the_dentist.description_id = "heist_contact_the_dentist_description"
@@ -3211,6 +3216,61 @@ function NarrativeTweakData:init()
 		40000,
 		80000
 	}
+	self.jobs.red2 = {}
+	self.jobs.red2.name_id = "heist_red2"
+	self.jobs.red2.briefing_id = "heist_red2_crimenet"
+	self.jobs.red2.package = "packages/narr_red2"
+	self.jobs.red2.contact = "classic"
+	self.jobs.red2.region = "street"
+	self.jobs.red2.jc = 60
+	self.jobs.red2.chain = {
+		{
+			level_id = "red2",
+			type_id = "heist_type_assault",
+			type = "d"
+		}
+	}
+	self.jobs.red2.briefing_event = "pln_fwb_cbf_01"
+	self.jobs.red2.debrief_event = "pln_fwb_34"
+	self.jobs.red2.crimenet_callouts = {
+		"pln_fwb_cnc_01",
+		"pln_fwb_cnc_01",
+		"pln_fwb_cnc_01"
+	}
+	self.jobs.red2.crimenet_videos = {
+		"cn_branchbank1",
+		"cn_branchbank2",
+		"cn_branchbank3"
+	}
+	self.jobs.red2.payout = {
+		100000,
+		200000,
+		500000,
+		1000000,
+		1300000
+	}
+	self.jobs.red2.contract_cost = {
+		80000,
+		150000,
+		400000,
+		850000,
+		1000000
+	}
+	self.jobs.red2.contract_visuals = {}
+	self.jobs.red2.contract_visuals.min_mission_xp = {
+		22000,
+		22000,
+		22000,
+		22000,
+		22000
+	}
+	self.jobs.red2.contract_visuals.max_mission_xp = {
+		34000,
+		34000,
+		34000,
+		34000,
+		34000
+	}
 	self._jobs_index = {
 		"jewelry_store",
 		"four_stores",
@@ -3264,7 +3324,8 @@ function NarrativeTweakData:init()
 		"shoutout_raid",
 		"arena",
 		"kenaz",
-		"jolly"
+		"jolly",
+		"red2"
 	}
 	if SystemInfo:platform() == Idstring("WIN32") then
 		table.insert(self._jobs_index, "roberts")

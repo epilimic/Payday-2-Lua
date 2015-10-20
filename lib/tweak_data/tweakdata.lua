@@ -2116,6 +2116,13 @@ Play the full version soon to get your full PAYDAY!]],
 			},
 			jobs = {"crojob1"}
 		},
+		death_red = {
+			award = "green_5",
+			difficulty = {
+				"overkill_290"
+			},
+			job = "red2"
+		},
 		death_hox_3 = {
 			award = "payback_1",
 			difficulty = {
@@ -2362,6 +2369,29 @@ Play the full version soon to get your full PAYDAY!]],
 				}
 			}
 		},
+		green_2 = {
+			award = "green_2",
+			job = "red2",
+			num_players = 4,
+			difficulty = {
+				"overkill_145",
+				"overkill_290"
+			},
+			equipped_team = {
+				primaries = {
+					"wpn_fps_shot_r870"
+				},
+				secondaries = {
+					"wpn_fps_pis_beretta"
+				},
+				characters = {
+					"russian",
+					"german",
+					"spanish",
+					"old_hoxton"
+				}
+			}
+		},
 		bain_jobs = {
 			challenge_stat = "bain_jobs",
 			complete_job = true,
@@ -2435,7 +2465,8 @@ Play the full version soon to get your full PAYDAY!]],
 		"four_stores",
 		"nightclub",
 		"pines",
-		"shoutout_raid"
+		"shoutout_raid",
+		"jolly"
 	}
 	self.achievement.job_list.hector = {
 		"watchdogs_wrapper",
@@ -2469,9 +2500,7 @@ Play the full version soon to get your full PAYDAY!]],
 		"gallery",
 		"rat",
 		"cage",
-		"arena",
-		"red2",
-		"dinner"
+		"arena"
 	}
 	self.achievement.job_list.the_dentist = {
 		"big",
@@ -2487,6 +2516,7 @@ Play the full version soon to get your full PAYDAY!]],
 		"crojob_wrapper",
 		"crojob1"
 	}
+	self.achievement.job_list.classic = {"red2"}
 	if SystemInfo:platform() == Idstring("WIN32") then
 		table.insert(self.achievement.job_list.bain, "roberts")
 	end
@@ -3170,6 +3200,7 @@ Play the full version soon to get your full PAYDAY!]],
 		{track = "track_28"},
 		{track = "track_29", lock = "kenaz"},
 		{track = "track_30"},
+		{track = "track_31"},
 		{
 			track = "track_pth_01",
 			lock = "payday"
@@ -4492,7 +4523,7 @@ function TweakData:get_controller_help_coords()
 			align = "right",
 			vertical = "bottom"
 		}
-		coords.menu_button_weapon_gadget = {
+		coords.menu_button_weapon_gadget_bipod = {
 			x = 0,
 			y = 243,
 			align = "right",

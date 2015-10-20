@@ -113,7 +113,8 @@ function AssetsTweakData:_init_assets(tweak_data)
 		"roberts",
 		"cage",
 		"hox_3",
-		"arena"
+		"arena",
+		"red2"
 	}
 	self.bodybags_bag.visible_if_locked = true
 	self.bodybags_bag.unlock_desc_id = "menu_asset_bodybags_bag_desc"
@@ -166,7 +167,8 @@ function AssetsTweakData:_init_assets(tweak_data)
 		"rat",
 		"hox_3",
 		"arena",
-		"jolly"
+		"jolly",
+		"red2"
 	}
 	self.grenade_crate.visible_if_locked = true
 	self.grenade_crate.unlock_desc_id = "menu_asset_grenade_crate_desc"
@@ -190,7 +192,8 @@ function AssetsTweakData:_init_assets(tweak_data)
 		"hox_3",
 		"shoutout_raid",
 		"arena",
-		"jolly"
+		"jolly",
+		"red2"
 	}
 	self.ammo_bag.visible_if_locked = true
 	self.ammo_bag.unlock_desc_id = "menu_asset_ammo_desc"
@@ -211,7 +214,8 @@ function AssetsTweakData:_init_assets(tweak_data)
 		"hox_3",
 		"shoutout_raid",
 		"arena",
-		"jolly"
+		"jolly",
+		"red2"
 	}
 	self.health_bag.visible_if_locked = true
 	self.health_bag.unlock_desc_id = "menu_asset_health_desc"

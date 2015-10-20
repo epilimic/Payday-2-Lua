@@ -6672,6 +6672,12 @@ function CharacterTweakData:character_map()
 				"ene_gang_hispanic_3",
 				"ene_gang_hispanic_2"
 			}
+		},
+		red = {
+			path = "units/pd2_dlc_red/characters/",
+			list = {
+				"civ_female_inside_man_1"
+			}
 		}
 	}
 	if TweakData._init_wip_character_map then

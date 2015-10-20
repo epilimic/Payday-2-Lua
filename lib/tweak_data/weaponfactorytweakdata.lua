@@ -23309,9 +23309,6 @@ function WeaponFactoryTweakData:_init_bipods()
 		a_obj = "a_bp",
 		unit = "units/pd2_dlc_cro/weapons/wpn_fps_upg_g_lmg_lionbipod/wpn_fps_upg_bp_lmg_lionbipod",
 		stats = {value = 0, zoom = 1},
-		adds = {
-			"wpn_fps_addon_ris"
-		},
 		animations = {deploy = "deploy", undeploy = "undeploy"},
 		forbids = {
 			"wpn_fps_lmg_hk21_fg_short"
