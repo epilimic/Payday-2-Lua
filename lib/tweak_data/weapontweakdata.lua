@@ -663,9 +663,10 @@ function WeaponTweakData:_init_data_swat_van_turret_module_npc()
 	self.swat_van_turret_module.FLASH_GRENADE = {
 		range = 300,
 		effect_duration = 6,
-		chance = 1,
-		check_interval = {1, 1},
-		quiet_time = {10, 13}
+		chance = 0.8,
+		check_interval = {3, 6},
+		quiet_time = {10, 13},
+		requirements = {aggression_history = 10}
 	}
 	self.swat_van_turret_module.HACKABLE_WITH_ECM = true
 	self.swat_van_turret_module.VELOCITY_COMPENSATION = {SNAPSHOT_INTERVAL = 0.3, OVERCOMPENSATION = 50}
