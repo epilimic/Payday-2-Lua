@@ -9,6 +9,7 @@ function DLCTweakData:init(tweak_data)
 		character_pack_bonnie = true,
 		butcher_pack_mods = true,
 		hoxton_revenge = 1,
+		favorite = true,
 		dlc1 = true,
 		gage_pack = true,
 		gage_pack_lmg = true,
@@ -379,6 +380,17 @@ function DLCTweakData:init(tweak_data)
 		{
 			type_items = "weapon_mods",
 			item_entry = "wpn_fps_lmg_par_s_plastic",
+			amount = 1
+		}
+	}
+	self.crimefest2_rave = {}
+	self.crimefest2_rave.content = {}
+	self.crimefest2_rave.free = true
+	self.crimefest2_rave.content.loot_global_value = "normal"
+	self.crimefest2_rave.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "lcv",
 			amount = 1
 		}
 	}

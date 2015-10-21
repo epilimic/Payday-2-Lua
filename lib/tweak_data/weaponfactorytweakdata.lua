@@ -23325,16 +23325,31 @@ function WeaponFactoryTweakData:_init_bipods()
 	table.list_append(self.wpn_fps_lmg_hk21.uses_parts, {
 		"wpn_fps_upg_bp_lmg_lionbipod"
 	})
+	table.list_append(self.wpn_fps_lmg_hk21_npc.uses_parts, {
+		"wpn_fps_upg_bp_lmg_lionbipod"
+	})
 	table.list_append(self.wpn_fps_lmg_m249.uses_parts, {
+		"wpn_fps_upg_bp_lmg_lionbipod"
+	})
+	table.list_append(self.wpn_fps_lmg_m249_npc.uses_parts, {
 		"wpn_fps_upg_bp_lmg_lionbipod"
 	})
 	table.list_append(self.wpn_fps_lmg_rpk.uses_parts, {
 		"wpn_fps_upg_bp_lmg_lionbipod"
 	})
+	table.list_append(self.wpn_fps_lmg_rpk_npc.uses_parts, {
+		"wpn_fps_upg_bp_lmg_lionbipod"
+	})
 	table.list_append(self.wpn_fps_lmg_mg42.uses_parts, {
 		"wpn_fps_upg_bp_lmg_lionbipod"
 	})
+	table.list_append(self.wpn_fps_lmg_mg42_npc.uses_parts, {
+		"wpn_fps_upg_bp_lmg_lionbipod"
+	})
 	table.list_append(self.wpn_fps_lmg_par.uses_parts, {
+		"wpn_fps_upg_bp_lmg_lionbipod"
+	})
+	table.list_append(self.wpn_fps_lmg_par_npc.uses_parts, {
 		"wpn_fps_upg_bp_lmg_lionbipod"
 	})
 end

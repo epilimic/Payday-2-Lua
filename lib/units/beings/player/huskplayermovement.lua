@@ -239,6 +239,7 @@ HuskPlayerMovement._look_modifier_name = Idstring("action_upper_body")
 HuskPlayerMovement._head_modifier_name = Idstring("look_head")
 HuskPlayerMovement._arm_modifier_name = Idstring("aim_r_arm")
 HuskPlayerMovement._mask_off_modifier_name = Idstring("look_mask_off")
+HuskPlayerMovement._bipod_start_position = {}
 function HuskPlayerMovement:init(unit)
 	self._unit = unit
 	self._machine = unit:anim_state_machine()
@@ -299,7 +300,6 @@ function HuskPlayerMovement:init(unit)
 	self._SO_access = managers.navigation:convert_access_flag("teamAI1")
 	self._slotmask_gnd_ray = managers.slot:get_mask("player_ground_check")
 	self:set_friendly_fire(true)
-	self._bipod_start_position = nil
 end
 function HuskPlayerMovement:post_init()
 	self._ext_anim = self._unit:anim_data()
@@ -378,7 +378,7 @@ function HuskPlayerMovement:update(unit, t, dt)
 	if self._attention_updator then
 		self._attention_updator(dt)
 	end
-	if not self._movement_updator and self._move_data and (self._state == "standard" or self._state == "mask_off" or self._state == "clean" or self._state == "civilian" or self._state == "carry") then
+	if not self._movement_updator and self._move_data and (self._state == "bipod" or self._state == "standard" or self._state == "mask_off" or self._state == "clean" or self._state == "civilian" or self._state == "carry") then
 		self._movement_updator = callback(self, self, "_upd_move_standard")
 		self._last_vel_z = 0
 	end
@@ -1498,31 +1498,33 @@ function HuskPlayerMovement:_upd_move_bipod(t, dt)
 		self:play_redirect("crouch")
 	end
 	local peer_id = managers.network:session():peer_by_unit(self._unit):id()
-	if not self._bipod_start_position then
+	if not HuskPlayerMovement._bipod_start_position[peer_id] then
 		return
 	end
-	if not self._bipod_start_position.pos or not self._bipod_start_position.peer_id then
-		return
+	if not HuskPlayerMovement._bipod_start_position[peer_id].bipod_pos then
+		local weapon = self._unit:inventory():equipped_unit()
+		local bipod_obj = weapon:get_object(Idstring("a_bp"))
+		local bipod_pos
+		if bipod_obj then
+			bipod_pos = bipod_obj:position()
+			HuskPlayerMovement._bipod_start_position[peer_id].bipod_pos = bipod_pos
+		else
+			return
+		end
 	end
-	if self._bipod_start_position.peer_id == peer_id then
+	if HuskPlayerMovement._bipod_start_position[peer_id] then
 		self._stance.owner_stance_code = 3
 		self:_chk_change_stance()
 		if not self._sync_look_dir then
 			self._sync_look_dir = self._look_dir
 		end
 		if not self._bipod_last_angle then
-			self._bipod_last_angle = 0
+			self._bipod_last_angle = self._sync_look_dir:angle(self._look_dir)
 		end
 		self._unit:set_driving("script")
-		local husk_original_position = self._bipod_start_position.pos
+		local husk_original_position = HuskPlayerMovement._bipod_start_position[peer_id].body_pos
 		local husk_original_look_direction = Vector3(self._look_dir.x, self._look_dir.y, 0)
-		local weapon = self._unit:inventory():equipped_unit()
-		local bipod_obj = weapon:get_object(Idstring("a_bp"))
-		local bipod_estimate_vec = husk_original_look_direction * 100
-		local bipod_pos = husk_original_position + bipod_estimate_vec
-		if bipod_obj then
-			bipod_pos = bipod_obj:position()
-		end
+		local bipod_pos = HuskPlayerMovement._bipod_start_position[peer_id].bipod_pos
 		local body_pos = husk_original_position
 		local target_angle = self._sync_look_dir:angle(self._look_dir)
 		local rotate_direction = math.sign(self._sync_look_dir - self._look_dir:to_polar_with_reference(self._look_dir, math.UP).spin)
@@ -1599,13 +1601,10 @@ function HuskPlayerMovement:_start_standard(event_desc)
 		self._mask_off_modifier:set_target_z(self._look_dir)
 	elseif self._state == "bipod" then
 		local peer_id = managers.network:session():peer_by_unit(self._unit):id()
-		self._bipod_start_position = {
-			peer_id = peer_id,
-			pos = Vector3(self._m_pos.x, self._m_pos.y, self._m_pos.z)
-		}
 		self._attention_updator = callback(self, self, "_upd_attention_bipod")
 		self._movement_updator = callback(self, self, "_upd_move_bipod")
 		self._look_modifier:set_target_y(self._look_dir)
+		self:_bipod_data()
 	else
 		self._attention_updator = callback(self, self, "_upd_attention_standard")
 		self._movement_updator = callback(self, self, "_upd_move_standard")
@@ -1613,6 +1612,22 @@ function HuskPlayerMovement:_start_standard(event_desc)
 	end
 	self._last_vel_z = 0
 	return true
+end
+function HuskPlayerMovement:_bipod_data()
+	Application:trace("HuskPlayerMovement:_bipod_data(): ", inspect(HuskPlayerMovement._bipod_start_position))
+	local peer_id = managers.network:session():peer_by_unit(self._unit):id()
+	local look_dir = Vector3(self._look_dir.x, self._look_dir.y, 0)
+	local weapon = self._unit:inventory():equipped_unit()
+	local bipod_obj = weapon:get_object(Idstring("a_bp"))
+	local bipod_pos
+	if bipod_obj then
+		bipod_pos = bipod_obj:position()
+		Application:trace("Getting bipod obj: ", bipod_pos)
+	else
+		Application:trace("Missing bipod obj: ", bipod_pos)
+	end
+	local body_pos = Vector3(self._m_pos.x, self._m_pos.y, self._m_pos.z)
+	HuskPlayerMovement._bipod_start_position[peer_id] = {bipod_pos = bipod_pos, body_pos = body_pos}
 end
 function HuskPlayerMovement:_start_bleedout(event_desc)
 	local redir_res = self:play_redirect("bleedout")

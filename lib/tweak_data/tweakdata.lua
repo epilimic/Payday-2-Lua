@@ -3202,6 +3202,15 @@ Play the full version soon to get your full PAYDAY!]],
 		{track = "track_30"},
 		{track = "track_31"},
 		{
+			track = "track_32_lcv"
+		},
+		{
+			track = "track_33_lcv"
+		},
+		{
+			track = "track_34_lcv"
+		},
+		{
 			track = "track_pth_01",
 			lock = "payday"
 		},

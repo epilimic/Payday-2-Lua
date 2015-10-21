@@ -2301,6 +2301,18 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.vlad_armor.value = 0
 	self.masks.vlad_armor.sort_number = 8
 	self.masks.vlad_armor.type = "helmet"
+	self.masks.lcv = {}
+	self.masks.lcv.unit = "units/pd2_dlc_rave/masks/msk_lcv"
+	self.masks.lcv.name_id = "bm_msk_lcv"
+	self.masks.lcv.pcs = {
+		10,
+		20,
+		30,
+		40
+	}
+	self.masks.lcv.value = 0
+	self.masks.lcv.sort_number = 9
+	self.masks.lcv.texture_bundle_folder = "rave"
 	if SystemInfo:platform() == Idstring("PS3") then
 		self.masks.sweettooth = {}
 		self.masks.sweettooth.unit = "units/pd2_dlc_consoles/masks/msk_sweettooth/msk_sweettooth"

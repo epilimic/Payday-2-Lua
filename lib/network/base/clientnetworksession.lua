@@ -23,7 +23,7 @@ function ClientNetworkSession:request_join_host(host_rpc, result_cb)
 		host_rpc = request_rpc,
 		params = {
 			self._local_peer:name(),
-			managers.blackmarket:get_preferred_character(),
+			managers.blackmarket:get_preferred_character_string(),
 			managers.dlc:dlcs_string(),
 			xuid,
 			lvl,

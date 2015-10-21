@@ -1833,15 +1833,58 @@ function BlackMarketGui:_setup(is_start_page, component_data)
 				1
 			}
 		})
+		local info_box_top = 93
 		local info_box_size = self._panel:h() - 70
 		local info_box_w = math.floor(self._panel:w() * (1 - WIDTH_MULTIPLIER) - BOX_GAP)
 		local info_box_h = math.floor(info_box_size * GRID_H_MUL)
+		self._extra_options_data = self._data.extra_options_data
+		if self._data.extra_options_panel then
+			self._extra_options_panel = self._panel:panel({
+				name = "extra_options_panel"
+			})
+			self._extra_options_panel:set_size(info_box_w, self._data.extra_options_panel.height or self._data.extra_options_panel.h or 50)
+			self._extra_options_panel:set_right(self._panel:w())
+			self._extra_options_panel:set_top(info_box_top)
+			local panel = self._extra_options_panel:panel()
+			if self._data.extra_options_panel.on_create_func_name then
+				if self._extra_options_data then
+					self._extra_options_data.selected = math.min(self._extra_options_data.selected or 1, managers.blackmarket:num_preferred_characters() + 1, CriminalsManager.get_num_characters())
+				end
+				local selected = math.min(self._extra_options_data and self._extra_options_data.selected or 1, managers.blackmarket:num_preferred_characters() + 1, CriminalsManager.get_num_characters())
+				self._extra_options_data = callback(self, self, self._data.extra_options_panel.on_create_func_name)(panel)
+				self._extra_options_data.selected = selected
+				local num_panels = 0
+				for i = 1, #self._extra_options_data do
+					if self._extra_options_data[i].panel then
+						num_panels = num_panels + 1
+					end
+				end
+				self._extra_options_data.num_panels = num_panels
+			end
+			self._extra_options_box = BoxGuiObject:new(self._extra_options_panel, {
+				sides = {
+					1,
+					1,
+					1,
+					1
+				}
+			})
+			local h = self._extra_options_panel:h() + 10
+			info_box_top = info_box_top + h
+			info_box_h = info_box_h - h
+			self._data.extra_options_data = self._extra_options_data
+			if is_win32 then
+				self._ws:connect_keyboard(Input:keyboard())
+				self._panel:key_press(callback(self, self, "extra_option_key_press"))
+				self._keyboard_connected = true
+			end
+		end
 		local info_box_panel = self._panel:panel({
 			name = "info_box_panel"
 		})
 		info_box_panel:set_size(info_box_w, info_box_h)
 		info_box_panel:set_right(self._panel:w())
-		info_box_panel:set_top(93)
+		info_box_panel:set_top(info_box_top)
 		if self._data.use_bgs then
 			local info_bg = self._panel:rect({
 				layer = -1,
@@ -2246,6 +2289,27 @@ function BlackMarketGui:_setup(is_start_page, component_data)
 				pc_btn = nil,
 				name = "bm_menu_btn_set_preferred",
 				callback = callback(self, self, "set_preferred_character_callback")
+			},
+			c_swap_slots = {
+				prio = 1,
+				btn = "BTN_A",
+				pc_btn = nil,
+				name = "bm_menu_btn_swap_preferred_slots",
+				callback = callback(self, self, "swap_preferred_character_to_slot_callback")
+			},
+			c_equip_to_slot = {
+				prio = 1,
+				btn = "BTN_A",
+				pc_btn = nil,
+				name = "bm_menu_btn_set_preferred_to_slot",
+				callback = callback(self, self, "set_preferred_character_to_slot_callback")
+			},
+			c_clear_slots = {
+				prio = 2,
+				btn = "BTN_X",
+				pc_btn = Idstring("menu_remove_item"),
+				name = "bm_menu_btn_clear_preferred",
+				callback = callback(self, self, "clear_preferred_characters_callback")
 			},
 			lo_w_equip = {
 				prio = 1,
@@ -5558,7 +5622,32 @@ function BlackMarketGui:mouse_moved(o, x, y)
 	if alive(self._no_input_panel) then
 		self._no_input = self._no_input_panel:inside(x, y)
 	end
-	if self._steam_inventory_extra_data and alive(self._steam_inventory_extra_data.gui_panel) then
+	if self._extra_options_data then
+		local used = false
+		local pointer = "arrow"
+		self._extra_options_data.selected = self._extra_options_data.selected or 1
+		local selected_slot
+		for i = 1, self._extra_options_data.num_panels do
+			local option = self._extra_options_data[i]
+			local panel = option.panel
+			local image = option.image
+			if alive(panel) and panel:inside(x, y) then
+				if not option.highlighted then
+					option.highlighted = true
+				end
+				used = true
+				pointer = "link"
+			elseif option.highlighted then
+				option.highlighted = false
+			end
+			if alive(image) then
+				image:set_alpha((option.selected and 1 or 0.9) * (option.highlighted and 1 or 0.9))
+			end
+		end
+		if used then
+			return used, pointer
+		end
+	elseif self._steam_inventory_extra_data and alive(self._steam_inventory_extra_data.gui_panel) then
 		local used = false
 		local pointer = "arrow"
 		local extra_data = self._steam_inventory_extra_data
@@ -5737,9 +5826,44 @@ function BlackMarketGui:mouse_pressed(button, x, y)
 	if self._no_input then
 		return
 	end
-	if self._steam_inventory_extra_data and alive(self._steam_inventory_extra_data.gui_panel) and not self._input_wait_t then
+	if self._extra_options_data and button == Idstring("0") then
+		self._extra_options_data.selected = self._extra_options_data.selected or 1
+		local selected_slot
+		for i = 1, self._extra_options_data.num_panels do
+			local option = self._extra_options_data[i]
+			local panel = option.panel
+			if alive(panel) and panel:inside(x, y) then
+				selected_slot = i
+				break
+			end
+		end
+		if selected_slot then
+			self._extra_options_data.selected = selected_slot
+			for i = 1, self._extra_options_data.num_panels do
+				local option = self._extra_options_data[i]
+				local box = option.box
+				local image = option.image
+				local selected = i == selected_slot
+				if alive(box) then
+					if selected and not option.selected then
+						option.selected = true
+						self:show_btns(self._selected_slot)
+						self:_update_borders()
+						self:update_info_text()
+						managers.menu_component:post_event("highlight")
+					elseif not selected then
+						option.selected = false
+					end
+					box:set_visible(selected)
+				end
+				if alive(image) then
+					image:set_alpha((option.selected and 1 or 0.9) * (option.highlighted and 1 or 0.9))
+				end
+			end
+		end
+	elseif self._steam_inventory_extra_data and button == Idstring("0") and alive(self._steam_inventory_extra_data.gui_panel) and not self._input_wait_t then
 		local extra_data = self._steam_inventory_extra_data
-		if Global.blackmarket_manager.tradable_inventory_sort > 1 and extra_data.arrow_left:inside(x, y) then
+		if 1 < Global.blackmarket_manager.tradable_inventory_sort and extra_data.arrow_left:inside(x, y) then
 			Global.blackmarket_manager.tradable_inventory_sort = math.max(Global.blackmarket_manager.tradable_inventory_sort - 1, 1)
 			extra_data.choice_text:set_text(extra_data.choices[Global.blackmarket_manager.tradable_inventory_sort or 1])
 			self._reload_in_t = 0.8
@@ -6217,9 +6341,37 @@ function BlackMarketGui:special_btn_pressed(button)
 	if self._renaming_item then
 		return
 	end
-	if self._steam_inventory_extra_data and not self._input_wait_t and alive(self._steam_inventory_extra_data.gui_panel) then
+	if self._extra_options_data then
+		self._extra_options_data.selected = self._extra_options_data.selected or 1
+		if button == Idstring("trigger_left") then
+			self._extra_options_data.selected = math.max(self._extra_options_data.selected - 1, 1)
+		elseif button == Idstring("trigger_right") then
+			self._extra_options_data.selected = math.min(self._extra_options_data.selected + 1, self._extra_options_data.num_panels)
+		end
+		for i = 1, self._extra_options_data.num_panels do
+			local option = self._extra_options_data[i]
+			local box = option.box
+			local image = option.image
+			local selected = i == self._extra_options_data.selected
+			if alive(box) then
+				if selected and not option.selected then
+					option.selected = true
+					self:show_btns(self._selected_slot)
+					self:_update_borders()
+					self:update_info_text()
+					managers.menu_component:post_event("highlight")
+				elseif not selected then
+					option.selected = false
+				end
+				box:set_visible(selected)
+			end
+			if alive(image) then
+				image:set_alpha((option.selected and 1 or 0.9) * (option.highlighted and 1 or 0.9))
+			end
+		end
+	elseif self._steam_inventory_extra_data and not self._input_wait_t and alive(self._steam_inventory_extra_data.gui_panel) then
 		local extra_data = self._steam_inventory_extra_data
-		if Global.blackmarket_manager.tradable_inventory_sort > 1 and button == Idstring("trigger_left") then
+		if 1 < Global.blackmarket_manager.tradable_inventory_sort and button == Idstring("trigger_left") then
 			Global.blackmarket_manager.tradable_inventory_sort = math.max(Global.blackmarket_manager.tradable_inventory_sort - 1, 1)
 			extra_data.choice_text:set_text(extra_data.choices[Global.blackmarket_manager.tradable_inventory_sort or 1])
 			self._reload_in_t = 0.8
@@ -6254,12 +6406,16 @@ function BlackMarketGui:visible()
 end
 function BlackMarketGui:show_btns(slot)
 	local data = slot._data
+	local btn_show_funcs = data.btn_show_funcs or {}
 	for _, btn in pairs(self._btns) do
 		btn:hide()
 	end
 	local btns = {}
+	local btn_show_func_name, btn_show_func
 	for i, btn in ipairs(data) do
-		if self._btns[btn] then
+		btn_show_func_name = btn_show_funcs[btn]
+		btn_show_func = btn_show_func_name and callback(self, self, btn_show_func_name)
+		if self._btns[btn] and (not btn_show_func or btn_show_func(data)) then
 			self._btns[btn]:show()
 			table.insert(btns, self._btns[btn])
 		end
@@ -6543,6 +6699,7 @@ function BlackMarketGui:populate_characters(data)
 		data[i] = nil
 	end
 	local guis_catalog = "guis/"
+	local index
 	for i = 1, CriminalsManager.get_num_characters() do
 		local character = CriminalsManager.character_names()[i]
 		local character_name = CriminalsManager.convert_old_to_new_character_workname(character)
@@ -6552,13 +6709,22 @@ function BlackMarketGui:populate_characters(data)
 		if bundle_folder then
 			guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
 		end
+		index = nil
+		for _, preferred_character in ipairs(managers.blackmarket:get_preferred_characters_list()) do
+			if preferred_character == character then
+				index = _
+			else
+			end
+		end
 		new_data = {}
 		new_data.name = character
 		new_data.name_localized = managers.localization:text("menu_" .. new_data.name)
 		new_data.category = "characters"
 		new_data.slot = i
 		new_data.unlocked = not character_table or not character_table.dlc or managers.dlc:is_dlc_unlocked(character_table.dlc)
-		new_data.equipped = managers.blackmarket:get_preferred_character() == character
+		new_data.equipped = not not index
+		if not index or not tostring(index) then
+		end
 		new_data.equipped_text = managers.localization:text("bm_menu_preferred")
 		new_data.bitmap_texture = guis_catalog .. "textures/pd2/blackmarket/icons/characters/" .. character_name
 		new_data.stream = false
@@ -6577,9 +6743,17 @@ function BlackMarketGui:populate_characters(data)
 		else
 			new_data.dlc_locked = character_table and character_table.dlc and tweak_data.lootdrop.global_values[character_table.dlc] and tweak_data.lootdrop.global_values[character_table.dlc].unlock_id or "bm_menu_dlc_locked"
 		end
-		if not new_data.equipped and new_data.unlocked then
-			table.insert(new_data, "c_equip")
+		local btn_show_funcs = {}
+		if new_data.unlocked then
+			if new_data.equipped then
+				table.insert(new_data, "c_swap_slots")
+				btn_show_funcs.c_swap_slots = "can_swap_character"
+			else
+				table.insert(new_data, "c_equip_to_slot")
+			end
+			table.insert(new_data, "c_clear_slots")
 		end
+		new_data.btn_show_funcs = btn_show_funcs
 		data[i] = new_data
 	end
 	for i = 1, max_items do
@@ -6594,6 +6768,166 @@ function BlackMarketGui:populate_characters(data)
 			data[i] = new_data
 		end
 	end
+end
+function BlackMarketGui:populate_preferred_character_options(panel)
+	local list = managers.blackmarket:get_preferred_characters_list()
+	local data = {}
+	local new_data
+	local desc_text = self._panel:text({
+		text = managers.localization:to_upper_text("menu_preferred_character_title"),
+		font = small_font,
+		font_size = small_font_size,
+		layer = 1,
+		blend_mode = "add",
+		wrap = true,
+		wrap_mode = true,
+		vertical = "bottom"
+	})
+	desc_text:set_w(panel:w())
+	desc_text:set_world_bottom(panel:world_top() - 10)
+	desc_text:set_world_left(panel:world_left())
+	local added_random = false
+	for i = 1, CriminalsManager.MAX_NR_CRIMINALS do
+		local character = list[i]
+		local char_panel = panel:panel({
+			w = 1 / CriminalsManager.MAX_NR_CRIMINALS * panel:w()
+		})
+		char_panel:set_right(i / CriminalsManager.MAX_NR_CRIMINALS * panel:w())
+		new_data = {}
+		if character then
+			local character_name = CriminalsManager.convert_old_to_new_character_workname(character)
+			local guis_catalog = "guis/"
+			local character_table = tweak_data.blackmarket.characters[character] or tweak_data.blackmarket.characters.locked[character_name]
+			local bundle_folder = character_table and character_table.texture_bundle_folder
+			if bundle_folder then
+				guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
+			end
+			local bitmap_texture = guis_catalog .. "textures/pd2/blackmarket/icons/characters/" .. character_name
+			local image = char_panel:bitmap({
+				name = "image",
+				texture = bitmap_texture,
+				blend_mode = "add"
+			})
+			local text = char_panel:text({
+				text = tostring(i),
+				x = 5,
+				y = 3,
+				font = small_font,
+				font_size = small_font_size,
+				layer = 1,
+				blend_mode = "add"
+			})
+			local texture_width = image:texture_width()
+			local texture_height = image:texture_height()
+			local panel_width = char_panel:w()
+			local panel_height = char_panel:h()
+			local tw = texture_width
+			local th = texture_height
+			local pw = panel_width
+			local ph = panel_height
+			if tw == 0 or th == 0 then
+				Application:error("[BlackMarketGui:populate_preferred_character_options] Texture size error!:", "width", tw, "height", th)
+				tw = 1
+				th = 1
+			end
+			local sw = math.min(pw, ph * (tw / th))
+			local sh = math.min(ph, pw / (tw / th))
+			image:set_size(math.round(sw), math.round(sh))
+			image:set_center(char_panel:w() * 0.5, char_panel:h() * 0.5)
+			local box_gui = BoxGuiObject:new(char_panel, {
+				sides = {
+					2,
+					2,
+					2,
+					2
+				}
+			})
+			new_data.panel = char_panel
+			new_data.box = box_gui
+			new_data.image = image
+			new_data.selected = i == (self._extra_options_data and self._extra_options_data.selected or 1)
+			new_data.highlighted = false
+			image:set_alpha((new_data.selected and 1 or 0.9) * (new_data.highlighted and 1 or 0.9))
+			box_gui:set_visible(new_data.selected)
+		else
+			local bitmap_texture = "guis/dlcs/favorite/textures/pd2/blackmarket/icons/characters/random"
+			local image = char_panel:bitmap({
+				name = "image",
+				texture = bitmap_texture,
+				blend_mode = "add"
+			})
+			local texture_width = image:texture_width()
+			local texture_height = image:texture_height()
+			local panel_width = char_panel:w()
+			local panel_height = char_panel:h()
+			local tw = texture_width
+			local th = texture_height
+			local pw = panel_width
+			local ph = panel_height
+			if tw == 0 or th == 0 then
+				Application:error("[BlackMarketGui:populate_preferred_character_options] Texture size error!:", "width", tw, "height", th)
+				tw = 1
+				th = 1
+			end
+			local sw = math.min(pw, ph * (tw / th))
+			local sh = math.min(ph, pw / (tw / th))
+			image:set_size(math.round(sw), math.round(sh))
+			image:set_center(char_panel:w() * 0.5, char_panel:h() * 0.5)
+			if not added_random then
+				added_random = true
+				local text = char_panel:text({
+					text = tostring(i),
+					x = 5,
+					y = 3,
+					font = small_font,
+					font_size = small_font_size,
+					layer = 1,
+					blend_mode = "add"
+				})
+				local box_gui = BoxGuiObject:new(char_panel, {
+					sides = {
+						2,
+						2,
+						2,
+						2
+					}
+				})
+				new_data.panel = char_panel
+				new_data.box = box_gui
+				new_data.image = image
+				new_data.selected = i == (self._extra_options_data and self._extra_options_data.selected or 1)
+				new_data.highlighted = false
+				image:set_alpha((new_data.selected and 1 or 0.9) * (new_data.highlighted and 1 or 0.9))
+				box_gui:set_visible(new_data.selected)
+			else
+				image:set_alpha(0.15)
+			end
+		end
+		data[i] = new_data
+	end
+	if not managers.menu:is_pc_controller() then
+		local arrow_left = self._panel:text({
+			text = managers.localization:get_default_macro("BTN_TOP_L"),
+			font = small_font,
+			font_size = small_font_size,
+			layer = 1,
+			blend_mode = "add"
+		})
+		local arrow_right = self._panel:text({
+			text = managers.localization:get_default_macro("BTN_TOP_R"),
+			font = small_font,
+			font_size = small_font_size,
+			layer = 1,
+			blend_mode = "add"
+		})
+		self:make_fine_text(arrow_left)
+		self:make_fine_text(arrow_right)
+		arrow_left:set_bottom(self._extra_options_panel:top())
+		arrow_right:set_bottom(self._extra_options_panel:top())
+		arrow_left:set_left(self._extra_options_panel:left())
+		arrow_right:set_right(self._extra_options_panel:right())
+	end
+	return data
 end
 function BlackMarketGui:populate_grenades(data)
 	local new_data = {}
@@ -8265,16 +8599,6 @@ function BlackMarketGui:populate_mods(data)
 					stream = true,
 					blend_mode = "add"
 				})
-				table.insert(data[equipped].mini_icons, {
-					color = Color.black,
-					right = -5,
-					bottom = -5,
-					layer = 0,
-					alpha = 0.4,
-					w = 42,
-					h = 42,
-					borders = true
-				})
 			end
 		end
 		if not data[equipped].conflict then
@@ -9101,6 +9425,81 @@ function BlackMarketGui:choose_mod_type_callback(data)
 end
 function BlackMarketGui:set_preferred_character_callback(data)
 	managers.blackmarket:set_preferred_character(data.name)
+	self:reload()
+end
+function BlackMarketGui:extra_option_key_press(panel, s)
+	if not self._extra_options_data then
+		return
+	end
+	local slot
+	if s == Idstring("1") then
+		slot = 1
+	elseif s == Idstring("2") then
+		slot = 2
+	elseif s == Idstring("3") then
+		slot = 3
+	elseif s == Idstring("4") then
+		slot = 4
+	end
+	if slot and self._slot_data then
+		if slot <= (self._extra_options_data.num_panels or 0) then
+			local character = self._slot_data.name
+			local index
+			for _, preferred_character in ipairs(managers.blackmarket:get_preferred_characters_list()) do
+				if preferred_character == character then
+					index = _
+				else
+				end
+			end
+			local reload = false
+			if index then
+				if index ~= slot and slot ~= self._extra_options_data.num_panels then
+					managers.blackmarket:swap_preferred_character(index, slot)
+					reload = true
+				end
+			else
+				managers.blackmarket:set_preferred_character(character, slot)
+				reload = true
+			end
+			if reload then
+				self:reload()
+			end
+		end
+	end
+end
+function BlackMarketGui:can_swap_character(data)
+	local index
+	local preferred_characters = managers.blackmarket:get_preferred_characters_list()
+	for _, preferred_character in ipairs(preferred_characters) do
+		if preferred_character == data.name then
+			index = _
+		else
+		end
+	end
+	local selected = self._extra_options_data.selected or 1
+	return index and self._extra_options_data and (#preferred_characters == CriminalsManager.MAX_NR_CRIMINALS or selected ~= self._extra_options_data.num_panels)
+end
+function BlackMarketGui:swap_preferred_character_to_slot_callback(data)
+	local index
+	local preferred_characters = managers.blackmarket:get_preferred_characters_list()
+	for _, preferred_character in ipairs(preferred_characters) do
+		if preferred_character == data.name then
+			index = _
+		else
+		end
+	end
+	local selected = self._extra_options_data.selected or 1
+	if index and self._extra_options_data and index ~= selected and (#preferred_characters == CriminalsManager.MAX_NR_CRIMINALS or selected ~= self._extra_options_data.num_panels) then
+		managers.blackmarket:swap_preferred_character(index, selected)
+		self:reload()
+	end
+end
+function BlackMarketGui:set_preferred_character_to_slot_callback(data)
+	managers.blackmarket:set_preferred_character(data.name, self._extra_options_data and self._extra_options_data.selected or 1)
+	self:reload()
+end
+function BlackMarketGui:clear_preferred_characters_callback(data)
+	managers.blackmarket:clear_preferred_characters()
 	self:reload()
 end
 function BlackMarketGui.get_crafting_custom_data()
@@ -10457,6 +10856,11 @@ function BlackMarketGui:close()
 		managers.network.account:remove_gamepad_text_listener(self._rename_clbk_id)
 		self._rename_clbk_id = nil
 	end
+	if self._keyboard_connected then
+		self._keyboard_connected = nil
+		self._ws:disconnect_keyboard()
+		self._panel:key_press(nil)
+	end
 	WalletGuiObject.close_wallet(self._panel)
 	self:destroy()
 	managers.blackmarket:drop_hold_crafted_item()
@@ -10490,6 +10894,11 @@ function BlackMarketGui:reload()
 	if self._rename_clbk_id then
 		managers.network.account:remove_gamepad_text_listener(self._rename_clbk_id)
 		self._rename_clbk_id = nil
+	end
+	if self._keyboard_connected then
+		self._keyboard_connected = nil
+		self._ws:disconnect_keyboard()
+		self._panel:key_press(nil)
 	end
 	self:_pre_reload()
 	self._tabs = {}

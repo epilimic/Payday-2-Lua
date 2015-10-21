@@ -55,6 +55,8 @@ function PlayerBipod:exit(state_data, new_state_name)
 	PlayerStandard.IDS_RECOIL_LOOP = Idstring("recoil_loop")
 	PlayerStandard.IDS_RECOIL_EXIT = Idstring("recoil_exit")
 	self._unit:sound_source():post_event("wp_steady_out")
+	local peer_id = managers.network:session():peer_by_unit(self._unit):id()
+	HuskPlayerMovement._bipod_start_position[peer_id] = nil
 	return exit_data
 end
 function PlayerBipod:update(t, dt)

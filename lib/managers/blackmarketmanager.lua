@@ -139,6 +139,9 @@ function BlackMarketManager:_setup_characters()
 	characters[self._defaults.character].owned = true
 	characters[self._defaults.character].equipped = true
 	Global.blackmarket_manager._preferred_character = self._defaults.preferred_character
+	Global.blackmarket_manager._preferred_characters = {
+		Global.blackmarket_manager._preferred_character
+	}
 end
 function BlackMarketManager:_setup_weapon_upgrades()
 	local weapon_upgrades = {}
@@ -2711,36 +2714,58 @@ function BlackMarketManager:get_sorted_characters(hide_locked)
 end
 function BlackMarketManager:equip_previous_character()
 	local sort_data = self:get_sorted_characters(true)
-	local preferred_character = self:get_preferred_character()
+	local preferred_characters = self:get_preferred_characters_list()
 	local equipped_index
 	for index, data in ipairs(sort_data or {}) do
-		if data == preferred_character then
+		if data == preferred_characters[1] then
 			equipped_index = index
 		else
 		end
 	end
 	if equipped_index then
 		local previous_character = sort_data[equipped_index == 1 and #sort_data or equipped_index - 1]
-		if previous_character and previous_character ~= preferred_character then
-			self:set_preferred_character(previous_character)
+		if previous_character and previous_character ~= preferred_characters[1] then
+			local index
+			for _, preferred_character in ipairs(preferred_characters) do
+				if preferred_character == previous_character then
+					index = _
+				else
+				end
+			end
+			if index then
+				self:swap_preferred_character(1, index)
+			else
+				self:set_preferred_character(previous_character)
+			end
 			return true
 		end
 	end
 end
 function BlackMarketManager:equip_next_character()
 	local sort_data = self:get_sorted_characters(true)
-	local preferred_character = self:get_preferred_character()
+	local preferred_characters = self:get_preferred_characters_list()
 	local equipped_index
 	for index, data in ipairs(sort_data or {}) do
-		if data == preferred_character then
+		if data == preferred_characters[1] then
 			equipped_index = index
 		else
 		end
 	end
 	if equipped_index then
 		local next_character = sort_data[equipped_index % #sort_data + 1]
-		if next_character and next_character ~= preferred_character then
-			self:set_preferred_character(next_character)
+		if next_character and next_character ~= preferred_characters[1] then
+			local index
+			for _, preferred_character in ipairs(preferred_characters) do
+				if preferred_character == next_character then
+					index = _
+				else
+				end
+			end
+			if index then
+				self:swap_preferred_character(1, index)
+			else
+				self:set_preferred_character(next_character)
+			end
 			return true
 		end
 	end
@@ -3381,24 +3406,68 @@ function BlackMarketManager:on_unaquired_armor(upgrade, id)
 		MenuCallbackHandler:_update_outfit_information()
 	end
 end
-function BlackMarketManager:set_preferred_character(character)
-	self._global._preferred_character = character
+function BlackMarketManager:_verify_preferred_characters()
+	local used_characters = {}
+	local preferred_characters = {}
+	local character, new_name, char_tweak
+	for i = 1, CriminalsManager.MAX_NR_CRIMINALS do
+		character = self._global._preferred_characters[i]
+		if not character or used_characters[character] then
+			break
+		end
+		new_name = CriminalsManager.convert_old_to_new_character_workname(character)
+		char_tweak = tweak_data.blackmarket.characters.locked[new_name] or tweak_data.blackmarket.characters[new_name]
+		if char_tweak.dlc and not managers.dlc:is_dlc_unlocked(char_tweak.dlc) then
+			break
+		end
+		preferred_characters[i] = self._global._preferred_characters[i]
+		used_characters[self._global._preferred_characters[i]] = true
+	end
+	self._global._preferred_characters = preferred_characters
+	self._global._preferred_characters[1] = self._global._preferred_characters[1] or self._defaults.preferred_character
+end
+function BlackMarketManager:_update_preferred_character(update_character)
+	self:_verify_preferred_characters()
+	if update_character then
+		local character = self._global._preferred_characters[1]
+		local new_name = CriminalsManager.convert_old_to_new_character_workname(character)
+		self._global._preferred_character = character
+		if tweak_data.blackmarket.characters.locked[new_name] then
+			if self:equipped_character() ~= "locked" then
+				self:equip_character("locked")
+			end
+		elseif self:equipped_character() ~= character then
+			self:equip_character(character)
+		end
+		if managers.menu_scene then
+			managers.menu_scene:on_set_preferred_character()
+		end
+	end
+	managers.statistics:publish_equipped_to_steam()
+end
+function BlackMarketManager:swap_preferred_character(first_index, second_index)
+	local temp = self._global._preferred_characters[first_index]
+	self._global._preferred_characters[first_index] = self._global._preferred_characters[second_index]
+	self._global._preferred_characters[second_index] = temp
+	self:_update_preferred_character(first_index == 1 or second_index == 1)
+end
+function BlackMarketManager:clear_preferred_characters()
+	local update_menu_scene = self._global._preferred_characters[1] == self._defaults.preferred_character
+	self._global._preferred_characters = {}
+	self:_update_preferred_character(update_menu_scene)
+end
+function BlackMarketManager:set_preferred_character(character, index)
 	local new_name = CriminalsManager.convert_old_to_new_character_workname(character)
 	local char_tweak = tweak_data.blackmarket.characters.locked[new_name] or tweak_data.blackmarket.characters[new_name]
 	if char_tweak.dlc and not managers.dlc:is_dlc_unlocked(char_tweak.dlc) then
 		return
 	end
-	if tweak_data.blackmarket.characters.locked[new_name] then
-		if self:equipped_character() ~= "locked" then
-			self:equip_character("locked")
-		end
-	elseif self:equipped_character() ~= character then
-		self:equip_character(character)
+	index = index or 1
+	if not character and index == 1 then
+		character = self._defaults.preferred_character or character
 	end
-	if managers.menu_scene then
-		managers.menu_scene:on_set_preferred_character()
-	end
-	managers.statistics:publish_equipped_to_steam()
+	self._global._preferred_characters[index] = character
+	self:_update_preferred_character(index == 1)
 end
 function BlackMarketManager:get_character_id_by_character_name(character_name)
 	local new_name = CriminalsManager.convert_old_to_new_character_workname(character_name)
@@ -3407,11 +3476,33 @@ function BlackMarketManager:get_character_id_by_character_name(character_name)
 	end
 	return character_name
 end
-function BlackMarketManager:get_preferred_character()
-	return self._global._preferred_character
+function BlackMarketManager:get_preferred_characters_list()
+	return clone(self._global._preferred_characters)
 end
-function BlackMarketManager:get_preferred_character_real_name()
-	return managers.localization:text("menu_" .. tostring(self._global._preferred_character or "russian"))
+function BlackMarketManager:num_preferred_characters()
+	return #self._global._preferred_characters
+end
+function BlackMarketManager:get_preferred_character(index)
+	if self._global._preferred_characters then
+	else
+	end
+	return self._global._preferred_characters[index or 1] or self._global._preferred_character or self._defaults.preferred_character
+end
+function BlackMarketManager:get_preferred_character_string()
+	if not self._global._preferred_characters then
+		return self._global._preferred_character or self._defaults.preferred_character
+	end
+	local s = ""
+	for i, character in ipairs(self._global._preferred_characters) do
+		s = s .. character
+		if i < #self._global._preferred_characters then
+			s = s .. " "
+		end
+	end
+	return s
+end
+function BlackMarketManager:get_preferred_character_real_name(index)
+	return managers.localization:text("menu_" .. tostring(self:get_preferred_character(index) or self._defaults.preferred_character))
 end
 function BlackMarketManager:get_category_default(category)
 	return self._defaults and self._defaults[category]
@@ -4553,6 +4644,15 @@ function BlackMarketManager:load(data)
 		if not tweak_data.blackmarket.characters.locked[character_name] and not tweak_data.blackmarket.characters[character_name] then
 			self._global._preferred_character = self._defaults.preferred_character
 		end
+		self._global._preferred_characters = self._global._preferred_characters or {
+			self._global._preferred_character
+		}
+		for i, character in pairs(clone(self._global._preferred_characters)) do
+			local character_name = CriminalsManager.convert_old_to_new_character_workname(character)
+			if not tweak_data.blackmarket.characters.locked[character_name] and not tweak_data.blackmarket.characters[character_name] then
+				self._global._preferred_character[i] = self._defaults.preferred_character
+			end
+		end
 		for character, _ in pairs(tweak_data.blackmarket.characters) do
 			if not self._global.characters[character] then
 				self._global.characters[character] = {
@@ -5135,8 +5235,9 @@ function BlackMarketManager:_verify_dlc_items()
 	local character_name = CriminalsManager.convert_old_to_new_character_workname(self._global._preferred_character)
 	local char_tweak = tweak_data.blackmarket.characters.locked[character_name] or tweak_data.blackmarket.characters[character_name]
 	if char_tweak.dlc and not managers.dlc:is_dlc_unlocked(char_tweak.dlc) then
-		self:set_preferred_character(self._defaults.preferred_character)
+		self._global._preferred_character = self._defaults.preferred_character
 	end
+	self:_verify_preferred_characters()
 	local player_level = managers.experience:current_level()
 	local unlocked, level, skill_based, weapon_def, weapon_dlc, has_dlc
 	for weapon_id, weapon in pairs(Global.blackmarket_manager.weapons) do
