@@ -523,6 +523,9 @@ end
 function GroupAIStateBesiege:is_smoke_grenade_active()
 	return self._smoke_end_t and Application:time() < self._smoke_end_t
 end
+function GroupAIStateBesiege:is_cs_grenade_active()
+	return self._cs_end_t and Application:time() < self._cs_end_t
+end
 function GroupAIStateBesiege:_begin_reenforce_task(reenforce_area)
 	local new_task = {
 		target_area = reenforce_area,
@@ -2631,6 +2634,10 @@ end
 function GroupAIStateBesiege:detonate_smoke_grenade(detonate_pos, shooter_pos, duration, flashbang)
 	managers.network:session():send_to_peers_synched("sync_smoke_grenade", detonate_pos, shooter_pos, duration, flashbang and true or false)
 	self:sync_smoke_grenade(detonate_pos, shooter_pos, duration, flashbang)
+end
+function GroupAIStateBesiege:detonate_cs_grenade(detonate_pos, shooter_pos, duration)
+	managers.network:session():send_to_peers_synched("sync_cs_grenade", detonate_pos, shooter_pos, duration)
+	self:sync_cs_grenade(detonate_pos, shooter_pos, duration)
 end
 function GroupAIStateBesiege:_assign_assault_groups_to_retire()
 	local function suitable_grp_func(group)

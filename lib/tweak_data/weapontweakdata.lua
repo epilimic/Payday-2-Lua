@@ -107,29 +107,30 @@ end
 function WeaponTweakData:_set_easy()
 end
 function WeaponTweakData:_set_normal()
-	self.swat_van_turret_module.HEALTH_INIT = 7000
-	self.swat_van_turret_module.SHIELD_HEALTH_INIT = 100
+	self.swat_van_turret_module.HEALTH_INIT = 3500
+	self.swat_van_turret_module.SHIELD_HEALTH_INIT = 70
 	self.swat_van_turret_module.DAMAGE = 0.2
 end
 function WeaponTweakData:_set_hard()
-	self.swat_van_turret_module.HEALTH_INIT = 7000
-	self.swat_van_turret_module.SHIELD_HEALTH_INIT = 100
+	self.swat_van_turret_module.HEALTH_INIT = 3500
+	self.swat_van_turret_module.SHIELD_HEALTH_INIT = 70
 	self.swat_van_turret_module.DAMAGE = 0.5
 end
 function WeaponTweakData:_set_overkill()
-	self.swat_van_turret_module.HEALTH_INIT = 27500
-	self.swat_van_turret_module.SHIELD_HEALTH_INIT = 400
-	self.swat_van_turret_module.DAMAGE = 1
+	self.swat_van_turret_module.HEALTH_INIT = 12500
+	self.swat_van_turret_module.SHIELD_HEALTH_INIT = 300
+	self.swat_van_turret_module.DAMAGE = 1.3
 end
 function WeaponTweakData:_set_overkill_145()
-	self.swat_van_turret_module.HEALTH_INIT = 50000
-	self.swat_van_turret_module.SHIELD_HEALTH_INIT = 750
-	self.swat_van_turret_module.DAMAGE = 1.5
+	self.swat_van_turret_module.HEALTH_INIT = 25000
+	self.swat_van_turret_module.SHIELD_HEALTH_INIT = 500
+	self.swat_van_turret_module.DAMAGE = 2
 end
 function WeaponTweakData:_set_overkill_290()
-	self.swat_van_turret_module.HEALTH_INIT = 70000
-	self.swat_van_turret_module.SHIELD_HEALTH_INIT = 1000
-	self.swat_van_turret_module.DAMAGE = 3
+	self.swat_van_turret_module.HEALTH_INIT = 40000
+	self.swat_van_turret_module.SHIELD_HEALTH_INIT = 700
+	self.swat_van_turret_module.DAMAGE = 3.5
+	self.swat_van_turret_module.CLIP_SIZE = 800
 end
 function WeaponTweakData:_init_data_npc_melee()
 	self.npc_melee = {}
@@ -659,14 +660,18 @@ function WeaponTweakData:_init_data_swat_van_turret_module_npc()
 	self.swat_van_turret_module.CLIP_SIZE = 400
 	self.swat_van_turret_module.AUTO_RELOAD = true
 	self.swat_van_turret_module.AUTO_RELOAD_DURATION = 8
+	self.swat_van_turret_module.CAN_GO_IDLE = true
+	self.swat_van_turret_module.IDLE_WAIT_TIME = 5
+	self.swat_van_turret_module.AUTO_REPAIR = true
+	self.swat_van_turret_module.AUTO_REPAIR_MAX_COUNT = 2
+	self.swat_van_turret_module.AUTO_REPAIR_DURATION = 30
 	self.swat_van_turret_module.ECM_HACKABLE = true
 	self.swat_van_turret_module.FLASH_GRENADE = {
 		range = 300,
 		effect_duration = 6,
-		chance = 0.8,
-		check_interval = {3, 6},
-		quiet_time = {10, 13},
-		requirements = {aggression_history = 10}
+		chance = 1,
+		check_interval = {1, 1},
+		quiet_time = {10, 13}
 	}
 	self.swat_van_turret_module.HACKABLE_WITH_ECM = true
 	self.swat_van_turret_module.VELOCITY_COMPENSATION = {SNAPSHOT_INTERVAL = 0.3, OVERCOMPENSATION = 50}
@@ -677,11 +682,12 @@ function WeaponTweakData:_init_data_swat_van_turret_module_npc()
 	self.swat_van_turret_module.headshot_dmg_mul = 4
 	self.swat_van_turret_module.EXPLOSION_DMG_MUL = 7
 	self.swat_van_turret_module.FIRE_DMG_MUL = 1
-	self.swat_van_turret_module.BAG_DMG_MUL = 200
+	self.swat_van_turret_module.BAG_DMG_MUL = 100
 	self.swat_van_turret_module.SHIELD_DMG_MUL = 1
 	self.swat_van_turret_module.HEALTH_INIT = 5000
 	self.swat_van_turret_module.SHIELD_HEALTH_INIT = 1000
-	self.swat_van_turret_module.SHIELD_DAMAGE_CLAMP = 75
+	self.swat_van_turret_module.SHIELD_DAMAGE_CLAMP = 350
+	self.swat_van_turret_module.BODY_DAMAGE_CLAMP = 4200
 	self.swat_van_turret_module.DEATH_VERIFICATION = {0.4, 0.75}
 	self.swat_van_turret_module.DETECTION_RANGE = self.swat_van_turret_module.FIRE_RANGE
 	self.swat_van_turret_module.DETECTION_DELAY = {

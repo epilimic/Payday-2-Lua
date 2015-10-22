@@ -1129,7 +1129,7 @@ function MenuCallbackHandler:can_buy_drill(item)
 	if not drill then
 		return
 	end
-	return not not tweak_data.economy.drills[drill].def_id
+	return tweak_data.economy.drills[drill].price and not not tweak_data.economy.drills[drill].def_id
 end
 function MenuCallbackHandler:have_safe_and_drill_for_container(data)
 	if not data then

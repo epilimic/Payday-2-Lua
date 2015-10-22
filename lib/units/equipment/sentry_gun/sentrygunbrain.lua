@@ -25,6 +25,7 @@ function SentryGunBrain:update(unit, t, dt)
 		self:_upd_detection(t)
 		self:_select_focus_attention(t)
 		self:_upd_flash_grenade(t)
+		self:_upd_go_idle(t)
 	end
 	self:_upd_fire(t)
 end
@@ -72,7 +73,7 @@ function SentryGunBrain:set_active(state)
 	end
 end
 function SentryGunBrain:_upd_detection(t)
-	if self._ext_movement:is_activating() then
+	if self._ext_movement:is_activating() or self._ext_movement:is_inactivating() then
 		return
 	end
 	if t < self._next_detection_upd_t then
@@ -283,6 +284,9 @@ function SentryGunBrain:_select_focus_attention(t)
 		else
 			return
 		end
+		if attention_info.settings.weight_mul then
+			total_weight = total_weight * attention_info.settings.weight_mul
+		end
 		local dis = mvec3_dir(tmp_vec1, current_pos, attention_info.m_head_pos)
 		local dis_weight = math_max(0, (max_dis - dis) / max_dis)
 		total_weight = total_weight * dis_weight
@@ -330,7 +334,11 @@ function SentryGunBrain:_destroy_detected_attention_object_data(attention_info)
 	self._detected_attention_objects[attention_info.u_key] = nil
 end
 function SentryGunBrain:_upd_fire(t)
-	if self._ext_movement:is_activating() then
+	if self._ext_movement:is_activating() or self._ext_movement:is_inactivating() or self._idle then
+		if self._firing then
+			self._unit:weapon():stop_autofire()
+			self._firing = false
+		end
 		return
 	end
 	local attention = self._ext_movement:attention()
@@ -378,6 +386,9 @@ function SentryGunBrain:_upd_flash_grenade(t)
 	if not self._tweak_data.FLASH_GRENADE then
 		return
 	end
+	if self._ext_movement:repairing() then
+		return
+	end
 	if self._next_flash_grenade_chk_t and t < self._next_flash_grenade_chk_t then
 		return
 	end
@@ -388,11 +399,56 @@ function SentryGunBrain:_upd_flash_grenade(t)
 		return
 	end
 	local max_range = grenade_tweak.range
-	for u_key, attention_info in pairs(self._detected_attention_objects) do
-		if attention_info.identified and attention_info.reaction >= AIAttentionObject.REACT_COMBAT and (not grenade_tweak.requirements.aggression_history or attention_info.dmg_t and t - attention_info.dmg_t < grenade_tweak.requirements.aggression_history) and mvector3.distance_sq(self._ext_movement:m_head_pos(), attention_info.last_verified_pos) < max_range * max_range then
-			managers.groupai:state():detonate_smoke_grenade(attention_info.m_pos, self._ext_movement:m_head_pos(), grenade_tweak.effect_duration, true)
-			self._next_flash_grenade_chk_t = check_t + math.lerp(grenade_tweak.quiet_time[1], grenade_tweak.quiet_time[2], math.random())
-		else
+	local m_pos = self._ext_movement:m_head_pos()
+	local ray_to = mvector3.copy(m_pos)
+	mvector3.set_z(ray_to, ray_to.z - 500)
+	local ground_ray = World:raycast("ray", m_pos, ray_to, "slot_mask", managers.slot:get_mask("statics"))
+	if ground_ray then
+		self._grenade_m_pos = mvector3.copy(ground_ray.hit_position)
+		mvector3.set_z(self._grenade_m_pos, self._grenade_m_pos.z + 3)
+		for u_key, attention_info in pairs(self._detected_attention_objects) do
+			if attention_info.identified and mvector3.distance_sq(self._grenade_m_pos, attention_info.last_verified_pos) < max_range * max_range then
+				managers.groupai:state():detonate_cs_grenade(self._grenade_m_pos, m_pos, grenade_tweak.effect_duration)
+				self._next_flash_grenade_chk_t = check_t + math.lerp(grenade_tweak.quiet_time[1], grenade_tweak.quiet_time[2], math.random())
+			else
+			end
+		end
+	end
+end
+function SentryGunBrain:_upd_go_idle(t)
+	if not Network:is_server() or not self._tweak_data.CAN_GO_IDLE then
+		return
+	end
+	local attention_obj = self._attention_obj
+	if managers.groupai:state():is_detection_persistent() then
+		self._has_seen_assault_mode = true
+	end
+	if self._tweak_data.AUTO_REPAIR and self._unit:character_damage():needs_repair() then
+		if not self._idle and not self._ext_movement:is_inactivating() then
+			if not self._auto_repair_counter then
+				self._auto_repair_counter = 0
+			end
+			if self._auto_repair_counter < self._tweak_data.AUTO_REPAIR_MAX_COUNT then
+				self._auto_repair_counter = self._auto_repair_counter + 1
+				self:set_idle(true)
+			end
+		end
+		if self._idle and self._ext_movement:is_inactivated() and not self._ext_movement:repairing() then
+			self._ext_movement:repair()
+		end
+	end
+	if not self._ext_movement:is_inactivating() and not self._ext_movement:repairing() then
+		if attention_obj and attention_obj.reaction > AIAttentionObject.REACT_AIM and not self._ext_movement:repairing() then
+			self._decide_go_idle_t = nil
+			if self._idle then
+				self:set_idle(false)
+			end
+		elseif not self._idle and not self._ext_movement:rearming() and (not self._has_seen_assault_mode or self._has_seen_assault_mode and not managers.groupai:state():is_detection_persistent()) then
+			if not self._decide_go_idle_t then
+				self._decide_go_idle_t = t + self._tweak_data.IDLE_WAIT_TIME
+			elseif t > self._decide_go_idle_t then
+				self:set_idle(true)
+			end
 		end
 	end
 end
@@ -443,6 +499,17 @@ function SentryGunBrain:on_team_set(team_data)
 	for _, u_key in ipairs(all_att_objects) do
 		self:on_detected_attention_obj_modified(u_key)
 	end
+	self:_update_SO_access()
+end
+function SentryGunBrain:set_idle(state)
+	self._idle = state
+	self._ext_movement:set_idle(not state)
+	if Network:is_server() then
+		self._unit:network():send("turret_idle_state", state)
+	end
+end
+function SentryGunBrain:get_repair_counter()
+	return self._auto_repair_counter
 end
 function SentryGunBrain:switch_off()
 	if self._unit:damage():has_sequence("laser_off") then
@@ -515,6 +582,7 @@ function SentryGunBrain:save(save_data)
 	save_data.brain = my_save_data
 	my_save_data.shaprness_mul = self._shaprness_mul
 	my_save_data.SO_access_str = self._SO_access_str
+	my_save_data.idle = self._idle
 end
 function SentryGunBrain:load(save_data)
 	if not save_data or not save_data.brain then
@@ -525,6 +593,7 @@ function SentryGunBrain:load(save_data)
 	self._SO_access_str = my_save_data.SO_access_str
 	self._SO_access = managers.navigation:convert_access_flag(self._SO_access_str)
 	self._tweak_data = tweak_data.weapon[self._unit:base():get_name_id()]
+	self:set_idle(my_save_data.idle)
 end
 function SentryGunBrain:pre_destroy()
 	for key, attention_info in pairs(self._detected_attention_objects) do

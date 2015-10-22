@@ -116,8 +116,8 @@ function GenericDLCManager:chk_content_updated()
 end
 function GenericDLCManager:give_dlc_and_verify_blackmarket()
 	self:give_dlc_package()
-	managers.network.account:inventory_reward_dlc()
 	if managers.blackmarket then
+		managers.blackmarket:tradable_dlcs()
 		managers.blackmarket:verify_dlc_items()
 	else
 		Application:error("[GenericDLCManager] _load_done(): BlackMarketManager not yet initialized!")

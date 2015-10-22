@@ -129,6 +129,25 @@ function EconomyTweakData:init()
 		},
 		contents = {"legendary"}
 	}
+	self.contents.event_red = {}
+	self.contents.event_red.def_id = 10006
+	self.contents.event_red.contains = {
+		weapon_skins = {
+			"p90_golddigger",
+			"m95_golddigger",
+			"serbu_golddigger",
+			"huntsman_golddigger",
+			"r93_golddigger",
+			"ak74_golddigger",
+			"m134_golddigger",
+			"famas_golddigger",
+			"new_m14_golddigger",
+			"ppk_golddigger"
+		},
+		contents = {
+			"event_01_legendary"
+		}
+	}
 	self.safes.event_01 = {}
 	self.safes.event_01.drill = "event_01"
 	self.safes.event_01.content = "event_01"
@@ -141,6 +160,15 @@ function EconomyTweakData:init()
 	self.safes.weapon_01.unit_name = "units/payday2_cash/safes/eco_safe_weapon_01/eco_safe_weapon_01"
 	self.safes.weapon_01.name_id = "bm_menu_safe_weapon_01"
 	self.safes.weapon_01.texture_bundle_folder = "cash/safes/sputnik"
+	self.safes.event_red = {}
+	self.safes.event_red.def_id = 50003
+	self.safes.event_red.drill = "event_red"
+	self.safes.event_red.content = "event_red"
+	self.safes.event_red.unit_name = "units/payday2_cash/safes/red/safe/eco_safe_event_red"
+	self.safes.event_red.name_id = "bm_menu_safe_event_red"
+	self.safes.event_red.texture_bundle_folder = "cash/safes/red"
+	self.safes.event_red.dlc = "full_game"
+	self.safes.event_red.achievement = "green_7"
 	self.drills.event_01 = {}
 	self.drills.event_01.safe = "event_01"
 	self.drills.event_01.def_id = 70001
@@ -157,6 +185,15 @@ function EconomyTweakData:init()
 	self.drills.weapon_01.name_id = "bm_menu_drill_weapon_01"
 	self.drills.weapon_01.desc_id = "bm_menu_drill_weapon_01_desc"
 	self.drills.weapon_01.texture_bundle_folder = "cash/safes/sputnik"
+	self.drills.event_red = {}
+	self.drills.event_red.safe = "event_red"
+	self.drills.event_red.def_id = 70003
+	self.drills.event_red.unit_name = "units/payday2_cash/safes/red/drill/eco_drill_event_red"
+	self.drills.event_red.name_id = "bm_menu_drill_event_red"
+	self.drills.event_red.desc_id = "bm_menu_drill_event_red_desc"
+	self.drills.event_red.texture_bundle_folder = "cash/safes/red"
+	self.drills.event_red.dlc = "full_game"
+	self.drills.event_red.achievement = "green_7"
 	self.bonuses = {}
 	self.bonuses.concealment_p1 = {}
 	self.bonuses.concealment_p1.name_id = "bm_menu_bonus_concealment"

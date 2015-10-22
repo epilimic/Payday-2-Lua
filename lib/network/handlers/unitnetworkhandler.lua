@@ -1093,6 +1093,36 @@ function UnitNetworkHandler:sentrygun_health(unit, health_ratio)
 	end
 	unit:character_damage():sync_health(health_ratio)
 end
+function UnitNetworkHandler:turret_idle_state(unit, state)
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	unit:brain():set_idle(state)
+end
+function UnitNetworkHandler:turret_update_shield_smoke_level(unit, ratio, up)
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	unit:character_damage():update_shield_smoke_level(ratio, up)
+end
+function UnitNetworkHandler:turret_repair(unit)
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	unit:movement():repair()
+end
+function UnitNetworkHandler:turret_complete_repairing(unit)
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	unit:movement():complete_repairing()
+end
+function UnitNetworkHandler:turret_repair_shield(unit)
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	unit:character_damage():repair_shield()
+end
 function UnitNetworkHandler:sync_unit_module(parent_unit, module_unit, align_obj_name, module_id, parent_extension_name)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then
 		return
@@ -1229,6 +1259,18 @@ function UnitNetworkHandler:sync_smoke_grenade_kill()
 		return
 	end
 	managers.groupai:state():sync_smoke_grenade_kill()
+end
+function UnitNetworkHandler:sync_cs_grenade(detonate_pos, shooter_pos, duration)
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	managers.groupai:state():sync_cs_grenade(detonate_pos, shooter_pos, duration)
+end
+function UnitNetworkHandler:sync_cs_grenade_kill()
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	managers.groupai:state():sync_cs_grenade_kill()
 end
 function UnitNetworkHandler:sync_hostage_headcount(value)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then

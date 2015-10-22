@@ -224,6 +224,13 @@ function AchievmentManager:award_steam(id)
 	self.handler:achievement_store_callback(AchievmentManager.steam_unlock_result)
 	self.handler:set_achievement(self:get_info(id).id)
 	self.handler:store_data()
+	if tweak_data.achievement.inventory[id] then
+		for category, category_data in pairs(tweak_data.achievement.inventory[id].rewards) do
+			for id, entry in pairs(category_data) do
+				managers.blackmarket:tradable_achievement(category, entry)
+			end
+		end
+	end
 end
 function AchievmentManager:clear_steam(id)
 	print("[AchievmentManager:clear_steam]", id)

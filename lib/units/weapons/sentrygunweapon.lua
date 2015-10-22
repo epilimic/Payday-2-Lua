@@ -356,6 +356,12 @@ function SentryGunWeapon:update_laser()
 	local laser_mode, blink
 	if self._unit:character_damage():dead() then
 	elseif self._unit:movement():is_activating() then
+		laser_mode = "turret_module_active"
+	elseif self._unit:movement():is_inactivating() then
+		laser_mode = "turret_module_active"
+		blink = true
+	elseif self._unit:movement():is_inactivated() then
+		laser_mode = nil
 	elseif self._unit:movement():rearming() then
 		laser_mode = "turret_module_rearming"
 		blink = true

@@ -2744,6 +2744,20 @@ function GroupAIStateBase:sync_smoke_grenade_kill()
 	end
 	self._smoke_end_t = nil
 end
+function GroupAIStateBase:sync_cs_grenade(detonate_pos, shooter_pos, duration)
+	local cs_duration = duration == 0 and 15 or duration
+	self._cs_grenade = World:spawn_unit(Idstring("units/weapons/cs_grenade_quick/cs_grenade_quick"), detonate_pos, Rotation())
+	self._cs_grenade:base():activate(shooter_pos or detonate_pos, cs_duration)
+	self._cs_end_t = Application:time() + cs_duration
+	self._cs_grenade_ignore_control = nil
+end
+function GroupAIStateBase:sync_cs_grenade_kill()
+	if alive(self._cs_grenade) then
+		self._cs_grenade:base():preemptive_kill()
+		self._cs_grenade = nil
+	end
+	self._cs_end_t = nil
+end
 function GroupAIStateBase:_call_listeners(event, params)
 	self._listener_holder:call(event, params)
 end

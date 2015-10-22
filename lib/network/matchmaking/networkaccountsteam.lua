@@ -408,10 +408,11 @@ function NetworkAccount:inventory_reward_unlock(safe, safe_instance_id, drill_in
 	end
 	Steam:inventory_reward_unlock(safe_instance_id, drill_instance_id, content_tweak.def_id, reward_unlock_callback)
 end
-function NetworkAccountSTEAM:inventory_reward_dlc()
+function NetworkAccountSTEAM:inventory_reward_dlc(def_id, reward_promo_callback)
 	if NetworkAccountSTEAM.TEST_INVENTORY then
 		return false
 	end
+	Steam:inventory_reward_promo(def_id, reward_promo_callback)
 end
 function NetworkAccountSTEAM:inventory_outfit_refresh()
 	if NetworkAccountSTEAM.TEST_INVENTORY then

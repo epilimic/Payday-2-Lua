@@ -970,6 +970,7 @@ function LevelsTweakData:init()
 	}
 	self.red2.cube = "cube_apply_heist_bank"
 	self.red2.max_bags = 84
+	self.red2.ghost_bonus = 0.15
 	self._level_index = {
 		"welcome_to_the_jungle_1",
 		"welcome_to_the_jungle_1_night",

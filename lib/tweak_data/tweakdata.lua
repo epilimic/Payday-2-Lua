@@ -2733,6 +2733,14 @@ Play the full version soon to get your full PAYDAY!]],
 			multi_kill = 2
 		}
 	}
+	self.achievement.inventory = {
+		green_7 = {
+			rewards = {
+				safes = {"event_red"},
+				drills = {"event_red"}
+			}
+		}
+	}
 	local gage_5_1_achievement = {
 		text_id = "bm_wp_gage5_1_achievment",
 		stat = "gage5_1_stats",

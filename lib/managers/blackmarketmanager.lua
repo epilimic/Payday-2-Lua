@@ -34,6 +34,7 @@ function BlackMarketManager:_setup()
 		Global.blackmarket_manager.tradable_items_received = {}
 		Global.blackmarket_manager.inventory_tradable = {}
 		Global.blackmarket_manager.tradable_inventory_sort = 1
+		Global.blackmarket_manager.tradable_dlcs = {}
 	end
 	self._global = Global.blackmarket_manager
 	self._preloading_list = {}
@@ -4515,6 +4516,38 @@ function BlackMarketManager:tradable_verify(category, entry, quality, bonus, tra
 	print("[BlackMarketManager:tradable_verify] Verification FAILED")
 	return false
 end
+function BlackMarketManager:tradable_achievement(category, entry)
+	local tweak_item = tweak_data.economy[category][entry]
+	if tweak_item.def_id and tweak_item.achievement and not self._global.tradable_dlcs[category .. "_" .. entry] and managers.achievment.handler:has_achievement(tweak_item.achievement) then
+		print("[BlackMarketManager:tradable_achievement]", category, entry, tweak_item.def_id)
+		managers.network.account:inventory_reward_dlc(tweak_item.def_id, callback(self, self, "_clbk_tradable_dlcs"))
+	end
+end
+function BlackMarketManager:tradable_dlcs()
+	for category, category_data in pairs(tweak_data.economy) do
+		for entry, item_data in pairs(category_data) do
+			if item_data.def_id then
+				if item_data.achievement then
+					self:tradable_achievement(category, entry)
+				elseif item_data.dlc and not self._global.tradable_dlcs[category .. "_" .. entry] then
+					managers.network.account:inventory_reward_dlc(item_data.def_id, callback(self, self, "_clbk_tradable_dlcs"))
+				end
+			end
+		end
+	end
+end
+function BlackMarketManager:_clbk_tradable_dlcs(error, tradable_list)
+	if error then
+		Application:error("[BlackMarketManager:_clbk_tradable_reward] Failed to reward item (" .. tostring(error) .. ")")
+		return
+	end
+	if tradable_list then
+		for _, item in pairs(tradable_list) do
+			self._global.tradable_dlcs[item.category .. "_" .. item.entry] = true
+			print("[BlackMarketManager:_clbk_tradable_dlcs]", item.category, item.entry)
+		end
+	end
+end
 function BlackMarketManager:reset()
 	self._global.inventory = {}
 	self._global.inventory_tradable = {}
@@ -4675,6 +4708,7 @@ function BlackMarketManager:load(data)
 		self._global.inventory_tradable = self._global.inventory_tradable or {}
 		self._global.tradable_items_received = self._global.tradable_items_received or {}
 		self._global.tradable_inventory_sort = self._global.tradable_inventory_sort or 1
+		self._global.tradable_dlcs = self._global.tradable_dlcs or {}
 		self._global.crafted_items = self._global.crafted_items or {}
 		if not self._global.unlocked_mask_slots then
 			self:_setup_unlocked_mask_slots()

@@ -3084,4 +3084,8 @@ function InteractionTweakData:init()
 	self.press_open_truck = {}
 	self.press_open_truck.text_id = "hud_int_press_open_truck"
 	self.press_open_truck.start_active = false
+	self.red_take_envelope = {}
+	self.red_take_envelope.text_id = "hud_int_take_envelope"
+	self.red_take_envelope.start_active = false
+	self.red_take_envelope.axis = "z"
 end

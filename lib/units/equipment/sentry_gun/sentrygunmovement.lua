@@ -30,7 +30,7 @@ function SentryGunMovement:init(unit)
 	self._last_attention_t = 0
 	self._warmup_t = 0
 	self._rot_speed_mul = 1
-	self._updator = callback(self, self, "_update_inactive")
+	self:_set_updator("_update_inactive")
 end
 function SentryGunMovement:post_init()
 	self._ext_network = self._unit:network()
@@ -45,6 +45,7 @@ function SentryGunMovement:update(unit, t, dt)
 	self._updator(t, dt)
 end
 function SentryGunMovement:_update_inactive(t, dt)
+	self:_upd_hacking(t, dt)
 end
 function SentryGunMovement:_update_active(t, dt)
 	self:_upd_hacking(t, dt)
@@ -54,14 +55,32 @@ function SentryGunMovement:_update_active(t, dt)
 	end
 end
 function SentryGunMovement:_update_activating(t, dt)
+	self:_upd_mutables()
 	if not self._unit:anim_is_playing(self._activation_anim_group_name_ids) then
-		self._activating = false
 		self._activated = true
-		self._updator = callback(self, self, "_update_active")
+		self._activating = false
+		self._inactivated = false
+		self._inactivating = false
+		if self._rearming then
+			self:_set_updator("_update_rearming")
+		else
+			self:_set_updator("_update_active")
+		end
 		self._unit:weapon():update_laser()
 		if managers.game_play_central:flashlights_on() and self._lights_on_sequence_name then
 			self._unit:damage():run_sequence_simple(self._lights_on_sequence_name)
 		end
+	end
+end
+function SentryGunMovement:_update_inactivating(t, dt)
+	self:_upd_mutables()
+	if not self._unit:anim_is_playing(self._activation_anim_group_name_ids) then
+		self._activated = false
+		self._activating = false
+		self._inactivated = true
+		self._inactivating = false
+		self:_set_updator("_update_inactive")
+		self._unit:weapon():update_laser()
 	end
 end
 function SentryGunMovement:_update_rearming(t, dt)
@@ -78,13 +97,33 @@ function SentryGunMovement:complete_rearming()
 		self._rearm_event = nil
 	end
 	self._rearming = false
-	self._updator = callback(self, self, "_update_active")
+	self:_set_updator("_update_active")
 	self._unit:weapon():update_laser()
+end
+function SentryGunMovement:_update_repairing(t, dt)
+	if self._repair_complete_t then
+		local repair_complete_ratio = 1 - (self._repair_complete_t - t) / self._tweak.AUTO_REPAIR_DURATION
+		self._unit:character_damage():update_shield_smoke_level(repair_complete_ratio, true)
+		if t > self._repair_complete_t then
+			self:complete_repairing()
+		end
+	end
+end
+function SentryGunMovement:complete_repairing()
+	if self._repair_complete_seq then
+		self._unit:damage():run_sequence_simple(self._repair_complete_seq)
+	end
+	self._repairing = false
+	self:_set_updator("_update_active")
+	if Network:is_server() then
+		self._unit:character_damage():repair_shield()
+		self._unit:network():send("turret_complete_repairing")
+	end
 end
 function SentryGunMovement:setup(rot_speed_multiplier)
 	self._rot_speed_mul = rot_speed_multiplier
 	self._activated = true
-	self._updator = callback(self, self, "_update_active")
+	self:_set_updator("_update_active")
 end
 function SentryGunMovement:on_activated()
 	self._tweak = tweak_data.weapon[self._unit:base():get_name_id()]
@@ -96,7 +135,7 @@ function SentryGunMovement:on_activated()
 		self._activation_anim_group_name_ids = Idstring(self._activation_anim_group_name)
 		self._unit:damage():run_sequence_simple("activate")
 		self._activating = true
-		self._updator = callback(self, self, "_update_activating")
+		self:_set_updator("_update_activating")
 	end
 end
 function SentryGunMovement:set_active(state)
@@ -111,6 +150,22 @@ function SentryGunMovement:set_active(state)
 			self._rearm_event = false
 		end
 	end
+end
+function SentryGunMovement:set_idle(state)
+	if not state then
+		if self._unit:damage() and self._unit:damage():has_sequence("deactivate") and self._activation_anim_group_name then
+			self._activation_anim_group_name_ids = Idstring(self._activation_anim_group_name)
+			self._unit:damage():run_sequence_simple("deactivate")
+			self._inactivating = true
+			self:_set_updator("_update_inactivating")
+		end
+	elseif self._unit:damage() and self._unit:damage():has_sequence("activate") and self._activation_anim_group_name then
+		self._activation_anim_group_name_ids = Idstring(self._activation_anim_group_name)
+		self._unit:damage():run_sequence_simple("activate")
+		self._activating = true
+		self:_set_updator("_update_activating")
+	end
+	self._unit:weapon():update_laser()
 end
 function SentryGunMovement:nav_tracker()
 	return self._nav_tracker
@@ -431,6 +486,12 @@ end
 function SentryGunMovement:is_activating()
 	return self._activating
 end
+function SentryGunMovement:is_inactivating()
+	return self._inactivating
+end
+function SentryGunMovement:is_inactivated()
+	return self._inactivated
+end
 function SentryGunMovement:switch_off()
 	self._switched_off = true
 	self._switch_off_rot = Rotation(self._m_rot:x(), -35)
@@ -438,6 +499,11 @@ end
 function SentryGunMovement:switch_on()
 	self._switched_off = false
 	self:set_active(true)
+end
+function SentryGunMovement:_set_updator(updator_name)
+	print("SentryGunMovement:_set_updator", updator_name)
+	self._updator_name = updator_name
+	self._updator = callback(self, self, updator_name)
 end
 function SentryGunMovement:save(save_data)
 	local my_save_data = {}
@@ -457,11 +523,13 @@ function SentryGunMovement:save(save_data)
 		my_save_data.rot_speed_mul = self._rot_speed_mul
 	end
 	my_save_data.team = self._team.id
-	if self._activating then
-		my_save_data.activating = true
-	elseif self._activated then
-		my_save_data.activated = true
-	end
+	my_save_data.activating = self._activating
+	my_save_data.activated = self._activated
+	my_save_data.inactivating = self._inactivating
+	my_save_data.inactivated = self._inactivated
+	my_save_data.rearming = self._rearming
+	my_save_data.reparing = self._repairing
+	my_save_data.updator_name = self._updator_name
 end
 function SentryGunMovement:load(save_data)
 	if not save_data or not save_data.movement then
@@ -479,13 +547,13 @@ function SentryGunMovement:load(save_data)
 	end
 	self._team = managers.groupai:state():team_data(my_save_data.team)
 	managers.groupai:state():add_listener("SentryGunMovement_team_def_" .. tostring(self._unit:key()), {"team_def"}, callback(self, self, "clbk_team_def"))
-	if my_save_data.activating then
-		self._activating = true
-		self._updator = callback(self, self, "_update_activating")
-	elseif my_save_data.activated then
-		self._activated = true
-		self._updator = callback(self, self, "_update_active")
-	end
+	self._activating = my_save_data.activating
+	self._activated = my_save_data.activated
+	self._inactivating = my_save_data.inactivating
+	self._inactivated = my_save_data.inactivated
+	self._rearming = my_save_data.rearming
+	self._repairing = my_save_data.repairing
+	self:_set_updator(my_save_data.updator_name)
 	self._unit:weapon():update_laser()
 end
 function SentryGunMovement:clbk_team_def()
@@ -531,7 +599,7 @@ function SentryGunMovement:rearming()
 	return self._rearming
 end
 function SentryGunMovement:rearm()
-	self._updator = callback(self, self, "_update_rearming")
+	self:_set_updator("_update_rearming")
 	self._rearming = true
 	if Network:is_server() then
 		self._rearm_complete_t = TimerManager:game():time() + self._tweak.AUTO_RELOAD_DURATION
@@ -542,6 +610,20 @@ function SentryGunMovement:rearm()
 		self._rearm_event = self._sound_source:post_event(self._rearm_snd_event)
 	end
 	self._unit:weapon():update_laser()
+end
+function SentryGunMovement:repairing()
+	return self._repairing
+end
+function SentryGunMovement:repair()
+	self:_set_updator("_update_repairing")
+	if self._repair_start_seq then
+		self._unit:damage():run_sequence_simple(self._repair_start_seq)
+	end
+	self._repairing = true
+	if Network:is_server() then
+		self._repair_complete_t = TimerManager:game():time() + self._tweak.AUTO_REPAIR_DURATION
+		self._unit:network():send("turret_repair")
+	end
 end
 function SentryGunMovement:pre_destroy()
 	if Network:is_server() then

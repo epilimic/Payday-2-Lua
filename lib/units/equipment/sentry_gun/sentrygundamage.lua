@@ -24,6 +24,12 @@ function SentryGunDamage:init(unit)
 	end
 	self._health = self._HEALTH_INIT
 	self._shield_health = self._SHIELD_HEALTH_INIT
+	self._shield_smoke_level = 0
+	self._shield_smoke_levels = {}
+	table.insert(self._shield_smoke_levels, self._shield_smoke_level_1)
+	table.insert(self._shield_smoke_levels, self._shield_smoke_level_2)
+	table.insert(self._shield_smoke_levels, self._shield_smoke_level_3)
+	self._num_shield_smoke_levels = table.getn(self._shield_smoke_levels)
 	self._sync_dmg_leftover = 0
 	if self._ignore_client_damage then
 		if Network:is_server() then
@@ -206,8 +212,25 @@ end
 function SentryGunDamage:dead()
 	return self._dead
 end
+function SentryGunDamage:needs_repair()
+	return self._shield_health == 0
+end
+function SentryGunDamage:repair_shield()
+	self._shield_health = self._SHIELD_HEALTH_INIT
+	self:update_shield_smoke_level(self:shield_health_ratio())
+	if self._shield_repaired_sequence_name then
+		self._unit:damage():run_sequence_simple(self._shield_repaired_sequence_name)
+	end
+	self._shield_smoke_level = 0
+	if Network:is_server() then
+		self._unit:network():send("turret_repair_shield")
+	end
+end
 function SentryGunDamage:health_ratio()
 	return self._health / self._HEALTH_INIT
+end
+function SentryGunDamage:shield_health_ratio()
+	return self._shield_health / self._SHIELD_HEALTH_INIT
 end
 function SentryGunDamage:focus_delay_mul()
 	return 1
@@ -301,6 +324,7 @@ function SentryGunDamage:_apply_damage(damage, dmg_shield, dmg_body, is_local)
 		end
 		if shield_dmg > 0 then
 			if shield_dmg >= self._shield_health then
+				damage = damage - self._shield_health
 				self._shield_health = 0
 				self._sync_dmg_leftover = 0
 				if self._shield_destroyed_sequence_name then
@@ -309,8 +333,11 @@ function SentryGunDamage:_apply_damage(damage, dmg_shield, dmg_body, is_local)
 				if self._shield_destroyed_snd_event then
 					self._unit:sound_source():post_event(self._shield_destroyed_snd_event)
 				end
+				self:update_shield_smoke_level(self:shield_health_ratio())
 			else
 				self._shield_health = self._shield_health - shield_dmg
+				damage = damage - shield_dmg
+				self:update_shield_smoke_level(self:shield_health_ratio())
 			end
 			if not dmg_body then
 				return damage_percent
@@ -320,11 +347,14 @@ function SentryGunDamage:_apply_damage(damage, dmg_shield, dmg_body, is_local)
 	if dmg_body then
 		local damage_percent
 		local body_damage = damage ~= "death" and damage or self._HEALTH_INIT
+		if tweak_data.weapon[self._unit:base():get_name_id()].BODY_DAMAGE_CLAMP then
+			body_damage = math.min(body_damage, tweak_data.weapon[self._unit:base():get_name_id()].BODY_DAMAGE_CLAMP)
+		end
 		if is_local then
 			local health_init_percent = self._HEALTH_INIT_PERCENT
 			damage_percent = math.clamp(body_damage / health_init_percent, 0, self._HEALTH_GRANULARITY)
 			local leftover_percent = damage_percent - math.floor(damage_percent)
-			self._sync_dmg_leftover = leftover_percent * health_init_percent
+			self._sync_dmg_leftover = self._sync_dmg_leftover + leftover_percent * health_init_percent
 			damage_percent = math.floor(damage_percent)
 			body_damage = damage_percent * health_init_percent
 		end
@@ -337,10 +367,34 @@ function SentryGunDamage:_apply_damage(damage, dmg_shield, dmg_body, is_local)
 		else
 			self._health = self._health - body_damage
 		end
-		if not self._dead and previous_health_ratio >= 0.75 and self:health_ratio() < 0.75 and self._damaged_sequence_name then
+		if not tweak_data.weapon[self._unit:base():get_name_id()].AUTO_REPAIR and not self._dead and previous_health_ratio >= 0.75 and self:health_ratio() < 0.75 and self._damaged_sequence_name then
 			self._unit:damage():run_sequence_simple(self._damaged_sequence_name)
 		end
 		return damage_percent
+	end
+end
+function SentryGunDamage:update_shield_smoke_level(ratio, up)
+	ratio = math.clamp(ratio, 0, 1)
+	local num_shield_smoke_levels = self._num_shield_smoke_levels
+	local new_smoke_level = num_shield_smoke_levels - ratio * num_shield_smoke_levels
+	if up then
+		new_smoke_level = math.ceil(new_smoke_level)
+	else
+		new_smoke_level = math.floor(new_smoke_level)
+	end
+	if new_smoke_level ~= self._shield_smoke_level then
+		self._shield_smoke_level = new_smoke_level
+		self:_make_shield_smoke()
+		if Network:is_server() then
+			self._unit:network():send("turret_update_shield_smoke_level", ratio, up)
+		end
+	end
+end
+function SentryGunDamage:_make_shield_smoke()
+	if self._shield_smoke_level == 0 then
+		self._unit:damage():run_sequence_simple(self._shield_smoke_level_0)
+	elseif self._shield_smoke_levels and self._shield_smoke_levels[self._shield_smoke_level] then
+		self._unit:damage():run_sequence_simple(self._shield_smoke_levels[self._shield_smoke_level])
 	end
 end
 function SentryGunDamage:save(save_data)
@@ -351,6 +405,7 @@ function SentryGunDamage:save(save_data)
 	my_save_data.shield_health = self._shield_health
 	my_save_data.HEALTH_INIT = self._HEALTH_INIT
 	my_save_data.SHIELD_HEALTH_INIT = self._SHIELD_HEALTH_INIT
+	my_save_data.shield_smoke_level = self._shield_smoke_level
 end
 function SentryGunDamage:load(save_data)
 	if not save_data or not save_data.char_damage then
@@ -360,6 +415,7 @@ function SentryGunDamage:load(save_data)
 	self._ignore_client_damage = my_save_data.ignore_client_damage
 	self._health = my_save_data.health
 	self._shield_health = my_save_data.shield_health
+	self._shield_smoke_level = my_save_data.shield_smoke_level
 	self._HEALTH_INIT = my_save_data.HEALTH_INIT
 	self._SHIELD_HEALTH_INIT = my_save_data.SHIELD_HEALTH_INIT
 	self._HEALTH_INIT_PERCENT = self._HEALTH_INIT / self._HEALTH_GRANULARITY
@@ -367,9 +423,15 @@ function SentryGunDamage:load(save_data)
 	if self._health == 0 then
 		self:die()
 	end
+	if self._shield_smoke_level > 0 then
+		self:_make_shield_smoke()
+	end
 end
 function SentryGunDamage:destroy(unit)
 	unit:brain():pre_destroy()
 	unit:movement():pre_destroy()
 	unit:base():pre_destroy()
+end
+function SentryGunDamage:shield_smoke_level()
+	return self._shield_smoke_level
 end
