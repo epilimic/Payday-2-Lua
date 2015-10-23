@@ -420,6 +420,22 @@ function DLCTweakData:init(tweak_data)
 			amount = 1
 		}
 	}
+	self.crimefest2_u9 = {}
+	self.crimefest2_u9.content = {}
+	self.crimefest2_u9.free = true
+	self.crimefest2_u9.content.loot_global_value = "normal"
+	self.crimefest2_u9.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "groucho_glasses",
+			amount = 1
+		},
+		{
+			type_items = "masks",
+			item_entry = "glasses_tinted_love",
+			amount = 1
+		}
+	}
 	self.pd2_clan_bonnie = {}
 	self.pd2_clan_bonnie.content = {}
 	self.pd2_clan_bonnie.dlc = "has_pd2_clan"

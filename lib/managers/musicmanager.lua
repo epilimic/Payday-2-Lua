@@ -265,6 +265,7 @@ function MusicManager:jukebox_default_tracks()
 		heist_alex2 = "track_07",
 		heist_alex3 = "track_02",
 		heist_haunted = "track_22",
+		heist_dinner = "track_35",
 		heist_big = "all",
 		heist_crojob1 = "all",
 		heist_crojob2 = "all",

@@ -356,6 +356,10 @@ function CarryTweakData:init(tweak_data)
 	self.safe_secure_dummy.bag_value = "safe"
 	self.safe_secure_dummy.visual_object = "g_safe"
 	self.safe_secure_dummy.unit = "units/pd2_dlc_jolly/pickups/gen_safe_secure_dummy/gen_safe_secure_dummy"
+	self.din_pig = {}
+	self.din_pig.type = "heavy"
+	self.din_pig.name_id = "hud_carry_pig"
+	self.din_pig.AI_carry = {SO_category = "enemies"}
 end
 function CarryTweakData:get_carry_ids()
 	local t = {}

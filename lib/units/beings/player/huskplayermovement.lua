@@ -378,7 +378,7 @@ function HuskPlayerMovement:update(unit, t, dt)
 	if self._attention_updator then
 		self._attention_updator(dt)
 	end
-	if not self._movement_updator and self._move_data and (self._state == "bipod" or self._state == "standard" or self._state == "mask_off" or self._state == "clean" or self._state == "civilian" or self._state == "carry") then
+	if not self._movement_updator and self._move_data and (self._state == "standard" or self._state == "mask_off" or self._state == "clean" or self._state == "civilian" or self._state == "carry") then
 		self._movement_updator = callback(self, self, "_upd_move_standard")
 		self._last_vel_z = 0
 	end

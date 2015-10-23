@@ -971,6 +971,21 @@ function LevelsTweakData:init()
 	self.red2.cube = "cube_apply_heist_bank"
 	self.red2.max_bags = 84
 	self.red2.ghost_bonus = 0.15
+	self.dinner = {}
+	self.dinner.name_id = "heist_dinner_hl"
+	self.dinner.briefing_id = "heist_dinner_briefing"
+	self.dinner.briefing_dialog = "Play_pln_dn1_brf_01"
+	self.dinner.world_name = "narratives/bain/dinner"
+	self.dinner.intro_event = "Play_pln_dn1_intro_01"
+	self.dinner.outro_event = {
+		"Play_pln_dn1_31"
+	}
+	self.dinner.music = "heist"
+	self.dinner.package = {
+		"packages/narr_dinner"
+	}
+	self.dinner.cube = "cube_apply_heist_bank"
+	self.dinner.max_bags = 20
 	self._level_index = {
 		"welcome_to_the_jungle_1",
 		"welcome_to_the_jungle_1_night",
@@ -1037,7 +1052,8 @@ function LevelsTweakData:init()
 		"driving_escapes_industry_day",
 		"driving_escapes_city_day",
 		"jolly",
-		"red2"
+		"red2",
+		"dinner"
 	}
 	if SystemInfo:platform() == Idstring("WIN32") then
 		table.insert(self._level_index, "roberts")

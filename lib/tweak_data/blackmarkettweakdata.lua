@@ -2362,6 +2362,32 @@ function BlackMarketTweakData:_init_masks()
 	}
 	self.masks.eggian.value = 0
 	self.masks.eggian.sort_number = 10
+	self.masks.groucho_glasses = {}
+	self.masks.groucho_glasses.unit = "units/pd2_crimefest_2015/update_9/masks/msk_groucho_glasses/msk_groucho_glasses"
+	self.masks.groucho_glasses.name_id = "bm_msk_groucho"
+	self.masks.groucho_glasses.pcs = {
+		10,
+		20,
+		30,
+		40
+	}
+	self.masks.groucho_glasses.value = 0
+	self.masks.groucho_glasses.type = "glasses"
+	self.masks.groucho_glasses.sort_number = 11
+	self.masks.groucho_glasses.skip_mask_on_sequence = true
+	self.masks.glasses_tinted_love = {}
+	self.masks.glasses_tinted_love.unit = "units/pd2_crimefest_2015/update_9/masks/msk_tinted_love/msk_glasses_tinted_love"
+	self.masks.glasses_tinted_love.name_id = "bm_msk_tinted_love"
+	self.masks.glasses_tinted_love.pcs = {
+		10,
+		20,
+		30,
+		40
+	}
+	self.masks.glasses_tinted_love.value = 0
+	self.masks.glasses_tinted_love.type = "glasses"
+	self.masks.glasses_tinted_love.sort_number = 11
+	self.masks.glasses_tinted_love.skip_mask_on_sequence = true
 	if SystemInfo:platform() == Idstring("PS3") then
 		self.masks.sweettooth = {}
 		self.masks.sweettooth.unit = "units/pd2_dlc_consoles/masks/msk_sweettooth/msk_sweettooth"

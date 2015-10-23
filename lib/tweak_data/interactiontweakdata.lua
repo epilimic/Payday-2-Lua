@@ -3088,4 +3088,25 @@ function InteractionTweakData:init()
 	self.red_take_envelope.text_id = "hud_int_take_envelope"
 	self.red_take_envelope.start_active = false
 	self.red_take_envelope.axis = "z"
+	self.din_crane_control = {}
+	self.din_crane_control.text_id = "hud_int_hold_start_crane"
+	self.din_crane_control.action_text_id = "hud_action_starting_crane"
+	self.din_crane_control.timer = 4
+	self.din_crane_control.sound_start = "bar_crane_control_panel"
+	self.din_crane_control.sound_interupt = "bar_crane_control_panel_cancel"
+	self.din_crane_control.sound_done = "bar_crane_control_panel_finished"
+	self.din_hold_ignite_trap = {}
+	self.din_hold_ignite_trap.text_id = "hud_int_hold_ignite_trap"
+	self.din_hold_ignite_trap.action_text_id = "hud_action_igniting_trap"
+	self.din_hold_ignite_trap.timer = 4
+	self.din_hold_ignite_trap.interact_distance = 300
+	self.din_hold_ignite_trap.sound_start = "bar_thermal_lance_fix"
+	self.din_hold_ignite_trap.sound_interupt = "bar_thermal_lance_fix_cancel"
+	self.din_hold_ignite_trap.sound_done = "bar_thermal_lance_fix_finished"
+	self.pku_pig = {}
+	self.pku_pig.text_id = "hud_int_hold_take_pig"
+	self.pku_pig.action_text_id = "hud_action_taking_pig"
+	self.pku_pig.start_active = false
+	self.pku_pig.timer = 3
+	self.pku_pig.blocked_hint = "carry_block"
 end

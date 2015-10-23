@@ -6678,6 +6678,13 @@ function CharacterTweakData:character_map()
 			list = {
 				"civ_female_inside_man_1"
 			}
+		},
+		dinner = {
+			path = "units/pd2_dlc_dinner/characters/",
+			list = {
+				"civ_male_butcher_2",
+				"civ_male_butcher_1"
+			}
 		}
 	}
 	if TweakData._init_wip_character_map then

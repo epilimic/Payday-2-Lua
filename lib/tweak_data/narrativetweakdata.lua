@@ -3258,11 +3258,11 @@ function NarrativeTweakData:init()
 	}
 	self.jobs.red2.contract_visuals = {}
 	self.jobs.red2.contract_visuals.min_mission_xp = {
-		22000,
-		22000,
-		22000,
-		22000,
-		22000
+		17500,
+		17500,
+		17500,
+		17500,
+		17500
 	}
 	self.jobs.red2.contract_visuals.max_mission_xp = {
 		34000,
@@ -3270,6 +3270,59 @@ function NarrativeTweakData:init()
 		34000,
 		34000,
 		34000
+	}
+	self.jobs.dinner = {}
+	self.jobs.dinner.name_id = "heist_dinner"
+	self.jobs.dinner.briefing_id = "heist_dinner_crimenet"
+	self.jobs.dinner.package = "packages/narr_dinner"
+	self.jobs.dinner.contact = "classic"
+	self.jobs.dinner.region = "street"
+	self.jobs.dinner.jc = 30
+	self.jobs.dinner.chain = {
+		{
+			level_id = "dinner",
+			type_id = "heist_type_assault",
+			type = "d"
+		}
+	}
+	self.jobs.dinner.briefing_event = "pln_dn1_brf_01"
+	self.jobs.dinner.debrief_event = "pln_dn1_31"
+	self.jobs.dinner.crimenet_callouts = {
+		"pln_dn1_cnc_01"
+	}
+	self.jobs.dinner.crimenet_videos = {
+		"cn_branchbank1",
+		"cn_branchbank2",
+		"cn_branchbank3"
+	}
+	self.jobs.dinner.payout = {
+		120000,
+		240000,
+		600000,
+		1100000,
+		1500000
+	}
+	self.jobs.dinner.contract_cost = {
+		80000,
+		150000,
+		400000,
+		850000,
+		1000000
+	}
+	self.jobs.dinner.contract_visuals = {}
+	self.jobs.dinner.contract_visuals.min_mission_xp = {
+		34000,
+		34000,
+		34000,
+		34000,
+		34000
+	}
+	self.jobs.dinner.contract_visuals.max_mission_xp = {
+		40000,
+		40000,
+		40000,
+		40000,
+		40000
 	}
 	self._jobs_index = {
 		"jewelry_store",
@@ -3325,7 +3378,8 @@ function NarrativeTweakData:init()
 		"arena",
 		"kenaz",
 		"jolly",
-		"red2"
+		"red2",
+		"dinner"
 	}
 	if SystemInfo:platform() == Idstring("WIN32") then
 		table.insert(self._jobs_index, "roberts")

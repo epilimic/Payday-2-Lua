@@ -3209,6 +3209,7 @@ Play the full version soon to get your full PAYDAY!]],
 		{track = "track_29", lock = "kenaz"},
 		{track = "track_30"},
 		{track = "track_31"},
+		{track = "track_35"},
 		{
 			track = "track_32_lcv"
 		},
