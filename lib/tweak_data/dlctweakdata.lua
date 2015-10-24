@@ -436,6 +436,54 @@ function DLCTweakData:init(tweak_data)
 			amount = 1
 		}
 	}
+	self.ach_brooklyn_1 = {}
+	self.ach_brooklyn_1.dlc = "has_achievement"
+	self.ach_brooklyn_1.achievement_id = "brooklyn_1"
+	self.ach_brooklyn_1.content = {}
+	self.ach_brooklyn_1.content.loot_global_value = "normal"
+	self.ach_brooklyn_1.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "baitface",
+			amount = 1
+		}
+	}
+	self.ach_brooklyn_2 = {}
+	self.ach_brooklyn_2.dlc = "has_achievement"
+	self.ach_brooklyn_2.achievement_id = "brooklyn_2"
+	self.ach_brooklyn_2.content = {}
+	self.ach_brooklyn_2.content.loot_global_value = "normal"
+	self.ach_brooklyn_2.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "nomegusta",
+			amount = 1
+		}
+	}
+	self.ach_brooklyn_3 = {}
+	self.ach_brooklyn_3.dlc = "has_achievement"
+	self.ach_brooklyn_3.achievement_id = "brooklyn_3"
+	self.ach_brooklyn_3.content = {}
+	self.ach_brooklyn_3.content.loot_global_value = "normal"
+	self.ach_brooklyn_3.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "rageface",
+			amount = 1
+		}
+	}
+	self.ach_brooklyn_4 = {}
+	self.ach_brooklyn_4.dlc = "has_achievement"
+	self.ach_brooklyn_4.achievement_id = "brooklyn_4"
+	self.ach_brooklyn_4.content = {}
+	self.ach_brooklyn_4.content.loot_global_value = "normal"
+	self.ach_brooklyn_4.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "dawg",
+			amount = 1
+		}
+	}
 	self.pd2_clan_bonnie = {}
 	self.pd2_clan_bonnie.content = {}
 	self.pd2_clan_bonnie.dlc = "has_pd2_clan"

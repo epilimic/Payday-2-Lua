@@ -148,6 +148,23 @@ function EconomyTweakData:init()
 			"event_01_legendary"
 		}
 	}
+	self.contents.event_dinner = {}
+	self.contents.event_dinner.def_id = 10007
+	self.contents.event_dinner.contains = {
+		weapon_skins = {
+			"judge_bloodbath",
+			"b92fs_bloodbath",
+			"new_raging_bull_bloodbath",
+			"mg42_bloodbath",
+			"plainsrider_bloodbath",
+			"new_m4_bloodbath",
+			"g36_bloodbath",
+			"flamethrower_mk2_bloodbath",
+			"deagle_bloodbath",
+			"rpg7_bloodbath"
+		},
+		contents = {"legendary"}
+	}
 	self.safes.event_01 = {}
 	self.safes.event_01.drill = "event_01"
 	self.safes.event_01.content = "event_01"
@@ -169,6 +186,14 @@ function EconomyTweakData:init()
 	self.safes.event_red.texture_bundle_folder = "cash/safes/red"
 	self.safes.event_red.dlc = "full_game"
 	self.safes.event_red.achievement = "green_7"
+	self.safes.event_dinner = {}
+	self.safes.event_dinner.def_id = 50004
+	self.safes.event_dinner.drill = "event_dinner"
+	self.safes.event_dinner.content = "event_dinner"
+	self.safes.event_dinner.unit_name = "units/payday2_cash/safes/dinner/safe/eco_safe_event_dinner"
+	self.safes.event_dinner.name_id = "bm_menu_safe_event_dinner"
+	self.safes.event_dinner.texture_bundle_folder = "cash/safes/dinner"
+	self.safes.event_dinner.achievement = "farm_6"
 	self.drills.event_01 = {}
 	self.drills.event_01.safe = "event_01"
 	self.drills.event_01.def_id = 70001
@@ -194,6 +219,14 @@ function EconomyTweakData:init()
 	self.drills.event_red.texture_bundle_folder = "cash/safes/red"
 	self.drills.event_red.dlc = "full_game"
 	self.drills.event_red.achievement = "green_7"
+	self.drills.event_dinner = {}
+	self.drills.event_dinner.def_id = 70004
+	self.drills.event_dinner.safe = "event_dinner"
+	self.drills.event_dinner.unit_name = "units/payday2_cash/safes/dinner/drill/eco_drill_event_dinner"
+	self.drills.event_dinner.name_id = "bm_menu_drill_event_dinner"
+	self.drills.event_dinner.desc_id = "bm_menu_drill_event_dinner_desc"
+	self.drills.event_dinner.texture_bundle_folder = "cash/safes/dinner"
+	self.drills.event_dinner.achievement = "farm_6"
 	self.bonuses = {}
 	self.bonuses.concealment_p1 = {}
 	self.bonuses.concealment_p1.name_id = "bm_menu_bonus_concealment"

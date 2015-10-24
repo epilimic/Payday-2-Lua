@@ -1060,8 +1060,12 @@ function HuskPlayerMovement:_upd_sequenced_events(t, dt)
 	elseif event_type == "zipline" then
 		next_event.commencing = true
 		self:_start_zipline(next_event)
-	elseif event_type == "driving" and self:_start_driving(next_event) then
-		table.remove(sequenced_events, 1)
+	elseif event_type == "driving" then
+		if self:_start_driving(next_event) then
+			table.remove(sequenced_events, 1)
+		end
+	elseif event_type == "jump" then
+		self:_start_jumping(next_event)
 	end
 end
 function HuskPlayerMovement:_add_sequenced_event(event_desc)
@@ -1332,19 +1336,19 @@ function HuskPlayerMovement:_is_slowdown_to_next_action()
 	return event_desc and event_desc.is_no_move_slowdown
 end
 function HuskPlayerMovement:_is_anim_move_redirect_forbidden(path_len_remaining)
-	return not self._move_data
+	return not self._move_data or not self._ext_anim.landing and self._ext_anim.jumping and path_len_remaining < 50
 end
 function HuskPlayerMovement:_is_anim_idle_redirect_forbidden()
-	return self._ext_anim.idle
+	return self._ext_anim.idle or self._ext_anim.landing
 end
 function HuskPlayerMovement:_is_anim_move_speed_forbidden()
-	return false
+	return self._ext_anim.jumping or self._ext_anim.landing
 end
 function HuskPlayerMovement:_is_anim_stop_allowed()
-	return false
+	return not self._ext_anim.jumping and self._ext_anim.landing and self._ext_anim.move
 end
 function HuskPlayerMovement:_is_start_move_velocity_max()
-	return false
+	return self._ext_anim.jumping
 end
 function HuskPlayerMovement:_upd_move_zipline(t, dt)
 	if self._load_data then
@@ -2324,4 +2328,150 @@ function HuskPlayerMovement:sync_vehicle_change_stance(stance)
 	Application:trace("Current animation", inspect(anim))
 	self._machine:set_parameter(anim, "shooting_stance", stance)
 	self._vehicle_shooting_stance = stance
+end
+function HuskPlayerMovement:sync_action_jump(pos, jump_vec)
+	self:sync_action_walk_nav_point(mvector3.copy(pos))
+	if #self._sequenced_events > 5 then
+		return
+	end
+	local event_desc = {
+		type = "jump",
+		jump_vec = jump_vec,
+		pos = pos,
+		steer_velocity = Vector3(),
+		is_no_move_slowdown = true
+	}
+	self:_add_sequenced_event(event_desc)
+end
+function HuskPlayerMovement:sync_action_jump_middle(pos)
+	for i = #self._sequenced_events, 1, -1 do
+		local event_desc = self._sequenced_events[i]
+		if event_desc.type == "jump" then
+			event_desc.middle_pos = pos
+			break
+		end
+	end
+end
+function HuskPlayerMovement:sync_action_land(pos)
+	local jump_index
+	local count = #self._sequenced_events
+	for i = count, 1, -1 do
+		local event_desc = self._sequenced_events[i]
+		if event_desc.type == "jump" then
+			event_desc.land_pos = pos
+			jump_index = i
+			break
+		end
+	end
+	self._unit:sound_source():post_event("footstep_npc_hardsole_land")
+	if jump_index == count or count == 0 then
+		self:sync_action_walk_nav_point(mvector3.copy(pos))
+	end
+end
+function HuskPlayerMovement:_start_jumping(event_desc)
+	event_desc.commencing = true
+	self._movement_updator = callback(self, self, "_upd_move_jump")
+	mvec3_set(tmp_vec1, event_desc.jump_vec)
+	mvec3_set_z(tmp_vec1, 0)
+	if 0 < mvec3_dot(tmp_vec1, self._look_dir) then
+		self:play_redirect("jump_fwd")
+	else
+		self:play_redirect("jump")
+	end
+end
+function HuskPlayerMovement:_upd_move_jump(t, dt)
+	local event_desc = self._sequenced_events[1]
+	local new_pos = self._m_pos
+	mvec3_set(tmp_vec1, event_desc.jump_vec)
+	mvec3_mul(tmp_vec1, dt)
+	mvec3_add(new_pos, tmp_vec1)
+	local jump_z = tmp_vec1.z
+	local gravity_z = World:gravity().z
+	mvec3_set_z(event_desc.jump_vec, event_desc.jump_vec.z + gravity_z * dt)
+	if event_desc.middle_pos and new_pos.z > event_desc.middle_pos.z then
+		mvec3_set_z(new_pos, event_desc.middle_pos.z)
+		if event_desc.jump_vec.z > 0 then
+			mvec3_set_z(event_desc.jump_vec, 0)
+			jump_z = 0
+		end
+	end
+	local is_verified_pos = false
+	if gravity_z < 0 then
+		if event_desc.land_pos then
+			self:_jump_toward(dt, new_pos, event_desc.steer_velocity, event_desc.land_pos, event_desc.jump_vec, jump_z, gravity_z, true)
+			is_verified_pos = true
+		elseif event_desc.middle_pos then
+			if event_desc.jump_vec.z > 0 then
+				self:_jump_toward(dt, new_pos, event_desc.steer_velocity, event_desc.middle_pos, event_desc.jump_vec, jump_z, gravity_z, false)
+				is_verified_pos = true
+			else
+				if not event_desc.calc_land_pos then
+					event_desc.calc_land_pos = mvector3.copy(event_desc.middle_pos)
+				else
+					mvec3_set(event_desc.calc_land_pos, event_desc.middle_pos)
+				end
+				mvec3_sub(event_desc.calc_land_pos, event_desc.pos)
+				mvec3_set_z(event_desc.calc_land_pos, 0)
+				mvec3_mul(event_desc.calc_land_pos, 2)
+				mvec3_add(event_desc.calc_land_pos, event_desc.pos)
+				self:_jump_toward(dt, new_pos, event_desc.steer_velocity, event_desc.calc_land_pos, event_desc.jump_vec, jump_z, gravity_z, false)
+			end
+		end
+	end
+	if not is_verified_pos then
+		self._unit:m_position(tmp_vec1)
+		mvec3_set(tmp_vec2, new_pos)
+		mvec3_sub(tmp_vec2, tmp_vec1)
+		mvec3_norm(tmp_vec2)
+		mvec3_sub(tmp_vec1, tmp_vec2)
+		mvec3_mul(tmp_vec2, 30 * (1 - math.abs(mvec3_dot(tmp_vec2, math.UP))))
+		mvec3_add(tmp_vec2, new_pos)
+		local is_hit = World:raycast("ray", tmp_vec1, tmp_vec2, "slot_mask", self._slotmask_gnd_ray, "ray_type", "walk", "report")
+		if is_hit then
+			mvec3_set(new_pos, tmp_vec1)
+			self:_exit_jumping()
+		end
+	end
+	self:set_position(new_pos)
+	mvec3_set(tmp_vec1, self._look_dir)
+	mvec3_set_z(tmp_vec1, 0)
+	mrotation.set_look_at(tmp_rot1, tmp_vec1, math.UP)
+	self:set_rotation(tmp_rot1)
+end
+local MAX_JUMP_MOVE = tweak_data.player.movement_state.standard.movement.speed.RUNNING_MAX
+function HuskPlayerMovement:_jump_toward(dt, mvec_new_pos, mvec_steer_velocity, target, velocity, jump_z, gravity_z, is_real_land_pos)
+	local velocity_z = velocity.z
+	local time_left = (-velocity_z - math.sqrt(math.abs(velocity_z * velocity_z + 2 * (target.z - mvec_new_pos.z) * gravity_z))) / gravity_z
+	mvec3_set(tmp_vec2, target)
+	mvec3_sub(tmp_vec2, mvec_new_pos)
+	mvec3_set_z(tmp_vec2, 0)
+	if time_left < 0 and mvec3_dot(tmp_vec2, velocity) > 0 then
+		time_left = -time_left
+	end
+	mvec3_set(tmp_vec1, velocity)
+	mvec3_set_z(tmp_vec1, 0)
+	mvec3_mul(tmp_vec1, time_left)
+	mvec3_sub(tmp_vec2, tmp_vec1)
+	if time_left ~= 0 then
+		mvec3_div(tmp_vec2, time_left)
+	end
+	mvec3_set(mvec_steer_velocity, tmp_vec2)
+	if mvec3_len(tmp_vec2) > MAX_JUMP_MOVE then
+		mvec3_set_len(tmp_vec2, MAX_JUMP_MOVE)
+	end
+	mvec3_mul(tmp_vec2, dt)
+	mvec3_add(mvec_new_pos, tmp_vec2)
+	if is_real_land_pos and velocity.z < 0 then
+		local diff_z = mvec_new_pos.z - target.z
+		if diff_z + jump_z <= 0 then
+			if diff_z < 0 then
+				mvec3_set_z(mvec_new_pos, mvec_new_pos.z - math.max(diff_z, jump_z))
+			end
+			self:_exit_jumping()
+		end
+	end
+end
+function HuskPlayerMovement:_exit_jumping()
+	table.remove(self._sequenced_events, 1)
+	self._movement_updator = callback(self, self, "_upd_move_standard")
 end

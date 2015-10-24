@@ -2388,6 +2388,30 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.glasses_tinted_love.type = "glasses"
 	self.masks.glasses_tinted_love.sort_number = 11
 	self.masks.glasses_tinted_love.skip_mask_on_sequence = true
+	self.masks.baitface = {}
+	self.masks.baitface.unit = "units/pd2_crimefest_2015/update_10/masks/baitface/msk_baitface"
+	self.masks.baitface.name_id = "bm_msk_baitface"
+	self.masks.baitface.pcs = {}
+	self.masks.baitface.value = 0
+	self.masks.baitface.sort_number = 12
+	self.masks.nomegusta = {}
+	self.masks.nomegusta.unit = "units/pd2_crimefest_2015/update_10/masks/nomegusta/msk_nomegusta"
+	self.masks.nomegusta.name_id = "bm_msk_nomegusta"
+	self.masks.nomegusta.pcs = {}
+	self.masks.nomegusta.value = 0
+	self.masks.nomegusta.sort_number = 12
+	self.masks.rageface = {}
+	self.masks.rageface.unit = "units/pd2_crimefest_2015/update_10/masks/rageface/msk_rageface"
+	self.masks.rageface.name_id = "bm_msk_rageface"
+	self.masks.rageface.pcs = {}
+	self.masks.rageface.value = 0
+	self.masks.rageface.sort_number = 12
+	self.masks.dawg = {}
+	self.masks.dawg.unit = "units/pd2_crimefest_2015/update_10/masks/msk_dawg/msk_dawg"
+	self.masks.dawg.name_id = "bm_msk_dawg"
+	self.masks.dawg.pcs = {}
+	self.masks.dawg.value = 0
+	self.masks.dawg.sort_number = 12
 	if SystemInfo:platform() == Idstring("PS3") then
 		self.masks.sweettooth = {}
 		self.masks.sweettooth.unit = "units/pd2_dlc_consoles/masks/msk_sweettooth/msk_sweettooth"
@@ -10074,6 +10098,352 @@ function BlackMarketTweakData:_init_weapon_skins()
 				uv_scale = Vector3(6.98481, 7.03248, 0),
 				uv_offset_rot = Vector3(0.0543599, 0.973251, 0),
 				pattern_tweak = Vector3(0.634393, 0, 1)
+			}
+		}
+	}
+	self.weapon_skins.judge_bloodbath = {}
+	self.weapon_skins.judge_bloodbath.name_id = "bm_wskn_judge_bloodbath"
+	self.weapon_skins.judge_bloodbath.desc_id = "bm_wskn_judge_bloodbath_desc"
+	self.weapon_skins.judge_bloodbath.weapon_id = "judge"
+	self.weapon_skins.judge_bloodbath.rarity = "common"
+	self.weapon_skins.judge_bloodbath.bonus = "spread_p1"
+	self.weapon_skins.judge_bloodbath.reserve_quality = true
+	self.weapon_skins.judge_bloodbath.texture_bundle_folder = "cash/safes/dinner"
+	self.weapon_skins.judge_bloodbath.base_gradient = Idstring("units/payday2_cash/safes/dinner/base_gradient/base_dinner_001_df")
+	self.weapon_skins.judge_bloodbath.pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_003_df")
+	self.weapon_skins.judge_bloodbath.pattern_tweak = Vector3(0.586694, 0, 1)
+	self.weapon_skins.judge_bloodbath.pattern_pos = Vector3(0.254233, -0.364308, 0)
+	self.weapon_skins.judge_bloodbath.parts = {
+		wpn_fps_pis_judge_g_standard = {
+			[Idstring("mtr_grip"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/default/pattern/pattern_default_df")
+			}
+		},
+		wpn_fps_pis_judge_body_standard = {
+			[Idstring("mtr_cylinder"):key()] = {
+				pattern_pos = Vector3(0.39463, -0.442546, 0),
+				pattern = Idstring("units/payday2_cash/safes/shared/pattern/pattern_hypnotic_001_df"),
+				pattern_tweak = Vector3(0.513996, 0, 1)
+			},
+			[Idstring("mtr_frame"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/shared/pattern/pattern_hypnotic_001_df")
+			}
+		}
+	}
+	self.weapon_skins.b92fs_bloodbath = {}
+	self.weapon_skins.b92fs_bloodbath.name_id = "bm_wskn_b92fs_bloodbath"
+	self.weapon_skins.b92fs_bloodbath.desc_id = "bm_wskn_b92fs_bloodbath_desc"
+	self.weapon_skins.b92fs_bloodbath.weapon_id = "b92fs"
+	self.weapon_skins.b92fs_bloodbath.rarity = "uncommon"
+	self.weapon_skins.b92fs_bloodbath.bonus = "spread_p1"
+	self.weapon_skins.b92fs_bloodbath.reserve_quality = true
+	self.weapon_skins.b92fs_bloodbath.texture_bundle_folder = "cash/safes/dinner"
+	self.weapon_skins.b92fs_bloodbath.base_gradient = Idstring("units/payday2_cash/safes/dinner/base_gradient/base_dinner_002_df")
+	self.weapon_skins.b92fs_bloodbath.pattern_gradient = Idstring("units/payday2_cash/safes/default/pattern_gradient/gradient_default_df")
+	self.weapon_skins.b92fs_bloodbath.parts = {
+		wpn_fps_pis_beretta_sl_brigadier = {
+			[Idstring("brig"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/dinner/base_gradient/base_dinner_003_df"),
+				pattern = Idstring("units/payday2_cash/safes/shared/pattern/pattern_scales_df"),
+				pattern_pos = Vector3(0, 0.048, 0),
+				pattern_tweak = Vector3(2.44694, 0, 1)
+			}
+		},
+		wpn_fps_pis_beretta_sl_std = {
+			[Idstring("std_slide"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/dinner/base_gradient/base_dinner_001_df"),
+				pattern = Idstring("units/payday2_cash/safes/shared/pattern/pattern_scales_df"),
+				pattern_pos = Vector3(0, -0.432626, 0),
+				pattern_tweak = Vector3(3.01932, 0, 1)
+			}
+		}
+	}
+	self.weapon_skins.new_raging_bull_bloodbath = {}
+	self.weapon_skins.new_raging_bull_bloodbath.name_id = "bm_wskn_new_raging_bull_bloodbath"
+	self.weapon_skins.new_raging_bull_bloodbath.desc_id = "bm_wskn_new_raging_bull_bloodbath_desc"
+	self.weapon_skins.new_raging_bull_bloodbath.weapon_id = "new_raging_bull"
+	self.weapon_skins.new_raging_bull_bloodbath.rarity = "common"
+	self.weapon_skins.new_raging_bull_bloodbath.bonus = "recoil_p1"
+	self.weapon_skins.new_raging_bull_bloodbath.reserve_quality = true
+	self.weapon_skins.new_raging_bull_bloodbath.texture_bundle_folder = "cash/safes/dinner"
+	self.weapon_skins.new_raging_bull_bloodbath.base_gradient = Idstring("units/payday2_cash/safes/shared/base_gradient/base_shared_001_df")
+	self.weapon_skins.new_raging_bull_bloodbath.pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_017_df")
+	self.weapon_skins.new_raging_bull_bloodbath.pattern = Idstring("units/payday2_cash/safes/shared/pattern/pattern_stains_df")
+	self.weapon_skins.new_raging_bull_bloodbath.pattern_tweak = Vector3(0.830488, 0.037, 1)
+	self.weapon_skins.new_raging_bull_bloodbath.pattern_pos = Vector3(0.521345, 0.37825, 0)
+	self.weapon_skins.new_raging_bull_bloodbath.parts = {
+		wpn_fps_upg_o_docter = {
+			[Idstring("docter"):key()] = {
+				pattern_tweak = Vector3(1.39757, 0, 1)
+			}
+		},
+		wpn_fps_pis_rage_g_standard = {
+			[Idstring("grip"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/red/base_gradient/base_red_fleur_df")
+			}
+		},
+		wpn_fps_upg_o_eotech_xps = {
+			[Idstring("eotech"):key()] = {
+				pattern_tweak = Vector3(1.63606, 0, 1)
+			}
+		},
+		wpn_fps_pis_rage_body_standard = {
+			[Idstring("cylinder"):key()] = {
+				pattern_pos = Vector3(0, -0.232292, 0),
+				pattern_tweak = Vector3(3.21011, 0, 1)
+			}
+		},
+		wpn_fps_pis_rage_b_comp1 = {
+			[Idstring("comp1"):key()] = {
+				pattern_pos = Vector3(0.759838, -0.019, 0)
+			}
+		},
+		wpn_fps_upg_o_cs = {
+			[Idstring("mtr_cs"):key()] = {
+				pattern_tweak = Vector3(1.68376, 0, 1)
+			}
+		},
+		wpn_fps_upg_o_eotech = {
+			[Idstring("mtr_eotech"):key()] = {
+				pattern_tweak = Vector3(1.63606, 0, 1)
+			}
+		},
+		wpn_fps_upg_o_aimpoint_2 = {
+			[Idstring("aimpoint"):key()] = {
+				pattern_tweak = Vector3(3.5917, 0, 1)
+			}
+		},
+		wpn_fps_upg_o_rx30 = {
+			[Idstring("rx30"):key()] = {
+				pattern_tweak = Vector3(1.34987, 0, 1)
+			}
+		},
+		wpn_fps_pis_rage_o_adapter = {
+			[Idstring("mtr_rail"):key()] = {
+				pattern_tweak = Vector3(2.16075, 0, 1)
+			}
+		},
+		wpn_fps_pis_rage_b_comp2 = {
+			[Idstring("comp2"):key()] = {
+				pattern_pos = Vector3(-0.690198, 0, 0)
+			}
+		},
+		wpn_fps_pis_rage_g_ergo = {
+			[Idstring("ergo"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/red/base_gradient/base_red_fleur_df")
+			}
+		},
+		wpn_fps_upg_o_rx01 = {
+			[Idstring("rx01"):key()] = {
+				pattern_tweak = Vector3(1.63606, 0, 1)
+			}
+		},
+		wpn_fps_upg_o_reflex = {
+			[Idstring("reflex"):key()] = {
+				pattern_tweak = Vector3(1.68376, 0, 1)
+			}
+		},
+		wpn_fps_upg_o_t1micro = {
+			[Idstring("mtr_t1micro"):key()] = {
+				pattern_tweak = Vector3(1.73146, 0, 0.997)
+			}
+		},
+		wpn_fps_upg_o_cmore = {
+			[Idstring("cmore"):key()] = {
+				pattern_tweak = Vector3(1.39757, 0, 1)
+			}
+		},
+		wpn_fps_pis_rage_b_long = {
+			[Idstring("barrel_long"):key()] = {
+				pattern_tweak = Vector3(1.06368, 0, 1)
+			}
+		},
+		wpn_fps_upg_o_specter = {
+			[Idstring("mtr_specter"):key()] = {
+				pattern_tweak = Vector3(1.96995, 0, 1)
+			}
+		},
+		wpn_fps_upg_o_aimpoint = {
+			[Idstring("aimpoint"):key()] = {
+				pattern_tweak = Vector3(1.73146, 0, 1)
+			}
+		},
+		wpn_fps_pis_rage_body_smooth = {
+			[Idstring("smooth"):key()] = {
+				pattern_tweak = Vector3(1.87455, 0, 1)
+			}
+		}
+	}
+	self.weapon_skins.mg42_bloodbath = {}
+	self.weapon_skins.mg42_bloodbath.name_id = "bm_wskn_mg42_bloodbath"
+	self.weapon_skins.mg42_bloodbath.desc_id = "bm_wskn_mg42_bloodbath_desc"
+	self.weapon_skins.mg42_bloodbath.weapon_id = "mg42"
+	self.weapon_skins.mg42_bloodbath.rarity = "rare"
+	self.weapon_skins.mg42_bloodbath.bonus = "spread_p1"
+	self.weapon_skins.mg42_bloodbath.reserve_quality = true
+	self.weapon_skins.mg42_bloodbath.texture_bundle_folder = "cash/safes/dinner"
+	self.weapon_skins.mg42_bloodbath.base_gradient = Idstring("units/payday2_cash/safes/dinner/base_gradient/base_dinner_002_df")
+	self.weapon_skins.mg42_bloodbath.default_blueprint = {
+		"wpn_fps_lmg_mg42_reciever",
+		"wpn_fps_lmg_mg42_b_mg34",
+		"wpn_fps_upg_ass_ns_jprifles",
+		"wpn_fps_upg_fl_ass_utg"
+	}
+	self.weapon_skins.mg42_bloodbath.parts = {
+		wpn_fps_lmg_mg42_reciever = {
+			[Idstring("wpn_fps_ass_fal_base_nm"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/dinner/sticker/sticker_butcher_df"),
+				uv_offset_rot = Vector3(0.406869, 0.998331, 5.06941),
+				pattern_gradient = Idstring("units/payday2_cash/safes/dinner/pattern_gradient/gradient_din_meat_df"),
+				pattern_pos = Vector3(0.401488, 0.156757, 0),
+				uv_scale = Vector3(8.79645, 8.5104, 0),
+				pattern = Idstring("units/payday2_cash/safes/dinner/pattern/pattern_meat_hook_df"),
+				pattern_tweak = Vector3(6.9783, 0.648849, 1)
+			}
+		}
+	}
+	self.weapon_skins.plainsrider_bloodbath = {}
+	self.weapon_skins.plainsrider_bloodbath.name_id = "bm_wskn_plainsrider_bloodbath"
+	self.weapon_skins.plainsrider_bloodbath.desc_id = "bm_wskn_plainsrider_bloodbath_desc"
+	self.weapon_skins.plainsrider_bloodbath.weapon_id = "plainsrider"
+	self.weapon_skins.plainsrider_bloodbath.rarity = "common"
+	self.weapon_skins.plainsrider_bloodbath.bonus = "total_ammo_p3"
+	self.weapon_skins.plainsrider_bloodbath.bonus = "concealment_p1"
+	self.weapon_skins.plainsrider_bloodbath.reserve_quality = true
+	self.weapon_skins.plainsrider_bloodbath.texture_bundle_folder = "cash/safes/dinner"
+	self.weapon_skins.plainsrider_bloodbath.base_gradient = Idstring("units/payday2_cash/safes/dinner/base_gradient/base_dinner_001_df")
+	self.weapon_skins.new_m4_bloodbath = {}
+	self.weapon_skins.new_m4_bloodbath.name_id = "bm_wskn_new_m4_bloodbath"
+	self.weapon_skins.new_m4_bloodbath.desc_id = "bm_wskn_new_m4_bloodbath_desc"
+	self.weapon_skins.new_m4_bloodbath.weapon_id = "new_m4"
+	self.weapon_skins.new_m4_bloodbath.rarity = "uncommon"
+	self.weapon_skins.new_m4_bloodbath.bonus = "spread_p1"
+	self.weapon_skins.new_m4_bloodbath.reserve_quality = true
+	self.weapon_skins.new_m4_bloodbath.texture_bundle_folder = "cash/safes/dinner"
+	self.weapon_skins.new_m4_bloodbath.base_gradient = Idstring("units/payday2_cash/safes/dinner/base_gradient/base_assault_001_df")
+	self.weapon_skins.g36_bloodbath = {}
+	self.weapon_skins.g36_bloodbath.name_id = "bm_wskn_g36_bloodbath"
+	self.weapon_skins.g36_bloodbath.desc_id = "bm_wskn_g36_bloodbath_desc"
+	self.weapon_skins.g36_bloodbath.weapon_id = "g36"
+	self.weapon_skins.g36_bloodbath.rarity = "epic"
+	self.weapon_skins.g36_bloodbath.bonus = "spread_p1"
+	self.weapon_skins.g36_bloodbath.reserve_quality = true
+	self.weapon_skins.g36_bloodbath.texture_bundle_folder = "cash/safes/dinner"
+	self.weapon_skins.g36_bloodbath.base_gradient = Idstring("units/payday2_cash/safes/dinner/base_gradient/base_assault_003_df")
+	self.weapon_skins.g36_bloodbath.pattern_gradient = Idstring("units/payday2_cash/safes/dinner/pattern_gradient/gradient_din_warning_df")
+	self.weapon_skins.g36_bloodbath.pattern = Idstring("units/payday2_cash/safes/dinner/pattern/pattern_warning_tape_df")
+	self.weapon_skins.g36_bloodbath.cubemap_pattern_control = Vector3(0.3, 0.3, 0)
+	self.weapon_skins.g36_bloodbath.default_blueprint = {
+		"wpn_fps_ass_g36_m_standard",
+		"wpn_fps_ass_g36_b_long",
+		"wpn_fps_ass_g36_fg_ksk",
+		"wpn_fps_upg_fl_ass_utg",
+		"wpn_fps_ass_g36_s_sl8",
+		"wpn_fps_upg_ass_ns_surefire"
+	}
+	self.weapon_skins.g36_bloodbath.parts = {
+		wpn_fps_ass_g36_s_sl8 = {
+			[Idstring("sl8"):key()] = {
+				pattern_pos = Vector3(0.0157406, 0.282853, 0)
+			}
+		},
+		wpn_fps_ass_g36_body_sl8 = {
+			[Idstring("base"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/dinner/sticker/sticker_assaultinprogress"),
+				uv_offset_rot = Vector3(-0.112275, 0.831616, 0),
+				pattern_pos = Vector3(0.0920584, -0.0605769, 0),
+				uv_scale = Vector3(2.12199, 6.22201, 0.475316),
+				pattern_tweak = Vector3(1.68376, 0, 1)
+			}
+		},
+		wpn_fps_ass_g36_body_standard = {
+			[Idstring("base"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/dinner/sticker/sticker_assaultinprogress"),
+				uv_offset_rot = Vector3(-0.0916564, 0.836695, 0),
+				pattern_pos = Vector3(0.079979, 0.027, 0),
+				uv_scale = Vector3(1.88362, 6.50806, 0.174815),
+				pattern_tweak = Vector3(1.82686, 0, 1)
+			}
+		}
+	}
+	self.weapon_skins.flamethrower_mk2_bloodbath = {}
+	self.weapon_skins.flamethrower_mk2_bloodbath.name_id = "bm_wskn_flamethrower_mk2_bloodbath"
+	self.weapon_skins.flamethrower_mk2_bloodbath.desc_id = "bm_wskn_flamethrower_mk2_bloodbath_desc"
+	self.weapon_skins.flamethrower_mk2_bloodbath.weapon_id = "flamethrower_mk2"
+	self.weapon_skins.flamethrower_mk2_bloodbath.rarity = "uncommon"
+	self.weapon_skins.flamethrower_mk2_bloodbath.bonus = "damage_p1"
+	self.weapon_skins.flamethrower_mk2_bloodbath.reserve_quality = true
+	self.weapon_skins.flamethrower_mk2_bloodbath.texture_bundle_folder = "cash/safes/dinner"
+	self.weapon_skins.flamethrower_mk2_bloodbath.base_gradient = Idstring("units/payday2_cash/safes/dinner/base_gradient/base_assault_002_df")
+	self.weapon_skins.flamethrower_mk2_bloodbath.pattern = Idstring("units/payday2_cash/safes/shared/pattern/pattern_stripe_df")
+	self.weapon_skins.flamethrower_mk2_bloodbath.pattern_gradient = Idstring("units/payday2_cash/safes/cf15/pattern_gradient/gradient_cf15_005_df")
+	self.weapon_skins.flamethrower_mk2_bloodbath.parts = {
+		wpn_fps_fla_mk2_body = {
+			[Idstring("body"):key()] = {
+				pattern_pos = Vector3(0, -0.0128784, 0),
+				pattern_tweak = Vector3(3.8302, 2.11741, 1)
+			}
+		},
+		wpn_fps_fla_mk2_mag = {
+			[Idstring("flame_fuel_can"):key()] = {
+				pattern_pos = Vector3(0, -0.0128784, 0),
+				pattern_tweak = Vector3(1.30217, 2.11741, 1)
+			}
+		},
+		wpn_fps_fla_mk2_mag_rare = {
+			[Idstring("flame_fuel_can"):key()] = {
+				pattern_pos = Vector3(0, -0.0128784, 0),
+				pattern_tweak = Vector3(1.30217, 2.11741, 1)
+			}
+		},
+		wpn_fps_fla_mk2_mag_welldone = {
+			[Idstring("flame_fuel_can"):key()] = {
+				pattern_pos = Vector3(0, -0.0128784, 0),
+				pattern_tweak = Vector3(1.30217, 2.11741, 1)
+			}
+		}
+	}
+	self.weapon_skins.deagle_bloodbath = {}
+	self.weapon_skins.deagle_bloodbath.name_id = "bm_wskn_deagle_bloodbath"
+	self.weapon_skins.deagle_bloodbath.desc_id = "bm_wskn_deagle_bloodbath_desc"
+	self.weapon_skins.deagle_bloodbath.weapon_id = "deagle"
+	self.weapon_skins.deagle_bloodbath.rarity = "common"
+	self.weapon_skins.deagle_bloodbath.bonus = "recoil_p1"
+	self.weapon_skins.deagle_bloodbath.reserve_quality = true
+	self.weapon_skins.deagle_bloodbath.texture_bundle_folder = "cash/safes/dinner"
+	self.weapon_skins.deagle_bloodbath.base_gradient = Idstring("units/payday2_cash/safes/dinner/base_gradient/base_assault_004_df")
+	self.weapon_skins.deagle_bloodbath.parts = {
+		wpn_fps_pis_deagle_body_standard = {
+			[Idstring("base"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/dinner/sticker/sticker_assaultinprogress"),
+				uv_scale = Vector3(3.12316, 13.7546, 0),
+				uv_offset_rot = Vector3(0.137297, 0.896394, 0)
+			}
+		}
+	}
+	self.weapon_skins.rpg7_bloodbath = {}
+	self.weapon_skins.rpg7_bloodbath.name_id = "bm_wskn_rpg7_bloodbath"
+	self.weapon_skins.rpg7_bloodbath.desc_id = "bm_wskn_rpg7_bloodbath_desc"
+	self.weapon_skins.rpg7_bloodbath.weapon_id = "rpg7"
+	self.weapon_skins.rpg7_bloodbath.rarity = "rare"
+	self.weapon_skins.rpg7_bloodbath.bonus = "spread_p1"
+	self.weapon_skins.rpg7_bloodbath.reserve_quality = true
+	self.weapon_skins.rpg7_bloodbath.texture_bundle_folder = "cash/safes/dinner"
+	self.weapon_skins.rpg7_bloodbath.base_gradient = Idstring("units/payday2_cash/safes/dinner/base_gradient/base_assault_002_df")
+	self.weapon_skins.rpg7_bloodbath.parts = {
+		wpn_fps_rpg7_m_rocket = {
+			[Idstring("mtr_rocket"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/dinner/base_gradient/base_assault_005_df"),
+				uv_offset_rot = Vector3(0.225614, 1.05557, 0.663833),
+				sticker = Idstring("units/payday2_cash/safes/dinner/sticker/sticker_radioactive"),
+				uv_scale = Vector3(8.36738, 8.36738, 1)
+			}
+		},
+		wpn_fps_rpg7_body = {
+			[Idstring("mtr_body"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/dinner/sticker/sticker_maycauseharm"),
+				uv_scale = Vector3(1.45455, 10.4651, 1),
+				uv_offset_rot = Vector3(0.145836, 1.02895, 3.13535)
 			}
 		}
 	}

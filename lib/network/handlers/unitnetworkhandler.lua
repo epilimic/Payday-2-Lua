@@ -2266,3 +2266,30 @@ function UnitNetworkHandler:sync_assault_endless(enabled)
 	end
 	managers.groupai:state():set_assault_endless(enabled)
 end
+function UnitNetworkHandler:action_jump(unit, pos, jump_vec, sender)
+	if not self._verify_character_and_sender(unit, sender) or not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	if not alive(unit) then
+		return
+	end
+	unit:movement():sync_action_jump(pos, jump_vec)
+end
+function UnitNetworkHandler:action_jump_middle(unit, pos, sender)
+	if not self._verify_character_and_sender(unit, sender) or not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	if not alive(unit) then
+		return
+	end
+	unit:movement():sync_action_jump_middle(pos)
+end
+function UnitNetworkHandler:action_land(unit, pos, sender)
+	if not self._verify_character_and_sender(unit, sender) or not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	if not alive(unit) then
+		return
+	end
+	unit:movement():sync_action_land(pos)
+end

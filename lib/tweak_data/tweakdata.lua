@@ -1248,6 +1248,12 @@ Play the full version soon to get your full PAYDAY!]],
 		count = 10,
 		weapon_category = "bow"
 	}
+	self.achievement.jordan_1 = "brooklyn_1"
+	self.achievement.jordan_2 = {
+		award = "brooklyn_2",
+		count = 100,
+		timer = 30
+	}
 	self.achievement.one_man_army = {
 		award = "gage5_3",
 		equipped = {
@@ -2334,6 +2340,15 @@ Play the full version soon to get your full PAYDAY!]],
 				grenades = "wpn_prj_four"
 			}
 		},
+		jordan_3 = {
+			award = "brooklyn_3",
+			memory = {value = nil, is_shortterm = false}
+		},
+		jordan_4 = {
+			award = "brooklyn_4",
+			jump_timer = 4,
+			memory = {value = true, is_shortterm = false}
+		},
 		steel_1 = {
 			award = "steel_1",
 			need_full_job = true,
@@ -2524,7 +2539,7 @@ Play the full version soon to get your full PAYDAY!]],
 	local job_data
 	local available_jobs = {}
 	for _, job_id in ipairs(self.narrative:get_jobs_index()) do
-		if self.narrative:job_data(job_id).contact ~= "wip" then
+		if self.narrative:job_data(job_id).contact ~= "wip" and self.narrative:job_data(job_id).contact ~= "tests" then
 			jobs[job_id] = true
 			available_jobs[job_id] = self.narrative:job_data(job_id).contact
 		end

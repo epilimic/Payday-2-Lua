@@ -56,6 +56,7 @@ function PlayerBipod:exit(state_data, new_state_name)
 	PlayerStandard.IDS_RECOIL_EXIT = Idstring("recoil_exit")
 	self._unit:sound_source():post_event("wp_steady_out")
 	local peer_id = managers.network:session():peer_by_unit(self._unit):id()
+	Application:trace("PlayerBipod:exit: ", peer_id, inspect(HuskPlayerMovement._bipod_start_position))
 	HuskPlayerMovement._bipod_start_position[peer_id] = nil
 	return exit_data
 end
@@ -147,6 +148,8 @@ function PlayerBipod:_check_action_unmount_bipod(t, input)
 	if bipod_part and bipod_part[1] then
 		local bipod_unit = bipod_part[1].unit:base()
 		bipod_unit:_unmount()
+		self:exit(nil, "standard")
+		managers.player:set_player_state("standard")
 	end
 end
 function PlayerBipod:_check_change_weapon(...)

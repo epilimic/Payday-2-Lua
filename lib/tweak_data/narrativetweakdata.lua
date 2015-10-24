@@ -3285,7 +3285,7 @@ function NarrativeTweakData:init()
 			type = "d"
 		}
 	}
-	self.jobs.dinner.briefing_event = "pln_dn1_brf_01"
+	self.jobs.dinner.briefing_event = "pln_dn1_cbf_01"
 	self.jobs.dinner.debrief_event = "pln_dn1_31"
 	self.jobs.dinner.crimenet_callouts = {
 		"pln_dn1_cnc_01"

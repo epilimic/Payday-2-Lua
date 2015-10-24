@@ -101,6 +101,15 @@ function MissionEndState:at_enter(old_state, params)
 	local total_killed = managers.statistics:session_total_killed()
 	if self._success then
 		if not managers.statistics:is_dropin() then
+			local jordan_4 = managers.job:get_memory("jordan_4")
+			if jordan_4 or jordan_4 == nil then
+				local t = managers.game_play_central and managers.game_play_central:get_heist_timer() or 0
+				local last_jump_t = managers.job:get_memory("last_jump_t", true) or 0
+				if last_jump_t and t > last_jump_t + tweak_data.achievement.complete_heist_achievements.jordan_4.jump_timer then
+					print("[achievement] Failed Achievement " .. "brooklyn_4")
+					managers.job:set_memory("jordan_4", false)
+				end
+			end
 			local ach_data = tweak_data.achievement.close_and_personal
 			local session_killed = managers.statistics:session_killed()
 			local has_type_stats = ach_data.kill_type and not not total_killed[ach_data.kill_type]
@@ -143,7 +152,7 @@ function MissionEndState:at_enter(old_state, params)
 					managers.achievment:award(shotgun_one_o_one.award)
 				end
 			end
-			local mask_pass, diff_pass, no_shots_pass, contract_pass, job_pass, jobs_pass, level_pass, levels_pass, stealth_pass, loud_pass, equipped_pass, job_value_pass, equipped_team_pass, timer_pass, num_players_pass, pass_skills, killed_by_weapons_pass, killed_by_melee_pass, killed_by_grenade_pass, civilians_killed_pass, complete_job_pass, all_pass, weapon_data, memory, level_id, stage, num_skills
+			local mask_pass, diff_pass, no_shots_pass, contract_pass, job_pass, jobs_pass, level_pass, levels_pass, stealth_pass, loud_pass, equipped_pass, job_value_pass, equipped_team_pass, timer_pass, num_players_pass, pass_skills, killed_by_weapons_pass, killed_by_melee_pass, killed_by_grenade_pass, civilians_killed_pass, complete_job_pass, memory_pass, all_pass, weapon_data, memory, level_id, stage, num_skills
 			local killed_by_weapons = managers.statistics:session_killed_by_weapons()
 			local killed_by_melee = managers.statistics:session_killed_by_melee()
 			local killed_by_grenade = managers.statistics:session_killed_by_grenade()
@@ -164,6 +173,7 @@ function MissionEndState:at_enter(old_state, params)
 				timer_pass = not achievement_data.timer or managers.game_play_central and managers.game_play_central:get_heist_timer() <= achievement_data.timer
 				num_players_pass = not achievement_data.num_players or achievement_data.num_players <= managers.network:session():amount_of_players()
 				job_value_pass = not achievement_data.job_value or managers.mission:get_job_value(achievement_data.job_value.key) == achievement_data.job_value.value
+				memory_pass = not achievement_data.memory or managers.job:get_memory(achievement, achievement_data.memory.is_shortterm) == achievement_data.memory.value
 				killed_by_weapons_pass = not achievement_data.killed_by_weapons
 				if achievement_data.killed_by_weapons then
 					if achievement_data.killed_by_weapons == 0 then
@@ -276,7 +286,7 @@ function MissionEndState:at_enter(old_state, params)
 						end
 					end
 				end
-				all_pass = job_pass and jobs_pass and level_pass and levels_pass and contract_pass and diff_pass and mask_pass and no_shots_pass and stealth_pass and loud_pass and equipped_pass and equipped_team_pass and num_players_pass and pass_skills and timer_pass and killed_by_weapons_pass and killed_by_melee_pass and killed_by_grenade_pass and complete_job_pass and job_value_pass
+				all_pass = job_pass and jobs_pass and level_pass and levels_pass and contract_pass and diff_pass and mask_pass and no_shots_pass and stealth_pass and loud_pass and equipped_pass and equipped_team_pass and num_players_pass and pass_skills and timer_pass and killed_by_weapons_pass and killed_by_melee_pass and killed_by_grenade_pass and complete_job_pass and job_value_pass and memory_pass
 				if all_pass and achievement_data.need_full_job and managers.job:has_active_job() then
 					if not managers.job:interupt_stage() then
 						memory = managers.job:get_memory(achievement)

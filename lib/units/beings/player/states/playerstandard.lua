@@ -200,6 +200,7 @@ function PlayerStandard:exit(state_data, new_state_name)
 		skip_equip = true
 	}
 	self._state_data.using_bipod = managers.player:current_state() == "bipod"
+	self:_update_network_jump(nil, true)
 	return exit_data
 end
 function PlayerStandard:_activate_mover(mover, velocity)
@@ -208,6 +209,10 @@ function PlayerStandard:_activate_mover(mover, velocity)
 		self._unit:mover():set_gravity(Vector3(0, 0, 0))
 	else
 		self._unit:mover():set_gravity(Vector3(0, 0, -982))
+	end
+	if self._is_jumping then
+		self._unit:mover():jump()
+		self._unit:mover():set_velocity(velocity)
 	end
 end
 function PlayerStandard:interaction_blocked()
@@ -622,6 +627,7 @@ function PlayerStandard:_update_movement(t, dt)
 		mvector3.set_static(self._last_velocity_xy, 0, 0, 0)
 	end
 	local cur_pos = pos_new or self._pos
+	self:_update_network_jump(cur_pos, false)
 	local move_dis = mvector3.distance_sq(cur_pos, self._last_sent_pos)
 	if self:is_network_move_allowed() and (move_dis > 22500 or move_dis > 400 and (t - self._last_sent_pos_t > 1.5 or not pos_new)) then
 		self._ext_network:send("action_walk_nav_point", cur_pos)
@@ -630,7 +636,7 @@ function PlayerStandard:_update_movement(t, dt)
 	end
 end
 function PlayerStandard:is_network_move_allowed()
-	return not self:_on_zipline()
+	return not self:_on_zipline() and not self._is_jumping
 end
 function PlayerStandard:_get_walk_headbob()
 	if self._state_data.using_bipod then
@@ -2330,6 +2336,67 @@ function PlayerStandard:_start_action_jump(t, action_start_data)
 end
 function PlayerStandard:_perform_jump(jump_vec)
 	self._unit:mover():set_velocity(jump_vec)
+	self._send_jump_vec = jump_vec * 0.87
+	local t = managers.game_play_central and managers.game_play_central:get_heist_timer() or 0
+	if not managers.achievment:get_info(tweak_data.achievement.jordan_1) or {}.awarded then
+		managers.achievment:award(tweak_data.achievement.jordan_1)
+	end
+	if not managers.achievment:get_info(tweak_data.achievement.jordan_2.award) or {}.awarded then
+		local memory = managers.job:get_memory("jordan_2", true) or {}
+		table.insert(memory, t)
+		for i = #memory, 1, -1 do
+			if t - memory[i] >= tweak_data.achievement.jordan_2.timer then
+				table.remove(memory, i)
+			end
+		end
+		if #memory >= tweak_data.achievement.jordan_2.count then
+			managers.achievment:award(tweak_data.achievement.jordan_2.award)
+		end
+		managers.job:set_memory("jordan_2", memory, true)
+	end
+	if not managers.job:get_memory("jordan_3") then
+		print("[achievement] Failed Achievement " .. "brooklyn_3")
+		managers.job:set_memory("jordan_3", true)
+	end
+	local jordan_4 = managers.job:get_memory("jordan_4")
+	if jordan_4 or jordan_4 == nil then
+		local last_jump_t = managers.job:get_memory("last_jump_t", true) or 0
+		if last_jump_t and t > last_jump_t + tweak_data.achievement.complete_heist_achievements.jordan_4.jump_timer then
+			print("[achievement] Failed Achievement " .. "brooklyn_4")
+			managers.job:set_memory("jordan_4", false)
+		else
+			managers.job:set_memory("jordan_4", true)
+		end
+		managers.job:set_memory("last_jump_t", t, true)
+	end
+	if self._jump_vel_xy then
+		mvec3_set(temp_vec1, self._jump_vel_xy)
+		mvec3_set_z(temp_vec1, 0)
+		mvec3_add(self._send_jump_vec, temp_vec1)
+	end
+end
+function PlayerStandard:_update_network_jump(pos, is_exit)
+	local mover = self._unit:mover()
+	if self._is_jumping and (is_exit or not mover or mover:standing() and mover:velocity().z < 0 or mover:gravity().z == 0) then
+		if not self._is_jump_middle_passed then
+			self._ext_network:send("action_jump_middle", pos or self._pos)
+			self._is_jump_middle_passed = true
+		end
+		self._is_jumping = nil
+		self._ext_network:send("action_land", pos or self._pos)
+	elseif self._send_jump_vec and not is_exit then
+		if self._is_jumping then
+			self._ext_network:send("action_land", pos or self._pos)
+		end
+		self._ext_network:send("action_jump", pos or self._pos, self._send_jump_vec)
+		self._send_jump_vec = nil
+		self._is_jumping = true
+		self._is_jump_middle_passed = nil
+		mvector3.set(self._last_sent_pos, pos or self._pos)
+	elseif self._is_jumping and not self._is_jump_middle_passed and mover and mover:velocity().z < 0 then
+		self._ext_network:send("action_jump_middle", pos or self._pos)
+		self._is_jump_middle_passed = true
+	end
 end
 function PlayerStandard:_check_action_zipline(t, input)
 	if self._state_data.in_air then

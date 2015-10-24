@@ -53,7 +53,7 @@ function MoneyTweakData:init(tweak_data)
 	self.cut_job_complete = self.cashout_without_player_alive * 0.15
 	self.cut_job_complete = self.cut_job_complete / self.cut_difficulty
 	self.bag_values = {}
-	self.bag_values.default = 1000
+	self.bag_values.default = 100
 	self.bag_values.money = 1500
 	self.bag_values.gold = 2875
 	self.bag_values.diamonds = 1000
