@@ -2129,6 +2129,22 @@ Play the full version soon to get your full PAYDAY!]],
 			},
 			job = "red2"
 		},
+		death_dinner = {
+			award = "farm_5",
+			difficulty = {
+				"overkill_290"
+			},
+			job = "dinner"
+		},
+		farm_1 = {
+			award = "farm_1",
+			phalanx_vip_alive = true,
+			difficulty = {
+				"overkill_145",
+				"overkill_290"
+			},
+			job = "dinner"
+		},
 		death_hox_3 = {
 			award = "payback_1",
 			difficulty = {
@@ -2311,6 +2327,13 @@ Play the full version soon to get your full PAYDAY!]],
 		death_sinus = {
 			award = "sinus_2",
 			job = "jolly",
+			difficulty = {
+				"overkill_290"
+			}
+		},
+		death_nails = {
+			award = "lab_3",
+			job = "nail",
 			difficulty = {
 				"overkill_290"
 			}
@@ -2531,7 +2554,7 @@ Play the full version soon to get your full PAYDAY!]],
 		"crojob_wrapper",
 		"crojob1"
 	}
-	self.achievement.job_list.classic = {"red2"}
+	self.achievement.job_list.classic = {"red2", "dinner"}
 	if SystemInfo:platform() == Idstring("WIN32") then
 		table.insert(self.achievement.job_list.bain, "roberts")
 	end
@@ -2753,6 +2776,16 @@ Play the full version soon to get your full PAYDAY!]],
 			rewards = {
 				safes = {"event_red"},
 				drills = {"event_red"}
+			}
+		},
+		farm_6 = {
+			rewards = {
+				safes = {
+					"event_dinner"
+				},
+				drills = {
+					"event_dinner"
+				}
 			}
 		}
 	}
@@ -3225,6 +3258,7 @@ Play the full version soon to get your full PAYDAY!]],
 		{track = "track_30"},
 		{track = "track_31"},
 		{track = "track_35"},
+		{track = "track_36"},
 		{
 			track = "track_32_lcv"
 		},

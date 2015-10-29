@@ -23307,7 +23307,7 @@ function WeaponFactoryTweakData:_init_bipods()
 		sub_type = "bipod",
 		name_id = "bm_wp_upg_lmg_lionbipod",
 		a_obj = "a_bp",
-		unit = "units/pd2_dlc_cro/weapons/wpn_fps_upg_g_lmg_lionbipod/wpn_fps_upg_bp_lmg_lionbipod",
+		unit = "units/pd2_crimefest_2015/update_5/weapons/wpn_fps_upg_bp_lmg_lionbipod/wpn_fps_upg_bp_lmg_lionbipod",
 		stats = {value = 0, zoom = 1},
 		animations = {deploy = "deploy", undeploy = "undeploy"},
 		forbids = {
@@ -23316,7 +23316,7 @@ function WeaponFactoryTweakData:_init_bipods()
 		texture_bundle_folder = "par",
 		perks = {"bipod"}
 	}
-	self.parts.wpn_fps_upg_bp_lmg_lionbipod.third_unit = "units/pd2_dlc_cro/weapons/wpn_third_upg_g_lmg_lionbipod/wpn_third_upg_g_lmg_lionbipod"
+	self.parts.wpn_fps_upg_bp_lmg_lionbipod.third_unit = "units/pd2_crimefest_2015/update_5/weapons/wpn_fps_upg_bp_lmg_lionbipod/wpn_third_upg_bp_lmg_lionbipod"
 	table.map_append(self.parts.wpn_fps_lmg_hk21_fg_short, {
 		forbids = {
 			"wpn_fps_upg_bp_lmg_lionbipod"

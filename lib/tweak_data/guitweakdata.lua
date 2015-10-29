@@ -553,12 +553,12 @@ function GuiTweakData:init()
 	self.mouse_pointer.controller.acceleration_speed = 4
 	self.mouse_pointer.controller.max_acceleration = 3
 	self.mouse_pointer.controller.mouse_pointer_speed = 125
-	local min_amount_masks = 72
+	local min_amount_masks = 160
 	self.MASK_ROWS_PER_PAGE = 4
 	self.MASK_COLUMNS_PER_PAGE = 4
 	self.MAX_MASK_PAGES = math.ceil(min_amount_masks / (self.MASK_ROWS_PER_PAGE * self.MASK_COLUMNS_PER_PAGE))
 	self.MAX_MASK_SLOTS = self.MAX_MASK_PAGES * self.MASK_ROWS_PER_PAGE * self.MASK_COLUMNS_PER_PAGE
-	local min_amount_weapons = 72
+	local min_amount_weapons = 160
 	self.WEAPON_ROWS_PER_PAGE = 4
 	self.WEAPON_COLUMNS_PER_PAGE = 4
 	self.MAX_WEAPON_PAGES = math.ceil(min_amount_weapons / (self.WEAPON_ROWS_PER_PAGE * self.WEAPON_COLUMNS_PER_PAGE))

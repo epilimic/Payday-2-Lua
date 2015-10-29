@@ -494,10 +494,10 @@ function CoreParticleEditorVisualizers:create_model()
 	local visualizer = CoreEffectStackMember:new("model", "visualizer", "Model")
 	visualizer:set_description("Visualizes particles using models picked from a unit")
 	local help = "Name of model/diesel database entry"
-	visualizer:add_property(CoreEffectProperty:new("model", "model", "widgets", help))
+	visualizer:add_property(CoreEffectProperty:new("model", "model", "core/units/widgets", help))
 	local help = "Name of object/mesh in model."
 	visualizer:add_property(CoreEffectProperty:new("object", "object", "g_z", help))
 	local help = "Name of material config."
-	visualizer:add_property(CoreEffectProperty:new("material_config", "material_config", "widgets_materials", help))
+	visualizer:add_property(CoreEffectProperty:new("material_config", "material_config", "core/material_configs/widgets_materials", help))
 	return visualizer
 end

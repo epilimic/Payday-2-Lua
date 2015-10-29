@@ -360,6 +360,33 @@ function CarryTweakData:init(tweak_data)
 	self.din_pig.type = "heavy"
 	self.din_pig.name_id = "hud_carry_pig"
 	self.din_pig.AI_carry = {SO_category = "enemies"}
+	self.nail_muriatic_acid = {}
+	self.nail_muriatic_acid.type = "light"
+	self.nail_muriatic_acid.name_id = "hud_int_equipment_acid"
+	self.nail_muriatic_acid.visual_object = "g_toolsbag"
+	self.nail_muriatic_acid.unit = "units/payday2/pickups/gen_pku_toolbag/gen_pku_toolbag"
+	self.nail_muriatic_acid.AI_carry = {SO_category = "enemies"}
+	self.nail_caustic_soda = {}
+	self.nail_caustic_soda.type = "light"
+	self.nail_caustic_soda.name_id = "hud_int_equipment_caustic_soda"
+	self.nail_caustic_soda.visual_object = "g_toolsbag_large"
+	self.nail_caustic_soda.unit = "units/payday2/pickups/gen_pku_toolbag_large/gen_pku_toolbag_large"
+	self.nail_caustic_soda.AI_carry = {SO_category = "enemies"}
+	self.nail_hydrogen_chloride = {}
+	self.nail_hydrogen_chloride.type = "light"
+	self.nail_hydrogen_chloride.name_id = "hud_int_equipment_hydrogen_chloride"
+	self.nail_hydrogen_chloride.visual_object = "g_cagebag"
+	self.nail_hydrogen_chloride.unit = "units/payday2/pickups/gen_pku_cage_bag/gen_pku_cage_bag"
+	self.nail_hydrogen_chloride.AI_carry = {SO_category = "enemies"}
+	self.nail_euphadrine_pills = {}
+	self.nail_euphadrine_pills.type = "light"
+	self.nail_euphadrine_pills.name_id = "hud_carry_euphadrine_pills"
+	self.nail_euphadrine_pills.AI_carry = {SO_category = "enemies"}
+	self.meth_half = {}
+	self.meth_half.type = "coke_light"
+	self.meth_half.name_id = "hud_carry_meth"
+	self.meth_half.bag_value = "meth_half"
+	self.meth_half.AI_carry = {SO_category = "enemies"}
 end
 function CarryTweakData:get_carry_ids()
 	local t = {}

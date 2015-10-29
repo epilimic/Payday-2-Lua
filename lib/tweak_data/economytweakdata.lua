@@ -41,7 +41,7 @@ function EconomyTweakData:init()
 	self.rarities.epic.name_id = "bm_menu_rarity_epic"
 	self.rarities.legendary = {}
 	self.rarities.legendary.index = 5
-	self.rarities.legendary.fake_chance = 0.01
+	self.rarities.legendary.fake_chance = 0
 	self.rarities.legendary.open_safe_sequence = "anim_open_05"
 	self.rarities.legendary.color = Color("FFAA00")
 	self.rarities.legendary.header_col = "guis/dlcs/cash/textures/pd2/safe_raffle/header_col_legendary"
@@ -193,6 +193,7 @@ function EconomyTweakData:init()
 	self.safes.event_dinner.unit_name = "units/payday2_cash/safes/dinner/safe/eco_safe_event_dinner"
 	self.safes.event_dinner.name_id = "bm_menu_safe_event_dinner"
 	self.safes.event_dinner.texture_bundle_folder = "cash/safes/dinner"
+	self.safes.event_dinner.dlc = "full_game"
 	self.safes.event_dinner.achievement = "farm_6"
 	self.drills.event_01 = {}
 	self.drills.event_01.safe = "event_01"
@@ -226,6 +227,7 @@ function EconomyTweakData:init()
 	self.drills.event_dinner.name_id = "bm_menu_drill_event_dinner"
 	self.drills.event_dinner.desc_id = "bm_menu_drill_event_dinner_desc"
 	self.drills.event_dinner.texture_bundle_folder = "cash/safes/dinner"
+	self.drills.event_dinner.dlc = "full_game"
 	self.drills.event_dinner.achievement = "farm_6"
 	self.bonuses = {}
 	self.bonuses.concealment_p1 = {}

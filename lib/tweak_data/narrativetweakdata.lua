@@ -209,6 +209,11 @@ function NarrativeTweakData:init()
 	self.contacts.interupt.description_id = "heist_contact_interupt_description"
 	self.contacts.interupt.package = "packages/contact_interupt"
 	self.contacts.interupt.assets_gui = Idstring("guis/mission_briefing/preload_contact_interupt")
+	self.contacts.events = {}
+	self.contacts.events.name_id = "heist_contact_events"
+	self.contacts.events.description_id = "heist_contact_events_description"
+	self.contacts.events.package = "packages/contact_bain"
+	self.contacts.events.assets_gui = Idstring("guis/mission_briefing/preload_contact_bain")
 	self.jobs = {}
 	self.jobs.firestarter = {}
 	self.jobs.firestarter.name_id = "heist_firestarter"
@@ -3324,6 +3329,119 @@ function NarrativeTweakData:init()
 		40000,
 		40000
 	}
+	self.jobs.nail = {}
+	self.jobs.nail.name_id = "heist_nail"
+	self.jobs.nail.briefing_id = "heist_nail_crimenet"
+	self.jobs.nail.package = "packages/job_nail"
+	self.jobs.nail.contact = "events"
+	self.jobs.nail.region = "street"
+	self.jobs.nail.jc = 30
+	self.jobs.nail.chain = {
+		{
+			level_id = "nail",
+			type_id = "heist_type_assault",
+			type = "d"
+		}
+	}
+	self.jobs.nail.briefing_event = "pln_nai_cbf_01"
+	self.jobs.nail.debrief_event = nil
+	self.jobs.nail.crimenet_callouts = {
+		"pln_nai_cnc_01"
+	}
+	self.jobs.nail.crimenet_videos = {
+		"cn_jewel1",
+		"cn_jewel2",
+		"cn_jewel3"
+	}
+	self.jobs.nail.payout = {
+		6000,
+		12000,
+		30000,
+		50000,
+		60000
+	}
+	self.jobs.nail.contract_cost = {
+		4000,
+		8000,
+		20000,
+		40000,
+		100000
+	}
+	self.jobs.nail.contract_visuals = {}
+	self.jobs.nail.contract_visuals.min_mission_xp = {
+		20000,
+		20000,
+		20000,
+		20000,
+		20000
+	}
+	self.jobs.nail.contract_visuals.max_mission_xp = {
+		3785000,
+		3785000,
+		3785000,
+		3785000,
+		3785000
+	}
+	self.jobs.haunted = {}
+	self.jobs.haunted.name_id = "heist_haunted"
+	self.jobs.haunted.briefing_id = "heist_haunted_crimenet"
+	self.jobs.haunted.contact = "events"
+	self.jobs.haunted.region = "street"
+	self.jobs.haunted.jc = 10
+	self.jobs.haunted.chain = {
+		{
+			level_id = "haunted",
+			type_id = "heist_type_assault",
+			type = "d"
+		}
+	}
+	self.jobs.haunted.briefing_event = nil
+	self.jobs.haunted.debrief_event = nil
+	self.jobs.haunted.crimenet_videos = {
+		"cn_branchbank1",
+		"cn_branchbank2",
+		"cn_branchbank3"
+	}
+	self.jobs.haunted.payout = {
+		20000,
+		30000,
+		40000,
+		70000,
+		80000
+	}
+	self.jobs.haunted.contract_cost = {
+		16000,
+		32000,
+		80000,
+		160000,
+		200000
+	}
+	self.jobs.haunted.contract_visuals = {}
+	self.jobs.haunted.contract_visuals.min_mission_xp = {
+		10000,
+		10000,
+		10000,
+		10000,
+		10000
+	}
+	self.jobs.haunted.contract_visuals.max_mission_xp = {
+		10000,
+		10000,
+		10000,
+		10000,
+		10000
+	}
+	self.jobs.haunted_prof = deep_clone(self.jobs.haunted)
+	self.jobs.haunted_prof.jc = 40
+	self.jobs.haunted_prof.professional = true
+	self.jobs.haunted_prof.region = "professional"
+	self.jobs.haunted_prof.payout = {
+		10000,
+		20000,
+		30000,
+		40000,
+		80000
+	}
 	self._jobs_index = {
 		"jewelry_store",
 		"four_stores",
@@ -3379,7 +3497,9 @@ function NarrativeTweakData:init()
 		"kenaz",
 		"jolly",
 		"red2",
-		"dinner"
+		"dinner",
+		"nail",
+		"haunted"
 	}
 	if SystemInfo:platform() == Idstring("WIN32") then
 		table.insert(self._jobs_index, "roberts")

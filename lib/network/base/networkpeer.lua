@@ -1332,6 +1332,7 @@ function NetworkPeer:sync_data(peer)
 	managers.player:update_ammo_info_to_peer(peer)
 	managers.player:update_carry_to_peer(peer)
 	managers.player:update_team_upgrades_to_peer(peer)
+	managers.player:update_husk_bipod_to_peer(peer)
 	if Network:is_server() then
 		managers.vehicle:update_vehicles_data_to_peer(peer)
 	end

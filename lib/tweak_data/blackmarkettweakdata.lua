@@ -693,7 +693,12 @@ function BlackMarketTweakData:_init_masks()
 			40
 		}
 	else
-		self.masks.pumpkin_king.pcs = nil
+		self.masks.pumpkin_king.pcs = {
+			10,
+			20,
+			30,
+			40
+		}
 		self.masks.pumpkin_king.weight = 1000
 		self.masks.pumpkin_king.got_item_weight_mod = 0.001
 	end
@@ -712,7 +717,12 @@ function BlackMarketTweakData:_init_masks()
 			40
 		}
 	else
-		self.masks.witch.pcs = nil
+		self.masks.witch.pcs = {
+			10,
+			20,
+			30,
+			40
+		}
 		self.masks.witch.weight = 1000
 		self.masks.witch.got_item_weight_mod = 0.001
 	end
@@ -731,7 +741,12 @@ function BlackMarketTweakData:_init_masks()
 			40
 		}
 	else
-		self.masks.venomorph.pcs = nil
+		self.masks.venomorph.pcs = {
+			10,
+			20,
+			30,
+			40
+		}
 		self.masks.venomorph.weight = 1000
 		self.masks.venomorph.got_item_weight_mod = 0.001
 	end
@@ -750,7 +765,12 @@ function BlackMarketTweakData:_init_masks()
 			40
 		}
 	else
-		self.masks.frank.pcs = nil
+		self.masks.frank.pcs = {
+			10,
+			20,
+			30,
+			40
+		}
 		self.masks.frank.weight = 1000
 		self.masks.frank.got_item_weight_mod = 0.001
 	end
@@ -2412,6 +2432,22 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.dawg.pcs = {}
 	self.masks.dawg.value = 0
 	self.masks.dawg.sort_number = 12
+	self.masks.invader = {}
+	self.masks.invader.unit = "units/pd2_dlc_nails/masks/invader/msk_invader"
+	self.masks.invader.name_id = "bm_msk_invader"
+	self.masks.invader.pcs = {}
+	self.masks.invader.global_value = "halloween"
+	self.masks.invader.texture_bundle_folder = "nails"
+	self.masks.invader.sort_number = 3
+	self.masks.invader.value = 0
+	self.masks.satan = {}
+	self.masks.satan.unit = "units/pd2_dlc_nails/masks/satan/msk_satan"
+	self.masks.satan.name_id = "bm_msk_satan"
+	self.masks.satan.pcs = {}
+	self.masks.satan.global_value = "halloween"
+	self.masks.satan.texture_bundle_folder = "nails"
+	self.masks.satan.sort_number = 3
+	self.masks.satan.value = 0
 	if SystemInfo:platform() == Idstring("PS3") then
 		self.masks.sweettooth = {}
 		self.masks.sweettooth.unit = "units/pd2_dlc_consoles/masks/msk_sweettooth/msk_sweettooth"
@@ -6881,7 +6917,7 @@ function BlackMarketTweakData:_init_projectiles()
 	self.projectiles.molotov.physic_effect = Idstring("physic_effects/molotov_throw")
 	self.projectiles.molotov.anim_global_param = "projectile_molotov"
 	self.projectiles.molotov.throw_allowed_expire_t = 0.1
-	self.projectiles.molotov.expire_t = 1.1
+	self.projectiles.molotov.expire_t = 1.3
 	self.projectiles.molotov.repeat_expire_t = 1.5
 	self.projectiles.molotov.is_a_grenade = true
 	self.projectiles.dynamite = {}
@@ -6895,7 +6931,7 @@ function BlackMarketTweakData:_init_projectiles()
 	self.projectiles.dynamite.throwable = true
 	self.projectiles.dynamite.anim_global_param = "projectile_molotov"
 	self.projectiles.dynamite.throw_allowed_expire_t = 0.1
-	self.projectiles.dynamite.expire_t = 1.1
+	self.projectiles.dynamite.expire_t = 1.3
 	self.projectiles.dynamite.repeat_expire_t = 1.5
 	self.projectiles.dynamite.is_a_grenade = true
 	self.projectiles.wpn_prj_four = {}
@@ -8757,6 +8793,43 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.morning.repeat_expire_t = 0.5
 	self.melee_weapons.morning.expire_t = 1.1
 	self.melee_weapons.morning.melee_damage_delay = 0.1
+	self.melee_weapons.cutters = {}
+	self.melee_weapons.cutters.name_id = "bm_melee_boltcutter"
+	self.melee_weapons.cutters.animation = nil
+	self.melee_weapons.cutters.anim_attack_vars = {
+		"var1",
+		"var2",
+		"var3",
+		"var4"
+	}
+	self.melee_weapons.cutters.anim_global_param = "melee_cutters"
+	self.melee_weapons.cutters.texture_bundle_folder = "nails"
+	self.melee_weapons.cutters.free = nil
+	self.melee_weapons.cutters.type = "axe"
+	self.melee_weapons.cutters.align_objects = {
+		"a_weapon_right"
+	}
+	self.melee_weapons.cutters.unit = "units/pd2_dlc_nails/weapons/wpn_fps_mel_cutters/wpn_fps_mel_cutters"
+	self.melee_weapons.cutters.third_unit = "units/pd2_dlc_nails/weapons/wpn_fps_mel_cutters/wpn_third_mel_cutters"
+	self.melee_weapons.cutters.sounds = {}
+	self.melee_weapons.cutters.sounds.equip = "mining_pick_equip"
+	self.melee_weapons.cutters.sounds.hit_air = "mining_pick_hit_air"
+	self.melee_weapons.cutters.sounds.hit_gen = "cutters_hit_gen"
+	self.melee_weapons.cutters.sounds.hit_body = "cutters_hit_body"
+	self.melee_weapons.cutters.sounds.charge = "mining_pick_charge"
+	self.melee_weapons.cutters.stats = {}
+	self.melee_weapons.cutters.stats.weapon_type = "blunt"
+	self.melee_weapons.cutters.stats.min_damage = 3
+	self.melee_weapons.cutters.stats.max_damage = 9
+	self.melee_weapons.cutters.stats.min_damage_effect = 5
+	self.melee_weapons.cutters.stats.max_damage_effect = 3
+	self.melee_weapons.cutters.stats.charge_time = 3
+	self.melee_weapons.cutters.stats.range = 275
+	self.melee_weapons.cutters.stats.concealment = 27
+	self.melee_weapons.cutters.stats.remove_weapon_movement_penalty = true
+	self.melee_weapons.cutters.repeat_expire_t = 0.8
+	self.melee_weapons.cutters.expire_t = 1.8
+	self.melee_weapons.cutters.melee_damage_delay = 0.3
 	self:_add_desc_from_name_macro(self.melee_weapons)
 end
 function BlackMarketTweakData:_init_weapon_skins()

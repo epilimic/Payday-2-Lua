@@ -696,6 +696,7 @@ function LevelsTweakData:init()
 	self.haunted.music = "heist"
 	self.haunted.package = "packages/narr_haunted"
 	self.haunted.cube = "cube_apply_heist_bank"
+	self.haunted.max_bags = 4
 	self.mia_1 = {}
 	self.mia_1.name_id = "heist_mia_1_hl"
 	self.mia_1.briefing_id = "heist_mia_1_briefing"
@@ -986,6 +987,24 @@ function LevelsTweakData:init()
 	}
 	self.dinner.cube = "cube_apply_heist_bank"
 	self.dinner.max_bags = 20
+	self.nail = {}
+	self.nail.name_id = "heist_nail_hl"
+	self.nail.briefing_id = "heist_nail_briefing"
+	self.nail.briefing_dialog = "Play_pln_nai_brf_01"
+	self.nail.world_name = "narratives/bain/nail"
+	self.nail.intro_event = "Play_pln_nai_intro_01"
+	self.nail.outro_event = {
+		"Play_pln_nai_17",
+		"Play_pln_nai_18",
+		"Play_pln_nai_19",
+		"Play_pln_nai_20"
+	}
+	self.nail.music = "heist"
+	self.nail.package = {
+		"packages/job_nail"
+	}
+	self.nail.cube = "cube_apply_heist_bank"
+	self.nail.max_bags = 1000
 	self._level_index = {
 		"welcome_to_the_jungle_1",
 		"welcome_to_the_jungle_1_night",
@@ -1053,7 +1072,9 @@ function LevelsTweakData:init()
 		"driving_escapes_city_day",
 		"jolly",
 		"red2",
-		"dinner"
+		"dinner",
+		"nail",
+		"haunted"
 	}
 	if SystemInfo:platform() == Idstring("WIN32") then
 		table.insert(self._level_index, "roberts")

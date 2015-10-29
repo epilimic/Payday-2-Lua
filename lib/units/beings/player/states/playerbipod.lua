@@ -34,6 +34,7 @@ function PlayerBipod:_enter(enter_data)
 		PlayerStandard.IDS_RECOIL_EXIT = Idstring(tweak_data.animations.bipod_recoil_exit .. "_" .. equipped_unit_id)
 		self._unit:sound_source():post_event("wp_steady_in")
 		self:_stance_entered()
+		self:_husk_bipod_data()
 	end
 end
 function PlayerBipod:exit(state_data, new_state_name)
@@ -56,9 +57,28 @@ function PlayerBipod:exit(state_data, new_state_name)
 	PlayerStandard.IDS_RECOIL_EXIT = Idstring("recoil_exit")
 	self._unit:sound_source():post_event("wp_steady_out")
 	local peer_id = managers.network:session():peer_by_unit(self._unit):id()
-	Application:trace("PlayerBipod:exit: ", peer_id, inspect(HuskPlayerMovement._bipod_start_position))
-	HuskPlayerMovement._bipod_start_position[peer_id] = nil
+	Application:trace("PlayerBipod:exit: ", peer_id)
+	managers.player:set_bipod_data_for_peer({peer_id = peer_id})
 	return exit_data
+end
+function PlayerBipod:_husk_bipod_data()
+	local peer_id = managers.network:session():peer_by_unit(self._unit):id()
+	local weapon = self._unit:inventory():equipped_unit()
+	local bipod_obj = weapon:get_object(Idstring("a_bp"))
+	local bipod_pos
+	if bipod_obj then
+		bipod_pos = bipod_obj:position()
+		Application:trace("Getting bipod obj: ", bipod_pos)
+	else
+		Application:trace("Missing bipod obj: ", bipod_pos)
+	end
+	local body_pos = Vector3(self._m_pos.x, self._m_pos.y, self._m_pos.z)
+	managers.player:set_bipod_data_for_peer({
+		peer_id = peer_id,
+		bipod_pos = bipod_pos,
+		body_pos = body_pos
+	})
+	managers.network:session():send_to_peers_synched("sync_bipod", bipod_pos, body_pos)
 end
 function PlayerBipod:update(t, dt)
 	PlayerBipod.super.update(self, t, dt)

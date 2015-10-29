@@ -1320,6 +1320,7 @@ function UnitNetworkHandler:sync_player_movement_state(unit, state, down_time, u
 	if not alive(unit) then
 		return
 	end
+	Application:trace("[UnitNetworkHandler:sync_player_movement_state]: ", unit:movement():current_state_name(), "->", state)
 	local local_peer = managers.network:session():local_peer()
 	if local_peer:unit() and unit:key() == local_peer:unit():key() then
 		local valid_transitions = {
@@ -1468,6 +1469,13 @@ function UnitNetworkHandler:sync_ammo_amount(selection_index, max_clip, current_
 		return
 	end
 	managers.player:set_synced_ammo_info(peer:id(), selection_index, max_clip, current_clip, current_left, max)
+end
+function UnitNetworkHandler:sync_bipod(bipod_pos, body_pos, sender)
+	local peer = self._verify_sender(sender)
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not peer then
+		return
+	end
+	managers.player:set_synced_bipod(peer, bipod_pos, body_pos)
 end
 function UnitNetworkHandler:sync_carry(carry_id, multiplier, dye_initiated, has_dye_pack, dye_value_multiplier, sender)
 	local peer = self._verify_sender(sender)

@@ -60,6 +60,7 @@ function MoneyTweakData:init(tweak_data)
 	self.bag_values.coke = 2000
 	self.bag_values.coke_pure = 3000
 	self.bag_values.meth = 13000
+	self.bag_values.meth_half = 6500
 	self.bag_values.weapon = 3000
 	self.bag_values.weapons = 3000
 	self.bag_values.painting = 3000

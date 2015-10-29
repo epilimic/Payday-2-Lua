@@ -100,6 +100,7 @@ function PlayerManager:_setup()
 	Global.player_manager.synced_carry = {}
 	Global.player_manager.synced_team_upgrades = {}
 	Global.player_manager.synced_vehicle_data = {}
+	Global.player_manager.synced_bipod = {}
 	self._global = Global.player_manager
 end
 function PlayerManager:_setup_rules()
@@ -1516,6 +1517,7 @@ function PlayerManager:peer_dropped_out(peer)
 	self._global.synced_ammo_info[peer_id] = nil
 	self._global.synced_carry[peer_id] = nil
 	self._global.synced_team_upgrades[peer_id] = nil
+	self._global.synced_bipod[peer_id] = nil
 	local peer_unit = peer:unit()
 	managers.vehicle:remove_player_from_all_vehicles(peer_unit)
 end
@@ -2358,9 +2360,11 @@ function PlayerManager:_verify_loaded_data()
 	end
 end
 function PlayerManager:sync_save(data)
+	Application:trace("PlayerManager:sync_save: ", inspect(self._global.synced_bipod))
 	local state = {
 		current_sync_state = self._current_sync_state,
-		player_mesh_suffix = self._player_mesh_suffix
+		player_mesh_suffix = self._player_mesh_suffix,
+		husk_bipod_data = self._global.synced_bipod
 	}
 	data.PlayerManager = state
 end
@@ -2369,7 +2373,9 @@ function PlayerManager:sync_load(data)
 	if state then
 		self:set_player_state(state.current_sync_state)
 		self:change_player_look(state.player_mesh_suffix)
+		self:set_husk_bipod_data(state.husk_bipod_data)
 	end
+	Application:trace("PlayerManager:sync_load: ", inspect(self._global.synced_bipod))
 end
 function PlayerManager:on_simulation_started()
 	self._respawn = false
@@ -2396,6 +2402,36 @@ function PlayerManager:soft_reset()
 end
 function PlayerManager:on_peer_synch_request(peer)
 	self:player_unit():network():synch_to_peer(peer)
+end
+function PlayerManager:update_husk_bipod_to_peer(peer)
+	Application:trace("PlayerManager:update_husk_bipod_to_peer")
+	local peer_id = managers.network:session():local_peer():id()
+	if self._global.synced_bipod[peer_id] then
+		local bipod_pos = self._global.synced_bipod[peer_id].bipod_pos
+		local body_pos = self._global.synced_bipod[peer_id].body_pos
+		peer:send_queued_sync("sync_bipod", bipod_pos, body_pos)
+	end
+end
+function PlayerManager:set_husk_bipod_data(data)
+	Application:trace("PlayerManager:set_husk_bipod_data( data ): ", inspect(data))
+	self._global.synced_bipod = data
+end
+function PlayerManager:set_bipod_data_for_peer(data)
+	if not self._global.synced_bipod then
+		self._global.synced_bipod = {}
+	end
+	self._global.synced_bipod[data.peer_id] = {
+		bipod_pos = data.bipod_pos,
+		body_pos = data.body_pos
+	}
+end
+function PlayerManager:get_bipod_data_for_peer(peer_id)
+	return self._global.synced_bipod[peer_id]
+end
+function PlayerManager:set_synced_bipod(peer, bipod_pos, body_pos)
+	Application:trace("PlayerManager:set_synced_bipod")
+	local peer_id = peer:id()
+	self._global.synced_bipod[peer_id] = {bipod_pos = bipod_pos, body_pos = body_pos}
 end
 function PlayerManager:enter_vehicle(vehicle, locator)
 	local peer_id = managers.network:session():local_peer():id()

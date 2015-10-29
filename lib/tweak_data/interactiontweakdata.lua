@@ -3109,4 +3109,20 @@ function InteractionTweakData:init()
 	self.pku_pig.start_active = false
 	self.pku_pig.timer = 3
 	self.pku_pig.blocked_hint = "carry_block"
+	self.pku_pills = {}
+	self.pku_pills.text_id = "hud_int_hold_take_pills"
+	self.pku_pills.action_text_id = "hud_action_taking_pills"
+	self.pku_pills.start_active = false
+	self.pku_pills.timer = 3
+	self.pku_pills.blocked_hint = "carry_block"
+	self.pku_pills.axis = "y"
+	self.taking_meth_huge = {}
+	self.taking_meth_huge.text_id = "hud_int_hold_take_meth"
+	self.taking_meth_huge.action_text_id = "hud_action_taking_meth"
+	self.taking_meth_huge.timer = 3
+	self.taking_meth_huge.interact_distance = 300
+	self.taking_meth_huge.sound_start = "bar_bag_money"
+	self.taking_meth_huge.sound_interupt = "bar_bag_money_cancel"
+	self.taking_meth_huge.sound_done = "bar_bag_money_finished"
+	self.taking_meth_huge.blocked_hint = "carry_block"
 end

@@ -667,6 +667,57 @@ function DLCTweakData:init(tweak_data)
 			amount = 1
 		}
 	}
+	self.halloween_2015 = {}
+	self.halloween_2015.free = true
+	self.halloween_2015.content = {}
+	self.halloween_2015.content.loot_drops = {
+		{
+			{
+				type_items = "masks",
+				item_entry = "pumpkin_king",
+				amount = 1
+			},
+			{
+				type_items = "masks",
+				item_entry = "witch",
+				amount = 1
+			},
+			{
+				type_items = "masks",
+				item_entry = "venomorph",
+				amount = 1
+			},
+			{
+				type_items = "masks",
+				item_entry = "frank",
+				amount = 1
+			}
+		}
+	}
+	self.ach_lab_1 = {}
+	self.ach_lab_1.dlc = "has_achievement"
+	self.ach_lab_1.achievement_id = "lab_1"
+	self.ach_lab_1.content = {}
+	self.ach_lab_1.content.loot_global_value = "halloween"
+	self.ach_lab_1.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "invader",
+			amount = 1
+		}
+	}
+	self.ach_lab_2 = {}
+	self.ach_lab_2.dlc = "has_achievement"
+	self.ach_lab_2.achievement_id = "lab_2"
+	self.ach_lab_2.content = {}
+	self.ach_lab_2.content.loot_global_value = "halloween"
+	self.ach_lab_2.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "satan",
+			amount = 1
+		}
+	}
 	self.armored_transport = {}
 	self.armored_transport.content = {}
 	self.armored_transport.dlc = "has_armored_transport"
@@ -4178,21 +4229,5 @@ function DLCTweakData:init(tweak_data)
 		}
 	}
 	if SystemInfo:platform() == Idstring("XB1") then
-		self.xone_bonus = {}
-		self.xone_bonus.free = true
-		self.xone_bonus.content = {}
-		self.xone_bonus.content.loot_global_value = "infamous"
-		self.xone_bonus.content.loot_drops = {
-			{
-				type_items = "cash",
-				item_entry = "xone_bonus",
-				amount = 1
-			},
-			{
-				type_items = "masks",
-				item_entry = "unforsaken",
-				amount = 1
-			}
-		}
 	end
 end
