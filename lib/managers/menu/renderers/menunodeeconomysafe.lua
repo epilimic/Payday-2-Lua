@@ -277,6 +277,7 @@ function MenuNodeEconomySafe:_create_raffle_panel(x, data, index)
 	local rarity_color = Color.white
 	local texture_rarity_name = "guis/dlcs/cash/textures/pd2/safe_raffle/header_col_common"
 	local is_legendary = false
+	local bonuses
 	if tweak_data.blackmarket[data.category] then
 		local entry_data = tweak_data.blackmarket[data.category][data.entry]
 		local weapon_id = entry_data.weapon_id or entry_data.weapons[1]
@@ -291,6 +292,9 @@ function MenuNodeEconomySafe:_create_raffle_panel(x, data, index)
 		name_id = entry_data.name_id
 		rarity_color = tweak_data.economy.rarities[entry_data.rarity].color
 		texture_rarity_name = tweak_data.economy.rarities[entry_data.rarity].header_col
+		if data.bonus and entry_data.bonus then
+			bonuses = tweak_data.economy:get_bonus_icons(entry_data.bonus)
+		end
 	end
 	local name = managers.localization:text(name_id)
 	if is_legendary then
@@ -327,18 +331,22 @@ function MenuNodeEconomySafe:_create_raffle_panel(x, data, index)
 		font = self.font,
 		layer = 10
 	})
-	if data.bonus then
-		local bonus_bitmap = p:bitmap({
-			name = "bonus",
-			texture = "guis/dlcs/cash/textures/pd2/safe_raffle/statboost_icon",
-			x = p:w() - 24,
-			y = p:h() - 24,
-			h = 16,
-			w = 16,
-			layer = 1
-		})
-		bonus_bitmap:set_right(p:w() - 4)
-		bonus_bitmap:set_center_y(p:h() - 12)
+	if bonuses then
+		local x = p:w() - 4
+		for _, texture_path in ipairs(bonuses) do
+			local bonus_bitmap = p:bitmap({
+				name = "bonus",
+				texture = texture_path,
+				x = p:w() - 24,
+				y = p:h() - 24,
+				h = 16,
+				w = 16,
+				layer = 1
+			})
+			bonus_bitmap:set_right(x)
+			bonus_bitmap:set_center_y(p:h() - 12)
+			x = bonus_bitmap:left() - 1
+		end
 	end
 	self:request_texture(texture_name, image_panel, true)
 end
@@ -478,20 +486,31 @@ function MenuNodeEconomySafe:_build_result_panel()
 	})
 	managers.menu_component:make_color_text(name, rarity_data.color)
 	if self._result.bonus then
-		local bonus_bitmap = self._result_panel:bitmap({
-			name = "bonus",
-			texture = "guis/dlcs/cash/textures/pd2/safe_raffle/statboost_icon",
-			x = 0,
-			y = 0,
-			h = 16,
-			w = 16,
-			layer = 1
-		})
-		local _, _, w, h = name:text_rect()
-		bonus_bitmap:set_x(w + 16)
-		bonus_bitmap:set_center_y(self._result_panel:h() - h / 2)
 		local bonus_data = item_data.bonus and tweak_data.economy.bonuses[item_data.bonus]
-		local bonus_title = bonus_data and managers.localization:to_upper_text(bonus_data.name_id) or ""
+		local bonuses = item_data.bonus and tweak_data.economy:get_bonus_icons(item_data.bonus) or {}
+		local _, _, w, h = name:text_rect()
+		local bonus_bitmap
+		local x = w + 16
+		for i = #bonuses, 1, -1 do
+			local texture_path = bonuses[i]
+			bonus_bitmap = self._result_panel:bitmap({
+				name = "bonus",
+				texture = texture_path,
+				x = 0,
+				y = 0,
+				h = 16,
+				w = 16,
+				layer = 1
+			})
+			bonus_bitmap:set_x(x)
+			bonus_bitmap:set_center_y(self._result_panel:h() - h / 2)
+			x = bonus_bitmap:right() + 1
+		end
+		local bonus_value = (not bonus_data.exp_multiplier or not (bonus_data.exp_multiplier * 100 - 100 .. "%")) and bonus_data.money_multiplier and bonus_data.money_multiplier * 100 - 100 .. "%"
+		if bonus_data then
+		else
+			local bonus_title = managers.localization:to_upper_text(bonus_data.name_id, {team_bonus = bonus_value}) or ""
+		end
 		local bonus_text = self._result_panel:text({
 			name = "bonus_text",
 			text = bonus_title,

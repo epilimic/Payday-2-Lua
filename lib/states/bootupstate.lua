@@ -118,25 +118,6 @@ function BootupState:setup()
 		fade_out = 1.25
 	})
 	if not Application:production_build() then
-		table.insert(self._play_data_list, {
-			visible = is_win32,
-			layer = intro_trailer_layer,
-			video = "movies/intro_trailer",
-			width = res.x,
-			height = res.y,
-			padding = 200,
-			can_skip = true
-		})
-		table.insert(self._play_data_list, {
-			visible = is_win32,
-			layer = intro_trailer_layer,
-			video = "movies/intro_trailer_exit",
-			width = res.x,
-			height = res.y,
-			padding = 200,
-			can_skip = true,
-			auto_skip = true
-		})
 	end
 	table.insert(self._play_data_list, {
 		layer = item_layer,

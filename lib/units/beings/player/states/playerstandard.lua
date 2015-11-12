@@ -873,7 +873,7 @@ function PlayerStandard:_start_action_running(t)
 	if self:on_ladder() or self:_on_zipline() then
 		return
 	end
-	if (self._shooting or self:_is_charging_weapon()) and not self.RUN_AND_SHOOT or self:_changing_weapon() or self:_is_meleeing() or self._use_item_expire_t or self._state_data.in_air or self:_is_throwing_projectile() then
+	if self._shooting and not self.RUN_AND_SHOOT or self:_changing_weapon() or self:_is_meleeing() or self._use_item_expire_t or self._state_data.in_air or self:_is_throwing_projectile() or self:_is_charging_weapon() then
 		self._running_wanted = true
 		return
 	end

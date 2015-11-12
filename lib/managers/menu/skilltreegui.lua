@@ -4,7 +4,7 @@ local NOT_WIN_32 = SystemInfo:platform() ~= Idstring("WIN32")
 local WIDTH_MULTIPLIER = NOT_WIN_32 and 0.6 or 0.6
 local SPEC_WIDTH_MULTIPLIER = NOT_WIN_32 and 0.7 or 0.7
 local CONSOLE_PAGE_ADJUSTMENT = NOT_WIN_32 and 0 or 0
-local TOP_ADJUSTMENT = NOT_WIN_32 and 50 or 60
+local TOP_ADJUSTMENT = NOT_WIN_32 and 50 or 55
 local BOX_GAP = 54
 local NUM_TREES_PER_PAGE = 4
 local make_fine_text = function(text)

@@ -67,6 +67,7 @@ function CopLogicPhalanxVip.enter(data, new_logic_name, enter_params)
 	data.unit:brain():set_update_enabled_state(false)
 	CopLogicPhalanxVip._perform_objective_action(data, my_data, objective)
 	managers.groupai:state():phalanx_damage_reduction_enable()
+	CopLogicPhalanxVip._set_final_health_limit(data)
 	data.unit:sound():say("cpw_a01", true, true)
 end
 function CopLogicPhalanxVip.exit(data, new_logic_name, enter_params)
@@ -120,6 +121,9 @@ function CopLogicPhalanxVip.chk_should_turn(data, my_data)
 end
 function CopLogicPhalanxVip.register_in_group_ai(unit)
 	managers.groupai:state():register_phalanx_vip(unit)
+end
+function CopLogicPhalanxVip._set_final_health_limit(data)
+	data.unit:base():char_tweak().LOWER_HEALTH_PERCENTAGE_LIMIT = data.unit:base():char_tweak().FINAL_LOWER_HEALTH_PERCENTAGE_LIMIT
 end
 function CopLogicPhalanxVip._chk_should_breakup(data)
 	local flee_health_ratio = tweak_data.group_ai.phalanx.vip.health_ratio_flee

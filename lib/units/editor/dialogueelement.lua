@@ -6,9 +6,11 @@ function DialogueUnitElement:init(unit)
 	self._hed.dialogue = "none"
 	self._hed.execute_on_executed_when_done = false
 	self._hed.use_position = false
+	self._hed.force_quit_current = nil
 	table.insert(self._save_values, "dialogue")
 	table.insert(self._save_values, "execute_on_executed_when_done")
 	table.insert(self._save_values, "use_position")
+	table.insert(self._save_values, "force_quit_current")
 end
 function DialogueUnitElement:new_save_values(...)
 	local t = DialogueUnitElement.super.new_save_values(self, ...)
@@ -38,6 +40,7 @@ function DialogueUnitElement:_build_panel(panel, panel_sizer)
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
 	self:_build_value_combobox(panel, panel_sizer, "dialogue", table.list_add({"none"}, managers.dialog:conversation_names()), "Select a dialogue from the combobox")
+	self:_build_value_checkbox(panel, panel_sizer, "force_quit_current", "Force quits current dialog to allow this to be played immediately")
 	self:_build_value_checkbox(panel, panel_sizer, "execute_on_executed_when_done", "Execute on executed when done")
 	self:_build_value_checkbox(panel, panel_sizer, "use_position")
 end

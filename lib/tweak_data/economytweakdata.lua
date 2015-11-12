@@ -75,6 +75,47 @@ function EconomyTweakData:init()
 		}
 	}
 	self.contents.legendary.rarity = "legendary"
+	self.contents.overkill_01 = {}
+	self.contents.overkill_01.def_id = 10001
+	self.contents.overkill_01.contains = {
+		weapon_skins = {
+			"new_m4_skullimov",
+			"deagle_skullimov",
+			"p90_skullimov",
+			"plainsrider_skullimov",
+			"m95_bombmatta",
+			"huntsman_bloodsplat",
+			"r93_wooh",
+			"judge_wooh",
+			"b92fs_bloodsplat",
+			"mg42_bloodsplat",
+			"m134_bloodsplat",
+			"flamethrower_mk2_bloodsplat",
+			"rpg7_bloodsplat",
+			"g36_bloodsplat",
+			"serbu_stunner",
+			"new_m14_bloodsplat",
+			"new_raging_bull_bloodsplat",
+			"famas_bloodsplat",
+			"r93_bloodsplat",
+			"ak74_bloodsplat",
+			"ppk_bloodsplat",
+			"b92fs_wooh"
+		},
+		contents = {
+			"overkill_01_legendary"
+		}
+	}
+	self.contents.overkill_01_legendary = {}
+	self.contents.overkill_01_legendary.def_id = 10002
+	self.contents.overkill_01_legendary.contains = {
+		weapon_skins = {
+			"flamethrower_mk2_fire",
+			"rpg7_boom",
+			"m134_bulletstorm"
+		}
+	}
+	self.contents.overkill_01_legendary.rarity = "legendary"
 	self.contents.event_01 = {}
 	self.contents.event_01.def_id = 10003
 	self.contents.event_01.contains = {
@@ -148,6 +189,7 @@ function EconomyTweakData:init()
 			"event_01_legendary"
 		}
 	}
+	self.contents.event_red.type = "limited"
 	self.contents.event_dinner = {}
 	self.contents.event_dinner.def_id = 10007
 	self.contents.event_dinner.contains = {
@@ -165,36 +207,96 @@ function EconomyTweakData:init()
 		},
 		contents = {"legendary"}
 	}
+	self.contents.event_dinner.type = "limited"
+	self.contents.dallas_01 = {}
+	self.contents.dallas_01.def_id = 10008
+	self.contents.dallas_01.contains = {
+		weapon_skins = {
+			"new_raging_bull_dallas",
+			"mg42_dallas",
+			"famas_dallas",
+			"flamethrower_mk2_dallas",
+			"huntsman_dallas",
+			"r93_dallas",
+			"ak74_dallas",
+			"ppk_dallas",
+			"deagle_dallas",
+			"new_m14_dallas",
+			"judge_dallas",
+			"b92fs_dallas",
+			"serbu_dallas",
+			"g36_dallas",
+			"m95_dallas"
+		},
+		contents = {
+			"dallas_01_legendary"
+		}
+	}
+	self.contents.dallas_01_legendary = {}
+	self.contents.dallas_01_legendary.def_id = 10009
+	self.contents.dallas_01_legendary.contains = {
+		weapon_skins = {
+			"p90_dallas_sallad"
+		}
+	}
+	self.contents.dallas_01_legendary.rarity = "legendary"
+	self.safes.overkill_01 = {}
+	self.safes.overkill_01.def_id = 50000
+	self.safes.overkill_01.promo = true
+	self.safes.overkill_01.drill = "overkill_01"
+	self.safes.overkill_01.content = "overkill_01"
+	self.safes.overkill_01.unit_name = "units/payday2_cash/safes/eco_safe_overkill_01/eco_safe_overkill_01"
+	self.safes.overkill_01.name_id = "bm_menu_safe_overkill_01"
+	self.safes.overkill_01.texture_bundle_folder = "cash/safes/cop"
+	self.safes.overkill_01.dlc = "complete_overkill_pack"
 	self.safes.event_01 = {}
 	self.safes.event_01.drill = "event_01"
 	self.safes.event_01.content = "event_01"
 	self.safes.event_01.unit_name = "units/payday2_cash/safes/eco_safe_event_01/eco_safe_event_01"
 	self.safes.event_01.name_id = "bm_menu_safe_event_01"
 	self.safes.event_01.texture_bundle_folder = "cash/safes/cf15"
+	self.safes.event_01.market_link = "https://steamcommunity.com/market/listings/218620/Crimefest%202%20Safe"
 	self.safes.weapon_01 = {}
 	self.safes.weapon_01.drill = "weapon_01"
 	self.safes.weapon_01.content = "weapon_01"
 	self.safes.weapon_01.unit_name = "units/payday2_cash/safes/eco_safe_weapon_01/eco_safe_weapon_01"
 	self.safes.weapon_01.name_id = "bm_menu_safe_weapon_01"
 	self.safes.weapon_01.texture_bundle_folder = "cash/safes/sputnik"
+	self.safes.weapon_01.market_link = "https://steamcommunity.com/market/listings/218620/Sputnik%20Safe"
 	self.safes.event_red = {}
 	self.safes.event_red.def_id = 50003
+	self.safes.event_red.promo = true
 	self.safes.event_red.drill = "event_red"
 	self.safes.event_red.content = "event_red"
 	self.safes.event_red.unit_name = "units/payday2_cash/safes/red/safe/eco_safe_event_red"
 	self.safes.event_red.name_id = "bm_menu_safe_event_red"
 	self.safes.event_red.texture_bundle_folder = "cash/safes/red"
-	self.safes.event_red.dlc = "full_game"
 	self.safes.event_red.achievement = "green_7"
 	self.safes.event_dinner = {}
 	self.safes.event_dinner.def_id = 50004
+	self.safes.event_dinner.promo = true
 	self.safes.event_dinner.drill = "event_dinner"
 	self.safes.event_dinner.content = "event_dinner"
 	self.safes.event_dinner.unit_name = "units/payday2_cash/safes/dinner/safe/eco_safe_event_dinner"
 	self.safes.event_dinner.name_id = "bm_menu_safe_event_dinner"
 	self.safes.event_dinner.texture_bundle_folder = "cash/safes/dinner"
-	self.safes.event_dinner.dlc = "full_game"
 	self.safes.event_dinner.achievement = "farm_6"
+	self.safes.dallas_01 = {}
+	self.safes.dallas_01.drill = "dallas_01"
+	self.safes.dallas_01.content = "dallas_01"
+	self.safes.dallas_01.name_id = "bm_menu_safe_dallas_01"
+	self.safes.dallas_01.unit_name = "units/payday2_cash/safes/dallas/safe/eco_safe_dallas"
+	self.safes.dallas_01.texture_bundle_folder = "cash/safes/dallas"
+	self.safes.dallas_01.market_link = "https://steamcommunity.com/market/listings/218620/Dallas%20Safe"
+	self.drills.overkill_01 = {}
+	self.drills.overkill_01.safe = "overkill_01"
+	self.drills.overkill_01.def_id = 70000
+	self.drills.overkill_01.promo = true
+	self.drills.overkill_01.unit_name = "units/payday2_cash/drills/eco_drill_overkill_01/eco_drill_overkill_01"
+	self.drills.overkill_01.name_id = "bm_menu_drill_overkill_01"
+	self.drills.overkill_01.desc_id = "bm_menu_drill_overkill_01_desc"
+	self.drills.overkill_01.texture_bundle_folder = "cash/safes/cop"
+	self.drills.overkill_01.dlc = "complete_overkill_pack"
 	self.drills.event_01 = {}
 	self.drills.event_01.safe = "event_01"
 	self.drills.event_01.def_id = 70001
@@ -214,21 +316,29 @@ function EconomyTweakData:init()
 	self.drills.event_red = {}
 	self.drills.event_red.safe = "event_red"
 	self.drills.event_red.def_id = 70003
+	self.drills.event_red.promo = true
 	self.drills.event_red.unit_name = "units/payday2_cash/safes/red/drill/eco_drill_event_red"
 	self.drills.event_red.name_id = "bm_menu_drill_event_red"
 	self.drills.event_red.desc_id = "bm_menu_drill_event_red_desc"
 	self.drills.event_red.texture_bundle_folder = "cash/safes/red"
-	self.drills.event_red.dlc = "full_game"
 	self.drills.event_red.achievement = "green_7"
 	self.drills.event_dinner = {}
 	self.drills.event_dinner.def_id = 70004
 	self.drills.event_dinner.safe = "event_dinner"
+	self.drills.event_dinner.promo = true
 	self.drills.event_dinner.unit_name = "units/payday2_cash/safes/dinner/drill/eco_drill_event_dinner"
 	self.drills.event_dinner.name_id = "bm_menu_drill_event_dinner"
 	self.drills.event_dinner.desc_id = "bm_menu_drill_event_dinner_desc"
 	self.drills.event_dinner.texture_bundle_folder = "cash/safes/dinner"
-	self.drills.event_dinner.dlc = "full_game"
 	self.drills.event_dinner.achievement = "farm_6"
+	self.drills.dallas_01 = {}
+	self.drills.dallas_01.safe = "dallas_01"
+	self.drills.dallas_01.def_id = 70005
+	self.drills.dallas_01.price = "2.49"
+	self.drills.dallas_01.name_id = "bm_menu_drill_dallas_01"
+	self.drills.dallas_01.desc_id = "bm_menu_drill_dallas_01_desc"
+	self.drills.dallas_01.unit_name = "units/payday2_cash/safes/dallas/drill/eco_drill_dallas"
+	self.drills.dallas_01.texture_bundle_folder = "cash/safes/dallas"
 	self.bonuses = {}
 	self.bonuses.concealment_p1 = {}
 	self.bonuses.concealment_p1.name_id = "bm_menu_bonus_concealment"
@@ -263,6 +373,65 @@ function EconomyTweakData:init()
 	self.bonuses.total_ammo_p3 = {}
 	self.bonuses.total_ammo_p3.name_id = "bm_menu_bonus_total_ammo"
 	self.bonuses.total_ammo_p3.stats = {total_ammo_mod = 3}
+	self.bonuses.concealment_p1_tem_p1 = {}
+	self.bonuses.concealment_p1_tem_p1.name_id = "bm_menu_bonus_concealment_tem"
+	self.bonuses.concealment_p1_tem_p1.stats = {concealment = 1}
+	self.bonuses.concealment_p1_tem_p1.exp_multiplier = 1.01
+	self.bonuses.concealment_p1_tem_p1.money_multiplier = 1.01
+	self.bonuses.concealment_p2_tem_p1 = {}
+	self.bonuses.concealment_p2_tem_p1.name_id = "bm_menu_bonus_concealment_tem"
+	self.bonuses.concealment_p2_tem_p1.stats = {concealment = 2}
+	self.bonuses.concealment_p2_tem_p1.exp_multiplier = 1.01
+	self.bonuses.concealment_p2_tem_p1.money_multiplier = 1.01
+	self.bonuses.concealment_p3_tem_p1 = {}
+	self.bonuses.concealment_p3_tem_p1.name_id = "bm_menu_bonus_concealment_tem"
+	self.bonuses.concealment_p3_tem_p1.stats = {concealment = 3}
+	self.bonuses.concealment_p3_tem_p1.exp_multiplier = 1.01
+	self.bonuses.concealment_p3_tem_p1.money_multiplier = 1.01
+	self.bonuses.spread_p1_tem_p1 = {}
+	self.bonuses.spread_p1_tem_p1.name_id = "bm_menu_bonus_spread_tem"
+	self.bonuses.spread_p1_tem_p1.stats = {spread = 1}
+	self.bonuses.spread_p1_tem_p1.exp_multiplier = 1.01
+	self.bonuses.spread_p1_tem_p1.money_multiplier = 1.01
+	self.bonuses.spread_n1_tem_p1 = {}
+	self.bonuses.spread_n1_tem_p1.name_id = "bm_menu_bonus_spread_tem"
+	self.bonuses.spread_n1_tem_p1.stats = {spread = -1}
+	self.bonuses.spread_n1_tem_p1.exp_multiplier = 1.01
+	self.bonuses.spread_n1_tem_p1.money_multiplier = 1.01
+	self.bonuses.recoil_p1_tem_p1 = {}
+	self.bonuses.recoil_p1_tem_p1.name_id = "bm_menu_bonus_recoil_tem"
+	self.bonuses.recoil_p1_tem_p1.stats = {recoil = 1}
+	self.bonuses.recoil_p1_tem_p1.exp_multiplier = 1.01
+	self.bonuses.recoil_p1_tem_p1.money_multiplier = 1.01
+	self.bonuses.recoil_p2_tem_p1 = {}
+	self.bonuses.recoil_p2_tem_p1.name_id = "bm_menu_bonus_recoil_tem"
+	self.bonuses.recoil_p2_tem_p1.stats = {recoil = 2}
+	self.bonuses.recoil_p2_tem_p1.exp_multiplier = 1.01
+	self.bonuses.recoil_p2_tem_p1.money_multiplier = 1.01
+	self.bonuses.damage_p1_tem_p1 = {}
+	self.bonuses.damage_p1_tem_p1.name_id = "bm_menu_bonus_damage_tem"
+	self.bonuses.damage_p1_tem_p1.stats = {damage = 1}
+	self.bonuses.damage_p1_tem_p1.exp_multiplier = 1.01
+	self.bonuses.damage_p1_tem_p1.money_multiplier = 1.01
+	self.bonuses.damage_p2_tem_p1 = {}
+	self.bonuses.damage_p2_tem_p1.name_id = "bm_menu_bonus_damage_tem"
+	self.bonuses.damage_p2_tem_p1.stats = {damage = 2}
+	self.bonuses.damage_p2_tem_p1.exp_multiplier = 1.01
+	self.bonuses.damage_p2_tem_p1.money_multiplier = 1.01
+	self.bonuses.total_ammo_p1_tem_p1 = {}
+	self.bonuses.total_ammo_p1_tem_p1.name_id = "bm_menu_bonus_total_ammo_tem"
+	self.bonuses.total_ammo_p1_tem_p1.stats = {total_ammo_mod = 1}
+	self.bonuses.total_ammo_p1_tem_p1.exp_multiplier = 1.01
+	self.bonuses.total_ammo_p1_tem_p1.money_multiplier = 1.01
+	self.bonuses.total_ammo_p3_tem_p1 = {}
+	self.bonuses.total_ammo_p3_tem_p1.name_id = "bm_menu_bonus_total_ammo_tem"
+	self.bonuses.total_ammo_p3_tem_p1.stats = {total_ammo_mod = 3}
+	self.bonuses.total_ammo_p3_tem_p1.exp_multiplier = 1.01
+	self.bonuses.total_ammo_p3_tem_p1.money_multiplier = 1.01
+	self.bonuses.team_exp_money_p3 = {}
+	self.bonuses.team_exp_money_p3.name_id = "bm_menu_bonus_team_exp_money"
+	self.bonuses.team_exp_money_p3.exp_multiplier = 1.03
+	self.bonuses.team_exp_money_p3.money_multiplier = 1.03
 end
 function EconomyTweakData:get_entry_from_index(category, index)
 	for entry, data in pairs(self[category] or {}) do
@@ -275,6 +444,25 @@ end
 function EconomyTweakData:get_index_from_entry(category, entry)
 	return self[category] and self[category][entry] and self[category][entry].index
 end
+function EconomyTweakData:get_bonus_icons(entry)
+	local bonus_data = self.bonuses[entry]
+	local bonuses = {}
+	if bonus_data then
+		if bonus_data.stats then
+			table.insert(bonuses, "guis/dlcs/cash/textures/pd2/safe_raffle/statboost_icon")
+		end
+		if bonus_data.exp_multiplier or bonus_data.money_multiplier then
+			table.insert(bonuses, "guis/dlcs/cash/textures/pd2/safe_raffle/teamboost_icon")
+		end
+	end
+	return bonuses
+end
+function EconomyTweakData:create_market_link_url(category, entry)
+	return self[category] and self[category][entry] and self[category][entry].market_link
+end
 function EconomyTweakData:create_buy_tradable_url(def_id, quantity)
 	return "https://store.steampowered.com/buyitem/218620/" .. tostring(def_id) .. "/"
+end
+function EconomyTweakData:create_sell_tradable_url(steam_id, instance_id)
+	return "https://steamcommunity.com/profiles/" .. tostring(steam_id) .. "/inventory/?sellOnLoad=1#218620_2_" .. tostring(instance_id)
 end

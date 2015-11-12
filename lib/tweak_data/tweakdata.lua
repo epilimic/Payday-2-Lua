@@ -669,6 +669,7 @@ function TweakData:init()
 	self.screen_colors.extra_bonus_color = Color(255, 255, 255, 255) / 255
 	self.screen_colors.community_color = Color(255, 59, 174, 254) / 255
 	self.screen_colors.challenge_completed_color = Color(255, 255, 168, 0) / 255
+	self.screen_colors.stat_maxed = Color("FF00FF")
 	self.screen_colors.heat_cold_color = Color(255, 255, 51, 51) / 255
 	self.screen_colors.heat_warm_color = Color("ff7f00")
 	self.screen_colors.heat_standard_color = Color(255, 255, 255, 255) / 255

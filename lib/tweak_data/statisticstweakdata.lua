@@ -610,3 +610,6 @@ function StatisticsTweakData:resolution_statistics_table()
 		"1024x768"
 	}
 end
+function StatisticsTweakData:mission_statistics_table()
+	return {"labrat"}
+end

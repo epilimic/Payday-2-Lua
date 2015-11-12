@@ -126,25 +126,28 @@ function NewRaycastWeaponBase:_apply_cosmetics(async_clbk)
 	end
 	local texture_load_result_clbk = async_clbk and callback(self, self, "clbk_texture_loaded", async_clbk)
 	local textures = {}
-	local base_variable, base_texture, mat_variable, mat_texture, custom_variable, texture_key
+	local base_variable, base_texture, mat_variable, mat_texture, type_variable, type_texture, p_type, custom_variable, texture_key
 	local wear_tear_value = self._cosmetics_quality and tweak_data.economy.qualities[self._cosmetics_quality] and tweak_data.economy.qualities[self._cosmetics_quality].wear_tear_value or 1
 	for part_id, materials in pairs(self._materials) do
 		for _, material in pairs(materials) do
 			material:set_variable(Idstring("wear_tear_value"), wear_tear_value)
+			p_type = managers.weapon_factory:get_type_from_part_id(part_id)
 			for key, variable in pairs(material_variables) do
 				mat_variable = cosmetics_data.parts and cosmetics_data.parts[part_id] and cosmetics_data.parts[part_id][material:name():key()] and cosmetics_data.parts[part_id][material:name():key()][key]
+				type_variable = cosmetics_data.types and cosmetics_data.types[p_type] and cosmetics_data.types[p_type][key]
 				base_variable = cosmetics_data[key]
-				if mat_variable or base_variable then
-					material:set_variable(Idstring(variable), mat_variable or base_variable)
+				if mat_variable or type_variable or base_variable then
+					material:set_variable(Idstring(variable), mat_variable or type_variable or base_variable)
 				end
 			end
 			for key, material_texture in pairs(material_textures) do
 				mat_texture = cosmetics_data.parts and cosmetics_data.parts[part_id] and cosmetics_data.parts[part_id][material:name():key()] and cosmetics_data.parts[part_id][material:name():key()][key]
+				type_texture = cosmetics_data.types and cosmetics_data.types[p_type] and cosmetics_data.types[p_type][key]
 				base_texture = cosmetics_data[key]
-				if mat_texture or base_texture then
-					texture_key = mat_texture and mat_texture:key() or base_texture and base_texture:key()
+				if mat_texture or type_texture or base_texture then
+					texture_key = mat_texture and mat_texture:key() or type_texture and type_texture:key() or base_texture and base_texture:key()
 					textures[texture_key] = textures[texture_key] or {
-						name = mat_texture or base_texture,
+						name = mat_texture or type_texture or base_texture,
 						ready = false,
 						applied = false
 					}
@@ -204,13 +207,15 @@ function NewRaycastWeaponBase:_set_material_textures()
 	if not self._parts or not cosmetics_data or not self._materials or table.size(self._materials) == 0 then
 		return
 	end
-	local base_texture, mat_texture, new_texture
+	local p_type, base_texture, mat_texture, type_texture, new_texture
 	for part_id, materials in pairs(self._materials) do
+		p_type = managers.weapon_factory:get_type_from_part_id(part_id)
 		for _, material in pairs(materials) do
 			for key, material_texture in pairs(material_textures) do
 				mat_texture = cosmetics_data.parts and cosmetics_data.parts[part_id] and cosmetics_data.parts[part_id][material:name():key()] and cosmetics_data.parts[part_id][material:name():key()][key]
+				type_texture = cosmetics_data.types and cosmetics_data.types[p_type] and cosmetics_data.types[p_type][key]
 				base_texture = cosmetics_data[key]
-				new_texture = mat_texture or base_texture or material_defaults[material_texture]
+				new_texture = mat_texture or type_texture or base_texture or material_defaults[material_texture]
 				if new_texture then
 					Application:set_material_texture(material, Idstring(material_texture), new_texture, Idstring("normal"))
 				end

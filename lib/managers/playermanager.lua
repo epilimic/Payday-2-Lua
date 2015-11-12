@@ -759,7 +759,54 @@ function PlayerManager:get_skill_exp_multiplier(whisper_mode)
 	if whisper_mode then
 		multiplier = multiplier + managers.player:team_upgrade_value("xp", "stealth_multiplier", 1) - 1
 	end
+	if managers.network:session() then
+		local outfit, tweak
+		for _, peer in pairs(managers.network:session():all_peers()) do
+			if peer:has_blackmarket_outfit() and not peer:is_cheater() then
+				outfit = peer:blackmarket_outfit()
+				for _, weapon in ipairs({"primary", "secondary"}) do
+					if outfit[weapon] and outfit[weapon].cosmetics and outfit[weapon].cosmetics.bonus then
+						tweak = tweak_data.blackmarket.weapon_skins[outfit[weapon].cosmetics.id]
+						tweak = tweak and tweak_data.economy.bonuses[tweak.bonus]
+						if tweak and tweak.exp_multiplier then
+							multiplier = multiplier + tweak.exp_multiplier - 1
+						end
+					end
+				end
+			end
+		end
+	end
 	return multiplier
+end
+function PlayerManager:get_skill_money_multiplier(whisper_mode)
+	local cash_skill_mulitplier = 1
+	local bag_skill_mulitplier = 1
+	bag_skill_mulitplier = bag_skill_mulitplier * managers.player:upgrade_value("player", "secured_bags_money_multiplier", 1)
+	if whisper_mode then
+		cash_skill_mulitplier = cash_skill_mulitplier * managers.player:team_upgrade_value("cash", "stealth_money_multiplier", 1)
+		bag_skill_mulitplier = bag_skill_mulitplier * managers.player:team_upgrade_value("cash", "stealth_bags_multiplier", 1)
+	end
+	if managers.network:session() then
+		local multiplier = 1
+		local outfit, tweak
+		for _, peer in pairs(managers.network:session():all_peers()) do
+			if peer:has_blackmarket_outfit() and not peer:is_cheater() then
+				outfit = peer:blackmarket_outfit()
+				for _, weapon in ipairs({"primary", "secondary"}) do
+					if outfit[weapon] and outfit[weapon].cosmetics and outfit[weapon].cosmetics.bonus then
+						tweak = tweak_data.blackmarket.weapon_skins[outfit[weapon].cosmetics.id]
+						tweak = tweak and tweak_data.economy.bonuses[tweak.bonus]
+						if tweak and tweak.money_multiplier then
+							multiplier = multiplier + tweak.money_multiplier - 1
+						end
+					end
+				end
+			end
+		end
+		cash_skill_mulitplier = cash_skill_mulitplier * multiplier
+		bag_skill_mulitplier = bag_skill_mulitplier * multiplier
+	end
+	return cash_skill_mulitplier, bag_skill_mulitplier
 end
 function PlayerManager:update_hostage_skills()
 	self._hostage_skills_update = true

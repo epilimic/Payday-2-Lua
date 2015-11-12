@@ -967,7 +967,7 @@ function MenuInitiatorBase:create_divider(node, id, text_id, size, color)
 end
 function MenuInitiatorBase:create_toggle(node, params)
 	local data_node = {
-		type = "MenuItemToggleWithIcon",
+		type = "CoreMenuItemToggle.ItemToggle",
 		{
 			_meta = "option",
 			icon = "guis/textures/menu_tickbox",
@@ -1034,6 +1034,15 @@ function MenuInitiatorBase:create_slider(node, params)
 		show_value = params.show_value
 	}
 	local new_item = node:create_item(data_node, params)
+	node:add_item(new_item)
+	return new_item
+end
+function MenuInitiatorBase:create_input(node, params)
+	local data_node = {
+		type = "MenuItemInput"
+	}
+	local new_item = node:create_item(data_node, params)
+	new_item:set_enabled(params.enabled)
 	node:add_item(new_item)
 	return new_item
 end
@@ -1108,7 +1117,10 @@ function MenuOpenContainerInitiator:refresh_node(node)
 	return node
 end
 function MenuOpenContainerInitiator:update_node(node)
-	node:item("open_container"):set_enabled(MenuCallbackHandler:have_safe_and_drill_for_container(node:parameters().container_data))
+	local item = node:item("open_container")
+	if item then
+		item:set_enabled(MenuCallbackHandler:have_safe_and_drill_for_container(node:parameters().container_data))
+	end
 end
 function MenuCallbackHandler:have_no_drills_for_container(item)
 	if not managers.menu:active_menu() or not managers.menu:active_menu().logic:selected_node() then
@@ -1141,31 +1153,64 @@ function MenuCallbackHandler:have_safe_and_drill_for_container(data)
 	local have_safe = managers.blackmarket:have_inventory_tradable_item("safes", safe)
 	return have_drill and have_safe
 end
-function MenuCallbackHandler:steam_buy_drill(item)
+function MenuCallbackHandler:steam_buy_drill(item, data)
 	local node = managers.menu:active_menu() and managers.menu:active_menu().logic:selected_node()
 	local quantity_item = node:item("buy_quantity")
-	local data = managers.menu:active_menu().logic:selected_node():parameters().container_data
+	data = data or managers.menu:active_menu().logic:selected_node():parameters().container_data
 	if not data then
 		return
 	end
 	local drill = data.drill
 	local quantity = quantity_item and tonumber(quantity_item:value()) or 1
-	local def_id = tweak_data.economy.drills[drill].def_id
+	local def_id = tweak_data.economy.drills[drill] and tweak_data.economy.drills[drill].def_id
 	do break end
 	managers.menu:show_enable_steam_overlay_tradable_item()
 	do break end
 	if def_id then
-		print("buying drill", drill, quantity)
-		managers.network.account:add_overlay_listener("steam_buy_tradable_item", {
+		managers.network.account:add_overlay_listener("steam_transaction_tradable_item", {
 			"overlay_close"
 		}, callback(MenuCallbackHandler, MenuCallbackHandler, "on_steam_transaction_over"))
 		Steam:overlay_activate("url", tweak_data.economy:create_buy_tradable_url(def_id, quantity))
 		managers.menu:show_buying_tradable_item_dialog()
 	end
 end
+function MenuCallbackHandler:steam_buy_safe_from_community(item, data)
+	local node = managers.menu:active_menu() and managers.menu:active_menu().logic:selected_node()
+	local quantity_item = node:item("buy_quantity")
+	data = data or managers.menu:active_menu().logic:selected_node():parameters().container_data
+	if not data then
+		return
+	end
+	local safe = data.safe
+	local quantity = quantity_item and tonumber(quantity_item:value()) or 1
+	do break end
+	managers.menu:show_enable_steam_overlay_tradable_item()
+	do break end
+	if safe then
+		managers.network.account:add_overlay_listener("steam_transaction_tradable_item", {
+			"overlay_close"
+		}, callback(MenuCallbackHandler, MenuCallbackHandler, "on_steam_transaction_over"))
+		Steam:overlay_activate("url", tweak_data.economy:create_market_link_url("safes", safe))
+		managers.menu:show_buying_tradable_item_dialog()
+	end
+end
+function MenuCallbackHandler:steam_sell_item(item)
+	local steam_id = Steam:userid()
+	local instance_id = item.instance_id
+	do break end
+	managers.menu:show_enable_steam_overlay_tradable_item()
+	do break end
+	if steam_id and instance_id then
+		print("selling item", "steam_id", steam_id, "instance_id", instance_id)
+		managers.network.account:add_overlay_listener("steam_transaction_tradable_item", {
+			"overlay_close"
+		}, callback(MenuCallbackHandler, MenuCallbackHandler, "on_steam_transaction_over"))
+		Steam:overlay_activate("url", tweak_data.economy:create_sell_tradable_url(steam_id, instance_id))
+	end
+end
 function MenuCallbackHandler:on_steam_transaction_over(canceled)
 	print("on_steam_transaction_over", canceled)
-	managers.network.account:remove_overlay_listener("steam_buy_tradable_item")
+	managers.network.account:remove_overlay_listener("steam_transaction_tradable_item")
 	managers.network.account:inventory_load()
 	managers.system_menu:close("buy_tradable_item")
 end
@@ -1194,6 +1239,8 @@ function MenuCallbackHandler:steam_open_container(item)
 end
 function MenuCallbackHandler:_safe_result_recieved(error, items_new, items_removed)
 	local active_node_gui = managers.menu:active_menu().renderer:active_node_gui()
+	managers.network.account:inventory_repair_list(items_new)
+	managers.network.account:inventory_repair_list(items_removed)
 	if active_node_gui and active_node_gui._safe_result_recieved then
 		active_node_gui:_safe_result_recieved(error, items_new, items_removed)
 	else

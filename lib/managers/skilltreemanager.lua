@@ -805,7 +805,7 @@ function SkillTreeManager:pack_to_string_from_list(list)
 	return packed_string
 end
 function SkillTreeManager:unpack_from_string(packed_string)
-	local t = string.split(packed_string, "-") or {}
+	local t = string.split(packed_string or "", "-") or {}
 	return {
 		skills = string.split(tostring(t[1] or ""), "_"),
 		specializations = string.split(tostring(t[2] or ""), "_")

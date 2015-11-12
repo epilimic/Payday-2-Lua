@@ -105,7 +105,8 @@ function MenuNodeBaseGui:create_text_button(params)
 		text = gui_text,
 		blur = gui_blur,
 		highlighted = false,
-		clbk = clbk
+		clbk = clbk,
+		image = nil
 	})
 	return button_panel
 end
@@ -142,13 +143,21 @@ function MenuNodeBaseGui:mouse_moved(o, x, y)
 					button.highlighted = true
 					managers.menu_component:post_event("highlight")
 					if alive(button.text) then
-						button.text:set_color(self.button_highlighted_color)
+						button.text:set_color(button.highlighted_color or self.button_highlighted_color)
+					end
+					if alive(button.image) then
+						button.image:set_color(button.highlighted_color or self.button_highlighted_color)
 					end
 				end
 				used, icon = true, "link"
 			elseif button.highlighted then
 				button.highlighted = false
-				button.text:set_color(self.button_default_color)
+				if alive(button.text) then
+					button.text:set_color(button.default_color or self.button_default_color)
+				end
+				if alive(button.image) then
+					button.image:set_color(button.default_color or self.button_default_color)
+				end
 			end
 		end
 	end

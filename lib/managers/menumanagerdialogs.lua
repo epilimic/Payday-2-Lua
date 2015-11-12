@@ -674,9 +674,11 @@ function MenuManager:show_new_tradable_item_received(params)
 	else
 		local entry_data = tweak_data.blackmarket[item.category][item.entry]
 		if item.bonus and entry_data.bonus then
-			local name_id = tweak_data.economy.bonuses[entry_data.bonus].name_id
+			local bonus_tweak = tweak_data.economy.bonuses[entry_data.bonus]
+			local name_id = bonus_tweak.name_id
+			local bonus_value = (not bonus_tweak.exp_multiplier or not (bonus_tweak.exp_multiplier * 100 - 100 .. "%")) and bonus_tweak.money_multiplier and bonus_tweak.money_multiplier * 100 - 100 .. "%"
 			local bonus_text = managers.localization:to_upper_text("dialog_new_tradable_item_bonus", {
-				bonus = managers.localization:text(name_id)
+				bonus = managers.localization:text(name_id, {team_bonus = bonus_value})
 			})
 			dialog_data.text = dialog_data.text .. "\n" .. bonus_text
 		end

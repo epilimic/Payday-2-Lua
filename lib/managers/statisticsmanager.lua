@@ -490,6 +490,10 @@ end
 function StatisticsManager:aquired_money(amount)
 	self:_increment_misc("cash", amount * 1000)
 end
+function StatisticsManager:mission_stats(name)
+	self._global.session.mission_stats = self._global.session.mission_stats or {}
+	self._global.session.mission_stats[name] = (self._global.session.mission_stats[name] or 0) + 1
+end
 function StatisticsManager:publish_to_steam(session, success, completion)
 	if Application:editor() or not managers.criminals:local_character_name() then
 		return
@@ -764,99 +768,10 @@ function StatisticsManager:publish_to_steam(session, success, completion)
 			stats["contract_" .. job_id .. "_fail"] = {type = "int", value = 1}
 		end
 	end
-	if completion == "win_begin" or completion == "win_dropin" then
-		if job_id == "shoutout_raid" then
-			print("Crimefest Challenge: crimefest_challenge_dallas_1", 1)
-			stats.crimefest_challenge_dallas_1 = {type = "int", value = 1}
-		elseif job_id == "hox" or job_id == "hox_prof" then
-			print("Crimefest Challenge: crimefest_challenge_houston_1", 1)
-			stats.crimefest_challenge_houston_1 = {type = "int", value = 1}
-		elseif job_id == "framing_frame" or job_id == "framing_frame_prof" then
-			print("Crimefest Challenge: crimefest_challenge_clover_4", 1)
-			stats.crimefest_challenge_clover_4 = {type = "int", value = 1}
-		elseif job_id == "roberts" and (managers.blackmarket:equipped_primary().weapon_id == "ak74" or managers.blackmarket:equipped_primary().weapon_id == "new_m4") then
-			print("Crimefest Challenge: crimefest_challenge_chains_5", 1)
-			stats.crimefest_challenge_chains_5 = {type = "int", value = 1}
-		elseif job_id == "pines" then
-			print("Crimefest Challenge: crimefest_challenge_clover_5", 1)
-			stats.crimefest_challenge_clover_5 = {type = "int", value = 1}
-		end
-		if Global.game_settings.difficulty == "overkill_290" then
-			print("Crimefest Challenge: crimefest_challenge_houston_5", 1)
-			stats.crimefest_challenge_houston_5 = {type = "int", value = 1}
-		end
-	end
-	if completion == "done" or completion == "win_begin" or completion == "win_dropin" then
-		if level_id == "alex_1" or level_id == "rat" or level_id == "mia_1" then
-			print("Crimefest Challenge: crimefest_challenge_chains_3", 1)
-			stats.crimefest_challenge_chains_3 = {type = "int", value = 1}
-		end
-		local vault_levels = {
-			"branchbank",
-			"big",
-			"election_day_3_skip1",
-			"election_day_3_skip2",
-			"framing_frame_3",
-			"crojob3",
-			"crojob3_night",
-			"shoutout_raid",
-			"arm_for",
-			"firestarter_3",
-			"kosugi",
-			"roberts",
-			"arena",
-			"mia_2",
-			"kenaz",
-			"hox_3"
-		}
-		if table.contains(vault_levels, level_id) then
-			print("Crimefest Challenge: crimefest_challenge_chains_4", 1)
-			stats.crimefest_challenge_chains_4 = {type = "int", value = 1}
-		end
-	end
-	for melee_name, melee_kill in pairs(session.killed_by_melee) do
-		if melee_kill > 0 and melee_name == "whiskey" then
-			print("Crimefest Challenge: crimefest_challenge_chains_1", melee_kill)
-			stats.crimefest_challenge_chains_1 = {type = "int", value = melee_kill}
-		else
-		end
-	end
-	local civilian_kills = 0
-	for enemy_name, enemy_data in pairs(session.killed) do
-		if enemy_name == "spooc" and 0 < enemy_data.count then
-			print("Crimefest Challenge: crimefest_challenge_clover_1", enemy_data.count)
-			stats.crimefest_challenge_clover_1 = {
-				type = "int",
-				value = enemy_data.count
-			}
-		elseif enemy_name == "civilian" or enemy_name == "civilian_female" then
-			civilian_kills = civilian_kills + enemy_data.count
-		elseif (enemy_name == "hector_boss" or enemy_name == "hector_boss_no_armor") and 0 < enemy_data.count then
-			print("Crimefest Challenge: crimefest_challenge_clover_3", 1)
-			stats.crimefest_challenge_clover_3 = {type = "int", value = 1}
-		elseif enemy_name == "taser" and 0 < enemy_data.count then
-			print("Crimefest Challenge: crimefest_challenge_houston_4", enemy_data.count)
-			stats.crimefest_challenge_houston_4 = {
-				type = "int",
-				value = enemy_data.count
-			}
-		elseif enemy_name == "phalanx_minion" and 0 < enemy_data.count then
-			print("Crimefest Challenge: crimefest_challenge_dallas_5", enemy_data.count)
-			stats.crimefest_challenge_dallas_5 = {
-				type = "int",
-				value = enemy_data.count
-			}
-		end
-	end
-	local enemy_kills = session.killed.total.count - civilian_kills
-	if enemy_kills > 0 then
-		print("Crimefest Challenge: crimefest_challenge_houston_2", enemy_kills)
-		stats.crimefest_challenge_houston_2 = {type = "int", value = enemy_kills}
-	end
-	if session.crimefest then
-		for name, count in pairs(session.crimefest) do
-			print("Crimefest Challenge: crimefest_challenge_" .. name, count)
-			stats["crimefest_challenge_" .. name] = {type = "int", value = count}
+	if session.mission_stats then
+		for name, count in pairs(session.mission_stats) do
+			print("Mission Statistics: mission_" .. name, count)
+			stats["mission_" .. name] = {type = "int", value = count}
 		end
 	end
 	managers.network.account:publish_statistics(stats)

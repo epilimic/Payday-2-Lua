@@ -3382,66 +3382,6 @@ function NarrativeTweakData:init()
 		3785000,
 		3785000
 	}
-	self.jobs.haunted = {}
-	self.jobs.haunted.name_id = "heist_haunted"
-	self.jobs.haunted.briefing_id = "heist_haunted_crimenet"
-	self.jobs.haunted.contact = "events"
-	self.jobs.haunted.region = "street"
-	self.jobs.haunted.jc = 10
-	self.jobs.haunted.chain = {
-		{
-			level_id = "haunted",
-			type_id = "heist_type_assault",
-			type = "d"
-		}
-	}
-	self.jobs.haunted.briefing_event = nil
-	self.jobs.haunted.debrief_event = nil
-	self.jobs.haunted.crimenet_videos = {
-		"cn_branchbank1",
-		"cn_branchbank2",
-		"cn_branchbank3"
-	}
-	self.jobs.haunted.payout = {
-		20000,
-		30000,
-		40000,
-		70000,
-		80000
-	}
-	self.jobs.haunted.contract_cost = {
-		16000,
-		32000,
-		80000,
-		160000,
-		200000
-	}
-	self.jobs.haunted.contract_visuals = {}
-	self.jobs.haunted.contract_visuals.min_mission_xp = {
-		10000,
-		10000,
-		10000,
-		10000,
-		10000
-	}
-	self.jobs.haunted.contract_visuals.max_mission_xp = {
-		10000,
-		10000,
-		10000,
-		10000,
-		10000
-	}
-	self.jobs.haunted_prof = deep_clone(self.jobs.haunted)
-	self.jobs.haunted_prof.jc = 40
-	self.jobs.haunted_prof.professional = true
-	self.jobs.haunted_prof.region = "professional"
-	self.jobs.haunted_prof.payout = {
-		10000,
-		20000,
-		30000,
-		40000,
-		80000
-	}
 	self._jobs_index = {
 		"jewelry_store",
 		"four_stores",
@@ -3498,8 +3438,7 @@ function NarrativeTweakData:init()
 		"jolly",
 		"red2",
 		"dinner",
-		"nail",
-		"haunted"
+		"nail"
 	}
 	if SystemInfo:platform() == Idstring("WIN32") then
 		table.insert(self._jobs_index, "roberts")

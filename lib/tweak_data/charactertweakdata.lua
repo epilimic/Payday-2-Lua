@@ -1132,7 +1132,8 @@ function CharacterTweakData:_init_phalanx_minion(presets)
 end
 function CharacterTweakData:_init_phalanx_vip(presets)
 	self.phalanx_vip = deep_clone(self.phalanx_minion)
-	self.phalanx_vip.LOWER_HEALTH_PERCENTAGE_LIMIT = 0.2
+	self.phalanx_vip.LOWER_HEALTH_PERCENTAGE_LIMIT = 1
+	self.phalanx_vip.FINAL_LOWER_HEALTH_PERCENTAGE_LIMIT = 0.2
 	self.phalanx_vip.HEALTH_INIT = 300
 	self.phalanx_vip.DAMAGE_CLAMP_BULLET = 100
 	self.phalanx_vip.DAMAGE_CLAMP_EXPLOSION = self.phalanx_vip.DAMAGE_CLAMP_BULLET

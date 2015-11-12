@@ -53,6 +53,8 @@ end
 function NetworkAccount:inventory_outfit_signature()
 	return ""
 end
+function NetworkAccount:inventory_repair_list(list)
+end
 function NetworkAccount:is_ready_to_close()
 	return true
 end

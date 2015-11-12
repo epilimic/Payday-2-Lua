@@ -619,81 +619,6 @@ function DLCTweakData:init(tweak_data)
 			amount = 1
 		}
 	}
-	self.halloween_nightmare_1_2014 = {}
-	self.halloween_nightmare_1_2014.dlc = "has_achievement"
-	self.halloween_nightmare_1_2014.achievement_id = "halloween_nightmare_1"
-	self.halloween_nightmare_1_2014.content = {}
-	self.halloween_nightmare_1_2014.content.loot_global_value = "halloween"
-	self.halloween_nightmare_1_2014.content.loot_drops = {
-		{
-			type_items = "masks",
-			item_entry = "baby_happy",
-			amount = 1
-		}
-	}
-	self.halloween_nightmare_2_2014 = {}
-	self.halloween_nightmare_2_2014.dlc = "has_achievement"
-	self.halloween_nightmare_2_2014.achievement_id = "halloween_nightmare_2"
-	self.halloween_nightmare_2_2014.content = {}
-	self.halloween_nightmare_2_2014.content.loot_global_value = "halloween"
-	self.halloween_nightmare_2_2014.content.loot_drops = {
-		{
-			type_items = "masks",
-			item_entry = "brazil_baby",
-			amount = 1
-		}
-	}
-	self.halloween_nightmare_3_2014 = {}
-	self.halloween_nightmare_3_2014.dlc = "has_achievement"
-	self.halloween_nightmare_3_2014.achievement_id = "halloween_nightmare_3"
-	self.halloween_nightmare_3_2014.content = {}
-	self.halloween_nightmare_3_2014.content.loot_global_value = "halloween"
-	self.halloween_nightmare_3_2014.content.loot_drops = {
-		{
-			type_items = "masks",
-			item_entry = "baby_angry",
-			amount = 1
-		}
-	}
-	self.halloween_nightmare_4_2014 = {}
-	self.halloween_nightmare_4_2014.dlc = "has_achievement"
-	self.halloween_nightmare_4_2014.achievement_id = "halloween_nightmare_4"
-	self.halloween_nightmare_4_2014.content = {}
-	self.halloween_nightmare_4_2014.content.loot_global_value = "halloween"
-	self.halloween_nightmare_4_2014.content.loot_drops = {
-		{
-			type_items = "masks",
-			item_entry = "baby_cry",
-			amount = 1
-		}
-	}
-	self.halloween_2015 = {}
-	self.halloween_2015.free = true
-	self.halloween_2015.content = {}
-	self.halloween_2015.content.loot_drops = {
-		{
-			{
-				type_items = "masks",
-				item_entry = "pumpkin_king",
-				amount = 1
-			},
-			{
-				type_items = "masks",
-				item_entry = "witch",
-				amount = 1
-			},
-			{
-				type_items = "masks",
-				item_entry = "venomorph",
-				amount = 1
-			},
-			{
-				type_items = "masks",
-				item_entry = "frank",
-				amount = 1
-			}
-		}
-	}
 	self.ach_lab_1 = {}
 	self.ach_lab_1.dlc = "has_achievement"
 	self.ach_lab_1.achievement_id = "lab_1"
@@ -715,6 +640,42 @@ function DLCTweakData:init(tweak_data)
 		{
 			type_items = "masks",
 			item_entry = "satan",
+			amount = 1
+		}
+	}
+	self.free_halloween_textures = {}
+	self.free_halloween_textures.free = true
+	self.free_halloween_textures.content = {}
+	self.free_halloween_textures.content.loot_global_value = "halloween"
+	self.free_halloween_textures.content.loot_drops = {
+		{
+			type_items = "textures",
+			item_entry = "pumpgrin",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "shout",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "webbed",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "hannibalistic",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "stitches",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "doomweaver",
 			amount = 1
 		}
 	}
@@ -3922,6 +3883,47 @@ function DLCTweakData:init(tweak_data)
 		{
 			type_items = "weapon_mods",
 			item_entry = "wpn_fps_bow_hunter_g_walnut",
+			amount = 1
+		}
+	}
+	self.turtles_mods_fix = {}
+	self.turtles_mods_fix.dlc = "has_turtles"
+	self.turtles_mods_fix.content = {}
+	self.turtles_mods_fix.content.loot_global_value = "turtles"
+	self.turtles_mods_fix.content.loot_drops = {
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_snp_wa2000_b_long",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_snp_wa2000_b_suppressed",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_snp_wa2000_g_light",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_snp_wa2000_g_stealth",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_snp_wa2000_g_walnut",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_smg_polymer_barrel_precision",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_smg_polymer_ns_silencer",
 			amount = 1
 		}
 	}

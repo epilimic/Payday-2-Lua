@@ -396,7 +396,12 @@ function NetworkAccount:inventory_reward_unlock(safe, safe_instance_id, drill_in
 	local safe_item = managers.blackmarket:tradable_receive_item_by_instance_id(safe_instance_id)
 	local drill_item = managers.blackmarket:tradable_receive_item_by_instance_id(drill_instance_id)
 	if NetworkAccountSTEAM.TEST_INVENTORY then
-		local params = {safe = safe, callback = reward_unlock_callback}
+		local params = {
+			safe = safe,
+			callback = reward_unlock_callback,
+			safe_instance_id = safe_instance_id,
+			drill_instance_id = drill_instance_id
+		}
 		managers.menu_scene:add_callback(callback(self, self, "_clbk_inventory_reward", params), 2)
 		return
 	end
@@ -445,12 +450,30 @@ function NetworkAccountSTEAM:_chk_inventory_outfit_refresh()
 end
 function NetworkAccountSTEAM:inventory_outfit_verify(steam_id, outfit_data, outfit_callback)
 	if outfit_data == "" then
-		return
+		return outfit_callback and outfit_callback(false, {})
 	end
 	Steam:inventory_signature_verify(steam_id, outfit_data, outfit_callback)
 end
 function NetworkAccountSTEAM:inventory_outfit_signature()
 	return self._outfit_signature
+end
+function NetworkAccountSTEAM:inventory_repair_list(list)
+	if list then
+		for _, item in pairs(list) do
+			if not item.category or item.category == "" or not item.entry or item.entry == "" then
+				print("[NetworkAccountSTEAM:inventory_repair_list] Item Def ID " .. tostring(item.def_id) .. " is missing information!")
+				for category, category_data in pairs(tweak_data.economy) do
+					for entry, entry_data in pairs(category_data) do
+						if entry_data.def_id == item.def_id then
+							item.category = category
+							item.entry = entry
+							print("[NetworkAccountSTEAM:inventory_repair_list] Item Def ID " .. tostring(item.def_id) .. " was repaired to " .. category .. "." .. entry)
+						end
+					end
+				end
+			end
+		end
+	end
 end
 function NetworkAccountSTEAM:_clbk_inventory_load(error, list)
 	print("[NetworkAccountSTEAM:_clbk_inventory_load]", "error: ", error, "list: ", list)
@@ -458,6 +481,7 @@ function NetworkAccountSTEAM:_clbk_inventory_load(error, list)
 	if error then
 		Application:error("[NetworkAccountSTEAM:_clbk_inventory_load] Failed to update tradable inventory (" .. tostring(error) .. ")")
 	end
+	self:inventory_repair_list(list)
 	managers.blackmarket:tradable_update(list, not error)
 	managers.menu_component:set_blackmarket_tradable_loaded(error)
 	if managers.menu_scene then

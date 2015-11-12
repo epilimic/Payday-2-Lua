@@ -19,6 +19,7 @@ function MenuInput:init(logic, ...)
 	self._item_input_action_map[MenuItemWeaponExpand.TYPE] = callback(self, self, "input_expand")
 	self._item_input_action_map[MenuItemWeaponUpgradeExpand.TYPE] = callback(self, self, "input_expand")
 	self._item_input_action_map[MenuItemDivider.TYPE] = callback(self, self, "input_item")
+	self._item_input_action_map[MenuItemInput.TYPE] = callback(self, self, "input_item")
 	self._callback_map = {}
 	self._callback_map.mouse_moved = {}
 	self._callback_map.mouse_pressed = {}

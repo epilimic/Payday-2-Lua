@@ -4153,7 +4153,7 @@ function WeaponFactoryTweakData:_init_akmsu()
 		stats = {value = 1}
 	}
 	self.parts.wpn_fps_smg_akmsu_body_lowerreceiver = {
-		type = "lower_receiver",
+		type = "lower_reciever",
 		name_id = "bm_wp_akmsu_body_lowerreceiver",
 		a_obj = "a_body",
 		unit = "units/payday2/weapons/wpn_fps_smg_akmsu_pts/wpn_fps_smg_akmsu_body_lowerreceiver",
@@ -5294,7 +5294,8 @@ function WeaponFactoryTweakData:_init_p90()
 		"wpn_fps_smg_p90_b_civilian",
 		"wpn_fps_smg_p90_b_ninja",
 		"wpn_fps_upg_ass_ns_battle",
-		"wpn_fps_upg_fl_ass_utg"
+		"wpn_fps_upg_fl_ass_utg",
+		"wpn_fps_smg_p90_b_legend"
 	}
 	self.wpn_fps_smg_p90_npc = deep_clone(self.wpn_fps_smg_p90)
 	self.wpn_fps_smg_p90_npc.unit = "units/payday2/weapons/wpn_fps_smg_p90/wpn_fps_smg_p90_npc"
@@ -23279,6 +23280,15 @@ function WeaponFactoryTweakData:_init_legendary()
 	}
 	self.parts.wpn_fps_lmg_m134_body_upper_spikey.third_unit = "units/payday2_cash/safes/cop/weapons/wpn_fps_lmg_m134_legend_pts/wpn_third_lmg_m134_body_upper_spikey"
 	self.parts.wpn_fps_lmg_m134_barrel_legendary.third_unit = "units/payday2_cash/safes/cop/weapons/wpn_fps_lmg_m134_legend_pts/wpn_third_lmg_m134_barrel_legendary"
+	self.parts.wpn_fps_smg_p90_b_legend = {
+		type = "slide",
+		name_id = "bm_wp_p90_b_legend ",
+		a_obj = "a_b",
+		unit = "units/payday2_cash/safes/dallas/weapons/wpn_fps_smg_p90_b_legendary/wpn_fps_smg_p90_b_legend",
+		stats = {value = 1},
+		unatainable = true
+	}
+	self.parts.wpn_fps_smg_p90_b_legend.third_unit = "units/payday2_cash/safes/dallas/weapons/wpn_third_smg_p90_b_legendary/wpn_third_smg_p90_b_legend"
 end
 function WeaponFactoryTweakData:_init_cc_material_config()
 	local parts = self.parts

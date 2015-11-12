@@ -213,12 +213,7 @@ function MoneyManager:get_money_by_params(params)
 	local money_multiplier = self:get_contract_difficulty_multiplier(total_difficulty_stars)
 	local contract_money_multiplier = 1 + money_multiplier / 10
 	local small_loot_multiplier = managers.money:get_small_loot_difficulty_multiplier(total_difficulty_stars) or 0
-	local cash_skill_bonus = 1
-	local bag_skill_bonus = managers.player:upgrade_value("player", "secured_bags_money_multiplier", 1)
-	if managers.groupai and managers.groupai:state():whisper_mode() then
-		cash_skill_bonus = cash_skill_bonus * managers.player:team_upgrade_value("cash", "stealth_money_multiplier", 1)
-		bag_skill_bonus = bag_skill_bonus * managers.player:team_upgrade_value("cash", "stealth_bags_multiplier", 1)
-	end
+	local cash_skill_bonus, bag_skill_bonus = managers.player:get_skill_money_multiplier(managers.groupai and managers.groupai:state():whisper_mode())
 	local bonus_bags = params.bonus_bags_value or managers.loot:get_secured_bonus_bags_value(params.level_id)
 	local mandatory_bags = params.mandatory_bags_value or managers.loot:get_secured_mandatory_bags_value()
 	local real_small_value = params.small_value or math.round(managers.loot:get_real_total_small_loot_value())

@@ -1823,6 +1823,16 @@ end
 function MenuComponentManager:blackmarket_fetching_disable()
 	return self._blackmarket_disable_fetching
 end
+function MenuComponentManager:hide_blackmarket_gui()
+	if self._blackmarket_gui then
+		self._blackmarket_gui:hide()
+	end
+end
+function MenuComponentManager:show_blackmarket_gui()
+	if self._blackmarket_gui then
+		self._blackmarket_gui:show()
+	end
+end
 function MenuComponentManager:_create_server_info_gui()
 	if self._server_info_gui then
 		self:close_server_info_gui()
@@ -2301,9 +2311,11 @@ function MenuComponentManager:close_view_character_profile_gui()
 		self._view_character_profile_gui_minimized_id = nil
 	end
 end
-function MenuComponentManager:get_texture_from_mod_type(type, sub_type, gadget, silencer, is_auto, equipped, mods, types)
+function MenuComponentManager:get_texture_from_mod_type(type, sub_type, gadget, silencer, is_auto, equipped, mods, types, is_a_path)
 	local texture
-	if silencer then
+	if is_a_path then
+		texture = type
+	elseif silencer then
 		texture = "guis/textures/pd2/blackmarket/inv_mod_silencer"
 	elseif type == "gadget" then
 		texture = "guis/textures/pd2/blackmarket/inv_mod_" .. (gadget or "flashlight")
@@ -2332,6 +2344,8 @@ end
 function MenuComponentManager:create_weapon_mod_icon_list(weapon, category, factory_id, slot)
 	local icon_list = {}
 	local mods_all = managers.blackmarket:get_dropable_mods_by_weapon_id(weapon)
+	local instance_ids = managers.blackmarket:get_cosmetics_instances_by_weapon_id(weapon)
+	local crafted = managers.blackmarket:get_crafted_category(category)[slot]
 	if table.size(mods_all) > 0 then
 		local weapon_factory_tweak_data = tweak_data.weapon.factory.parts
 		local mods_equip = deep_clone(managers.blackmarket:get_weapon_blueprint(category, slot))
@@ -2343,13 +2357,15 @@ function MenuComponentManager:create_weapon_mod_icon_list(weapon, category, fact
 		local mods_sorted = {}
 		local types = {}
 		local type
-		for id, data in pairs(mods_all) do
-			mods[id] = mods[id] or {}
-			for _, mod in ipairs(data) do
-				table.insert(mods[id], clone(mod))
+		if not crafted or not crafted.customize_locked then
+			for id, data in pairs(mods_all) do
+				mods[id] = mods[id] or {}
+				for _, mod in ipairs(data) do
+					table.insert(mods[id], clone(mod))
+				end
+				table.insert(mods_sorted, id)
+				types[id] = true
 			end
-			table.insert(mods_sorted, id)
-			types[id] = true
 		end
 		for _, data in pairs(mods) do
 			do
@@ -2369,27 +2385,48 @@ function MenuComponentManager:create_weapon_mod_icon_list(weapon, category, fact
 		table.sort(mods_sorted, function(x, y)
 			return y < x
 		end)
+		if #instance_ids > 0 then
+			types.weapon_cosmetics = true
+			table.insert(mods_sorted, "weapon_cosmetics")
+		end
+		if crafted.cosmetics and crafted.cosmetics.bonus then
+			local bonuses = tweak_data.economy:get_bonus_icons(tweak_data.blackmarket.weapon_skins[crafted.cosmetics.id].bonus)
+			types.weapon_skin_bonuses = {}
+			for _, texture_path in ipairs(bonuses) do
+				table.insert(types.weapon_skin_bonuses, texture_path)
+				table.insert(mods_sorted, texture_path)
+			end
+		end
 		for _, name in pairs(mods_sorted) do
 			local gadget, silencer, equipped, sub_type
 			local is_auto = tweak_data.weapon[weapon] and tweak_data.weapon[weapon].FIRE_MODE == "auto"
-			for _, name_equip in pairs(mods_equip) do
-				if name == weapon_factory_tweak_data[name_equip].type then
-					equipped = true
-					sub_type = weapon_factory_tweak_data[name_equip].sub_type
-					if name == "gadget" then
-						gadget = sub_type
+			local weapon_skin_bonus = false
+			if types.weapon_skin_bonuses and table.contains(types.weapon_skin_bonuses, name) then
+				equipped = true
+				weapon_skin_bonus = true
+			elseif name == "weapon_cosmetics" then
+				equipped = not not managers.blackmarket:get_weapon_cosmetics(category, slot)
+			else
+				for _, name_equip in pairs(mods_equip) do
+					if name == weapon_factory_tweak_data[name_equip].type then
+						equipped = true
+						sub_type = weapon_factory_tweak_data[name_equip].sub_type
+						if name == "gadget" then
+							gadget = sub_type
+						end
+						silencer = sub_type == "silencer" and true
+					else
 					end
-					silencer = sub_type == "silencer" and true
-				else
 				end
 			end
-			local texture = self:get_texture_from_mod_type(name, sub_type, gadget, silencer, is_auto, equipped, mods[name], types)
+			local texture = self:get_texture_from_mod_type(name, sub_type, gadget, silencer, is_auto, equipped, mods[name], types, weapon_skin_bonus)
 			if texture then
 				if DB:has(Idstring("texture"), texture) then
 					table.insert(icon_list, {
 						texture = texture,
 						equipped = equipped,
-						type = name
+						type = name,
+						weapon_skin_bonus = weapon_skin_bonus
 					})
 				else
 					Application:error("[MenuComponentManager:create_weapon_mod_icon_list]", "Missing texture for weapon mod icon", texture)

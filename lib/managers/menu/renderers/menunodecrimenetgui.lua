@@ -2689,7 +2689,7 @@ function MenuNodeOpenContainerGui:setup(half_fade)
 	local drill_amount = managers.blackmarket:get_inventory_tradable_item_amount("drills", container_data.drill)
 	local safe_amount = managers.blackmarket:get_inventory_tradable_item_amount("safes", container_data.safe)
 	local padding = 10
-	local content_padding = 0
+	local content_padding = 1
 	if self._drill_amount == drill_amount and self._safe_amount == safe_amount then
 		self.item_panel:set_world_left(self._safe_panel:world_right() + padding - self.node:parameters().align_line_proportions * self.item_panel:w())
 		self.item_panel:set_world_center_y(self._safe_panel:world_center_y())
@@ -2764,7 +2764,7 @@ function MenuNodeOpenContainerGui:setup(half_fade)
 		h = self._panel:h() - 20,
 		layer = 1
 	})
-	local title_text = managers.localization:to_upper_text("menu_ti_steam_open_safe_title", {
+	local title_text = container_data.show_only and managers.localization:to_upper_text("menu_steam_market_content_" .. container_data.content) or managers.localization:to_upper_text("menu_ti_steam_open_safe_title", {
 		name = managers.localization:text(tweak_data.economy.safes[data.safe].name_id),
 		type = managers.localization:text("bm_menu_safe")
 	})
@@ -2912,9 +2912,33 @@ function MenuNodeOpenContainerGui:setup(half_fade)
 			local sh = math.min(ph, pw / (tw / th))
 			rarity_bitmap:set_size(math.round(sw), math.round(sh))
 			rarity_bitmap:set_center(new_content:w() * 0.5, new_content:h() * 0.5)
+			local select_box_panel = new_content:panel()
+			local select_box = BoxGuiObject:new(select_box_panel, {
+				sides = {
+					2,
+					2,
+					2,
+					2
+				}
+			})
+			select_box:set_color(Color(0, 0, 0, 0))
+			table.insert(self._text_buttons, {
+				panel = new_content,
+				text = nil,
+				blur = nil,
+				highlighted = false,
+				clbk = callback(self, self, "preview_weapon_cosmetics_callback", {
+					weapon_id = c_td.weapon_id,
+					cosmetic_id = content.entry,
+					quality = "mint"
+				}),
+				image = select_box,
+				highlighted_color = Color(1, 1, 1),
+				default_color = Color(0, 0, 0, 0)
+			})
 		else
 			if content.category == "contents" and c_td.rarity == "legendary" then
-				self:request_texture(content.texute_path or "guis/dlcs/cash/textures/pd2/safe_raffle/icon_legendary", new_content, true)
+				self:request_texture(content.texture_path or "guis/dlcs/cash/textures/pd2/safe_raffle/icon_legendary", new_content, true)
 			else
 			end
 		end
@@ -2925,7 +2949,7 @@ function MenuNodeOpenContainerGui:setup(half_fade)
 		name = "divider_panel",
 		h = 4
 	})
-	divider_panel:set_top(safe_panel:bottom() + padding * 0.5)
+	divider_panel:set_top(safe_panel:bottom() + padding)
 	BoxGuiObject:new(divider_panel, {
 		sides = {
 			0,
@@ -2937,9 +2961,30 @@ function MenuNodeOpenContainerGui:setup(half_fade)
 	self.item_panel:set_world_left(safe_panel:world_right() + padding - self.node:parameters().align_line_proportions * self.item_panel:w())
 	self.item_panel:set_world_center_y(safe_panel:world_center_y())
 end
+function MenuNodeOpenContainerGui:preview_weapon_cosmetics_callback(data)
+	managers.blackmarket:view_weapon_platform_with_cosmetics(data.weapon_id, {
+		id = data.cosmetic_id,
+		quality = data.cosmetic_quality
+	}, function()
+		managers.menu:open_node("inventory_tradable_container_preview_node", {})
+		managers.menu_component:hide_blackmarket_gui()
+	end)
+end
+function MenuNodeOpenContainerGui:set_visible(visible)
+	MenuNodeOpenContainerGui.super.set_visible(self, visible)
+	self._fullscreen_panel:set_visible(visible)
+end
 function MenuNodeOpenContainerGui:close()
 	MenuNodeOpenContainerGui.super.close(self)
 	if alive(self._fullscreen_panel) then
 		self._fullscreen_panel:parent():remove(self._fullscreen_panel)
 	end
+end
+MenuNodeContainerPreviewGui = MenuNodeContainerPreviewGui or class(MenuNodeGui)
+function MenuNodeContainerPreviewGui:init(...)
+	MenuNodeContainerPreviewGui.super.init(self, ...)
+end
+function MenuNodeContainerPreviewGui:close(...)
+	MenuNodeContainerPreviewGui.super.close(self, ...)
+	managers.menu_component:show_blackmarket_gui()
 end

@@ -647,6 +647,7 @@ function CrimeNetContractGui:init(ws, fullscreen_ws, node)
 		self._contact_text_header:set_text(managers.localization:to_upper_text("menu_cn_premium_buy_desc") .. ": " .. managers.localization:to_upper_text(narrative.name_id))
 		self._step = 1
 		self._steps = {
+			"start_sound",
 			"set_all",
 			"free_memory"
 		}
@@ -1284,7 +1285,7 @@ function CrimeNetContractGui:set_all(t, dt)
 			gui_panel:child("premium_text"):set_range_color(start_ci[i], end_ci[i], i == 1 and not can_afford and tweak_data.screen_colors.pro_color or tweak_data.screen_colors.button_stage_2)
 		end
 	end
-	if self._step == 1 then
+	if self._step == 2 then
 		self._step = self._step + 1
 	end
 end

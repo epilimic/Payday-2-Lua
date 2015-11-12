@@ -1643,9 +1643,9 @@ function TeamLoadoutItem:set_slot_outfit(slot, criminal_name, outfit)
 			rarity_bitmap:set_center(primary_bitmap:center())
 		end
 		primary_texture = texture
+		local perk_index = 0
 		local perks = managers.blackmarket:get_perks_from_weapon_blueprint(outfit.primary.factory_id, outfit.primary.blueprint)
 		if 0 < table.size(perks) then
-			local perk_index = 0
 			for perk in pairs(perks) do
 				local texture = "guis/textures/pd2/blackmarket/inv_mod_" .. perk
 				if DB:has(Idstring("texture"), texture) then
@@ -1655,11 +1655,26 @@ function TeamLoadoutItem:set_slot_outfit(slot, criminal_name, outfit)
 						h = 16,
 						rotation = math.random(2) - 1.5,
 						alpha = 0.8,
-						layer = 1
+						layer = 2
 					})
 					perk_object:set_rightbottom(math.round(primary_bitmap:right() - perk_index * 16), math.round(primary_bitmap:bottom() - 5))
 					perk_index = perk_index + 1
 				end
+			end
+		end
+		if outfit.primary.cosmetics and outfit.primary.cosmetics.bonus then
+			local bonus_data = tweak_data.economy.bonuses[tweak_data.blackmarket.weapon_skins[outfit.primary.cosmetics.id].bonus]
+			if bonus_data and (bonus_data.exp_multiplier or bonus_data.money_multiplier) then
+				local perk_object = player_slot.panel:bitmap({
+					texture = "guis/dlcs/cash/textures/pd2/safe_raffle/teamboost_icon",
+					w = 16,
+					h = 16,
+					rotation = math.random(2) - 1.5,
+					alpha = 0.8,
+					layer = 2
+				})
+				perk_object:set_rightbottom(math.round(primary_bitmap:right() - perk_index * 16), math.round(primary_bitmap:bottom() - 5))
+				perk_index = perk_index + 1
 			end
 		end
 	end
@@ -1703,9 +1718,9 @@ function TeamLoadoutItem:set_slot_outfit(slot, criminal_name, outfit)
 			rarity_bitmap:set_center(secondary_bitmap:center())
 		end
 		secondary_texture = texture
+		local perk_index = 0
 		local perks = managers.blackmarket:get_perks_from_weapon_blueprint(outfit.secondary.factory_id, outfit.secondary.blueprint)
 		if 0 < table.size(perks) then
-			local perk_index = 0
 			for perk in pairs(perks) do
 				local texture = "guis/textures/pd2/blackmarket/inv_mod_" .. perk
 				if DB:has(Idstring("texture"), texture) then
@@ -1720,6 +1735,21 @@ function TeamLoadoutItem:set_slot_outfit(slot, criminal_name, outfit)
 					perk_object:set_rightbottom(secondary_bitmap:right() - perk_index * 16, secondary_bitmap:bottom() - 5)
 					perk_index = perk_index + 1
 				end
+			end
+		end
+		if outfit.secondary.cosmetics and outfit.secondary.cosmetics.bonus then
+			local bonus_data = tweak_data.economy.bonuses[tweak_data.blackmarket.weapon_skins[outfit.secondary.cosmetics.id].bonus]
+			if bonus_data and (bonus_data.exp_multiplier or bonus_data.money_multiplier) then
+				local perk_object = player_slot.panel:bitmap({
+					texture = "guis/dlcs/cash/textures/pd2/safe_raffle/teamboost_icon",
+					w = 16,
+					h = 16,
+					rotation = math.random(2) - 1.5,
+					alpha = 0.8,
+					layer = 2
+				})
+				perk_object:set_rightbottom(math.round(secondary_bitmap:right() - perk_index * 16), math.round(secondary_bitmap:bottom() - 5))
+				perk_index = perk_index + 1
 			end
 		end
 	end
@@ -1877,7 +1907,7 @@ function NewLoadoutItem:init(panel, columns, rows, x, y, params)
 	})
 	if params then
 		if params.info_text then
-			self:set_info_text(params.info_text)
+			self:set_info_text(params.info_text, params.info_text_color)
 		end
 		if params.item_texture and DB:has(Idstring("texture"), params.item_texture) then
 			self._item_image = self._item_panel:bitmap({
@@ -1961,9 +1991,10 @@ function NewLoadoutItem:init(panel, columns, rows, x, y, params)
 						alpha = icon.equipped and 1 or 0.25,
 						layer = 1
 					})
-					object:set_center(self._info_icon_panel:right() - index * 18, self._info_icon_panel:h() / 2)
+					object:set_center(self._info_icon_panel:right() - (index - 1) * 18 - 9, self._info_icon_panel:h() / 2)
 					if split and index > when_to_split then
-						object:move(18 * when_to_split, 0)
+						object:move(18 * when_to_split, -18)
+						object:set_rotation(360)
 					end
 				else
 				end
@@ -1973,10 +2004,11 @@ function NewLoadoutItem:init(panel, columns, rows, x, y, params)
 	end
 	self:deselect_item()
 end
-function NewLoadoutItem:set_info_text(text)
+function NewLoadoutItem:set_info_text(text, color)
 	self._info_text:set_text(text)
 	local x, y, w, h = self._info_text:text_rect()
 	self._info_text:set_align(w > self._info_text:w() and "left" or "center")
+	self._info_text:set_color(color or tweak_data.screen_colors.text)
 end
 function NewLoadoutItem:mouse_moved(x, y)
 	local mouse_over = self._item_panel:inside(x, y)
@@ -2159,6 +2191,7 @@ function NewLoadoutTab:populate_category(data)
 			new_data.global_value = tweak_data.weapon[new_data.name] and tweak_data.weapon[new_data.name].global_value or "normal"
 			new_data.dlc_locked = tweak_data.lootdrop.global_values[new_data.global_value].unlock_id or nil
 			new_data.lock_texture = BlackMarketGui.get_lock_icon(self, new_data)
+			new_data.name_color = crafted.customize_locked and crafted.cosmetics and tweak_data.economy.rarities[tweak_data.blackmarket.weapon_skins[crafted.cosmetics.id].rarity or "common"].color
 			if not new_data.equipped and new_data.unlocked then
 				table.insert(new_data, "lo_w_equip")
 			end
@@ -2168,8 +2201,8 @@ function NewLoadoutTab:populate_category(data)
 			for _, icon in pairs(icon_list) do
 				table.insert(new_data.mini_icons, {
 					texture = icon.texture,
-					right = (icon_index - 1) * 18,
-					bottom = 0,
+					right = (icon_index - 1) % 11 * 18,
+					bottom = math.floor((icon_index - 1) / 11) * 18,
 					layer = 1,
 					w = 16,
 					h = 16,
@@ -2325,6 +2358,7 @@ function NewLoadoutTab:create_weapon_loadout(category)
 	end
 	new_node_data.is_loadout = true
 	new_node_data.selected_tab = selected_tab
+	new_node_data.scroll_tab_anywhere = true
 	new_node_data.topic_id = "menu_loadout_blackmarket"
 	new_node_data.topic_params = {
 		category = managers.localization:text("bm_menu_" .. category)
@@ -2383,6 +2417,7 @@ function NewLoadoutTab:create_melee_weapon_loadout()
 	end
 	new_node_data.selected_tab = selected_tab
 	new_node_data.is_loadout = true
+	new_node_data.scroll_tab_anywhere = true
 	new_node_data.topic_id = "bm_menu_melee_weapons"
 	new_node_data.topic_params = {
 		weapon_category = managers.localization:text("bm_menu_melee_weapons")

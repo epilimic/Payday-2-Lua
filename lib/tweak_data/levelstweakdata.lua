@@ -687,16 +687,6 @@ function LevelsTweakData:init()
 		self.roberts.ghost_bonus = 0.1
 		self.roberts.max_bags = 14
 	end
-	self.haunted = {}
-	self.haunted.name_id = "heist_haunted_hl"
-	self.haunted.briefing_id = "heist_haunted_briefing"
-	self.haunted.world_name = "narratives/haunted_safehouse"
-	self.haunted.intro_event = "lol"
-	self.haunted.outro_event = {"lol", "lolo"}
-	self.haunted.music = "heist"
-	self.haunted.package = "packages/narr_haunted"
-	self.haunted.cube = "cube_apply_heist_bank"
-	self.haunted.max_bags = 4
 	self.mia_1 = {}
 	self.mia_1.name_id = "heist_mia_1_hl"
 	self.mia_1.briefing_id = "heist_mia_1_briefing"
@@ -1073,8 +1063,7 @@ function LevelsTweakData:init()
 		"jolly",
 		"red2",
 		"dinner",
-		"nail",
-		"haunted"
+		"nail"
 	}
 	if SystemInfo:platform() == Idstring("WIN32") then
 		table.insert(self._level_index, "roberts")

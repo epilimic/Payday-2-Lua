@@ -189,6 +189,8 @@ function PlayerMovement:update(unit, t, dt)
 	self:update_stamina(t, dt)
 end
 function PlayerMovement:update_stamina(t, dt, ignore_running)
+	local dt = self._last_stamina_regen_t and t - self._last_stamina_regen_t or dt
+	self._last_stamina_regen_t = t
 	if not ignore_running and self._is_running then
 		self:subtract_stamina(dt * tweak_data.player.movement_state.stamina.STAMINA_DRAIN_RATE)
 	elseif self._regenerate_timer then

@@ -437,7 +437,7 @@ function ConnectionNetworkHandler:sync_outfit(outfit_string, outfit_version, out
 		return
 	end
 	print("[ConnectionNetworkHandler:sync_outfit]", "peer_id", peer:id(), "outfit_string", outfit_string, "outfit_version", outfit_version)
-	peer:set_outfit_string(outfit_string, outfit_version, outfit_signature)
+	outfit_string, outfit_version, outfit_signature = peer:set_outfit_string(outfit_string, outfit_version, outfit_signature)
 	if managers.network:session():is_host() then
 		managers.network:session():chk_request_peer_outfit_load_status()
 	end

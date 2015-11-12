@@ -365,6 +365,9 @@ function NetworkPeer:tradable_verify_outfit(signature)
 end
 function NetworkPeer:on_verify_tradable_outfit(outfit_version, error, list)
 	self._wait_for_verify_tradable_outfit = nil
+	if NetworkAccountSTEAM.TEST_INVENTORY then
+		return
+	end
 	if outfit_version ~= self._outfit_version then
 		return
 	end
@@ -539,6 +542,9 @@ function NetworkPeer:character()
 end
 function NetworkPeer:used_deployable()
 	return self._used_deployable
+end
+function NetworkPeer:outfit_signature()
+	return self._signature
 end
 function NetworkPeer:set_used_deployable(used)
 	self._used_deployable = used
@@ -979,6 +985,7 @@ function NetworkPeer:set_outfit_string(outfit_string, outfit_version, outfit_sig
 			self:tradable_verify_outfit(outfit_signature)
 		end
 	end
+	return self._profile.outfit_string, self._outfit_version, self._signature
 end
 function NetworkPeer:profile(data)
 	if data then
@@ -1019,6 +1026,10 @@ function NetworkPeer:skills()
 	local outfit_string = self:profile("outfit_string")
 	local data = string.split(outfit_string, " ")
 	return data[managers.blackmarket:outfit_string_index("skills")]
+end
+function NetworkPeer:has_blackmarket_outfit()
+	local outfit_string = self:profile("outfit_string")
+	return not not outfit_string
 end
 function NetworkPeer:blackmarket_outfit()
 	local outfit_string = self:profile("outfit_string")

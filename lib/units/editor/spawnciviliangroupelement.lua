@@ -2,7 +2,7 @@ SpawnCivilianGroupUnitElement = SpawnCivilianGroupUnitElement or class(MissionEl
 function SpawnCivilianGroupUnitElement:init(unit)
 	SpawnCivilianGroupUnitElement.super.init(self, unit)
 	self._hed.random = false
-	self._hed.ignore_disabled = false
+	self._hed.ignore_disabled = true
 	self._hed.amount = 1
 	self._hed.elements = {}
 	self._hed.team = "default"

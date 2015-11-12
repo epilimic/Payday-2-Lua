@@ -311,16 +311,16 @@ function MenuBackdropGUI:_create_particle()
 	})
 	local from_longside = math.random(2) == 1
 	local otherside_start = math.random(2) == 1
-	local cx = from_longside and math.random(1280) or otherside_start and -32 or 1312
-	local cy = not from_longside and math.random(720) or otherside_start and -32 or 752
+	local cx = from_longside and math.random(MenuBackdropGUI.BASE_RES.w) or otherside_start and -32 or MenuBackdropGUI.BASE_RES.w + 32
+	local cy = not from_longside and math.random(MenuBackdropGUI.BASE_RES.h) or otherside_start and -32 or MenuBackdropGUI.BASE_RES.h + 32
 	particle:set_center(cx, cy)
 	particle:rotate(math.rand(180))
 	local function particle_animation(o, self)
 		local start_x = o:center_x()
 		local start_y = o:center_y()
 		otherside_start = not otherside_start
-		local end_x = from_longside and math.random(1280) or otherside_start and -32 or 1312
-		local end_y = not from_longside and math.random(720) or otherside_start and -32 or 752
+		local end_x = from_longside and math.random(MenuBackdropGUI.BASE_RES.w) or otherside_start and -32 or MenuBackdropGUI.BASE_RES.w + 32
+		local end_y = not from_longside and math.random(MenuBackdropGUI.BASE_RES.h) or otherside_start and -32 or MenuBackdropGUI.BASE_RES.h + 32
 		local diff_x = end_x - start_x
 		local diff_y = end_y - start_y
 		local distance = diff_x * diff_x + diff_y * diff_y

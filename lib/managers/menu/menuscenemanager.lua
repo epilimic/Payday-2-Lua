@@ -169,7 +169,6 @@ function MenuSceneManager:_set_up_templates()
 	self._scene_templates.standard = {}
 	self._scene_templates.standard.use_character_grab = true
 	self._scene_templates.standard.character_visible = true
-	self._scene_templates.standard.complete_overkill_pack_safe_visible = true
 	self._scene_templates.standard.camera_pos = ref:position()
 	self._scene_templates.standard.target_pos = target_pos
 	self._scene_templates.standard.character_pos = c_ref:position()
@@ -575,12 +574,6 @@ function MenuSceneManager:_setup_bg()
 		if Global.blackmarket_manager.characters[character_id].equipped then
 			self:set_character(character_id)
 		end
-	end
-	if managers.dlc:is_dlc_unlocked("complete_overkill_pack") then
-		local a = self._bg_unit:get_object(Idstring("a_reference"))
-		local rot = Rotation(60, 0, 0)
-		local pos = Vector3(-180, 160, -120)
-		self._complete_overkill_pack_safe = World:spawn_unit(Idstring("units/payday2/equipment/gen_interactable_sec_safe_overkill/gen_interactable_sec_safe_overkill"), pos, rot)
 	end
 	self:_setup_lobby_characters()
 end
@@ -1142,6 +1135,12 @@ function MenuSceneManager:_set_unit_enabled_tree(unit, state)
 	if state then
 		unit:set_moving()
 	end
+	if unit:digital_gui() then
+		unit:digital_gui():set_visible(state)
+	end
+	if unit:digital_gui_upper() then
+		unit:digital_gui_upper():set_visible(state)
+	end
 	for _, child_unit in ipairs(unit:children()) do
 		self:_set_unit_enabled_tree(child_unit, state)
 	end
@@ -1171,7 +1170,9 @@ function MenuSceneManager:clbk_weapon_base_unit_loaded(params, status, asset_typ
 	end
 	local align_name = params.type == "primary" and Idstring("a_weapon_right_front") or Idstring("a_weapon_left_front")
 	owner:link(align_name, weapon_unit, weapon_unit:orientation_object():name())
-	self:_select_character_pose()
+	if owner == self._character_unit then
+		self:_select_character_pose()
+	end
 	self:_chk_character_visibility(owner)
 end
 function MenuSceneManager:clbk_weapon_assembly_complete(params)
@@ -1435,7 +1436,6 @@ function MenuSceneManager:set_scene_template(template, data, custom_name, skip_t
 			self._character_unit:set_position(self._character_values.pos_target)
 		end
 		self:_chk_character_visibility(self._character_unit)
-		self:_chk_complete_overkill_pack_safe_visibility()
 		if self._lobby_characters then
 			for _, unit in pairs(self._lobby_characters) do
 				self:_chk_character_visibility(unit)
@@ -1512,12 +1512,6 @@ function MenuSceneManager:set_scene_template(template, data, custom_name, skip_t
 		end
 	end
 	managers.network.account:inventory_load()
-end
-function MenuSceneManager:_chk_complete_overkill_pack_safe_visibility()
-	if not alive(self._complete_overkill_pack_safe) then
-		return
-	end
-	self._complete_overkill_pack_safe:set_visible(self._scene_templates[self._current_scene_template].complete_overkill_pack_safe_visible)
 end
 function MenuSceneManager:dispatch_transition_done()
 	self._transition_done_callback_handler:dispatch()
@@ -2316,6 +2310,8 @@ function MenuSceneManager:reset_economy_safe()
 	managers.menu_scene:remove_item()
 end
 function MenuSceneManager:store_safe_result(error, items_new, items_removed)
+	managers.network.account:inventory_repair_list(items_new)
+	managers.network.account:inventory_repair_list(items_removed)
 	self._safe_result_recieved_data = {
 		error,
 		items_new,

@@ -216,6 +216,11 @@ function ExperienceManager:_check_achievements()
 	if self:current_level() >= tweak_data.achievement.most_wanted then
 		managers.achievment:award("most_wanted")
 	end
+	if self._global.rank then
+		for i = 1, Application:digest_value(self._global.rank, false) do
+			managers.achievment:award("ignominy_" .. tostring(i))
+		end
+	end
 end
 function ExperienceManager:present()
 end
@@ -242,7 +247,7 @@ function ExperienceManager:set_current_rank(value)
 	if value < #tweak_data.infamy.ranks + 1 then
 		managers.infamy:aquire_point()
 		self._global.rank = Application:digest_value(value, true)
-		managers.achievment:award("ignominy_" .. tostring(value))
+		self:_check_achievements()
 		self:update_progress()
 	end
 end
@@ -667,6 +672,7 @@ function ExperienceManager:load(data)
 		end
 	end
 	managers.network.account:experience_loaded()
+	self:_check_achievements()
 end
 function ExperienceManager:reset()
 	managers.upgrades:reset()

@@ -1072,6 +1072,10 @@ function WeaponFactoryManager:has_perk(perk_name, factory_id, blueprint)
 	end
 	return false
 end
+function WeaponFactoryManager:get_type_from_part_id(part_id)
+	local factory = tweak_data.weapon.factory
+	return factory.parts[part_id] and factory.parts[part_id].type
+end
 function WeaponFactoryManager:get_perks_from_part_id(part_id)
 	local factory = tweak_data.weapon.factory
 	if not factory.parts[part_id] then

@@ -147,6 +147,7 @@ function IngameLobbyMenuState:_clbk_inventory_reward(error, tradable_list)
 		Application:error("[IngameLobbyMenuState:_clbk_inventory_reward] Failed to reward tradable item (" .. tostring(error) .. ")")
 	end
 	local drop_category, drop_entry
+	managers.network.account:inventory_repair_list(tradable_list)
 	if tradable_list and table.size(tradable_list) > 0 then
 		print("[IngameLobbyMenuState:_clbk_inventory_reward]", tradable_list[1].category, tradable_list[1].entry, tradable_list[1].instance_id, tradable_list[1].amount, table.size(tradable_list))
 		drop_category = tradable_list[1].category
