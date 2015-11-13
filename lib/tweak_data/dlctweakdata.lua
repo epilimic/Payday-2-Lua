@@ -4210,6 +4210,17 @@ function DLCTweakData:init(tweak_data)
 			amount = 1
 		}
 	}
+	self.tormentor_mask = {}
+	self.tormentor_mask.free = true
+	self.tormentor_mask.content = {}
+	self.tormentor_mask.content.loot_global_value = "normal"
+	self.tormentor_mask.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "tormentor",
+			amount = 1
+		}
+	}
 	self.pdcon_2015 = {}
 	self.pdcon_2015.dlc = "has_pdcon_2015"
 	self.pdcon_2015.content = {}

@@ -2343,6 +2343,12 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.satan.texture_bundle_folder = "nails"
 	self.masks.satan.sort_number = 3
 	self.masks.satan.value = 0
+	self.masks.tormentor = {}
+	self.masks.tormentor.unit = "units/pd2_dlc_tormentor_mask/masks/tormentor/msk_tormentor"
+	self.masks.tormentor.name_id = "bm_msk_tormentor"
+	self.masks.tormentor.pcs = {}
+	self.masks.tormentor.value = 0
+	self.masks.tormentor.sort_number = 12
 	if SystemInfo:platform() == Idstring("PS3") then
 		self.masks.sweettooth = {}
 		self.masks.sweettooth.unit = "units/pd2_dlc_consoles/masks/msk_sweettooth/msk_sweettooth"
