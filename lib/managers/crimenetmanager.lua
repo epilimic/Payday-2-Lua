@@ -132,8 +132,16 @@ function CrimeNetManager:reset_seed()
 		self._presets = nil
 	end
 end
+function CrimeNetManager:set_getting_hacked(hacked)
+	self._getting_hacked = hacked and true or false
+	managers.menu_component:set_crimenet_gui_getting_hacked(hacked)
+end
 function CrimeNetManager:update(t, dt)
 	if not self._active then
+		return
+	end
+	if self._getting_hacked then
+		managers.menu_component:update_crimenet_gui(t, dt)
 		return
 	end
 	for id, job in pairs(self._active_jobs) do
@@ -681,7 +689,8 @@ function CrimeNetManager:_find_online_games_win32(friends_only)
 								job_id = job_id,
 								is_friend = is_friend,
 								kick_option = kick_option,
-								job_plan = job_plan
+								job_plan = job_plan,
+								custom_text = room.custom_text
 							})
 						end
 					else
@@ -699,7 +708,8 @@ function CrimeNetManager:_find_online_games_win32(friends_only)
 							job_id = job_id,
 							is_friend = is_friend,
 							kick_option = kick_option,
-							job_plan = job_plan
+							job_plan = job_plan,
+							custom_text = room.custom_text
 						})
 					end
 				end
@@ -731,6 +741,7 @@ CrimeNetGui = CrimeNetGui or class()
 function CrimeNetGui:init(ws, fullscreeen_ws, node)
 	self._tweak_data = tweak_data.gui.crime_net
 	self._crimenet_enabled = true
+	managers.crimenet:set_getting_hacked(false)
 	managers.menu_component:post_event("crime_net_startup")
 	managers.menu_component:close_contract_gui()
 	local no_servers = node:parameters().no_servers
@@ -1476,18 +1487,19 @@ function CrimeNetGui:init(ws, fullscreeen_ws, node)
 	end
 	self._special_contracts_id = {}
 	self:add_special_contracts(node:parameters().no_casino)
-	managers.features:announce_feature("crimenet_welcome")
-	if is_win32 then
-		managers.features:announce_feature("thq_feature")
+	if managers.features:can_announce("crimenet_hacked") then
+	else
+		managers.features:announce_feature("crimenet_welcome")
+		if is_win32 then
+			managers.features:announce_feature("thq_feature")
+		end
+		if is_win32 and Steam:logged_on() and not managers.dlc:has_pd2_clan() and math.random() < 0.2 then
+			managers.features:announce_feature("join_pd2_clan")
+		end
+		if managers.dlc:is_dlc_unlocked("gage_pack_jobs") then
+			managers.features:announce_feature("dlc_gage_pack_jobs")
+		end
 	end
-	if is_win32 and Steam:logged_on() and not managers.dlc:has_pd2_clan() and math.random() < 0.2 then
-		managers.features:announce_feature("join_pd2_clan")
-	end
-	if managers.dlc:is_dlc_unlocked("gage_pack_jobs") then
-		managers.features:announce_feature("dlc_gage_pack_jobs")
-	end
-	managers.features:announce_feature("crimenet_heat")
-	managers.features:announce_feature("election_changes")
 	managers.challenge:fetch_challenges()
 	return
 end
@@ -1704,6 +1716,163 @@ function CrimeNetGui:_get_job_location(data)
 		end
 	end
 	return self:_get_random_location()
+end
+function CrimeNetGui:set_getting_hacked(hacked)
+	self._getting_hacked = hacked and true or false
+	self._getting_hacked_panel = self._getting_hacked_panel or self._fullscreen_panel:panel({layer = 100})
+	self._getting_hacked_panel:stop()
+	self._getting_hacked_panel:clear()
+	if self._getting_hacked_post_event then
+		self._getting_hacked_post_event:stop()
+		self._getting_hacked_post_event = nil
+	end
+	if not hacked then
+		return
+	end
+	local hack_window = self._getting_hacked_panel:panel({
+		name = "message",
+		w = self._getting_hacked_panel:w() * 0.45,
+		h = self._getting_hacked_panel:h() * 0.2,
+		layer = 2
+	})
+	hack_window:set_center(self._getting_hacked_panel:w() / 2, self._getting_hacked_panel:h() / 2)
+	local box = BoxGuiObject:new(hack_window, {
+		sides = {
+			1,
+			1,
+			1,
+			1
+		}
+	})
+	box:set_color(tweak_data.screen_colors.important_1)
+	hack_window:rect({
+		color = Color.black,
+		alpha = 0.55
+	})
+	hack_window:bitmap({
+		texture = "guis/textures/pd2/cn_icon_cs",
+		color = tweak_data.screen_colors.important_1,
+		x = 10,
+		y = 10,
+		w = hack_window:h() - 20,
+		h = hack_window:h() - 20,
+		layer = 1,
+		blend_mode = "add"
+	})
+	hack_window:text({
+		x = hack_window:h(),
+		y = 10,
+		w = hack_window:w() - hack_window:h() - 10,
+		text = managers.localization:to_upper_text("menu_mrkwtr_hack_text"),
+		font = tweak_data.menu.pd2_small_font,
+		font_size = tweak_data.menu.pd2_small_font_size,
+		color = tweak_data.screen_colors.important_1,
+		layer = 1,
+		wrap = true,
+		word_wrap = true,
+		blend_mode = "add"
+	})
+	local progress_h = 30
+	hack_window:rect({
+		name = "progress",
+		x = hack_window:h(),
+		y = hack_window:h() - progress_h - 10,
+		w = 0,
+		h = progress_h,
+		color = tweak_data.screen_colors.important_1,
+		alpha = 0.25,
+		blend_mode = "add",
+		layer = 2
+	})
+	hack_window:rect({
+		x = hack_window:h(),
+		y = hack_window:h() - progress_h - 10,
+		w = hack_window:w() - hack_window:h() - 10,
+		h = progress_h,
+		color = tweak_data.screen_colors.important_1,
+		alpha = 0.25,
+		blend_mode = "add",
+		layer = 1
+	})
+	hack_window:rect({
+		name = "stop",
+		x = hack_window:w() - 10,
+		y = hack_window:h() - progress_h - 10,
+		w = 2,
+		h = progress_h,
+		color = tweak_data.screen_colors.important_1,
+		blend_mode = "add",
+		layer = 3
+	})
+	hack_window:text({
+		x = hack_window:h() + 10,
+		y = hack_window:h() - progress_h - 10,
+		w = hack_window:w() - hack_window:h() - 20,
+		h = progress_h,
+		text = managers.localization:to_upper_text("menu_mrkwtr_progress_text"),
+		font = tweak_data.menu.pd2_small_font,
+		font_size = tweak_data.menu.pd2_small_font_size,
+		align = "left",
+		vertical = "center",
+		color = tweak_data.screen_colors.important_1,
+		alpha = 1,
+		blend_mode = "add",
+		layer = 1
+	})
+	self._getting_hacked_panel:video({
+		name = "video",
+		video = "movies/crimenet_hacked",
+		width = 1280,
+		height = 720,
+		blend_mode = "mul",
+		loop = true,
+		alpha = 1,
+		color = tweak_data.screen_colors.button_Stage_3
+	})
+	self._getting_hacked_panel:animate(function(o)
+		local panel = o
+		local video = o:child("video")
+		local message = o:child("message")
+		local progress = message:child("progress")
+		local stop = message:child("stop")
+		panel:set_alpha(1)
+		message:set_alpha(0)
+		over(1, function(p)
+			local osc = math.cos(p * 250)
+			local alpha = math.round(math.sin(p * 500 * osc))
+			video:set_blend_mode(alpha == 1 and "mul" or "mulx2")
+		end)
+		video:set_blend_mode("mulx2")
+		panel:set_alpha(1)
+		over(1, function(p)
+			local osc = math.cos(p * 400)
+			local alpha = math.round(math.sin(p * 500 * osc))
+			message:set_alpha(alpha)
+		end)
+		message:set_alpha(1)
+		wait(0.08)
+		self._getting_hacked_post_event = managers.menu_component:post_event("Play_loc_quote_set_a")
+		over(self._start_hacked_t - 4, function(p)
+			progress:set_w((stop:x() - progress:x()) * p)
+		end)
+		wait(0.08)
+		over(1, function(p)
+			local osc = math.cos(p * 350)
+			local alpha = math.round(math.sin(p * 450 * osc))
+			message:set_alpha(alpha)
+		end)
+		message:set_alpha(0)
+		over(1, function(p)
+			local osc = math.cos(p * 250)
+			local alpha = math.round(math.sin(p * 500 * osc))
+			panel:set_alpha(alpha)
+			video:set_blend_mode(alpha == 1 and "normal" or "mulx2")
+		end)
+		video:set_blend_mode("mul")
+		panel:set_alpha(0)
+	end)
+	self._start_hacked_t = hacked
+	self._hacked_t = self._start_hacked_t
 end
 function CrimeNetGui:add_special_contracts(no_casino)
 	for index, special_contract in ipairs(tweak_data.gui.crime_net.special_contracts) do
@@ -1945,7 +2114,9 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 			heat_name:set_range_color(unpack(range))
 		end
 	end
+	local use_custom_text = is_win32 and data.custom_text and data.custom_text ~= "" and data.custom_text ~= "value_pending" and data.custom_text ~= "value_missing" and true or false
 	local job_tweak = tweak_data.narrative:job_data(data.job_id)
+	local custom_string = use_custom_text and data.custom_text or ""
 	local host_string = data.host_name or is_professional and managers.localization:to_upper_text("cn_menu_pro_job") or " "
 	local job_string = data.job_id and managers.localization:to_upper_text(job_tweak.name_id) or data.level_name or "NO JOB"
 	local contact_string = utf8.to_upper(data.job_id and managers.localization:text(tweak_data.narrative.contacts[job_tweak.contact].name_id)) or "BAIN"
@@ -1972,6 +2143,16 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 			color = Color.white
 		})
 	end
+	local custom_name = side_panel:text({
+		name = "custom_name",
+		text = custom_string,
+		vertical = "bottom",
+		font = tweak_data.menu.pd2_small_font,
+		font_size = tweak_data.menu.pd2_small_font_size,
+		color = data.is_friend and friend_color or is_server and regular_color or pro_color,
+		blend_mode = "add",
+		alpha = 0
+	})
 	local host_name = side_panel:text({
 		name = "host_name",
 		text = host_string,
@@ -1979,8 +2160,7 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 		font = tweak_data.menu.pd2_small_font,
 		font_size = tweak_data.menu.pd2_small_font_size,
 		color = data.is_friend and friend_color or is_server and regular_color or pro_color,
-		blend_mode = "add",
-		layer = 0
+		blend_mode = "add"
 	})
 	local job_name = side_panel:text({
 		name = "job_name",
@@ -2027,6 +2207,21 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 		host_name:set_size(w, h)
 		host_name:set_position(x, 0)
 		if not is_server then
+		end
+		if use_custom_text then
+			custom_name:set_w(150)
+			custom_name:set_wrap(true)
+			custom_name:set_word_wrap(true)
+			custom_name:set_kern(custom_name:kern())
+			local _, _, _, h = custom_name:text_rect()
+			custom_name:set_h(h)
+			custom_name:set_position(x, 0)
+			host_name:set_h(h)
+			host_name:set_bottom(custom_name:bottom())
+			host_name:set_vertical("bottom")
+			if job_plan_icon then
+				job_plan_icon:set_bottom(host_name:bottom() - 2)
+			end
 		end
 	end
 	do
@@ -2315,6 +2510,7 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 		contact_name:set_w(0)
 		local _, _, w, h = job_name:text_rect()
 		job_name:set_size(w, h)
+		custom_name:set_right(side_panel:w())
 		host_name:set_right(side_panel:w())
 		job_name:set_right(side_panel:w())
 		contact_name:set_left(side_panel:w())
@@ -2375,8 +2571,27 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 		callout = callout,
 		text_on_right = text_on_right,
 		location = location,
-		heat_glow = heat_glow
+		heat_glow = heat_glow,
+		custom_text = data.custom_text,
+		use_custom_text = use_custom_text
 	}
+	if use_custom_text then
+		side_panel:stop()
+		side_panel:animate(function(o)
+			while true do
+				wait(4)
+				over(1, function(p)
+					host_name:set_alpha(1 - p)
+					custom_name:set_alpha(p)
+				end)
+				wait(4)
+				over(1, function(p)
+					host_name:set_alpha(p)
+					custom_name:set_alpha(1 - p)
+				end)
+			end
+		end)
+	end
 	self:update_job_gui(job, 3)
 	return job
 end
@@ -2493,7 +2708,8 @@ function CrimeNetGui:update_server_job(data, i)
 	local updated_state = self:_update_job_variable(job_index, "state", data.state)
 	local updated_friend = self:_update_job_variable(job_index, "is_friend", data.is_friend)
 	local updated_job_plan = self:_update_job_variable(job_index, "job_plan", data.job_plan)
-	local recreate_job = updated_room or updated_job or updated_level_id or updated_level_data or updated_difficulty or updated_difficulty_id or updated_state or updated_friend or updated_job_plan
+	local updated_custom_text = self:_update_job_variable(job_index, "custom_text", data.custom_text)
+	local recreate_job = updated_room or updated_job or updated_level_id or updated_level_data or updated_difficulty or updated_difficulty_id or updated_state or updated_friend or updated_job_plan or updated_custom_text
 	self:_update_job_variable(job_index, "state_name", data.state_name)
 	if self:_update_job_variable(job_index, "num_plrs", data.num_plrs) and job.peers_panel then
 		for i, peer_icon in ipairs(job.peers_panel:children()) do
@@ -2566,6 +2782,13 @@ function CrimeNetGui:update(t, dt)
 		end
 	end
 	self._rasteroverlay:set_texture_rect(0, -math.mod(Application:time() * 5, 32), 32, 640)
+	if self._getting_hacked then
+		self._hacked_t = self._hacked_t - dt
+		if 0 >= self._hacked_t then
+			managers.crimenet:set_getting_hacked(false)
+			return
+		end
+	end
 	if self._released_map then
 		self._released_map.dx = math.lerp(self._released_map.dx, 0, dt * 2)
 		self._released_map.dy = math.lerp(self._released_map.dy, 0, dt * 2)
@@ -2670,11 +2893,17 @@ function CrimeNetGui:confirm_pressed()
 	if not self._crimenet_enabled then
 		return false
 	end
+	if self._getting_hacked then
+		return
+	end
 	return self:check_job_pressed(managers.mouse_pointer:modified_mouse_pos())
 end
 function CrimeNetGui:special_btn_pressed(button)
 	if not self._crimenet_enabled then
 		return false
+	end
+	if self._getting_hacked then
+		return
 	end
 	if button == Idstring("menu_toggle_legends") then
 		self:toggle_legend()
@@ -2696,11 +2925,17 @@ function CrimeNetGui:previous_page()
 	if not self._crimenet_enabled then
 		return
 	end
+	if self._getting_hacked then
+		return
+	end
 	self:_set_zoom("out", managers.mouse_pointer:modified_mouse_pos())
 	return true
 end
 function CrimeNetGui:next_page()
 	if not self._crimenet_enabled then
+		return
+	end
+	if self._getting_hacked then
 		return
 	end
 	self:_set_zoom("in", managers.mouse_pointer:modified_mouse_pos())
@@ -2727,6 +2962,7 @@ function CrimeNetGui:check_job_pressed(x, y)
 				num_plrs = job.num_plrs or 0,
 				state = job.state,
 				host_name = job.host_name,
+				custom_text = job.custom_text,
 				special_node = job.special_node,
 				dlc = job.dlc,
 				contract_visuals = job_data and job_data.contract_visuals,
@@ -2756,6 +2992,9 @@ function CrimeNetGui:check_job_pressed(x, y)
 end
 function CrimeNetGui:mouse_pressed(o, button, x, y)
 	if not self._crimenet_enabled then
+		return
+	end
+	if self._getting_hacked then
 		return
 	end
 	if self:mouse_button_click(button) then
@@ -2818,6 +3057,9 @@ function CrimeNetGui:mouse_released(o, button, x, y)
 		return
 	end
 	if not self:mouse_button_click(button) then
+		return
+	end
+	if self._getting_hacked then
 		return
 	end
 	if self._grabbed_map and #self._grabbed_map.dirs > 0 then
@@ -2991,6 +3233,8 @@ function CrimeNetGui:update_job_gui(job, inside)
 			local kick_icon = job.kick_option == 0 and "kick_none_icon" or "kick_vote_icon"
 			local start_h = job.side_panel:h()
 			local h = start_h
+			local use_custom_text = job.use_custom_text or false
+			local custom_name = job.side_panel:child("custom_name")
 			local host_name = job.side_panel:child("host_name")
 			local job_name = job.side_panel:child("job_name")
 			local contact_name = job.side_panel:child("contact_name")
@@ -3133,6 +3377,9 @@ end
 function CrimeNetGui:mouse_moved(o, x, y)
 	if not self._crimenet_enabled then
 		return false
+	end
+	if self._getting_hacked then
+		return
 	end
 	if managers.menu:is_pc_controller() then
 		if self._panel:child("back_button"):inside(x, y) then
@@ -3281,6 +3528,13 @@ function CrimeNetGui:disable_crimenet()
 end
 function CrimeNetGui:close()
 	managers.crimenet:stop()
+	if self._getting_hacked_panel then
+		self._getting_hacked_panel:stop()
+		self._getting_hacked_panel:clear()
+	end
+	if self._getting_hacked_post_event then
+		self._getting_hacked_post_event:stop()
+	end
 	if self._crimenet_ambience then
 		self._crimenet_ambience:stop()
 		self._crimenet_ambience = nil

@@ -15,6 +15,7 @@ function FeatureManager:_setup()
 	self._default.announcements.freed_old_hoxton = 1
 	self._default.announcements.infamy_2_0 = 1
 	self._default.announcements.thq_feature = 1
+	self._default.announcements.crimenet_hacked = 1
 	if not Global.feature_manager then
 		Global.feature_manager = {}
 		Global.feature_manager.announcements = {}
@@ -25,6 +26,7 @@ function FeatureManager:_setup()
 		Global.feature_manager.announcements.dlc_gage_pack_jobs = 1
 		Global.feature_manager.announcements.join_pd2_clan = 50
 		Global.feature_manager.announcements.freed_old_hoxton = 1
+		Global.feature_manager.announcements.crimenet_hacked = 1
 		Global.feature_manager.announced = {}
 	end
 	self._global = Global.feature_manager
@@ -47,13 +49,30 @@ function FeatureManager:load(data, version)
 		end
 	end
 end
+function FeatureManager:can_announce(feature_id)
+	local announcement = self._global.announcements[feature_id]
+	if not announcement then
+		return false
+	end
+	if self._global.announced[feature_id] then
+		return false
+	end
+	if type(announcement) ~= "number" then
+		self._global.announcements[feature_id] = 0
+		return false
+	end
+	if announcement <= 0 then
+		return false
+	end
+	return true
+end
 function FeatureManager:announce_feature(feature_id)
 	local announcement = self._global.announcements[feature_id]
 	if not announcement then
 		return
 	end
 	if self._global.announced[feature_id] then
-		Application:debug("[FeatureManager:announce_feature] Feture already announced.", feature_id)
+		print("[FeatureManager:announce_feature] Feture already announced.", feature_id)
 		return
 	end
 	if type(announcement) ~= "number" then
@@ -184,5 +203,10 @@ function FeatureManager:thq_feature()
 		text = "dialog_feature_thq",
 		button_list = button_list
 	})
+	return true
+end
+function FeatureManager:crimenet_hacked()
+	print("FeatureManager:crimenet_hacked()")
+	managers.crimenet:set_getting_hacked(42.16)
 	return true
 end

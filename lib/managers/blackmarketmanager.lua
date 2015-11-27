@@ -4717,7 +4717,7 @@ function BlackMarketManager:load(data)
 		for i, character in pairs(clone(self._global._preferred_characters)) do
 			local character_name = CriminalsManager.convert_old_to_new_character_workname(character)
 			if not tweak_data.blackmarket.characters.locked[character_name] and not tweak_data.blackmarket.characters[character_name] then
-				self._global._preferred_character[i] = self._defaults.preferred_character
+				self._global._preferred_characters[i] = self._defaults.preferred_character
 			end
 		end
 		for character, _ in pairs(tweak_data.blackmarket.characters) do
