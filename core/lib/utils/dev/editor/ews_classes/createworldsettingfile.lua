@@ -54,15 +54,16 @@ function CreateWorldSettingFile:on_create()
 end
 function CreateWorldSettingFile:_compile(path)
 	local t = {
-		platform = "win32",
+		platform = string.lower(SystemInfo:platform():s()),
 		source_root = managers.database:root_path() .. "/assets",
-		target_db_root = managers.database:root_path() .. "/packages/win32/assets",
+		target_db_root = Application:base_path() .. "assets",
 		target_db_name = "all",
 		source_files = {
 			managers.database:entry_path_with_properties(path)
 		},
 		verbose = false,
-		send_idstrings = false
+		send_idstrings = false,
+		preprocessor_definitions = "preprocessor_definitions"
 	}
 	Application:data_compile(t)
 	DB:reload()

@@ -390,7 +390,8 @@ function TweakData:init()
 		"jacket",
 		"bonnie",
 		"sokol",
-		"dragon"
+		"dragon",
+		"bodhi"
 	}
 	self.criminals.characters = {
 		{
@@ -522,6 +523,17 @@ function TweakData:init()
 				color_id = 4,
 				voice = "rb12",
 				ai_mask_id = "jiro",
+				mask_id = 4
+			}
+		},
+		{
+			name = "bodhi",
+			static_data = {
+				ai_character_id = "ai_bodhi",
+				ssuffix = "t",
+				color_id = 4,
+				voice = "rb13",
+				ai_mask_id = "bodhi",
 				mask_id = 4
 			}
 		}
@@ -670,6 +682,7 @@ function TweakData:init()
 	self.screen_colors.community_color = Color(255, 59, 174, 254) / 255
 	self.screen_colors.challenge_completed_color = Color(255, 255, 168, 0) / 255
 	self.screen_colors.stat_maxed = Color("FF00FF")
+	self.screen_colors.competitive_color = Color(255, 41, 204, 122) / 255
 	self.screen_colors.heat_cold_color = Color(255, 255, 51, 51) / 255
 	self.screen_colors.heat_warm_color = Color("ff7f00")
 	self.screen_colors.heat_standard_color = Color(255, 255, 255, 255) / 255
@@ -1596,6 +1609,13 @@ Play the full version soon to get your full PAYDAY!]],
 			weapon = "polymer",
 			kill_count = 100
 		},
+		berry_5 = {
+			award = "berry_5",
+			weapon = "model70",
+			in_steelsight = false,
+			in_head = true,
+			count_in_row = 10
+		},
 		assault_rifle_kills = {
 			challenge_stat = "assault_rifle_kills",
 			weapon_type = "assault_rifle"
@@ -2431,6 +2451,33 @@ Play the full version soon to get your full PAYDAY!]],
 				}
 			}
 		},
+		death_berry = {
+			award = "berry_1",
+			difficulty = {
+				"overkill_290"
+			},
+			job = "pbr"
+		},
+		death_jerry = {
+			award = "jerry_1",
+			difficulty = {
+				"overkill_290"
+			},
+			job = "pbr2"
+		},
+		jerry_5 = {
+			award = "jerry_5",
+			job = "pbr2",
+			difficulty = {
+				"overkill_145",
+				"overkill_290"
+			},
+			equipped_team = {
+				primary_category = "akimbo",
+				secondary_category = "pistol",
+				armor = "level_1"
+			}
+		},
 		bain_jobs = {
 			challenge_stat = "bain_jobs",
 			complete_job = true,
@@ -2482,6 +2529,16 @@ Play the full version soon to get your full PAYDAY!]],
 			total_kills = 120,
 			total_accuracy = 120,
 			num_players = 4
+		},
+		berry_4 = {
+			award = "berry_4",
+			total_downs = 0,
+			difficulty = {
+				"overkill_145",
+				"overkill_290"
+			},
+			level_id = "pbr",
+			is_dropin = false
 		}
 	}
 	self.achievement.loot_cash_achievements = {
@@ -3260,6 +3317,8 @@ Play the full version soon to get your full PAYDAY!]],
 		{track = "track_31"},
 		{track = "track_35"},
 		{track = "track_36"},
+		{track = "track_37", lock = "berry"},
+		{track = "track_38", lock = "berry"},
 		{
 			track = "track_32_lcv"
 		},
@@ -3362,6 +3421,22 @@ Play the full version soon to get your full PAYDAY!]],
 		{
 			track = "alesso_payday",
 			lock = "alesso"
+		},
+		{
+			track = "pb_do_you_wanna",
+			lock = "berry"
+		},
+		{
+			track = "pb_i_need_your_love",
+			lock = "berry"
+		},
+		{
+			track = "pb_still_breathing",
+			lock = "berry"
+		},
+		{
+			track = "pb_take_me_down",
+			lock = "berry"
 		},
 		{
 			track = "bsides_04_double_lmgs",
@@ -3699,14 +3774,14 @@ Play the full version soon to get your full PAYDAY!]],
 	self.projectiles.rocket_frag.launch_speed = 2500
 	self.projectiles.rocket_frag.adjust_z = 0
 	self.projectiles.west_arrow = {}
-	self.projectiles.west_arrow.damage = 19.5
+	self.projectiles.west_arrow.damage = 19.4
 	self.projectiles.west_arrow.launch_speed = 2000
 	self.projectiles.west_arrow.adjust_z = 0
 	self.projectiles.west_arrow.mass_look_up_modifier = 1
 	self.projectiles.west_arrow.name_id = "bm_west_arrow"
 	self.projectiles.west_arrow.push_at_body_index = 0
 	self.projectiles.west_arrow_exp = deep_clone(self.projectiles.west_arrow)
-	self.projectiles.west_arrow_exp.damage = 26
+	self.projectiles.west_arrow_exp.damage = 26.4
 	self.projectiles.west_arrow_exp.bullet_class = "InstantExplosiveBulletBase"
 	self.projectiles.west_arrow_exp.remove_on_impact = true
 	self.projectiles.dynamite = {}
@@ -3716,7 +3791,7 @@ Play the full version soon to get your full PAYDAY!]],
 	self.projectiles.dynamite.name_id = "bm_grenade_frag"
 	self.projectiles.dynamite.effect_name = "effects/payday2/particles/explosions/dynamite_explosion"
 	self.projectiles.bow_poison_arrow = deep_clone(self.projectiles.west_arrow)
-	self.projectiles.bow_poison_arrow.damage = 6.5
+	self.projectiles.bow_poison_arrow.damage = 6.6
 	self.projectiles.bow_poison_arrow.bullet_class = "PoisonBulletBase"
 	self.projectiles.crossbow_arrow = {}
 	self.projectiles.crossbow_arrow.damage = 10
@@ -3767,16 +3842,16 @@ Play the full version soon to get your full PAYDAY!]],
 	self.projectiles.wpn_prj_jav.sounds.flyby_stop = "jav_flyby_stop"
 	self.projectiles.wpn_prj_jav.sounds.impact = "jav_impact_gen"
 	self.projectiles.arblast_arrow = {}
-	self.projectiles.arblast_arrow.damage = 52.5
+	self.projectiles.arblast_arrow.damage = 53
 	self.projectiles.arblast_arrow.launch_speed = 3500
 	self.projectiles.arblast_arrow.adjust_z = 0
 	self.projectiles.arblast_arrow.mass_look_up_modifier = 1
 	self.projectiles.arblast_arrow.push_at_body_index = 0
 	self.projectiles.arblast_poison_arrow = deep_clone(self.projectiles.arblast_arrow)
-	self.projectiles.arblast_poison_arrow.damage = 19.6
+	self.projectiles.arblast_poison_arrow.damage = 20
 	self.projectiles.arblast_poison_arrow.bullet_class = "PoisonBulletBase"
 	self.projectiles.arblast_arrow_exp = deep_clone(self.projectiles.arblast_arrow)
-	self.projectiles.arblast_arrow_exp.damage = 70
+	self.projectiles.arblast_arrow_exp.damage = 71
 	self.projectiles.arblast_arrow_exp.bullet_class = "InstantExplosiveBulletBase"
 	self.projectiles.arblast_arrow_exp.remove_on_impact = true
 	self.projectiles.frankish_arrow = {}
@@ -3789,7 +3864,7 @@ Play the full version soon to get your full PAYDAY!]],
 	self.projectiles.frankish_poison_arrow.damage = 9
 	self.projectiles.frankish_poison_arrow.bullet_class = "PoisonBulletBase"
 	self.projectiles.frankish_arrow_exp = deep_clone(self.projectiles.frankish_arrow)
-	self.projectiles.frankish_arrow_exp.damage = 31.5
+	self.projectiles.frankish_arrow_exp.damage = 32
 	self.projectiles.frankish_arrow_exp.bullet_class = "InstantExplosiveBulletBase"
 	self.projectiles.frankish_arrow_exp.remove_on_impact = true
 	self.projectiles.long_arrow = {}
@@ -4228,389 +4303,914 @@ function TweakData:get_controller_help_coords()
 	if managers.controller:get_default_wrapper_type() == "pc" then
 		return false
 	end
-	local coords = {}
+	local coords = {
+		normal = {},
+		vehicle = {}
+	}
 	if SystemInfo:platform() == Idstring("PS3") then
-		coords.menu_button_sprint = {
+		coords.normal.left_thumb = {
+			id = "menu_button_sprint",
 			x = 195,
 			y = 255,
 			align = "right",
 			vertical = "top"
 		}
-		coords.menu_button_move = {
+		coords.normal.left = {
+			id = "menu_button_move",
 			x = 195,
 			y = 280,
 			align = "right",
 			vertical = "top"
 		}
-		coords.menu_button_melee = {
+		coords.normal.right_thumb = {
+			id = "menu_button_melee",
 			x = 319,
 			y = 255,
 			align = "left",
 			vertical = "top"
 		}
-		coords.menu_button_look = {
+		coords.normal.right = {
+			id = "menu_button_look",
 			x = 319,
 			y = 280,
 			align = "left",
 			vertical = "top"
 		}
-		coords.menu_button_switch_weapon = {
+		coords.normal.triangle = {
+			id = "menu_button_switch_weapon",
 			x = 511,
 			y = 112,
 			align = "left"
 		}
-		coords.menu_button_reload = {
+		coords.normal.square = {
+			id = "menu_button_reload",
 			x = 511,
 			y = 214,
 			align = "left"
 		}
-		coords.menu_button_crouch = {
+		coords.normal.circle = {
+			id = "menu_button_crouch",
 			x = 511,
 			y = 146,
 			align = "left"
 		}
-		coords.menu_button_jump = {
+		coords.normal.cross = {
+			id = "menu_button_jump",
 			x = 511,
 			y = 178,
 			align = "left"
 		}
-		coords.menu_button_shout = {
+		coords.normal.r2_trigger = {
+			id = "menu_button_shout",
 			x = 511,
 			y = 8,
 			align = "left"
 		}
-		coords.menu_button_fire_weapon = {
+		coords.normal.r1_trigger = {
+			id = "menu_button_fire_weapon",
 			x = 511,
 			y = 36,
 			align = "left"
 		}
-		coords.menu_button_deploy = {
+		coords.normal.l2_trigger = {
+			id = "menu_button_deploy",
 			x = 0,
 			y = 8,
 			align = "right"
 		}
-		coords.menu_button_aim_down_sight = {
+		coords.normal.l1_trigger = {
+			id = "menu_button_aim_down_sight",
 			x = 0,
 			y = 36,
 			align = "right"
 		}
-		coords.menu_button_ingame_menu = {
+		coords.normal.start = {
+			id = "menu_button_ingame_menu",
 			x = 280,
 			y = 0,
 			align = "left",
 			vertical = "bottom"
 		}
-		coords.menu_button_stats_screen = {
+		coords.normal.back = {
+			id = "menu_button_stats_screen",
 			x = 230,
 			y = 0,
 			align = "right",
 			vertical = "bottom"
 		}
-		coords.menu_button_weapon_gadget = {
+		coords.normal.d_down = {
+			id = "menu_button_weapon_gadget_bipod",
 			x = 0,
 			y = 171,
 			align = "right",
 			vertical = "center"
 		}
-		coords.menu_button_throw_grenade = {
+		coords.normal.d_left = {
+			id = "menu_button_throw_grenade",
 			x = 0,
 			y = 145,
 			align = "right",
 			vertical = "center"
 		}
-		coords.menu_button_weapon_firemode = {
+		coords.normal.d_right = {
+			id = "menu_button_weapon_firemode",
+			x = 0,
+			y = 87,
+			align = "right",
+			vertical = "center"
+		}
+		coords.vehicle.left_thumb = {
+			id = "menu_button_unassigned",
+			x = 195,
+			y = 255,
+			align = "right",
+			vertical = "top"
+		}
+		coords.vehicle.left = {
+			id = "menu_button_steering",
+			x = 195,
+			y = 280,
+			align = "right",
+			vertical = "top"
+		}
+		coords.vehicle.right_thumb = {
+			id = "menu_button_vehicle_rear_camera",
+			x = 319,
+			y = 255,
+			align = "left",
+			vertical = "top"
+		}
+		coords.vehicle.right = {
+			id = "menu_button_unassigned",
+			x = 319,
+			y = 280,
+			align = "left",
+			vertical = "top"
+		}
+		coords.vehicle.triangle = {
+			id = "menu_button_unassigned",
+			x = 511,
+			y = 112,
+			align = "left"
+		}
+		coords.vehicle.square = {
+			id = "menu_button_vehicle_change_camera",
+			x = 511,
+			y = 214,
+			align = "left"
+		}
+		coords.vehicle.circle = {
+			id = "menu_button_vehicle_shooting_stance",
+			x = 511,
+			y = 146,
+			align = "left"
+		}
+		coords.vehicle.cross = {
+			id = "menu_button_handbrake",
+			x = 511,
+			y = 178,
+			align = "left"
+		}
+		coords.vehicle.r2_trigger = {
+			id = "menu_button_unassigned",
+			x = 511,
+			y = 8,
+			align = "left"
+		}
+		coords.vehicle.r1_trigger = {
+			id = "menu_button_accelerate",
+			x = 511,
+			y = 36,
+			align = "left"
+		}
+		coords.vehicle.l2_trigger = {
+			id = "menu_button_unassigned",
+			x = 0,
+			y = 8,
+			align = "right"
+		}
+		coords.vehicle.l1_trigger = {
+			id = "menu_button_brake",
+			x = 0,
+			y = 36,
+			align = "right"
+		}
+		coords.vehicle.start = {
+			id = "menu_button_ingame_menu",
+			x = 280,
+			y = 0,
+			align = "left",
+			vertical = "bottom"
+		}
+		coords.vehicle.back = {
+			id = "menu_button_stats_screen",
+			x = 230,
+			y = 0,
+			align = "right",
+			vertical = "bottom"
+		}
+		coords.vehicle.d_down = {
+			id = "menu_button_unassigned",
+			x = 0,
+			y = 171,
+			align = "right",
+			vertical = "center"
+		}
+		coords.vehicle.d_left = {
+			id = "menu_button_unassigned",
+			x = 0,
+			y = 145,
+			align = "right",
+			vertical = "center"
+		}
+		coords.vehicle.d_right = {
+			id = "menu_button_unassigned",
 			x = 0,
 			y = 87,
 			align = "right",
 			vertical = "center"
 		}
 	elseif SystemInfo:platform() == Idstring("PS4") then
-		coords.menu_button_sprint = {
+		coords.normal.left_thumb = {
+			id = "menu_button_sprint",
 			x = 199,
 			y = 255,
 			align = "right",
 			vertical = "top"
 		}
-		coords.menu_button_move = {
+		coords.normal.left = {
+			id = "menu_button_move",
 			x = 199,
 			y = 280,
 			align = "right",
 			vertical = "top"
 		}
-		coords.menu_button_melee = {
+		coords.normal.right_thumb = {
+			id = "menu_button_melee",
 			x = 313,
 			y = 255,
 			align = "left",
 			vertical = "top"
 		}
-		coords.menu_button_look = {
+		coords.normal.right = {
+			id = "menu_button_look",
 			x = 313,
 			y = 280,
 			align = "left",
 			vertical = "top"
 		}
-		coords.menu_button_switch_weapon = {
+		coords.normal.triangle = {
+			id = "menu_button_switch_weapon",
 			x = 511,
 			y = 104,
 			align = "left"
 		}
-		coords.menu_button_crouch = {
+		coords.normal.circle = {
+			id = "menu_button_crouch",
 			x = 511,
 			y = 128,
 			align = "left"
 		}
-		coords.menu_button_jump = {
+		coords.normal.cross = {
+			id = "menu_button_jump",
 			x = 511,
 			y = 153,
 			align = "left"
 		}
-		coords.menu_button_reload = {
+		coords.normal.square = {
+			id = "menu_button_reload",
 			x = 511,
 			y = 181,
 			align = "left"
 		}
-		coords.menu_button_fire_weapon = {
+		coords.normal.r1_trigger = {
+			id = "menu_button_fire_weapon",
 			x = 511,
 			y = 10,
 			align = "left"
 		}
-		coords.menu_button_shout = {
+		coords.normal.r2_trigger = {
+			id = "menu_button_shout",
 			x = 511,
 			y = 55,
 			align = "left"
 		}
-		coords.menu_button_aim_down_sight = {
+		coords.normal.l1_trigger = {
+			id = "menu_button_aim_down_sight",
 			x = 0,
 			y = 10,
 			align = "right"
 		}
-		coords.menu_button_deploy = {
+		coords.normal.l2_trigger = {
+			id = "menu_button_deploy",
 			x = 0,
 			y = 55,
 			align = "right"
 		}
-		coords.menu_button_ingame_menu = {
+		coords.normal.start = {
+			id = "menu_button_ingame_menu",
 			x = 219,
 			y = 0,
 			align = "right",
 			vertical = "bottom"
 		}
-		coords.menu_button_stats_screen = {
+		coords.normal.back = {
+			id = "menu_button_stats_screen",
 			x = 328,
 			y = 0,
 			align = "left",
 			vertical = "bottom"
 		}
-		coords.menu_button_throw_grenade = {
+		coords.normal.d_left = {
+			id = "menu_button_throw_grenade",
 			x = 0,
 			y = 128,
 			align = "right",
 			vertical = "center"
 		}
-		coords.menu_button_weapon_gadget = {
+		coords.normal.d_down = {
+			id = "menu_button_weapon_gadget_bipod",
 			x = 0,
 			y = 153,
 			align = "right",
 			vertical = "center"
 		}
-		coords.menu_button_weapon_firemode = {
+		coords.normal.d_right = {
+			id = "menu_button_weapon_firemode",
+			x = 0,
+			y = 181,
+			align = "right",
+			vertical = "center"
+		}
+		coords.vehicle.left_thumb = {
+			id = "menu_button_unassigned",
+			x = 199,
+			y = 255,
+			align = "right",
+			vertical = "top"
+		}
+		coords.vehicle.left = {
+			id = "menu_button_steering",
+			x = 199,
+			y = 280,
+			align = "right",
+			vertical = "top"
+		}
+		coords.vehicle.right_thumb = {
+			id = "menu_button_vehicle_rear_camera",
+			x = 313,
+			y = 255,
+			align = "left",
+			vertical = "top"
+		}
+		coords.vehicle.right = {
+			id = "menu_button_unassigned",
+			x = 313,
+			y = 280,
+			align = "left",
+			vertical = "top"
+		}
+		coords.vehicle.triangle = {
+			id = "menu_button_unassigned",
+			x = 511,
+			y = 104,
+			align = "left"
+		}
+		coords.vehicle.circle = {
+			id = "menu_button_vehicle_shooting_stance",
+			x = 511,
+			y = 128,
+			align = "left"
+		}
+		coords.vehicle.cross = {
+			id = "menu_button_handbrake",
+			x = 511,
+			y = 153,
+			align = "left"
+		}
+		coords.vehicle.square = {
+			id = "menu_button_vehicle_change_camera",
+			x = 511,
+			y = 181,
+			align = "left"
+		}
+		coords.vehicle.r1_trigger = {
+			id = "menu_button_accelerate",
+			x = 511,
+			y = 10,
+			align = "left"
+		}
+		coords.vehicle.r2_trigger = {
+			id = "menu_button_unassigned",
+			x = 511,
+			y = 55,
+			align = "left"
+		}
+		coords.vehicle.l1_trigger = {
+			id = "menu_button_brake",
+			x = 0,
+			y = 10,
+			align = "right"
+		}
+		coords.vehicle.l2_trigger = {
+			id = "menu_button_unassigned",
+			x = 0,
+			y = 55,
+			align = "right"
+		}
+		coords.vehicle.start = {
+			id = "menu_button_ingame_menu",
+			x = 219,
+			y = 0,
+			align = "right",
+			vertical = "bottom"
+		}
+		coords.vehicle.back = {
+			id = "menu_button_stats_screen",
+			x = 328,
+			y = 0,
+			align = "left",
+			vertical = "bottom"
+		}
+		coords.vehicle.d_left = {
+			id = "menu_button_unassigned",
+			x = 0,
+			y = 128,
+			align = "right",
+			vertical = "center"
+		}
+		coords.vehicle.d_down = {
+			id = "menu_button_unassigned",
+			x = 0,
+			y = 153,
+			align = "right",
+			vertical = "center"
+		}
+		coords.vehicle.d_right = {
+			id = "menu_button_unassigned",
 			x = 0,
 			y = 181,
 			align = "right",
 			vertical = "center"
 		}
 	elseif SystemInfo:platform() == Idstring("XB1") then
-		coords.menu_button_sprint = {
+		coords.normal.left_thumb = {
+			id = "menu_button_sprint",
 			x = 0,
 			y = 78,
 			align = "right",
 			vertical = "bottom"
 		}
-		coords.menu_button_move = {
+		coords.normal.left = {
+			id = "menu_button_move",
 			x = 0,
 			y = 78,
 			align = "right",
 			vertical = "top"
 		}
-		coords.menu_button_melee = {
+		coords.normal.right_thumb = {
+			id = "menu_button_melee",
 			x = 302,
 			y = 276,
 			align = "center",
 			vertical = "top"
 		}
-		coords.menu_button_look = {
+		coords.normal.right = {
+			id = "menu_button_look",
 			x = 302,
 			y = 301,
 			align = "center",
 			vertical = "top"
 		}
-		coords.menu_button_switch_weapon = {
+		coords.normal.y = {
+			id = "menu_button_switch_weapon",
 			x = 512,
 			y = 57,
 			align = "left"
 		}
-		coords.menu_button_reload = {
+		coords.normal.x = {
+			id = "menu_button_reload",
 			x = 512,
 			y = 140,
 			align = "left"
 		}
-		coords.menu_button_crouch = {
+		coords.normal.b = {
+			id = "menu_button_crouch",
 			x = 512,
 			y = 85,
 			align = "left"
 		}
-		coords.menu_button_jump = {
+		coords.normal.a = {
+			id = "menu_button_jump",
 			x = 512,
 			y = 113,
 			align = "left"
 		}
-		coords.menu_button_shout = {
+		coords.normal.right_shoulder = {
+			id = "menu_button_shout",
 			x = 390,
 			y = -10,
 			align = "center"
 		}
-		coords.menu_button_fire_weapon = {
+		coords.normal.right_trigger = {
+			id = "menu_button_fire_weapon",
 			x = 512,
 			y = 18,
 			align = "left"
 		}
-		coords.menu_button_deploy = {
+		coords.normal.left_shoulder = {
+			id = "menu_button_deploy",
 			x = 180,
 			y = -10,
 			align = "right"
 		}
-		coords.menu_button_aim_down_sight = {
+		coords.normal.left_trigger = {
+			id = "menu_button_aim_down_sight",
 			x = 0,
 			y = 18,
 			align = "right"
 		}
-		coords.menu_button_ingame_menu = {
+		coords.normal.start = {
+			id = "menu_button_ingame_menu",
 			x = 288,
 			y = -25,
 			align = "left",
 			vertical = "bottom"
 		}
-		coords.menu_button_stats_screen = {
+		coords.normal.back = {
+			id = "menu_button_stats_screen",
 			x = 235,
 			y = -25,
 			align = "right",
 			vertical = "bottom"
 		}
-		coords.menu_button_weapon_gadget = {
+		coords.normal.d_down = {
+			id = "menu_button_weapon_gadget_bipod",
 			x = 0,
 			y = 193,
 			align = "right",
 			vertical = "center"
 		}
-		coords.menu_button_throw_grenade = {
+		coords.normal.d_left = {
+			id = "menu_button_throw_grenade",
 			x = 0,
 			y = 158,
 			align = "right",
 			vertical = "center"
 		}
-		coords.menu_button_weapon_firemode = {
+		coords.normal.d_right = {
+			id = "menu_button_weapon_firemode",
+			x = 270,
+			y = 266,
+			align = "right",
+			vertical = "center"
+		}
+		coords.vehicle.left_thumb = {
+			id = "menu_button_unassigned",
+			x = 0,
+			y = 78,
+			align = "right",
+			vertical = "bottom"
+		}
+		coords.vehicle.left = {
+			id = "menu_button_steering",
+			x = 0,
+			y = 78,
+			align = "right",
+			vertical = "top"
+		}
+		coords.vehicle.right_thumb = {
+			id = "menu_button_vehicle_rear_camera",
+			x = 302,
+			y = 276,
+			align = "center",
+			vertical = "top"
+		}
+		coords.vehicle.right = {
+			id = "menu_button_unassigned",
+			x = 302,
+			y = 301,
+			align = "center",
+			vertical = "top"
+		}
+		coords.vehicle.y = {
+			id = "menu_button_unassigned",
+			x = 512,
+			y = 57,
+			align = "left"
+		}
+		coords.vehicle.x = {
+			id = "menu_button_vehicle_change_camera",
+			x = 512,
+			y = 140,
+			align = "left"
+		}
+		coords.vehicle.b = {
+			id = "menu_button_vehicle_shooting_stance",
+			x = 512,
+			y = 85,
+			align = "left"
+		}
+		coords.vehicle.a = {
+			id = "menu_button_handbrake",
+			x = 512,
+			y = 113,
+			align = "left"
+		}
+		coords.vehicle.right_shoulder = {
+			id = "menu_button_unassigned",
+			x = 390,
+			y = -10,
+			align = "center"
+		}
+		coords.vehicle.right_trigger = {
+			id = "menu_button_accelerate",
+			x = 512,
+			y = 18,
+			align = "left"
+		}
+		coords.vehicle.left_shoulder = {
+			id = "menu_button_unassigned",
+			x = 180,
+			y = -10,
+			align = "right"
+		}
+		coords.vehicle.left_trigger = {
+			id = "menu_button_brake",
+			x = 0,
+			y = 18,
+			align = "right"
+		}
+		coords.vehicle.start = {
+			id = "menu_button_ingame_menu",
+			x = 288,
+			y = -25,
+			align = "left",
+			vertical = "bottom"
+		}
+		coords.vehicle.back = {
+			id = "menu_button_stats_screen",
+			x = 235,
+			y = -25,
+			align = "right",
+			vertical = "bottom"
+		}
+		coords.vehicle.d_down = {
+			id = "menu_button_unassigned",
+			x = 0,
+			y = 193,
+			align = "right",
+			vertical = "center"
+		}
+		coords.vehicle.d_left = {
+			id = "menu_button_unassigned",
+			x = 0,
+			y = 158,
+			align = "right",
+			vertical = "center"
+		}
+		coords.vehicle.d_right = {
+			id = "menu_button_unassigned",
 			x = 270,
 			y = 266,
 			align = "right",
 			vertical = "center"
 		}
 	else
-		coords.menu_button_sprint = {
+		coords.normal.left_thumb = {
+			id = "menu_button_sprint",
 			x = 0,
 			y = 138,
 			align = "right",
 			vertical = "bottom"
 		}
-		coords.menu_button_move = {
+		coords.normal.left = {
+			id = "menu_button_move",
 			x = 0,
 			y = 138,
 			align = "right",
 			vertical = "top"
 		}
-		coords.menu_button_melee = {
+		coords.normal.right_thumb = {
+			id = "menu_button_melee",
 			x = 302,
 			y = 256,
 			align = "left",
 			vertical = "top"
 		}
-		coords.menu_button_look = {
+		coords.normal.right = {
+			id = "menu_button_look",
 			x = 302,
 			y = 281,
 			align = "left",
 			vertical = "top"
 		}
-		coords.menu_button_switch_weapon = {
+		coords.normal.y = {
+			id = "menu_button_switch_weapon",
 			x = 512,
 			y = 97,
 			align = "left"
 		}
-		coords.menu_button_reload = {
+		coords.normal.x = {
+			id = "menu_button_reload",
 			x = 512,
 			y = 180,
 			align = "left"
 		}
-		coords.menu_button_crouch = {
+		coords.normal.b = {
+			id = "menu_button_crouch",
 			x = 512,
 			y = 125,
 			align = "left"
 		}
-		coords.menu_button_jump = {
+		coords.normal.a = {
+			id = "menu_button_jump",
 			x = 512,
 			y = 153,
 			align = "left"
 		}
-		coords.menu_button_shout = {
+		coords.normal.right_shoulder = {
+			id = "menu_button_shout",
 			x = 512,
 			y = 49,
 			align = "left"
 		}
-		coords.menu_button_fire_weapon = {
+		coords.normal.right_trigger = {
+			id = "menu_button_fire_weapon",
 			x = 512,
 			y = 19,
 			align = "left"
 		}
-		coords.menu_button_deploy = {
+		coords.normal.left_shoulder = {
+			id = "menu_button_deploy",
 			x = 0,
 			y = 49,
 			align = "right"
 		}
-		coords.menu_button_aim_down_sight = {
+		coords.normal.left_trigger = {
+			id = "menu_button_aim_down_sight",
 			x = 0,
 			y = 19,
 			align = "right"
 		}
-		coords.menu_button_ingame_menu = {
+		coords.normal.start = {
+			id = "menu_button_ingame_menu",
 			x = 288,
 			y = 0,
 			align = "left",
 			vertical = "bottom"
 		}
-		coords.menu_button_stats_screen = {
+		coords.normal.back = {
+			id = "menu_button_stats_screen",
 			x = 223,
 			y = 0,
 			align = "right",
 			vertical = "bottom"
 		}
-		coords.menu_button_weapon_gadget_bipod = {
+		coords.normal.d_down = {
+			id = "menu_button_weapon_gadget_bipod",
 			x = 0,
 			y = 243,
 			align = "right",
 			vertical = "center"
 		}
-		coords.menu_button_throw_grenade = {
+		coords.normal.d_left = {
+			id = "menu_button_throw_grenade",
 			x = 0,
 			y = 208,
 			align = "right",
 			vertical = "center"
 		}
-		coords.menu_button_weapon_firemode = {
+		coords.normal.d_right = {
+			id = "menu_button_weapon_firemode",
 			x = 226,
 			y = 256,
 			align = "right",
 			vertical = "top"
 		}
 		if SystemInfo:platform() == Idstring("WIN32") then
-			coords.menu_button_push_to_talk = {
+			coords.normal.d_up = {
+				id = "menu_button_push_to_talk",
+				x = 0,
+				y = 174,
+				align = "right",
+				vertical = "center"
+			}
+		end
+		coords.vehicle.left_thumb = {
+			id = "menu_button_unassigned",
+			x = 0,
+			y = 138,
+			align = "right",
+			vertical = "bottom"
+		}
+		coords.vehicle.left = {
+			id = "menu_button_steering",
+			x = 0,
+			y = 138,
+			align = "right",
+			vertical = "top"
+		}
+		coords.vehicle.right_thumb = {
+			id = "menu_button_vehicle_rear_camera",
+			x = 302,
+			y = 256,
+			align = "left",
+			vertical = "top"
+		}
+		coords.vehicle.right = {
+			id = "menu_button_unassigned",
+			x = 302,
+			y = 281,
+			align = "left",
+			vertical = "top"
+		}
+		coords.vehicle.y = {
+			id = "menu_button_unassigned",
+			x = 512,
+			y = 97,
+			align = "left"
+		}
+		coords.vehicle.x = {
+			id = "menu_button_vehicle_change_camera",
+			x = 512,
+			y = 180,
+			align = "left"
+		}
+		coords.vehicle.b = {
+			id = "menu_button_vehicle_shooting_stance",
+			x = 512,
+			y = 125,
+			align = "left"
+		}
+		coords.vehicle.a = {
+			id = "menu_button_handbrake",
+			x = 512,
+			y = 153,
+			align = "left"
+		}
+		coords.vehicle.right_shoulder = {
+			id = "menu_button_unassigned",
+			x = 512,
+			y = 49,
+			align = "left"
+		}
+		coords.vehicle.right_trigger = {
+			id = "menu_button_accelerate",
+			x = 512,
+			y = 19,
+			align = "left"
+		}
+		coords.vehicle.left_shoulder = {
+			id = "menu_button_unassigned",
+			x = 0,
+			y = 49,
+			align = "right"
+		}
+		coords.vehicle.left_trigger = {
+			id = "menu_button_brake",
+			x = 0,
+			y = 19,
+			align = "right"
+		}
+		coords.vehicle.start = {
+			id = "menu_button_ingame_menu",
+			x = 288,
+			y = 0,
+			align = "left",
+			vertical = "bottom"
+		}
+		coords.vehicle.back = {
+			id = "menu_button_stats_screen",
+			x = 223,
+			y = 0,
+			align = "right",
+			vertical = "bottom"
+		}
+		coords.vehicle.d_down = {
+			id = "menu_button_unassigned",
+			x = 0,
+			y = 243,
+			align = "right",
+			vertical = "center"
+		}
+		coords.vehicle.d_left = {
+			id = "menu_button_unassigned",
+			x = 0,
+			y = 208,
+			align = "right",
+			vertical = "center"
+		}
+		coords.vehicle.d_right = {
+			id = "menu_button_unassigned",
+			x = 226,
+			y = 256,
+			align = "right",
+			vertical = "top"
+		}
+		if SystemInfo:platform() == Idstring("WIN32") then
+			coords.vehicle.d_up = {
+				id = "menu_button_unassigned",
 				x = 0,
 				y = 174,
 				align = "right",
@@ -4619,9 +5219,9 @@ function TweakData:get_controller_help_coords()
 		end
 	end
 	if managers.user and managers.user:get_setting("southpaw") then
-		local tmp = coords.menu_button_move
-		coords.menu_button_move = coords.menu_button_look
-		coords.menu_button_look = tmp
+		local tmp = coords.normal.menu_button_move
+		coords.normal.menu_button_move = coords.normal.menu_button_look
+		coords.normal.menu_button_look = tmp
 	end
 	return coords
 end

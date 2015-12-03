@@ -49,10 +49,11 @@ function DatabaseManager:recompile(...)
 	Application:data_compile({
 		platform = string.lower(SystemInfo:platform():s()),
 		source_root = self:base_path(),
-		target_db_root = Application:base_path() .. "/assets",
+		target_db_root = Application:base_path() .. "assets",
 		target_db_name = "all",
 		source_files = files,
-		verbose = false
+		verbose = false,
+		preprocessor_definitions = "preprocessor_definitions"
 	})
 	DB:reload()
 	self:clear_all_cached_indices()

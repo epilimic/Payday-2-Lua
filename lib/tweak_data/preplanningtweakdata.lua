@@ -2384,6 +2384,43 @@ function PrePlanningTweakData:_create_locations(tweak_data)
 			rotation = 0
 		}
 	}
+	self.locations.pbr = {
+		default_plans = {},
+		total_budget = 100,
+		mission_briefing_texture = "guis/dlcs/berry/textures/pd2/pre_planning/mission_briefing_pbr",
+		start_location = {
+			group = "a",
+			x = 1024,
+			y = 1024,
+			zoom = 1
+		},
+		{
+			name_id = "menu_pp_berry_bpr_loc_a",
+			texture = "guis/dlcs/berry/textures/pd2/pre_planning/base_01",
+			map_x = -0.55,
+			map_y = 0,
+			map_size = 1,
+			x1 = -15000,
+			y1 = -7600,
+			x2 = -5000,
+			y2 = 2400,
+			rotation = 90,
+			custom_points = {}
+		},
+		{
+			name_id = "menu_pp_berry_bpr_loc_b",
+			texture = "guis/dlcs/berry/textures/pd2/pre_planning/base_02",
+			map_x = 0.55,
+			map_y = 0,
+			map_size = 1,
+			x1 = -15100,
+			y1 = -8000,
+			x2 = -5100,
+			y2 = 2000,
+			rotation = 0,
+			custom_points = {}
+		}
+	}
 end
 function PrePlanningTweakData:get_level_data(level_id)
 	return self.locations[level_id] or {}

@@ -41,7 +41,6 @@ function ElementInstanceInputEvent:init(...)
 	ElementInstanceInputEvent.super.init(self, ...)
 end
 function ElementInstanceInputEvent:on_created()
-	print("ElementInstanceInputEvent:on_created()")
 end
 function ElementInstanceInputEvent:client_on_executed(...)
 end

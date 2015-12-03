@@ -88,7 +88,6 @@ function HUDPresenter:_present_information(params)
 	self._presenting = true
 end
 function HUDPresenter:_present_done()
-	print(Application:time(), ":_present_done()")
 	self._presenting = false
 	local queued = table.remove(self._present_queue, 1)
 	if queued and queued.present_mid_text then
@@ -96,7 +95,6 @@ function HUDPresenter:_present_done()
 	end
 end
 function HUDPresenter:_do_it(queued)
-	print("do_it", inspect(queued))
 	self:_present_information(queued)
 end
 function HUDPresenter:_animate_present_information(present_panel, params)

@@ -116,6 +116,7 @@ function MissionManager:init(...)
 	self:add_area_instigator_categories("npc_vehicle")
 	self:add_area_instigator_categories("vehicle_with_players")
 	self:add_area_instigator_categories("player_not_in_vehicle")
+	self:add_area_instigator_categories("hostages")
 	self:set_default_area_instigator("player")
 	self:set_global_event_list({
 		"bankmanager_key",
@@ -151,7 +152,8 @@ function MissionManager:init(...)
 		"ecm_jammer_off",
 		"pku_warhead",
 		"enemy_killed",
-		"pku_rambo"
+		"pku_rambo",
+		"player_damaged"
 	})
 	self._mission_filter = {}
 	if not Global.mission_manager then

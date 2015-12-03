@@ -274,6 +274,9 @@ function FPCameraPlayerBase:_update_movement(t, dt)
 end
 local mvec1 = Vector3()
 function FPCameraPlayerBase:_update_rot(axis)
+	if self._animate_pitch then
+		self:animate_pitch_upd()
+	end
 	local t = managers.player:player_timer():time()
 	local dt = t - (self._last_rot_t or t)
 	self._last_rot_t = t
@@ -290,22 +293,17 @@ function FPCameraPlayerBase:_update_rot(axis)
 	local look_polar_spin = data.spin - stick_input_x
 	local look_polar_pitch = math.clamp(data.pitch + stick_input_y, -85, 85)
 	local player_state = managers.player:current_state()
-	if self._limits and player_state ~= "bipod" and player_state ~= "driving" then
+	if self._limits then
 		if self._limits.spin then
 			local d = (look_polar_spin - self._limits.spin.mid) / self._limits.spin.offset
+			d = math.clamp(d, -1, 1)
 			look_polar_spin = data.spin - math.lerp(stick_input_x, 0, math.abs(d))
 		end
 		if self._limits.pitch then
 			local d = math.abs((look_polar_pitch - self._limits.pitch.mid) / self._limits.pitch.offset)
+			d = math.clamp(d, -1, 1)
 			look_polar_pitch = data.pitch + math.lerp(stick_input_y, 0, math.abs(d))
 			look_polar_pitch = math.clamp(look_polar_pitch, -85, 85)
-		end
-	elseif self._limits and (player_state == "bipod" or player_state == "driving") then
-		if self._limits.spin then
-			look_polar_spin = math.clamp(look_polar_spin, self._limits.spin.mid - self._limits.spin.offset, self._limits.spin.mid + self._limits.spin.offset)
-		end
-		if self._limits.pitch then
-			look_polar_pitch = math.clamp(look_polar_pitch, self._limits.pitch.mid - self._limits.pitch.offset, self._limits.pitch.mid + self._limits.pitch.offset)
 		end
 	end
 	if not self._limits or not self._limits.spin then
@@ -315,13 +313,22 @@ function FPCameraPlayerBase:_update_rot(axis)
 	local look_vec = look_polar:to_vector()
 	local cam_offset_rot = mrot3
 	mrotation.set_look_at(cam_offset_rot, look_vec, math.UP)
-	mrotation.set_zero(new_head_rot)
-	mrotation.multiply(new_head_rot, self._head_stance.rotation)
-	mrotation.multiply(new_head_rot, cam_offset_rot)
-	data.pitch = look_polar_pitch
-	data.spin = look_polar_spin
+	if self._animate_pitch == nil then
+		mrotation.set_zero(new_head_rot)
+		mrotation.multiply(new_head_rot, self._head_stance.rotation)
+		mrotation.multiply(new_head_rot, cam_offset_rot)
+		data.pitch = look_polar_pitch
+		data.spin = look_polar_spin
+	end
 	self._output_data.position = new_head_pos
-	self._output_data.rotation = new_head_rot or self._output_data.rotation
+	if self._p_exit then
+		self._p_exit = false
+		self._output_data.rotation = self._parent_unit:movement().fall_rotation
+		mrotation.multiply(self._output_data.rotation, self._parent_unit:camera():rotation())
+		data.spin = self._output_data.rotation:y():to_polar().spin
+	else
+		self._output_data.rotation = new_head_rot or self._output_data.rotation
+	end
 	if self._camera_properties.current_tilt ~= self._camera_properties.target_tilt then
 		self._camera_properties.current_tilt = math.step(self._camera_properties.current_tilt, self._camera_properties.target_tilt, 150 * dt)
 	end
@@ -351,6 +358,24 @@ function FPCameraPlayerBase:_update_rot(axis)
 	mrotation.multiply(new_shoulder_rot, self._vel_overshot.rotation)
 	if player_state == "driving" then
 		self:_set_camera_position_in_vehicle()
+	elseif player_state == "jerry1" or player_state == "jerry2" then
+		mrotation.set_zero(cam_offset_rot)
+		mrotation.multiply(cam_offset_rot, self._parent_unit:movement().fall_rotation)
+		mrotation.multiply(cam_offset_rot, self._output_data.rotation)
+		local shoulder_pos = mvec3
+		local shoulder_rot = mrot4
+		mrotation.set_zero(shoulder_rot)
+		mrotation.multiply(shoulder_rot, cam_offset_rot)
+		mrotation.multiply(shoulder_rot, self._shoulder_stance.rotation)
+		mrotation.multiply(shoulder_rot, self._vel_overshot.rotation)
+		mvector3.set(shoulder_pos, self._shoulder_stance.translation)
+		mvector3.add(shoulder_pos, self._vel_overshot.translation)
+		mvector3.rotate_with(shoulder_pos, cam_offset_rot)
+		mvector3.add(shoulder_pos, self._parent_unit:position())
+		self:set_position(shoulder_pos)
+		self:set_rotation(shoulder_rot)
+		self._parent_unit:camera():set_position(self._parent_unit:position())
+		self._parent_unit:camera():set_rotation(cam_offset_rot)
 	else
 		self:set_position(new_shoulder_pos)
 		self:set_rotation(new_shoulder_rot)
@@ -366,8 +391,10 @@ function FPCameraPlayerBase:_update_rot(axis)
 	end
 end
 function FPCameraPlayerBase:_set_camera_position_in_vehicle()
-	local vehicle = managers.player:get_vehicle().vehicle_unit:vehicle()
-	local vehicle_ext = managers.player:get_vehicle().vehicle_unit:vehicle_driving()
+	local vehicle_data = managers.player:get_vehicle()
+	local vehicle_unit = vehicle_data.vehicle_unit
+	local vehicle = vehicle_unit:vehicle()
+	local vehicle_ext = vehicle_unit:vehicle_driving()
 	local seat = vehicle_ext:find_seat_for_player(managers.player:player_unit())
 	local obj_pos, obj_rot = vehicle_ext:get_object_placement(managers.player:local_player())
 	if obj_pos == nil or obj_rot == nil then
@@ -384,7 +411,6 @@ function FPCameraPlayerBase:_set_camera_position_in_vehicle()
 	local hands_rot = mrot4
 	mrotation.set_zero(hands_rot)
 	mrotation.multiply(hands_rot, obj_rot)
-	mrotation.multiply(hands_rot, Rotation(-90, 0, 0))
 	local target = Vector3(0, 0, 145)
 	local target_camera = Vector3(0, 0, 145)
 	if vehicle_ext._tweak_data.driver_camera_offset then
@@ -395,6 +421,9 @@ function FPCameraPlayerBase:_set_camera_position_in_vehicle()
 	local pos = obj_pos + target
 	local camera_pos = obj_pos + target_camera
 	if seat.driving then
+		if vehicle_unit:camera() then
+			vehicle_unit:camera():update_camera()
+		end
 		self:set_position(pos)
 		self:set_rotation(hands_rot)
 		self._parent_unit:camera():set_position(camera_pos)
@@ -594,7 +623,6 @@ function FPCameraPlayerBase:play_redirect(redirect_name, speed, offset_time)
 	self:set_anims_enabled(true)
 	self._anim_empty_state_wanted = false
 	local result = self._unit:play_redirect(redirect_name, offset_time)
-	Application:debug("FPCameraPlayerBase:play_redirect: ", redirect_name)
 	if result == self.IDS_NOSTRING then
 		return false
 	end
@@ -1199,4 +1227,56 @@ function FPCameraPlayerBase:set_spin(_spin)
 end
 function FPCameraPlayerBase:set_pitch(_pitch)
 	self._camera_properties.pitch = _pitch
+end
+function FPCameraPlayerBase:current_tilt()
+	return self._camera_properties.current_tilt
+end
+function FPCameraPlayerBase:animate_pitch(start_t, start_pitch, end_pitch, total_duration)
+	self._animate_pitch = {}
+	self._animate_pitch.start_t = start_t
+	self._animate_pitch.start_pitch = start_pitch or self._camera_properties.pitch
+	self._animate_pitch.end_pitch = end_pitch
+	self._animate_pitch.duration = total_duration
+end
+function FPCameraPlayerBase:animate_pitch_upd()
+	local t = Application:time()
+	local elapsed_t = t - self._animate_pitch.start_t
+	local step = elapsed_t / self._animate_pitch.duration
+	if step > 1 then
+		self._animate_pitch = nil
+	else
+		step = self:catmullrom(step, -10, 0, 1, 0.7)
+		self._camera_properties.pitch = math.lerp(self._animate_pitch.start_pitch, self._animate_pitch.end_pitch, step)
+	end
+end
+function FPCameraPlayerBase:update_tilt_smooth(direction, max_tilt, tilt_speed, dt)
+	self._tilt_dt = self._tilt_dt or 0
+	if direction < 0 and 0 >= self._camera_properties.current_tilt then
+		self:set_target_tilt(-1 * self:smoothstep(0, max_tilt, self._tilt_dt, tilt_speed))
+		if tilt_speed > self._tilt_dt then
+			self._tilt_dt = self._tilt_dt + dt
+		end
+	elseif direction > 0 and 0 <= self._camera_properties.current_tilt then
+		self:set_target_tilt(self:smoothstep(0, max_tilt, self._tilt_dt, tilt_speed))
+		if tilt_speed > self._tilt_dt then
+			self._tilt_dt = self._tilt_dt + dt
+		end
+	else
+		self:set_target_tilt(math.sign(self._camera_properties.current_tilt) * self:smoothstep(0, max_tilt, self._tilt_dt, tilt_speed))
+		if self._tilt_dt > 0 then
+			self._tilt_dt = self._tilt_dt - 2 * dt
+			if self._tilt_dt < 0 then
+				self._tilt_dt = 0
+			end
+		end
+	end
+end
+function FPCameraPlayerBase:catmullrom(t, p0, p1, p2, p3)
+	return 0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t + (-p0 + 3 * p1 - 3 * p2 + p3) * t * t * t)
+end
+function FPCameraPlayerBase:smoothstep(a, b, step, n)
+	local v = step / n
+	v = 1 - (1 - v) * (1 - v)
+	local x = a * (1 - v) + b * v
+	return x
 end

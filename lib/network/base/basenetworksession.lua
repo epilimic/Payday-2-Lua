@@ -911,7 +911,6 @@ function BaseNetworkSession:are_all_peer_assets_loaded()
 			return false
 		end
 	end
-	print("[BaseNetworkSession:are_all_peer_assets_loaded] all outfits loaded")
 	return true
 end
 function BaseNetworkSession:_get_peer_outfit_versions_str()
@@ -1238,7 +1237,7 @@ end
 function BaseNetworkSession:on_statistics_recieved(peer_id, peer_kills, peer_specials_kills, peer_head_shots, accuracy, downs)
 	local peer = self:peer(peer_id)
 	peer:set_statistics(peer_kills, peer_specials_kills, peer_head_shots, accuracy, downs)
-	for _, peer in ipairs(self._peers_all) do
+	for _, peer in pairs(self._peers_all) do
 		if peer:has_statistics() then
 		elseif peer:waiting_for_player_ready() and not peer:has_statistics() then
 			return

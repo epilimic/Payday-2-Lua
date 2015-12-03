@@ -44,6 +44,7 @@ function CharacterTweakData:init(tweak_data)
 	self:_init_bonnie(presets)
 	self:_init_sokol(presets)
 	self:_init_dragon(presets)
+	self:_init_bodhi(presets)
 	self:_init_old_hoxton_mission(presets)
 end
 function CharacterTweakData:_init_security(presets)
@@ -1128,7 +1129,7 @@ function CharacterTweakData:_init_phalanx_minion(presets)
 	self.phalanx_minion.damage.shield_knocked = false
 	self.phalanx_minion.ecm_vulnerability = nil
 	self.phalanx_minion.ecm_hurts = {}
-	self.phalanx_minion.priority_shout = "f44"
+	self.phalanx_minion.priority_shout = "f45"
 end
 function CharacterTweakData:_init_phalanx_vip(presets)
 	self.phalanx_vip = deep_clone(self.phalanx_minion)
@@ -1257,6 +1258,15 @@ function CharacterTweakData:_init_taser(presets)
 	}
 	self.taser.announce_incomming = "incomming_taser"
 	self.taser.steal_loot = nil
+	self.taser.special_deaths = {}
+	self.taser.special_deaths.bullet = {
+		[("head"):id():key()] = {
+			character_name = "bodhi",
+			weapon_id = "model70",
+			sequence = "kill_tazer_headshot",
+			special_comment = "x01"
+		}
+	}
 end
 function CharacterTweakData:_init_inside_man(presets)
 	self.inside_man = deep_clone(presets.base)
@@ -1630,6 +1640,26 @@ function CharacterTweakData:_init_dragon(presets)
 	self.dragon.weapon_voice = "3"
 	self.dragon.access = "teamAI1"
 	self.dragon.arrest = {
+		timeout = 240,
+		aggression_timeout = 6,
+		arrest_timeout = 240
+	}
+end
+function CharacterTweakData:_init_bodhi(presets)
+	self.bodhi = {}
+	self.bodhi.damage = presets.gang_member_damage
+	self.bodhi.weapon = deep_clone(presets.weapon.gang_member)
+	self.bodhi.weapon.weapons_of_choice = {
+		primary = Idstring("units/payday2/weapons/wpn_npc_m4/wpn_npc_m4"),
+		secondary = Idstring("units/payday2/weapons/wpn_npc_c45/wpn_npc_c45")
+	}
+	self.bodhi.detection = presets.detection.gang_member
+	self.bodhi.move_speed = presets.move_speed.fast
+	self.bodhi.crouch_move = false
+	self.bodhi.speech_prefix = "rb13"
+	self.bodhi.weapon_voice = "3"
+	self.bodhi.access = "teamAI1"
+	self.bodhi.arrest = {
 		timeout = 240,
 		aggression_timeout = 6,
 		arrest_timeout = 240
@@ -6685,6 +6715,13 @@ function CharacterTweakData:character_map()
 			list = {
 				"civ_male_butcher_2",
 				"civ_male_butcher_1"
+			}
+		},
+		berry = {
+			path = "units/pd2_dlc_berry/characters/",
+			list = {
+				"ene_murkywater_no_light",
+				"npc_locke"
 			}
 		}
 	}

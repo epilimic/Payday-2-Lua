@@ -892,6 +892,10 @@ function MenuCallbackHandler:got_new_steam_lootdrop(item)
 end
 function MenuCallbackHandler:leave_steam_inventory(item)
 end
+function MenuCallbackHandler:can_toggle_chat()
+	local input = managers.menu:active_menu() and managers.menu:active_menu().input
+	return not input or input.can_toggle_chat and input:can_toggle_chat()
+end
 function MenuCallbackHandler:on_visit_fbi_files()
 	Steam:overlay_activate("url", tweak_data.gui.fbi_files_webpage)
 end
@@ -1191,6 +1195,26 @@ function MenuCallbackHandler:steam_buy_safe_from_community(item, data)
 			"overlay_close"
 		}, callback(MenuCallbackHandler, MenuCallbackHandler, "on_steam_transaction_over"))
 		Steam:overlay_activate("url", tweak_data.economy:create_market_link_url("safes", safe))
+		managers.menu:show_buying_tradable_item_dialog()
+	end
+end
+function MenuCallbackHandler:steam_find_item_from_community(item, data)
+	local node = managers.menu:active_menu() and managers.menu:active_menu().logic:selected_node()
+	local quantity_item = node:item("buy_quantity")
+	data = data or managers.menu:active_menu().logic:selected_node():parameters().container_data
+	if not data then
+		return
+	end
+	local cosmetic_id = data.cosmetic_id
+	local weapon_id = data.weapon_id
+	do break end
+	managers.menu:show_enable_steam_overlay_tradable_item()
+	do break end
+	if cosmetic_id and weapon_id then
+		managers.network.account:add_overlay_listener("steam_transaction_tradable_item", {
+			"overlay_close"
+		}, callback(MenuCallbackHandler, MenuCallbackHandler, "on_steam_transaction_over"))
+		Steam:overlay_activate("url", tweak_data.economy:create_weapon_skin_market_search_url(weapon_id, cosmetic_id))
 		managers.menu:show_buying_tradable_item_dialog()
 	end
 end

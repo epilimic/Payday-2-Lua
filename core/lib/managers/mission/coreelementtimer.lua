@@ -7,7 +7,7 @@ function ElementTimer:init(...)
 	self._triggers = {}
 end
 function ElementTimer:on_script_activated()
-	self._timer = self:value("timer")
+	self._timer = self:get_random_table_value_float(self:value("timer"))
 	if not Network:is_server() then
 		return
 	end
@@ -87,7 +87,7 @@ function ElementTimer:timer_operation_subtract_time(time)
 	self:_update_digital_guis_timer()
 end
 function ElementTimer:timer_operation_reset()
-	self._timer = self._values.timer
+	self._timer = self:get_random_table_value_float(self:value("timer"))
 	self:_update_digital_guis_timer()
 end
 function ElementTimer:timer_operation_set_time(time)
@@ -138,6 +138,7 @@ function ElementTimerOperator:on_executed(instigator)
 	if not self._values.enabled then
 		return
 	end
+	local time = self:get_random_table_value_float(self:value("time"))
 	for _, id in ipairs(self._values.elements) do
 		local element = self:get_mission_element(id)
 		if element then
@@ -146,13 +147,13 @@ function ElementTimerOperator:on_executed(instigator)
 			elseif self._values.operation == "start" then
 				element:timer_operation_start()
 			elseif self._values.operation == "add_time" then
-				element:timer_operation_add_time(self._values.time)
+				element:timer_operation_add_time(time)
 			elseif self._values.operation == "subtract_time" then
-				element:timer_operation_subtract_time(self._values.time)
+				element:timer_operation_subtract_time(time)
 			elseif self._values.operation == "reset" then
-				element:timer_operation_reset(self._values.time)
+				element:timer_operation_reset(time)
 			elseif self._values.operation == "set_time" then
-				element:timer_operation_set_time(self._values.time)
+				element:timer_operation_set_time(time)
 			end
 		end
 	end

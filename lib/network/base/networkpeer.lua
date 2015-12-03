@@ -300,16 +300,16 @@ function NetworkPeer:verify_bag(carry_id, pickup)
 		self._carry_id = nil
 		return true
 	end
-	if Network:is_client() and amount < 0 and not self._skipped_first_cheat then
+	if Network:is_client() and not pickup and not self._skipped_first_cheat then
 		self._skipped_first_cheat = true
 		return true
 	end
 	if Network:is_server() then
-		self:mark_cheater(amount < 0 and VoteManager.REASON.many_bags or VoteManager.REASON.many_bags_pickup, true)
+		self:mark_cheater(not pickup and VoteManager.REASON.many_bags or VoteManager.REASON.many_bags_pickup, true)
 	else
-		managers.network:session():server_peer():mark_cheater(amount < 0 and VoteManager.REASON.many_bags or VoteManager.REASON.many_bags_pickup, Network:is_server())
+		managers.network:session():server_peer():mark_cheater(not pickup and VoteManager.REASON.many_bags or VoteManager.REASON.many_bags_pickup, Network:is_server())
 	end
-	print("[NetworkPeer:verify_bag]: Failed to place bag", self:id(), self._carry_id, carry_id, amount)
+	print("[NetworkPeer:verify_bag]: Failed to place bag", self:id(), self._carry_id, carry_id, pickup)
 	return false
 end
 function NetworkPeer:verify_deployable(id)

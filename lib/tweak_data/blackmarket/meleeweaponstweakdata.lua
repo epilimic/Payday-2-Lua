@@ -462,7 +462,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.fireaxe.stats.concealment = 27
 	self.melee_weapons.fireaxe.repeat_expire_t = 1.6
 	self.melee_weapons.fireaxe.expire_t = 1.8
-	self.melee_weapons.fireaxe.melee_damage_delay = 0.4
+	self.melee_weapons.fireaxe.melee_damage_delay = 0.6
 	self.melee_weapons.machete = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.machete.name_id = "bm_melee_machete"
 	self.melee_weapons.machete.anim_global_param = "melee_machete"
@@ -1134,10 +1134,10 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.micstand.name_id = "bm_melee_micstand"
 	self.melee_weapons.micstand.dlc = "arena"
 	self.melee_weapons.micstand.texture_bundle_folder = "dlc_arena"
-	self.melee_weapons.micstand.anim_global_param = "melee_pickaxe"
+	self.melee_weapons.micstand.anim_global_param = "melee_hockey"
 	self.melee_weapons.micstand.type = "axe"
 	self.melee_weapons.micstand.align_objects = {
-		"a_weapon_left"
+		"a_weapon_right"
 	}
 	self.melee_weapons.micstand.unit = "units/pd2_dlc_arena/weapons/wpn_fps_mel_micstand/wpn_fps_mel_micstand"
 	self.melee_weapons.micstand.third_unit = "units/pd2_dlc_arena/weapons/wpn_third_mel_micstand/wpn_third_mel_micstand"
@@ -1148,7 +1148,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.micstand.stats.max_damage_effect = 3
 	self.melee_weapons.micstand.stats.charge_time = 3
 	self.melee_weapons.micstand.stats.range = 250
-	self.melee_weapons.micstand.expire_t = 1.1
+	self.melee_weapons.micstand.expire_t = 0.8
 	self.melee_weapons.micstand.repeat_expire_t = 0.8
 	self.melee_weapons.micstand.attack_allowed_expire_t = 0.1
 	self.melee_weapons.micstand.sounds = {}
@@ -1190,10 +1190,10 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.hockey.name_id = "bm_melee_hockey"
 	self.melee_weapons.hockey.dlc = "character_pack_sokol"
 	self.melee_weapons.hockey.texture_bundle_folder = "character_pack_sokol"
-	self.melee_weapons.hockey.anim_global_param = "melee_pickaxe"
+	self.melee_weapons.hockey.anim_global_param = "melee_hockey"
 	self.melee_weapons.hockey.type = "axe"
 	self.melee_weapons.hockey.align_objects = {
-		"a_weapon_left"
+		"a_weapon_right"
 	}
 	self.melee_weapons.hockey.unit = "units/pd2_dlc_character_sokol/weapons/wpn_fps_mel_hockey/wpn_fps_mel_hockey"
 	self.melee_weapons.hockey.third_unit = "units/pd2_dlc_character_sokol/weapons/wpn_third_mel_hockey/wpn_third_mel_hockey"
@@ -1204,7 +1204,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.hockey.stats.max_damage_effect = 3
 	self.melee_weapons.hockey.stats.charge_time = 3
 	self.melee_weapons.hockey.stats.range = 250
-	self.melee_weapons.hockey.expire_t = 1.1
+	self.melee_weapons.hockey.expire_t = 0.8
 	self.melee_weapons.hockey.repeat_expire_t = 0.8
 	self.melee_weapons.hockey.attack_allowed_expire_t = 0.1
 	self.melee_weapons.hockey.sounds = {}
@@ -1663,5 +1663,129 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.cutters.repeat_expire_t = 0.8
 	self.melee_weapons.cutters.expire_t = 1.8
 	self.melee_weapons.cutters.melee_damage_delay = 0.3
+	self.melee_weapons.boxcutter = {}
+	self.melee_weapons.boxcutter.name_id = "bm_melee_boxcutter"
+	self.melee_weapons.boxcutter.animation = nil
+	self.melee_weapons.boxcutter.anim_attack_vars = {
+		"var1",
+		"var2",
+		"var3",
+		"var4"
+	}
+	self.melee_weapons.boxcutter.anim_global_param = "melee_boxcutter"
+	self.melee_weapons.boxcutter.texture_bundle_folder = "rip"
+	self.melee_weapons.boxcutter.free = nil
+	self.melee_weapons.boxcutter.type = "knife"
+	self.melee_weapons.boxcutter.align_objects = {
+		"a_weapon_right"
+	}
+	self.melee_weapons.boxcutter.unit = "units/pd2_dlc_rip/weapons/wpn_fps_mel_boxcutter/wpn_fps_mel_boxcutter"
+	self.melee_weapons.boxcutter.third_unit = "units/pd2_dlc_rip/weapons/wpn_fps_mel_boxcutter/wpn_third_mel_boxcutter"
+	self.melee_weapons.boxcutter.sounds = {}
+	self.melee_weapons.boxcutter.sounds.equip = "boxcutter_equip"
+	self.melee_weapons.boxcutter.sounds.hit_air = "boxcutter_hit_air"
+	self.melee_weapons.boxcutter.sounds.hit_gen = "boxcutter_hit_gen"
+	self.melee_weapons.boxcutter.sounds.hit_body = "boxcutter_hit_body"
+	self.melee_weapons.boxcutter.sounds.charge = "boxcutter_charge"
+	self.melee_weapons.boxcutter.stats = {}
+	self.melee_weapons.boxcutter.stats.weapon_type = "sharp"
+	self.melee_weapons.boxcutter.stats.min_damage = 3
+	self.melee_weapons.boxcutter.stats.max_damage = 8
+	self.melee_weapons.boxcutter.stats.min_damage_effect = 1
+	self.melee_weapons.boxcutter.stats.max_damage_effect = 1
+	self.melee_weapons.boxcutter.stats.charge_time = 2
+	self.melee_weapons.boxcutter.stats.range = 185
+	self.melee_weapons.boxcutter.stats.concealment = 29
+	self.melee_weapons.boxcutter.repeat_expire_t = 0.8
+	self.melee_weapons.boxcutter.expire_t = 0.5
+	self.melee_weapons.boxcutter.melee_damage_delay = 0.16
+	self.melee_weapons.selfie = deep_clone(self.melee_weapons.tomahawk)
+	self.melee_weapons.selfie.name_id = "bm_melee_selfie"
+	self.melee_weapons.selfie.unit = "units/pd2_dlc_berry/weapons/wpn_fps_mel_selfie/wpn_fps_mel_selfie"
+	self.melee_weapons.selfie.third_unit = "units/pd2_dlc_berry/weapons/wpn_fps_mel_selfie/wpn_third_mel_selfie"
+	self.melee_weapons.selfie.stats.weapon_type = "blunt"
+	self.melee_weapons.selfie.dlc = "berry"
+	self.melee_weapons.selfie.texture_bundle_folder = "berry"
+	self.melee_weapons.selfie.sounds = {}
+	self.melee_weapons.selfie.sounds.equip = "selfie_equip"
+	self.melee_weapons.selfie.sounds.hit_air = "baton_hit_air"
+	self.melee_weapons.selfie.sounds.hit_gen = "selfie_hit_gen"
+	self.melee_weapons.selfie.sounds.hit_body = "selfie_hit_body"
+	self.melee_weapons.selfie.sounds.charge = "baton_charge"
+	self.melee_weapons.selfie.stats.min_damage = 3
+	self.melee_weapons.selfie.stats.max_damage = 9
+	self.melee_weapons.selfie.stats.min_damage_effect = 5
+	self.melee_weapons.selfie.stats.max_damage_effect = 3
+	self.melee_weapons.selfie.stats.charge_time = 3
+	self.melee_weapons.selfie.stats.range = 250
+	self.melee_weapons.selfie.stats.concealment = 30
+	self.melee_weapons.iceaxe = deep_clone(self.melee_weapons.tomahawk)
+	self.melee_weapons.iceaxe.name_id = "bm_melee_topaz"
+	self.melee_weapons.iceaxe.unit = "units/pd2_dlc_berry/weapons/rp_wpn_fps_mel_topaz2000/wpn_fps_mel_topaz2000"
+	self.melee_weapons.iceaxe.third_unit = "units/pd2_dlc_berry/weapons/rp_wpn_third_mel_topaz2000/wpn_third_mel_topaz2000"
+	self.melee_weapons.iceaxe.stats.weapon_type = "sharp"
+	self.melee_weapons.iceaxe.dlc = "berry"
+	self.melee_weapons.iceaxe.texture_bundle_folder = "berry"
+	self.melee_weapons.iceaxe.sounds = {}
+	self.melee_weapons.iceaxe.sounds.equip = "mining_pick_equip"
+	self.melee_weapons.iceaxe.sounds.hit_air = "mining_pick_hit_air"
+	self.melee_weapons.iceaxe.sounds.hit_gen = "mining_pick_hit_gen"
+	self.melee_weapons.iceaxe.sounds.hit_body = "mining_pick_hit_body"
+	self.melee_weapons.iceaxe.sounds.charge = "mining_pick_charge"
+	self.melee_weapons.iceaxe.stats.min_damage = 7
+	self.melee_weapons.iceaxe.stats.max_damage = 45
+	self.melee_weapons.iceaxe.stats.min_damage_effect = 1
+	self.melee_weapons.iceaxe.stats.max_damage_effect = 1
+	self.melee_weapons.iceaxe.stats.charge_time = 4
+	self.melee_weapons.iceaxe.stats.range = 250
+	self.melee_weapons.iceaxe.stats.concealment = 30
+	self.melee_weapons.gator = deep_clone(self.melee_weapons.machete)
+	self.melee_weapons.gator.name_id = "bm_melee_gator"
+	self.melee_weapons.gator.unit = "units/pd2_dlc_berry/weapons/wpn_fps_mel_gator/wpn_fps_mel_gator"
+	self.melee_weapons.gator.third_unit = "units/pd2_dlc_berry/weapons/wpn_third_mel_gator/wpn_third_mel_gator"
+	self.melee_weapons.gator.dlc = "berry"
+	self.melee_weapons.gator.texture_bundle_folder = "berry"
+	self.melee_weapons.gator.sounds = {}
+	self.melee_weapons.gator.sounds.equip = "machete_equip"
+	self.melee_weapons.gator.sounds.hit_air = "machete_hit_air"
+	self.melee_weapons.gator.sounds.hit_gen = "machete_hit_gen"
+	self.melee_weapons.gator.sounds.hit_body = "machete_hit_body"
+	self.melee_weapons.gator.sounds.charge = "machete_charge"
+	self.melee_weapons.gator.stats.min_damage = 3
+	self.melee_weapons.gator.stats.max_damage = 8
+	self.melee_weapons.gator.stats.min_damage_effect = 1
+	self.melee_weapons.gator.stats.max_damage_effect = 1
+	self.melee_weapons.gator.stats.charge_time = 2
+	self.melee_weapons.gator.stats.range = 225
+	self.melee_weapons.gator.expire_t = 1.1
+	self.melee_weapons.gator.repeat_expire_t = 0.8
+	self.melee_weapons.gator.stats.concealment = 29
+	self.melee_weapons.pugio = deep_clone(self.melee_weapons.kabar)
+	self.melee_weapons.pugio.name_id = "bm_melee_pugio"
+	self.melee_weapons.pugio.anim_global_param = "melee_stab"
+	self.melee_weapons.pugio.dlc = "berry"
+	self.melee_weapons.pugio.texture_bundle_folder = "berry"
+	self.melee_weapons.pugio.type = "knife"
+	self.melee_weapons.pugio.align_objects = {
+		"a_weapon_right"
+	}
+	self.melee_weapons.pugio.unit = "units/pd2_dlc_berry/weapons/wpn_fps_mel_pugio/wpn_fps_mel_pugio"
+	self.melee_weapons.pugio.third_unit = "units/pd2_dlc_berry/weapons/wpn_fps_mel_pugio/wpn_third_mel_pugio"
+	self.melee_weapons.pugio.sounds = {}
+	self.melee_weapons.pugio.sounds.equip = "cqc_equip"
+	self.melee_weapons.pugio.sounds.hit_air = "cqc_hit_air"
+	self.melee_weapons.pugio.sounds.hit_gen = "cqc_hit_gen"
+	self.melee_weapons.pugio.sounds.hit_body = "cqc_hit_body"
+	self.melee_weapons.pugio.sounds.charge = "cqc_charge"
+	self.melee_weapons.pugio.stats.min_damage = 3
+	self.melee_weapons.pugio.stats.max_damage = 8
+	self.melee_weapons.pugio.stats.min_damage_effect = 1
+	self.melee_weapons.pugio.stats.max_damage_effect = 1
+	self.melee_weapons.pugio.stats.charge_time = 2
+	self.melee_weapons.pugio.stats.range = 175
+	self.melee_weapons.pugio.stats.concealment = 29
+	self.melee_weapons.pugio.repeat_expire_t = 0.3
+	self.melee_weapons.pugio.expire_t = 1
+	self.melee_weapons.pugio.melee_damage_delay = 0.1
 	self:_add_desc_from_name_macro(self.melee_weapons)
 end

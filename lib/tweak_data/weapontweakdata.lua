@@ -38,6 +38,7 @@ function WeaponTweakData:init(tweak_data)
 	self:_init_data_saw_npc()
 	self:_init_data_sentry_gun_npc()
 	self:_init_data_swat_van_turret_module_npc()
+	self:_init_data_ceiling_turret_module_npc()
 	self:_init_data_usp_npc()
 	self:_init_data_g22c_npc()
 	self:_init_data_judge_npc()
@@ -102,6 +103,8 @@ function WeaponTweakData:init(tweak_data)
 	self:_init_data_frankish_npc()
 	self:_init_data_long_npc()
 	self:_init_data_par_npc()
+	self:_init_data_sparrow_npc()
+	self:_init_data_model70_npc()
 	self:_precalculate_values()
 end
 function WeaponTweakData:_set_easy()
@@ -110,27 +113,43 @@ function WeaponTweakData:_set_normal()
 	self.swat_van_turret_module.HEALTH_INIT = 3500
 	self.swat_van_turret_module.SHIELD_HEALTH_INIT = 70
 	self.swat_van_turret_module.DAMAGE = 0.2
+	self.ceiling_turret_module.HEALTH_INIT = 875
+	self.ceiling_turret_module.SHIELD_HEALTH_INIT = 2
+	self.ceiling_turret_module.DAMAGE = 0.2
 end
 function WeaponTweakData:_set_hard()
 	self.swat_van_turret_module.HEALTH_INIT = 3500
 	self.swat_van_turret_module.SHIELD_HEALTH_INIT = 70
 	self.swat_van_turret_module.DAMAGE = 0.5
+	self.ceiling_turret_module.HEALTH_INIT = 875
+	self.ceiling_turret_module.SHIELD_HEALTH_INIT = 70
+	self.ceiling_turret_module.DAMAGE = 0.5
 end
 function WeaponTweakData:_set_overkill()
 	self.swat_van_turret_module.HEALTH_INIT = 12500
 	self.swat_van_turret_module.SHIELD_HEALTH_INIT = 300
 	self.swat_van_turret_module.DAMAGE = 1.3
+	self.ceiling_turret_module.HEALTH_INIT = 6250
+	self.ceiling_turret_module.SHIELD_HEALTH_INIT = 150
+	self.ceiling_turret_module.DAMAGE = 1.3
 end
 function WeaponTweakData:_set_overkill_145()
 	self.swat_van_turret_module.HEALTH_INIT = 25000
 	self.swat_van_turret_module.SHIELD_HEALTH_INIT = 500
 	self.swat_van_turret_module.DAMAGE = 2
+	self.ceiling_turret_module.HEALTH_INIT = 12500
+	self.ceiling_turret_module.SHIELD_HEALTH_INIT = 250
+	self.ceiling_turret_module.DAMAGE = 2
 end
 function WeaponTweakData:_set_overkill_290()
 	self.swat_van_turret_module.HEALTH_INIT = 40000
 	self.swat_van_turret_module.SHIELD_HEALTH_INIT = 700
 	self.swat_van_turret_module.DAMAGE = 3.5
 	self.swat_van_turret_module.CLIP_SIZE = 800
+	self.ceiling_turret_module.HEALTH_INIT = 20000
+	self.ceiling_turret_module.SHIELD_HEALTH_INIT = 350
+	self.ceiling_turret_module.DAMAGE = 3.5
+	self.ceiling_turret_module.CLIP_SIZE = 800
 end
 function WeaponTweakData:_init_data_npc_melee()
 	self.npc_melee = {}
@@ -681,7 +700,7 @@ function WeaponTweakData:_init_data_swat_van_turret_module_npc()
 	self.swat_van_turret_module.alert_size = 2500
 	self.swat_van_turret_module.headshot_dmg_mul = 4
 	self.swat_van_turret_module.EXPLOSION_DMG_MUL = 7
-	self.swat_van_turret_module.FIRE_DMG_MUL = 1
+	self.swat_van_turret_module.FIRE_DMG_MUL = 0.1
 	self.swat_van_turret_module.BAG_DMG_MUL = 100
 	self.swat_van_turret_module.SHIELD_DMG_MUL = 1
 	self.swat_van_turret_module.HEALTH_INIT = 5000
@@ -720,6 +739,81 @@ function WeaponTweakData:_init_data_swat_van_turret_module_npc()
 	self.swat_van_turret_module.challenges.group = "sentry_gun"
 	self.swat_van_turret_module.challenges.weapon = "sentry_gun"
 	self.swat_van_turret_module.suppression = 0.8
+end
+function WeaponTweakData:_init_data_ceiling_turret_module_npc()
+	self.ceiling_turret_module.name_id = "debug_sentry_gun"
+	self.ceiling_turret_module.DAMAGE = 3
+	self.ceiling_turret_module.DAMAGE_MUL_RANGE = {
+		{800, 4},
+		{1000, 1.1},
+		{1500, 1}
+	}
+	self.ceiling_turret_module.SUPPRESSION = 1
+	self.ceiling_turret_module.SPREAD = 0.5
+	self.ceiling_turret_module.FIRE_RANGE = 10000
+	self.ceiling_turret_module.CLIP_SIZE = 400
+	self.ceiling_turret_module.AUTO_RELOAD = true
+	self.ceiling_turret_module.AUTO_RELOAD_DURATION = 8
+	self.ceiling_turret_module.CAN_GO_IDLE = true
+	self.ceiling_turret_module.IDLE_WAIT_TIME = 5
+	self.ceiling_turret_module.AUTO_REPAIR = false
+	self.ceiling_turret_module.AUTO_REPAIR_MAX_COUNT = 2
+	self.ceiling_turret_module.AUTO_REPAIR_DURATION = 30
+	self.ceiling_turret_module.ECM_HACKABLE = true
+	self.ceiling_turret_module.FLASH_GRENADE = {
+		range = 300,
+		effect_duration = 6,
+		chance = 1,
+		check_interval = {1, 1},
+		quiet_time = {10, 13}
+	}
+	self.ceiling_turret_module.HACKABLE_WITH_ECM = true
+	self.ceiling_turret_module.VELOCITY_COMPENSATION = {SNAPSHOT_INTERVAL = 0.3, OVERCOMPENSATION = 50}
+	self.ceiling_turret_module.muzzleflash = "effects/payday2/particles/weapons/big_762_auto"
+	self.ceiling_turret_module.shell_ejection = "effects/payday2/particles/weapons/shells/shell_556_lmg"
+	self.ceiling_turret_module.auto.fire_rate = 0.06
+	self.ceiling_turret_module.alert_size = 2500
+	self.ceiling_turret_module.headshot_dmg_mul = 4
+	self.ceiling_turret_module.EXPLOSION_DMG_MUL = 7
+	self.ceiling_turret_module.FIRE_DMG_MUL = 0.1
+	self.ceiling_turret_module.BAG_DMG_MUL = 100
+	self.ceiling_turret_module.SHIELD_DMG_MUL = 1
+	self.ceiling_turret_module.HEALTH_INIT = 1250
+	self.ceiling_turret_module.SHIELD_HEALTH_INIT = 2
+	self.ceiling_turret_module.SHIELD_DAMAGE_CLAMP = 350
+	self.ceiling_turret_module.BODY_DAMAGE_CLAMP = 4200
+	self.ceiling_turret_module.DEATH_VERIFICATION = {0.4, 0.75}
+	self.ceiling_turret_module.DETECTION_RANGE = self.ceiling_turret_module.FIRE_RANGE
+	self.ceiling_turret_module.DETECTION_DELAY = {
+		{900, 0.3},
+		{3500, 1.5}
+	}
+	self.ceiling_turret_module.KEEP_FIRE_ANGLE = 0.9
+	self.ceiling_turret_module.MAX_VEL_SPIN = 72
+	self.ceiling_turret_module.MIN_VEL_SPIN = self.ceiling_turret_module.MAX_VEL_SPIN * 0.05
+	self.ceiling_turret_module.SLOWDOWN_ANGLE_SPIN = 30
+	self.ceiling_turret_module.ACC_SPIN = self.ceiling_turret_module.MAX_VEL_SPIN * 5
+	self.ceiling_turret_module.MAX_VEL_PITCH = 60
+	self.ceiling_turret_module.MIN_VEL_PITCH = self.ceiling_turret_module.MAX_VEL_PITCH * 0.05
+	self.ceiling_turret_module.SLOWDOWN_ANGLE_PITCH = 20
+	self.ceiling_turret_module.ACC_PITCH = self.ceiling_turret_module.MAX_VEL_PITCH * 5
+	self.ceiling_turret_module.recoil = {}
+	self.ceiling_turret_module.recoil.horizontal = {
+		1,
+		1.5,
+		1,
+		1
+	}
+	self.ceiling_turret_module.recoil.vertical = {
+		1,
+		1.5,
+		1,
+		1
+	}
+	self.ceiling_turret_module.challenges = {}
+	self.ceiling_turret_module.challenges.group = "sentry_gun"
+	self.ceiling_turret_module.challenges.weapon = "sentry_gun"
+	self.ceiling_turret_module.suppression = 0.8
 end
 function WeaponTweakData:_init_data_usp_npc()
 	self.usp_npc.sounds.prefix = "usp45_npc"
@@ -1629,6 +1723,34 @@ function WeaponTweakData:_init_data_par_npc()
 	self.par_secondary_npc.use_data.selection_index = 1
 	self.par_secondary_npc.armor_piercing = true
 end
+function WeaponTweakData:_init_data_sparrow_npc()
+	self.sparrow_npc.sounds.prefix = "sparrow_npc"
+	self.sparrow_npc.use_data.selection_index = 1
+	self.sparrow_npc.DAMAGE = 1
+	self.sparrow_npc.muzzleflash = "effects/payday2/particles/weapons/9mm_auto"
+	self.sparrow_npc.muzzleflash_silenced = "effects/payday2/particles/weapons/9mm_auto_silence"
+	self.sparrow_npc.shell_ejection = "effects/payday2/particles/weapons/shells/shell_9mm"
+	self.sparrow_npc.CLIP_AMMO_MAX = 10
+	self.sparrow_npc.NR_CLIPS_MAX = 5
+	self.sparrow_npc.hold = "pistol"
+	self.sparrow_npc.alert_size = 2500
+	self.sparrow_npc.suppression = 1
+end
+function WeaponTweakData:_init_data_model70_npc()
+	self.model70_npc.sounds.prefix = "model70_npc"
+	self.model70_npc.use_data.selection_index = 2
+	self.model70_npc.DAMAGE = 2
+	self.model70_npc.muzzleflash = "effects/payday2/particles/weapons/big_762_auto"
+	self.model70_npc.shell_ejection = "effects/payday2/particles/weapons/shells/shell_sniper"
+	self.model70_npc.CLIP_AMMO_MAX = 5
+	self.model70_npc.NR_CLIPS_MAX = 8
+	self.model70_npc.auto.fire_rate = 20
+	self.model70_npc.hold = "rifle"
+	self.model70_npc.alert_size = 5000
+	self.model70_npc.suppression = 1
+	self.model70_secondary_npc = deep_clone(self.model70_npc)
+	self.model70_secondary_npc.use_data.selection_index = 1
+end
 function WeaponTweakData:_init_data_player_weapons(tweak_data)
 	local autohit_rifle_default, autohit_pistol_default, autohit_shotgun_default, autohit_lmg_default, autohit_snp_default, autohit_smg_default, autohit_minigun_default, aim_assist_rifle_default, aim_assist_pistol_default, aim_assist_shotgun_default, aim_assist_lmg_default, aim_assist_snp_default, aim_assist_smg_default, aim_assist_minigun_default
 	if SystemInfo:platform() == Idstring("WIN32") then
@@ -2190,11 +2312,11 @@ end
 function WeaponTweakData:_pickup_chance(max_ammo, selection_index)
 	local low, high
 	if selection_index == 2 then
-		low = 0.02
-		high = 0.03
+		low = 0.03
+		high = 0.04
 	else
-		low = 0.02
-		high = 0.03
+		low = 0.03
+		high = 0.04
 	end
 	return {
 		max_ammo * low,
@@ -2248,7 +2370,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.new_m4.spread.steelsight = self.new_m4.spread.standing * 0.4
 	self.new_m4.spread.moving_standing = self.new_m4.spread.standing
 	self.new_m4.spread.moving_crouching = self.new_m4.spread.standing
-	self.new_m4.spread.moving_steelsight = self.new_m4.spread.steelsight * 2
+	self.new_m4.spread.moving_steelsight = self.new_m4.spread.steelsight
 	self.new_m4.kick = {}
 	self.new_m4.kick.standing = {
 		0.6,
@@ -2270,9 +2392,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.new_m4.animations.equip_id = "equip_m4"
 	self.new_m4.animations.recoil_steelsight = true
 	self.new_m4.transition_duration = 0.02
+	self.new_m4.panic_suppression_chance = 0.2
 	self.new_m4.stats = {
 		damage = 38,
-		spread = 10,
+		spread = 12,
 		recoil = 16,
 		spread_moving = 10,
 		zoom = 3,
@@ -2317,10 +2440,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.glock_17.AMMO_PICKUP = self:_pickup_chance(self.glock_17.AMMO_MAX, 1)
 	self.glock_17.spread = {}
 	self.glock_17.spread.standing = self.new_m4.spread.standing
-	self.glock_17.spread.crouching = self.new_m4.spread.standing
+	self.glock_17.spread.crouching = self.new_m4.spread.crouching
 	self.glock_17.spread.steelsight = self.new_m4.spread.steelsight
-	self.glock_17.spread.moving_standing = self.new_m4.spread.standing
-	self.glock_17.spread.moving_crouching = self.new_m4.spread.standing
+	self.glock_17.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.glock_17.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.glock_17.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.glock_17.kick = {}
 	self.glock_17.kick.standing = {
@@ -2355,8 +2478,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.glock_17.animations.equip_id = "equip_glock"
 	self.glock_17.animations.recoil_steelsight = true
 	self.glock_17.transition_duration = 0
+	self.glock_17.panic_suppression_chance = 0.2
 	self.glock_17.stats = {
-		damage = 38,
+		damage = 35,
 		spread = 14,
 		recoil = 16,
 		spread_moving = 14,
@@ -2406,10 +2530,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.mp9.auto.fire_rate = 0.063
 	self.mp9.spread = {}
 	self.mp9.spread.standing = self.new_m4.spread.standing
-	self.mp9.spread.crouching = self.new_m4.spread.standing
+	self.mp9.spread.crouching = self.new_m4.spread.crouching
 	self.mp9.spread.steelsight = self.new_m4.spread.steelsight
-	self.mp9.spread.moving_standing = self.new_m4.spread.standing
-	self.mp9.spread.moving_crouching = self.new_m4.spread.standing
+	self.mp9.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.mp9.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.mp9.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.mp9.kick = {}
 	self.mp9.kick.standing = {
@@ -2442,7 +2566,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.mp9.animations = {}
 	self.mp9.animations.equip_id = "equip_mac11_rifle"
 	self.mp9.animations.recoil_steelsight = true
-	self.mp9.panic_suppression_chance = 0.05
+	self.mp9.panic_suppression_chance = 0.2
 	self.mp9.stats = {
 		damage = 36,
 		spread = 8,
@@ -2477,8 +2601,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.r870.use_data.selection_index = 2
 	self.r870.use_data.align_place = "right_hand"
 	self.r870.DAMAGE = 6
-	self.r870.damage_near = 700
-	self.r870.damage_far = 1500
+	self.r870.damage_near = 1000
+	self.r870.damage_far = 2000
 	self.r870.rays = 12
 	self.r870.CLIP_AMMO_MAX = 6
 	self.r870.NR_CLIPS_MAX = 7
@@ -2493,9 +2617,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.r870.spread.standing = self.new_m4.spread.standing * 2
 	self.r870.spread.crouching = self.new_m4.spread.crouching * 2
 	self.r870.spread.steelsight = self.new_m4.spread.steelsight * 2
-	self.r870.spread.moving_standing = self.new_m4.spread.standing * 2
-	self.r870.spread.moving_crouching = self.new_m4.spread.standing * 2
-	self.r870.spread.moving_steelsight = self.new_m4.spread.standing * 2
+	self.r870.spread.moving_standing = self.new_m4.spread.moving_standing * 2
+	self.r870.spread.moving_crouching = self.new_m4.spread.moving_crouching * 2
+	self.r870.spread.moving_steelsight = self.new_m4.spread.moving_steelsight * 2
 	self.r870.kick = {}
 	self.r870.kick.standing = {
 		1.9,
@@ -2533,6 +2657,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.r870.animations = {}
 	self.r870.animations.equip_id = "equip_r870_shotgun"
 	self.r870.animations.recoil_steelsight = true
+	self.r870.panic_suppression_chance = 0.2
 	self.r870.stats = {
 		damage = 59,
 		spread = 11,
@@ -2584,10 +2709,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.glock_18c.auto.fire_rate = 0.066
 	self.glock_18c.spread = {}
 	self.glock_18c.spread.standing = self.new_m4.spread.standing
-	self.glock_18c.spread.crouching = self.new_m4.spread.standing
+	self.glock_18c.spread.crouching = self.new_m4.spread.crouching
 	self.glock_18c.spread.steelsight = self.new_m4.spread.steelsight
-	self.glock_18c.spread.moving_standing = self.new_m4.spread.standing
-	self.glock_18c.spread.moving_crouching = self.new_m4.spread.standing
+	self.glock_18c.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.glock_18c.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.glock_18c.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.glock_18c.kick = {}
 	self.glock_18c.kick.standing = self.glock_17.kick.standing
@@ -2623,8 +2748,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.glock_18c.challenges.group = "handgun"
 	self.glock_18c.challenges.weapon = "glock"
 	self.glock_18c.transition_duration = 0
+	self.glock_18c.panic_suppression_chance = 0.2
 	self.glock_18c.stats = {
-		damage = 38,
+		damage = 35,
 		spread = 14,
 		recoil = 16,
 		spread_moving = 14,
@@ -2674,10 +2800,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.amcar.auto.fire_rate = 0.11
 	self.amcar.spread = {}
 	self.amcar.spread.standing = self.new_m4.spread.standing
-	self.amcar.spread.crouching = self.new_m4.spread.standing
+	self.amcar.spread.crouching = self.new_m4.spread.crouching
 	self.amcar.spread.steelsight = self.new_m4.spread.steelsight
-	self.amcar.spread.moving_standing = self.new_m4.spread.standing
-	self.amcar.spread.moving_crouching = self.new_m4.spread.standing
+	self.amcar.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.amcar.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.amcar.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.amcar.kick = {}
 	self.amcar.kick.standing = self.new_m4.kick.standing
@@ -2708,9 +2834,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.amcar.animations.reload_not_empty = "reload_not_empty"
 	self.amcar.animations.equip_id = "equip_m4"
 	self.amcar.animations.recoil_steelsight = true
+	self.amcar.panic_suppression_chance = 0.2
 	self.amcar.stats = {
 		damage = 36,
-		spread = 8,
+		spread = 10,
 		recoil = 20,
 		spread_moving = 8,
 		zoom = 3,
@@ -2759,10 +2886,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.m16.auto.fire_rate = 0.07
 	self.m16.spread = {}
 	self.m16.spread.standing = self.new_m4.spread.standing
-	self.m16.spread.crouching = self.new_m4.spread.standing
+	self.m16.spread.crouching = self.new_m4.spread.crouching
 	self.m16.spread.steelsight = self.new_m4.spread.steelsight
-	self.m16.spread.moving_standing = self.new_m4.spread.standing
-	self.m16.spread.moving_crouching = self.new_m4.spread.standing
+	self.m16.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.m16.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.m16.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.m16.kick = {}
 	self.m16.kick.standing = self.new_m4.kick.standing
@@ -2793,9 +2920,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.m16.animations.reload_not_empty = "reload_not_empty"
 	self.m16.animations.equip_id = "equip_m4"
 	self.m16.animations.recoil_steelsight = true
+	self.m16.panic_suppression_chance = 0.2
 	self.m16.stats = {
 		damage = 80,
-		spread = 13,
+		spread = 15,
 		recoil = 9,
 		spread_moving = 13,
 		zoom = 4,
@@ -2844,10 +2972,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.olympic.auto.fire_rate = 0.088
 	self.olympic.spread = {}
 	self.olympic.spread.standing = self.new_m4.spread.standing
-	self.olympic.spread.crouching = self.new_m4.spread.standing
+	self.olympic.spread.crouching = self.new_m4.spread.crouching
 	self.olympic.spread.steelsight = self.new_m4.spread.steelsight
-	self.olympic.spread.moving_standing = self.new_m4.spread.standing
-	self.olympic.spread.moving_crouching = self.new_m4.spread.standing
+	self.olympic.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.olympic.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.olympic.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.olympic.kick = {}
 	self.olympic.kick.standing = self.new_m4.kick.standing
@@ -2878,7 +3006,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.olympic.animations.reload_not_empty = "reload_not_empty"
 	self.olympic.animations.equip_id = "equip_mp5"
 	self.olympic.animations.recoil_steelsight = true
-	self.olympic.panic_suppression_chance = 0.05
+	self.olympic.panic_suppression_chance = 0.2
 	self.olympic.stats = {
 		damage = 38,
 		spread = 12,
@@ -2929,10 +3057,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.ak74.auto.fire_rate = 0.092
 	self.ak74.spread = {}
 	self.ak74.spread.standing = self.new_m4.spread.standing
-	self.ak74.spread.crouching = self.new_m4.spread.standing
+	self.ak74.spread.crouching = self.new_m4.spread.crouching
 	self.ak74.spread.steelsight = self.new_m4.spread.steelsight
-	self.ak74.spread.moving_standing = self.new_m4.spread.standing
-	self.ak74.spread.moving_crouching = self.new_m4.spread.standing
+	self.ak74.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.ak74.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.ak74.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.ak74.kick = {}
 	self.ak74.kick.standing = self.new_m4.kick.standing
@@ -2964,9 +3092,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.ak74.challenges = {}
 	self.ak74.challenges.group = "rifle"
 	self.ak74.challenges.weapon = "ak47"
+	self.ak74.panic_suppression_chance = 0.2
 	self.ak74.stats = {
 		damage = 40,
-		spread = 11,
+		spread = 13,
 		recoil = 16,
 		spread_moving = 11,
 		zoom = 3,
@@ -3014,10 +3143,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.akm.auto.fire_rate = 0.107
 	self.akm.spread = {}
 	self.akm.spread.standing = self.new_m4.spread.standing
-	self.akm.spread.crouching = self.new_m4.spread.standing
+	self.akm.spread.crouching = self.new_m4.spread.crouching
 	self.akm.spread.steelsight = self.new_m4.spread.steelsight
-	self.akm.spread.moving_standing = self.new_m4.spread.standing
-	self.akm.spread.moving_crouching = self.new_m4.spread.standing
+	self.akm.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.akm.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.akm.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.akm.kick = {}
 	self.akm.kick.standing = self.new_m4.kick.standing
@@ -3049,9 +3178,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.akm.challenges = {}
 	self.akm.challenges.group = "rifle"
 	self.akm.challenges.weapon = "ak47"
+	self.akm.panic_suppression_chance = 0.2
 	self.akm.stats = {
 		damage = 80,
-		spread = 14,
+		spread = 16,
 		recoil = 12,
 		spread_moving = 14,
 		zoom = 3,
@@ -3099,10 +3229,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.akm_gold.auto.fire_rate = 0.107
 	self.akm_gold.spread = {}
 	self.akm_gold.spread.standing = self.new_m4.spread.standing
-	self.akm_gold.spread.crouching = self.new_m4.spread.standing
+	self.akm_gold.spread.crouching = self.new_m4.spread.crouching
 	self.akm_gold.spread.steelsight = self.new_m4.spread.steelsight
-	self.akm_gold.spread.moving_standing = self.new_m4.spread.standing
-	self.akm_gold.spread.moving_crouching = self.new_m4.spread.standing
+	self.akm_gold.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.akm_gold.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.akm_gold.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.akm_gold.kick = {}
 	self.akm_gold.kick.standing = self.new_m4.kick.standing
@@ -3135,9 +3265,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.akm_gold.challenges = {}
 	self.akm_gold.challenges.group = "rifle"
 	self.akm_gold.challenges.weapon = "ak47"
+	self.akm_gold.panic_suppression_chance = 0.2
 	self.akm_gold.stats = {
 		damage = 80,
-		spread = 14,
+		spread = 16,
 		recoil = 12,
 		spread_moving = 14,
 		zoom = 3,
@@ -3185,10 +3316,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.akmsu.auto.fire_rate = 0.073
 	self.akmsu.spread = {}
 	self.akmsu.spread.standing = self.new_m4.spread.standing
-	self.akmsu.spread.crouching = self.new_m4.spread.standing
+	self.akmsu.spread.crouching = self.new_m4.spread.crouching
 	self.akmsu.spread.steelsight = self.new_m4.spread.steelsight
-	self.akmsu.spread.moving_standing = self.new_m4.spread.standing
-	self.akmsu.spread.moving_crouching = self.new_m4.spread.standing
+	self.akmsu.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.akmsu.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.akmsu.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.akmsu.kick = {}
 	self.akmsu.kick.standing = self.new_m4.kick.standing
@@ -3220,7 +3351,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.akmsu.challenges = {}
 	self.akmsu.challenges.group = "rifle"
 	self.akmsu.challenges.weapon = "ak47"
-	self.akmsu.panic_suppression_chance = 0.05
+	self.akmsu.panic_suppression_chance = 0.2
 	self.akmsu.stats = {
 		damage = 80,
 		spread = 16,
@@ -3258,8 +3389,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.saiga.use_data.selection_index = 2
 	self.saiga.use_data.align_place = "right_hand"
 	self.saiga.DAMAGE = 6
-	self.saiga.damage_near = 700
-	self.saiga.damage_far = 1800
+	self.saiga.damage_near = 1000
+	self.saiga.damage_far = 2000
 	self.saiga.rays = 12
 	self.saiga.CLIP_AMMO_MAX = 7
 	self.saiga.NR_CLIPS_MAX = 10
@@ -3305,8 +3436,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.saiga.animations = {}
 	self.saiga.animations.equip_id = "equip_saiga"
 	self.saiga.animations.recoil_steelsight = true
+	self.saiga.panic_suppression_chance = 0.2
 	self.saiga.stats = {
-		damage = 23,
+		damage = 33,
 		spread = 8,
 		recoil = 12,
 		spread_moving = 8,
@@ -3356,10 +3488,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.ak5.auto.fire_rate = 0.085
 	self.ak5.spread = {}
 	self.ak5.spread.standing = self.new_m4.spread.standing
-	self.ak5.spread.crouching = self.new_m4.spread.standing
+	self.ak5.spread.crouching = self.new_m4.spread.crouching
 	self.ak5.spread.steelsight = self.new_m4.spread.steelsight
-	self.ak5.spread.moving_standing = self.new_m4.spread.standing
-	self.ak5.spread.moving_crouching = self.new_m4.spread.standing
+	self.ak5.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.ak5.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.ak5.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.ak5.kick = {}
 	self.ak5.kick.standing = self.new_m4.kick.standing
@@ -3390,9 +3522,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.ak5.animations.reload = "reload"
 	self.ak5.animations.equip_id = "equip_m4"
 	self.ak5.animations.recoil_steelsight = true
+	self.ak5.panic_suppression_chance = 0.2
 	self.ak5.stats = {
 		damage = 38,
-		spread = 14,
+		spread = 16,
 		recoil = 16,
 		spread_moving = 14,
 		zoom = 3,
@@ -3440,10 +3573,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.aug.auto.fire_rate = 0.08
 	self.aug.spread = {}
 	self.aug.spread.standing = self.new_m4.spread.standing
-	self.aug.spread.crouching = self.new_m4.spread.standing
+	self.aug.spread.crouching = self.new_m4.spread.crouching
 	self.aug.spread.steelsight = self.new_m4.spread.steelsight
-	self.aug.spread.moving_standing = self.new_m4.spread.standing
-	self.aug.spread.moving_crouching = self.new_m4.spread.standing
+	self.aug.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.aug.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.aug.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.aug.kick = {}
 	self.aug.kick.standing = self.new_m4.kick.standing
@@ -3471,9 +3604,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.aug.animations = {}
 	self.aug.animations.equip_id = "equip_mp5_rifle"
 	self.aug.animations.recoil_steelsight = true
+	self.aug.panic_suppression_chance = 0.2
 	self.aug.stats = {
 		damage = 38,
-		spread = 15,
+		spread = 17,
 		recoil = 11,
 		spread_moving = 15,
 		zoom = 3,
@@ -3522,10 +3656,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.g36.auto.fire_rate = 0.085
 	self.g36.spread = {}
 	self.g36.spread.standing = self.new_m4.spread.standing
-	self.g36.spread.crouching = self.new_m4.spread.standing
+	self.g36.spread.crouching = self.new_m4.spread.crouching
 	self.g36.spread.steelsight = self.new_m4.spread.steelsight
-	self.g36.spread.moving_standing = self.new_m4.spread.standing
-	self.g36.spread.moving_crouching = self.new_m4.spread.standing
+	self.g36.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.g36.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.g36.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.g36.kick = {}
 	self.g36.kick.standing = self.new_m4.kick.standing
@@ -3553,9 +3687,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.g36.animations = {}
 	self.g36.animations.equip_id = "equip_m4"
 	self.g36.animations.recoil_steelsight = true
+	self.g36.panic_suppression_chance = 0.2
 	self.g36.stats = {
 		damage = 36,
-		spread = 9,
+		spread = 11,
 		recoil = 17,
 		spread_moving = 9,
 		zoom = 3,
@@ -3603,10 +3738,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.p90.auto.fire_rate = 0.066
 	self.p90.spread = {}
 	self.p90.spread.standing = self.new_m4.spread.standing
-	self.p90.spread.crouching = self.new_m4.spread.standing
+	self.p90.spread.crouching = self.new_m4.spread.crouching
 	self.p90.spread.steelsight = self.new_m4.spread.steelsight
-	self.p90.spread.moving_standing = self.new_m4.spread.standing
-	self.p90.spread.moving_crouching = self.new_m4.spread.standing
+	self.p90.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.p90.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.p90.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.p90.kick = {}
 	self.p90.kick.standing = self.new_m4.kick.standing
@@ -3634,7 +3769,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.p90.animations = {}
 	self.p90.animations.equip_id = "equip_mac11_rifle"
 	self.p90.animations.recoil_steelsight = true
-	self.p90.panic_suppression_chance = 0.05
+	self.p90.panic_suppression_chance = 0.2
 	self.p90.stats = {
 		damage = 38,
 		spread = 14,
@@ -3685,10 +3820,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.new_m14.single.fire_rate = 0.085
 	self.new_m14.spread = {}
 	self.new_m14.spread.standing = self.new_m4.spread.standing
-	self.new_m14.spread.crouching = self.new_m4.spread.standing
+	self.new_m14.spread.crouching = self.new_m4.spread.crouching
 	self.new_m14.spread.steelsight = self.new_m4.spread.steelsight
-	self.new_m14.spread.moving_standing = self.new_m4.spread.standing
-	self.new_m14.spread.moving_crouching = self.new_m4.spread.standing
+	self.new_m14.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.new_m14.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.new_m14.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.new_m14.kick = {}
 	self.new_m14.kick.standing = self.new_m4.kick.standing
@@ -3717,9 +3852,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.new_m14.animations.fire = "recoil"
 	self.new_m14.animations.equip_id = "equip_m14_rifle"
 	self.new_m14.animations.recoil_steelsight = true
+	self.new_m14.panic_suppression_chance = 0.2
 	self.new_m14.stats = {
 		damage = 160,
-		spread = 20,
+		spread = 22,
 		recoil = 10,
 		spread_moving = 20,
 		zoom = 3,
@@ -3763,10 +3899,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.deagle.AMMO_PICKUP = self:_pickup_chance(self.deagle.AMMO_MAX, 1)
 	self.deagle.spread = {}
 	self.deagle.spread.standing = self.new_m4.spread.standing
-	self.deagle.spread.crouching = self.new_m4.spread.standing
+	self.deagle.spread.crouching = self.new_m4.spread.crouching
 	self.deagle.spread.steelsight = self.new_m4.spread.steelsight
-	self.deagle.spread.moving_standing = self.new_m4.spread.standing
-	self.deagle.spread.moving_crouching = self.new_m4.spread.standing
+	self.deagle.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.deagle.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.deagle.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.deagle.kick = {}
 	self.deagle.kick.standing = self.glock_17.kick.standing
@@ -3794,8 +3930,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.deagle.animations = {}
 	self.deagle.animations.equip_id = "equip_glock"
 	self.deagle.animations.recoil_steelsight = true
+	self.deagle.panic_suppression_chance = 0.2
 	self.deagle.stats = {
-		damage = 160,
+		damage = 145,
 		spread = 20,
 		recoil = 8,
 		spread_moving = 20,
@@ -3845,10 +3982,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.new_mp5.auto.fire_rate = 0.08
 	self.new_mp5.spread = {}
 	self.new_mp5.spread.standing = self.new_m4.spread.standing
-	self.new_mp5.spread.crouching = self.new_m4.spread.standing
+	self.new_mp5.spread.crouching = self.new_m4.spread.crouching
 	self.new_mp5.spread.steelsight = self.new_m4.spread.steelsight
-	self.new_mp5.spread.moving_standing = self.new_m4.spread.standing
-	self.new_mp5.spread.moving_crouching = self.new_m4.spread.standing
+	self.new_mp5.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.new_mp5.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.new_mp5.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.new_mp5.kick = {}
 	self.new_mp5.kick.standing = self.new_m4.kick.standing
@@ -3877,7 +4014,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.new_mp5.animations = {}
 	self.new_mp5.animations.equip_id = "equip_mp5_rifle"
 	self.new_mp5.animations.recoil_steelsight = true
-	self.new_mp5.panic_suppression_chance = 0.05
+	self.new_mp5.panic_suppression_chance = 0.2
 	self.new_mp5.stats = {
 		damage = 36,
 		spread = 8,
@@ -3925,10 +4062,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.colt_1911.AMMO_PICKUP = self:_pickup_chance(self.colt_1911.AMMO_MAX, 1)
 	self.colt_1911.spread = {}
 	self.colt_1911.spread.standing = self.new_m4.spread.standing
-	self.colt_1911.spread.crouching = self.new_m4.spread.standing
+	self.colt_1911.spread.crouching = self.new_m4.spread.crouching
 	self.colt_1911.spread.steelsight = self.new_m4.spread.steelsight
-	self.colt_1911.spread.moving_standing = self.new_m4.spread.standing
-	self.colt_1911.spread.moving_crouching = self.new_m4.spread.standing
+	self.colt_1911.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.colt_1911.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.colt_1911.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.colt_1911.kick = {}
 	self.colt_1911.kick.standing = self.glock_17.kick.standing
@@ -3959,8 +4096,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.colt_1911.animations.reload_not_empty = "reload_not_empty"
 	self.colt_1911.animations.equip_id = "equip_glock"
 	self.colt_1911.animations.recoil_steelsight = true
+	self.colt_1911.panic_suppression_chance = 0.2
 	self.colt_1911.stats = {
-		damage = 80,
+		damage = 65,
 		spread = 18,
 		recoil = 14,
 		spread_moving = 18,
@@ -4010,10 +4148,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.mac10.auto.fire_rate = 0.06
 	self.mac10.spread = {}
 	self.mac10.spread.standing = self.new_m4.spread.standing
-	self.mac10.spread.crouching = self.new_m4.spread.standing
+	self.mac10.spread.crouching = self.new_m4.spread.crouching
 	self.mac10.spread.steelsight = self.new_m4.spread.steelsight
-	self.mac10.spread.moving_standing = self.new_m4.spread.standing
-	self.mac10.spread.moving_crouching = self.new_m4.spread.standing
+	self.mac10.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.mac10.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.mac10.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.mac10.kick = {}
 	self.mac10.kick.standing = self.mp9.kick.standing
@@ -4042,7 +4180,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.mac10.animations = {}
 	self.mac10.animations.equip_id = "equip_mac11_rifle"
 	self.mac10.animations.recoil_steelsight = true
-	self.mac10.panic_suppression_chance = 0.05
+	self.mac10.panic_suppression_chance = 0.2
 	self.mac10.stats = {
 		damage = 40,
 		spread = 13,
@@ -4077,8 +4215,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.serbu.use_data.selection_index = 1
 	self.serbu.use_data.align_place = "right_hand"
 	self.serbu.DAMAGE = 6
-	self.serbu.damage_near = 800
-	self.serbu.damage_far = 1200
+	self.serbu.damage_near = 1000
+	self.serbu.damage_far = 2000
 	self.serbu.rays = 12
 	self.serbu.CLIP_AMMO_MAX = 6
 	self.serbu.NR_CLIPS_MAX = 7
@@ -4123,6 +4261,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.serbu.animations = {}
 	self.serbu.animations.equip_id = "equip_r870_shotgun"
 	self.serbu.animations.recoil_steelsight = true
+	self.serbu.panic_suppression_chance = 0.2
 	self.serbu.stats = {
 		damage = 58,
 		spread = 13,
@@ -4216,6 +4355,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.huntsman.animations = {}
 	self.huntsman.animations.equip_id = "equip_huntsman"
 	self.huntsman.animations.recoil_steelsight = true
+	self.huntsman.panic_suppression_chance = 0.2
 	self.huntsman.stats = {
 		damage = 145,
 		spread = 16,
@@ -4264,10 +4404,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.b92fs.single.fire_rate = 0.09
 	self.b92fs.spread = {}
 	self.b92fs.spread.standing = self.new_m4.spread.standing
-	self.b92fs.spread.crouching = self.new_m4.spread.standing
+	self.b92fs.spread.crouching = self.new_m4.spread.crouching
 	self.b92fs.spread.steelsight = self.new_m4.spread.steelsight
-	self.b92fs.spread.moving_standing = self.new_m4.spread.standing
-	self.b92fs.spread.moving_crouching = self.new_m4.spread.standing
+	self.b92fs.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.b92fs.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.b92fs.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.b92fs.kick = {}
 	self.b92fs.kick.standing = self.glock_17.kick.standing
@@ -4296,8 +4436,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.b92fs.animations = {}
 	self.b92fs.animations.equip_id = "equip_glock"
 	self.b92fs.animations.recoil_steelsight = true
+	self.b92fs.panic_suppression_chance = 0.2
 	self.b92fs.stats = {
-		damage = 40,
+		damage = 37,
 		spread = 15,
 		recoil = 16,
 		spread_moving = 15,
@@ -4347,10 +4488,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.new_raging_bull.AMMO_PICKUP = self:_pickup_chance(self.new_raging_bull.AMMO_MAX, 1)
 	self.new_raging_bull.spread = {}
 	self.new_raging_bull.spread.standing = self.new_m4.spread.standing
-	self.new_raging_bull.spread.crouching = self.new_m4.spread.standing
+	self.new_raging_bull.spread.crouching = self.new_m4.spread.crouching
 	self.new_raging_bull.spread.steelsight = self.new_m4.spread.steelsight
-	self.new_raging_bull.spread.moving_standing = self.new_m4.spread.standing
-	self.new_raging_bull.spread.moving_crouching = self.new_m4.spread.standing
+	self.new_raging_bull.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.new_raging_bull.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.new_raging_bull.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.new_raging_bull.kick = {}
 	self.new_raging_bull.kick.standing = self.glock_17.kick.standing
@@ -4379,8 +4520,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.new_raging_bull.animations = {}
 	self.new_raging_bull.animations.equip_id = "equip_raging_bull"
 	self.new_raging_bull.animations.recoil_steelsight = true
+	self.new_raging_bull.panic_suppression_chance = 0.2
 	self.new_raging_bull.stats = {
-		damage = 190,
+		damage = 175,
 		spread = 20,
 		recoil = 2,
 		spread_moving = 5,
@@ -4478,6 +4620,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.saw.animations = {}
 	self.saw.animations.equip_id = "equip_saw"
 	self.saw.animations.recoil_steelsight = true
+	self.saw.panic_suppression_chance = 0.2
 	self.saw.stats = {
 		alert_size = 9,
 		suppression = 7,
@@ -4533,10 +4676,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.usp.AMMO_PICKUP = self:_pickup_chance(self.usp.AMMO_MAX, 1)
 	self.usp.spread = {}
 	self.usp.spread.standing = self.new_m4.spread.standing
-	self.usp.spread.crouching = self.new_m4.spread.standing
+	self.usp.spread.crouching = self.new_m4.spread.crouching
 	self.usp.spread.steelsight = self.new_m4.spread.steelsight
-	self.usp.spread.moving_standing = self.new_m4.spread.standing
-	self.usp.spread.moving_crouching = self.new_m4.spread.standing
+	self.usp.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.usp.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.usp.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.usp.kick = {}
 	self.usp.kick.standing = {
@@ -4571,8 +4714,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.usp.animations = {}
 	self.usp.animations.equip_id = "equip_glock"
 	self.usp.animations.recoil_steelsight = true
+	self.usp.panic_suppression_chance = 0.2
 	self.usp.stats = {
-		damage = 80,
+		damage = 65,
 		spread = 18,
 		recoil = 14,
 		spread_moving = 18,
@@ -4618,10 +4762,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.g22c.AMMO_PICKUP = self:_pickup_chance(self.g22c.AMMO_MAX, 1)
 	self.g22c.spread = {}
 	self.g22c.spread.standing = self.new_m4.spread.standing
-	self.g22c.spread.crouching = self.new_m4.spread.standing
+	self.g22c.spread.crouching = self.new_m4.spread.crouching
 	self.g22c.spread.steelsight = self.new_m4.spread.steelsight
-	self.g22c.spread.moving_standing = self.new_m4.spread.standing
-	self.g22c.spread.moving_crouching = self.new_m4.spread.standing
+	self.g22c.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.g22c.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.g22c.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.g22c.kick = {}
 	self.g22c.kick.standing = {
@@ -4656,8 +4800,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.g22c.animations = {}
 	self.g22c.animations.equip_id = "equip_glock"
 	self.g22c.animations.recoil_steelsight = true
+	self.g22c.panic_suppression_chance = 0.2
 	self.g22c.stats = {
-		damage = 80,
+		damage = 65,
 		spread = 18,
 		recoil = 14,
 		spread_moving = 18,
@@ -4702,8 +4847,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.judge.use_data.selection_index = 1
 	self.judge.use_data.align_place = "right_hand"
 	self.judge.DAMAGE = 6
-	self.judge.damage_near = 800
-	self.judge.damage_far = 1200
+	self.judge.damage_near = 1000
+	self.judge.damage_far = 2000
 	self.judge.rays = 12
 	self.judge.CLIP_AMMO_MAX = 5
 	self.judge.NR_CLIPS_MAX = 5
@@ -4750,6 +4895,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.judge.animations.recoil_steelsight = true
 	self.judge.global_value = "pd2_clan"
 	self.judge.texture_bundle_folder = "pd2_million"
+	self.judge.panic_suppression_chance = 0.2
 	self.judge.stats = {
 		damage = 95,
 		spread = 14,
@@ -4800,10 +4946,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.m45.auto.fire_rate = 0.1
 	self.m45.spread = {}
 	self.m45.spread.standing = self.new_m4.spread.standing
-	self.m45.spread.crouching = self.new_m4.spread.standing
+	self.m45.spread.crouching = self.new_m4.spread.crouching
 	self.m45.spread.steelsight = self.new_m4.spread.steelsight
-	self.m45.spread.moving_standing = self.new_m4.spread.standing
-	self.m45.spread.moving_crouching = self.new_m4.spread.standing
+	self.m45.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.m45.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.m45.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.m45.kick = {}
 	self.m45.kick.standing = self.mp9.kick.standing
@@ -4834,7 +4980,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.m45.animations.recoil_steelsight = true
 	self.m45.global_value = "armored_transport"
 	self.m45.texture_bundle_folder = "dlc1"
-	self.m45.panic_suppression_chance = 0.05
+	self.m45.panic_suppression_chance = 0.2
 	self.m45.stats = {
 		damage = 80,
 		spread = 18,
@@ -4885,10 +5031,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.s552.auto.fire_rate = 0.084
 	self.s552.spread = {}
 	self.s552.spread.standing = self.new_m4.spread.standing
-	self.s552.spread.crouching = self.new_m4.spread.standing
+	self.s552.spread.crouching = self.new_m4.spread.crouching
 	self.s552.spread.steelsight = self.new_m4.spread.steelsight
-	self.s552.spread.moving_standing = self.new_m4.spread.standing
-	self.s552.spread.moving_crouching = self.new_m4.spread.standing
+	self.s552.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.s552.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.s552.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.s552.kick = {}
 	self.s552.kick.standing = self.new_m4.kick.standing
@@ -4919,9 +5065,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.s552.animations.recoil_steelsight = true
 	self.s552.global_value = "armored_transport"
 	self.s552.texture_bundle_folder = "dlc1"
+	self.s552.panic_suppression_chance = 0.2
 	self.s552.stats = {
 		damage = 35,
-		spread = 8,
+		spread = 10,
 		recoil = 15,
 		spread_moving = 8,
 		zoom = 3,
@@ -4966,10 +5113,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.ppk.single.fire_rate = 0.09
 	self.ppk.spread = {}
 	self.ppk.spread.standing = self.new_m4.spread.standing
-	self.ppk.spread.crouching = self.new_m4.spread.standing
+	self.ppk.spread.crouching = self.new_m4.spread.crouching
 	self.ppk.spread.steelsight = self.new_m4.spread.steelsight
-	self.ppk.spread.moving_standing = self.new_m4.spread.standing
-	self.ppk.spread.moving_crouching = self.new_m4.spread.standing
+	self.ppk.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.ppk.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.ppk.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.ppk.kick = {}
 	self.ppk.kick.standing = self.glock_17.kick.standing
@@ -5000,8 +5147,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.ppk.animations.recoil_steelsight = true
 	self.ppk.global_value = "armored_transport"
 	self.ppk.texture_bundle_folder = "dlc1"
+	self.ppk.panic_suppression_chance = 0.2
 	self.ppk.stats = {
-		damage = 40,
+		damage = 37,
 		spread = 12,
 		recoil = 16,
 		spread_moving = 12,
@@ -5051,10 +5199,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.mp7.auto.fire_rate = 0.063
 	self.mp7.spread = {}
 	self.mp7.spread.standing = self.new_m4.spread.standing
-	self.mp7.spread.crouching = self.new_m4.spread.standing
+	self.mp7.spread.crouching = self.new_m4.spread.crouching
 	self.mp7.spread.steelsight = self.new_m4.spread.steelsight
-	self.mp7.spread.moving_standing = self.new_m4.spread.standing
-	self.mp7.spread.moving_crouching = self.new_m4.spread.standing
+	self.mp7.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.mp7.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.mp7.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.mp7.kick = {}
 	self.mp7.kick.standing = self.new_m4.kick.standing
@@ -5085,7 +5233,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.mp7.animations.recoil_steelsight = true
 	self.mp7.global_value = "gage_pack"
 	self.mp7.texture_bundle_folder = "gage_pack"
-	self.mp7.panic_suppression_chance = 0.05
+	self.mp7.panic_suppression_chance = 0.2
 	self.mp7.stats = {
 		damage = 40,
 		spread = 17,
@@ -5136,10 +5284,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.scar.auto.fire_rate = 0.098
 	self.scar.spread = {}
 	self.scar.spread.standing = self.new_m4.spread.standing
-	self.scar.spread.crouching = self.new_m4.spread.standing
+	self.scar.spread.crouching = self.new_m4.spread.crouching
 	self.scar.spread.steelsight = self.new_m4.spread.steelsight
-	self.scar.spread.moving_standing = self.new_m4.spread.standing
-	self.scar.spread.moving_crouching = self.new_m4.spread.standing
+	self.scar.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.scar.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.scar.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.scar.kick = {}
 	self.scar.kick.standing = self.new_m4.kick.standing
@@ -5170,9 +5318,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.scar.animations.recoil_steelsight = true
 	self.scar.global_value = "gage_pack"
 	self.scar.texture_bundle_folder = "gage_pack"
+	self.scar.panic_suppression_chance = 0.2
 	self.scar.stats = {
 		damage = 81,
-		spread = 17,
+		spread = 19,
 		recoil = 12,
 		spread_moving = 15,
 		zoom = 3,
@@ -5217,10 +5366,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.p226.single.fire_rate = 0.09
 	self.p226.spread = {}
 	self.p226.spread.standing = self.new_m4.spread.standing
-	self.p226.spread.crouching = self.new_m4.spread.standing
+	self.p226.spread.crouching = self.new_m4.spread.crouching
 	self.p226.spread.steelsight = self.new_m4.spread.steelsight
-	self.p226.spread.moving_standing = self.new_m4.spread.standing
-	self.p226.spread.moving_crouching = self.new_m4.spread.standing
+	self.p226.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.p226.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.p226.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.p226.kick = {}
 	self.p226.kick.standing = self.glock_17.kick.standing
@@ -5251,8 +5400,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.p226.animations.recoil_steelsight = true
 	self.p226.global_value = "gage_pack"
 	self.p226.texture_bundle_folder = "gage_pack"
+	self.p226.panic_suppression_chance = 0.2
 	self.p226.stats = {
-		damage = 80,
+		damage = 65,
 		spread = 18,
 		recoil = 14,
 		spread_moving = 18,
@@ -5305,10 +5455,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.hk21.auto.fire_rate = 0.083
 	self.hk21.spread = {}
 	self.hk21.spread.standing = self.new_m4.spread.standing
-	self.hk21.spread.crouching = self.new_m4.spread.standing
+	self.hk21.spread.crouching = self.new_m4.spread.crouching
 	self.hk21.spread.steelsight = self.new_m4.spread.steelsight
-	self.hk21.spread.moving_standing = self.new_m4.spread.standing
-	self.hk21.spread.moving_crouching = self.new_m4.spread.standing
+	self.hk21.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.hk21.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.hk21.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.hk21.kick = {}
 	self.hk21.kick.standing = {
@@ -5350,7 +5500,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.hk21.animations.bipod_recoil_exit = "bipod_recoil_exit"
 	self.hk21.global_value = "gage_pack_lmg"
 	self.hk21.texture_bundle_folder = "gage_pack_lmg"
-	self.hk21.panic_suppression_chance = 0.1
+	self.hk21.panic_suppression_chance = 0.2
 	self.hk21.stats = {
 		damage = 40,
 		spread = 10,
@@ -5405,10 +5555,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.m249.auto.fire_rate = 0.076
 	self.m249.spread = {}
 	self.m249.spread.standing = self.new_m4.spread.standing
-	self.m249.spread.crouching = self.new_m4.spread.standing
+	self.m249.spread.crouching = self.new_m4.spread.crouching
 	self.m249.spread.steelsight = self.new_m4.spread.steelsight
-	self.m249.spread.moving_standing = self.new_m4.spread.standing
-	self.m249.spread.moving_crouching = self.new_m4.spread.standing
+	self.m249.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.m249.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.m249.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.m249.kick = {}
 	self.m249.kick.standing = {
@@ -5450,7 +5600,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.m249.animations.bipod_recoil_exit = "bipod_recoil_exit"
 	self.m249.global_value = "gage_pack_lmg"
 	self.m249.texture_bundle_folder = "gage_pack_lmg"
-	self.m249.panic_suppression_chance = 0.1
+	self.m249.panic_suppression_chance = 0.2
 	self.m249.stats = {
 		damage = 36,
 		spread = 8,
@@ -5507,8 +5657,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.rpk.spread.standing = self.new_m4.spread.standing
 	self.rpk.spread.crouching = self.new_m4.spread.crouching
 	self.rpk.spread.steelsight = self.new_m4.spread.steelsight
-	self.rpk.spread.moving_standing = self.new_m4.spread.standing
-	self.rpk.spread.moving_crouching = self.new_m4.spread.standing
+	self.rpk.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.rpk.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.rpk.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.rpk.kick = {}
 	self.rpk.kick.standing = {
@@ -5550,7 +5700,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.rpk.animations.bipod_recoil_exit = "bipod_recoil_exit"
 	self.rpk.global_value = "gage_pack_lmg"
 	self.rpk.texture_bundle_folder = "gage_pack_lmg"
-	self.rpk.panic_suppression_chance = 0.1
+	self.rpk.panic_suppression_chance = 0.2
 	self.rpk.stats = {
 		damage = 40,
 		spread = 8,
@@ -5605,8 +5755,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.m95.spread.standing = self.new_m4.spread.standing
 	self.m95.spread.crouching = self.new_m4.spread.crouching
 	self.m95.spread.steelsight = self.new_m4.spread.steelsight
-	self.m95.spread.moving_standing = self.new_m4.spread.standing
-	self.m95.spread.moving_crouching = self.new_m4.spread.standing
+	self.m95.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.m95.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.m95.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.m95.kick = {}
 	self.m95.kick.standing = {
@@ -5644,7 +5794,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.m95.can_shoot_through_enemy = true
 	self.m95.can_shoot_through_shield = true
 	self.m95.can_shoot_through_wall = true
-	self.m95.panic_suppression_chance = 0.1
+	self.m95.panic_suppression_chance = 0.2
 	self.m95.stats = {
 		damage = 145,
 		spread = 24,
@@ -5702,8 +5852,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.msr.spread.standing = self.new_m4.spread.standing
 	self.msr.spread.crouching = self.new_m4.spread.crouching
 	self.msr.spread.steelsight = self.new_m4.spread.steelsight
-	self.msr.spread.moving_standing = self.new_m4.spread.standing
-	self.msr.spread.moving_crouching = self.new_m4.spread.standing
+	self.msr.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.msr.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.msr.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.msr.kick = {}
 	self.msr.kick.standing = {
@@ -5742,10 +5892,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.msr.can_shoot_through_enemy = true
 	self.msr.can_shoot_through_shield = true
 	self.msr.can_shoot_through_wall = true
-	self.msr.panic_suppression_chance = 0.1
+	self.msr.panic_suppression_chance = 0.2
 	self.msr.stats = {
 		damage = 160,
-		spread = 22,
+		spread = 23,
 		recoil = 8,
 		spread_moving = 22,
 		zoom = 1,
@@ -5801,8 +5951,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.r93.spread.standing = self.new_m4.spread.standing
 	self.r93.spread.crouching = self.new_m4.spread.crouching
 	self.r93.spread.steelsight = self.new_m4.spread.steelsight
-	self.r93.spread.moving_standing = self.new_m4.spread.standing
-	self.r93.spread.moving_crouching = self.new_m4.spread.standing
+	self.r93.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.r93.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.r93.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.r93.kick = {}
 	self.r93.kick.standing = {
@@ -5841,7 +5991,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.r93.can_shoot_through_enemy = true
 	self.r93.can_shoot_through_shield = true
 	self.r93.can_shoot_through_wall = true
-	self.r93.panic_suppression_chance = 0.1
+	self.r93.panic_suppression_chance = 0.2
 	self.r93.stats = {
 		damage = 140,
 		spread = 24,
@@ -5894,10 +6044,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.fal.auto.fire_rate = 0.086
 	self.fal.spread = {}
 	self.fal.spread.standing = self.new_m4.spread.standing
-	self.fal.spread.crouching = self.new_m4.spread.standing
+	self.fal.spread.crouching = self.new_m4.spread.crouching
 	self.fal.spread.steelsight = self.new_m4.spread.steelsight
-	self.fal.spread.moving_standing = self.new_m4.spread.standing
-	self.fal.spread.moving_crouching = self.new_m4.spread.standing
+	self.fal.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.fal.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.fal.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.fal.kick = {}
 	self.fal.kick.standing = self.new_m4.kick.standing
@@ -5927,9 +6077,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.fal.animations.recoil_steelsight = true
 	self.fal.global_value = "big_bank"
 	self.fal.texture_bundle_folder = "big_bank"
+	self.fal.panic_suppression_chance = 0.2
 	self.fal.stats = {
 		damage = 80,
-		spread = 16,
+		spread = 18,
 		recoil = 12,
 		spread_moving = 16,
 		zoom = 3,
@@ -5962,8 +6113,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.benelli.use_data.selection_index = 2
 	self.benelli.use_data.align_place = "right_hand"
 	self.benelli.DAMAGE = 6
-	self.benelli.damage_near = 700
-	self.benelli.damage_far = 1800
+	self.benelli.damage_near = 1000
+	self.benelli.damage_far = 2000
 	self.benelli.rays = 12
 	self.benelli.CLIP_AMMO_MAX = 8
 	self.benelli.NR_CLIPS_MAX = 8
@@ -6010,8 +6161,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.benelli.animations.recoil_steelsight = true
 	self.benelli.texture_bundle_folder = "gage_pack_shotgun"
 	self.benelli.global_value = "gage_pack_shotgun"
+	self.benelli.panic_suppression_chance = 0.2
 	self.benelli.stats = {
-		damage = 30,
+		damage = 40,
 		spread = 8,
 		recoil = 12,
 		spread_moving = 7,
@@ -6050,8 +6202,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.striker.use_data.selection_index = 1
 	self.striker.use_data.align_place = "left_hand"
 	self.striker.DAMAGE = 6
-	self.striker.damage_near = 700
-	self.striker.damage_far = 1800
+	self.striker.damage_near = 1000
+	self.striker.damage_far = 2000
 	self.striker.rays = 12
 	self.striker.CLIP_AMMO_MAX = 12
 	self.striker.NR_CLIPS_MAX = 6
@@ -6099,8 +6251,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.striker.animations.reload_shell_data = {align = "right"}
 	self.striker.texture_bundle_folder = "gage_pack_shotgun"
 	self.striker.global_value = "gage_pack_shotgun"
+	self.striker.panic_suppression_chance = 0.2
 	self.striker.stats = {
-		damage = 23,
+		damage = 33,
 		spread = 8,
 		recoil = 12,
 		spread_moving = 8,
@@ -6133,8 +6286,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.ksg.use_data.selection_index = 2
 	self.ksg.use_data.align_place = "right_hand"
 	self.ksg.DAMAGE = 6
-	self.ksg.damage_near = 700
-	self.ksg.damage_far = 1500
+	self.ksg.damage_near = 1000
+	self.ksg.damage_far = 2000
 	self.ksg.rays = 12
 	self.ksg.CLIP_AMMO_MAX = 14
 	self.ksg.NR_CLIPS_MAX = 3
@@ -6147,11 +6300,11 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.ksg.single.fire_rate = 0.575
 	self.ksg.spread = {}
 	self.ksg.spread.standing = self.new_m4.spread.standing
-	self.ksg.spread.crouching = self.new_m4.spread.standing
-	self.ksg.spread.steelsight = self.new_m4.spread.standing
-	self.ksg.spread.moving_standing = self.new_m4.spread.standing
-	self.ksg.spread.moving_crouching = self.new_m4.spread.standing
-	self.ksg.spread.moving_steelsight = self.new_m4.spread.standing
+	self.ksg.spread.crouching = self.new_m4.spread.crouching
+	self.ksg.spread.steelsight = self.new_m4.spread.steelsight
+	self.ksg.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.ksg.spread.moving_crouching = self.new_m4.spread.moving_crouching
+	self.ksg.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.ksg.kick = {}
 	self.ksg.kick.standing = {
 		1.9,
@@ -6191,6 +6344,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.ksg.animations.recoil_steelsight = true
 	self.ksg.texture_bundle_folder = "gage_pack_shotgun"
 	self.ksg.global_value = "gage_pack_shotgun"
+	self.ksg.panic_suppression_chance = 0.2
 	self.ksg.stats = {
 		damage = 59,
 		spread = 12,
@@ -6286,7 +6440,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.gre_m79.animations.recoil_steelsight = true
 	self.gre_m79.global_value = "gage_pack_assault"
 	self.gre_m79.texture_bundle_folder = "gage_pack_assault"
-	self.gre_m79.panic_suppression_chance = 0.3
+	self.gre_m79.panic_suppression_chance = 0.2
 	self.gre_m79.ignore_damage_upgrades = true
 	self.gre_m79.stats = {
 		damage = 170,
@@ -6339,10 +6493,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.g3.auto.fire_rate = 0.092
 	self.g3.spread = {}
 	self.g3.spread.standing = self.new_m4.spread.standing
-	self.g3.spread.crouching = self.new_m4.spread.standing
+	self.g3.spread.crouching = self.new_m4.spread.crouching
 	self.g3.spread.steelsight = self.new_m4.spread.steelsight
-	self.g3.spread.moving_standing = self.new_m4.spread.standing
-	self.g3.spread.moving_crouching = self.new_m4.spread.standing
+	self.g3.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.g3.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.g3.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.g3.kick = {}
 	self.g3.kick.standing = self.new_m4.kick.standing
@@ -6372,9 +6526,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.g3.animations.recoil_steelsight = true
 	self.g3.global_value = "gage_pack_assault"
 	self.g3.texture_bundle_folder = "gage_pack_assault"
+	self.g3.panic_suppression_chance = 0.2
 	self.g3.stats = {
 		damage = 80,
-		spread = 16,
+		spread = 18,
 		recoil = 13,
 		spread_moving = 16,
 		zoom = 3,
@@ -6422,10 +6577,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.galil.auto.fire_rate = 0.071
 	self.galil.spread = {}
 	self.galil.spread.standing = self.new_m4.spread.standing
-	self.galil.spread.crouching = self.new_m4.spread.standing
+	self.galil.spread.crouching = self.new_m4.spread.crouching
 	self.galil.spread.steelsight = self.new_m4.spread.steelsight
-	self.galil.spread.moving_standing = self.new_m4.spread.standing
-	self.galil.spread.moving_crouching = self.new_m4.spread.standing
+	self.galil.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.galil.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.galil.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.galil.kick = {}
 	self.galil.kick.standing = self.new_m4.kick.standing
@@ -6457,9 +6612,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.galil.animations.recoil_steelsight = true
 	self.galil.global_value = "gage_pack_assault"
 	self.galil.texture_bundle_folder = "gage_pack_assault"
+	self.galil.panic_suppression_chance = 0.2
 	self.galil.stats = {
 		damage = 42,
-		spread = 11,
+		spread = 13,
 		recoil = 18,
 		spread_moving = 10,
 		zoom = 3,
@@ -6507,10 +6663,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.famas.auto.fire_rate = 0.06
 	self.famas.spread = {}
 	self.famas.spread.standing = self.new_m4.spread.standing
-	self.famas.spread.crouching = self.new_m4.spread.standing
+	self.famas.spread.crouching = self.new_m4.spread.crouching
 	self.famas.spread.steelsight = self.new_m4.spread.steelsight
-	self.famas.spread.moving_standing = self.new_m4.spread.standing
-	self.famas.spread.moving_crouching = self.new_m4.spread.standing
+	self.famas.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.famas.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.famas.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.famas.kick = {}
 	self.famas.kick.standing = self.new_m4.kick.standing
@@ -6540,9 +6696,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.famas.animations.recoil_steelsight = true
 	self.famas.global_value = "gage_pack_assault"
 	self.famas.texture_bundle_folder = "gage_pack_assault"
+	self.famas.panic_suppression_chance = 0.2
 	self.famas.stats = {
 		damage = 35,
-		spread = 8,
+		spread = 10,
 		recoil = 18,
 		spread_moving = 8,
 		zoom = 3,
@@ -6591,10 +6748,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.scorpion.auto.fire_rate = 0.06
 	self.scorpion.spread = {}
 	self.scorpion.spread.standing = self.new_m4.spread.standing
-	self.scorpion.spread.crouching = self.new_m4.spread.standing
+	self.scorpion.spread.crouching = self.new_m4.spread.crouching
 	self.scorpion.spread.steelsight = self.new_m4.spread.steelsight
-	self.scorpion.spread.moving_standing = self.new_m4.spread.standing
-	self.scorpion.spread.moving_crouching = self.new_m4.spread.standing
+	self.scorpion.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.scorpion.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.scorpion.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.scorpion.kick = {}
 	self.scorpion.kick.standing = self.new_m4.kick.standing
@@ -6625,7 +6782,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.scorpion.animations.recoil_steelsight = true
 	self.scorpion.global_value = "hl_miami"
 	self.scorpion.texture_bundle_folder = "hl_miami"
-	self.scorpion.panic_suppression_chance = 0.05
+	self.scorpion.panic_suppression_chance = 0.2
 	self.scorpion.stats = {
 		damage = 36,
 		spread = 8,
@@ -6677,10 +6834,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.tec9.auto.fire_rate = 0.067
 	self.tec9.spread = {}
 	self.tec9.spread.standing = self.new_m4.spread.standing
-	self.tec9.spread.crouching = self.new_m4.spread.standing
+	self.tec9.spread.crouching = self.new_m4.spread.crouching
 	self.tec9.spread.steelsight = self.new_m4.spread.steelsight
-	self.tec9.spread.moving_standing = self.new_m4.spread.standing
-	self.tec9.spread.moving_crouching = self.new_m4.spread.standing
+	self.tec9.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.tec9.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.tec9.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.tec9.kick = {}
 	self.tec9.kick.standing = self.new_m4.kick.standing
@@ -6711,7 +6868,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.tec9.animations.recoil_steelsight = true
 	self.tec9.global_value = "hl_miami"
 	self.tec9.texture_bundle_folder = "hl_miami"
-	self.tec9.panic_suppression_chance = 0.05
+	self.tec9.panic_suppression_chance = 0.2
 	self.tec9.stats = {
 		damage = 36,
 		spread = 8,
@@ -6763,10 +6920,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.uzi.auto.fire_rate = 0.086
 	self.uzi.spread = {}
 	self.uzi.spread.standing = self.new_m4.spread.standing
-	self.uzi.spread.crouching = self.new_m4.spread.standing
+	self.uzi.spread.crouching = self.new_m4.spread.crouching
 	self.uzi.spread.steelsight = self.new_m4.spread.steelsight
-	self.uzi.spread.moving_standing = self.new_m4.spread.standing
-	self.uzi.spread.moving_crouching = self.new_m4.spread.standing
+	self.uzi.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.uzi.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.uzi.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.uzi.kick = {}
 	self.uzi.kick.standing = self.new_m4.kick.standing
@@ -6797,7 +6954,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.uzi.animations.recoil_steelsight = true
 	self.uzi.global_value = "hl_miami"
 	self.uzi.texture_bundle_folder = "hl_miami"
-	self.uzi.panic_suppression_chance = 0.05
+	self.uzi.panic_suppression_chance = 0.2
 	self.uzi.stats = {
 		damage = 40,
 		spread = 14,
@@ -6845,10 +7002,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.jowi.single.fire_rate = 0.09
 	self.jowi.spread = {}
 	self.jowi.spread.standing = self.new_m4.spread.standing
-	self.jowi.spread.crouching = self.new_m4.spread.standing
+	self.jowi.spread.crouching = self.new_m4.spread.crouching
 	self.jowi.spread.steelsight = self.new_m4.spread.steelsight
-	self.jowi.spread.moving_standing = self.new_m4.spread.standing
-	self.jowi.spread.moving_crouching = self.new_m4.spread.standing
+	self.jowi.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.jowi.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.jowi.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.jowi.kick = {}
 	self.jowi.kick.standing = {
@@ -6886,8 +7043,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	}
 	self.jowi.animations.has_steelsight_stance = true
 	self.jowi.animations.recoil_steelsight = true
+	self.jowi.panic_suppression_chance = 0.2
 	self.jowi.stats = {
-		damage = 40,
+		damage = 37,
 		spread = 14,
 		recoil = 16,
 		spread_moving = 14,
@@ -6935,9 +7093,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.x_1911.spread.standing = self.colt_1911.spread.standing
 	self.x_1911.spread.crouching = self.colt_1911.spread.crouching
 	self.x_1911.spread.steelsight = self.colt_1911.spread.steelsight
-	self.x_1911.spread.moving_standing = self.colt_1911.spread.standing
-	self.x_1911.spread.moving_crouching = self.colt_1911.spread.standing
-	self.x_1911.spread.moving_steelsight = self.colt_1911.spread.steelsight
+	self.x_1911.spread.moving_standing = self.colt_1911.spread.moving_standing
+	self.x_1911.spread.moving_crouching = self.colt_1911.spread.moving_crouching
+	self.x_1911.spread.moving_steelsight = self.colt_1911.spread.moving_steelsight
 	self.x_1911.kick = {}
 	self.x_1911.kick.standing = {
 		1.6,
@@ -6974,8 +7132,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	}
 	self.x_1911.animations.has_steelsight_stance = true
 	self.x_1911.animations.recoil_steelsight = true
+	self.x_1911.panic_suppression_chance = 0.2
 	self.x_1911.stats = {
-		damage = 80,
+		damage = 65,
 		spread = 18,
 		recoil = 14,
 		spread_moving = 18,
@@ -7023,9 +7182,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.x_b92fs.spread.standing = self.b92fs.spread.standing
 	self.x_b92fs.spread.crouching = self.b92fs.spread.crouching
 	self.x_b92fs.spread.steelsight = self.b92fs.spread.steelsight
-	self.x_b92fs.spread.moving_standing = self.b92fs.spread.standing
-	self.x_b92fs.spread.moving_crouching = self.b92fs.spread.standing
-	self.x_b92fs.spread.moving_steelsight = self.b92fs.spread.steelsight
+	self.x_b92fs.spread.moving_standing = self.b92fs.spread.moving_standing
+	self.x_b92fs.spread.moving_crouching = self.b92fs.spread.moving_crouching
+	self.x_b92fs.spread.moving_steelsight = self.b92fs.spread.moving_steelsight
 	self.x_b92fs.kick = {
 		1.5,
 		1.2,
@@ -7062,8 +7221,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	}
 	self.x_b92fs.animations.has_steelsight_stance = true
 	self.x_b92fs.animations.recoil_steelsight = true
+	self.x_b92fs.panic_suppression_chance = 0.2
 	self.x_b92fs.stats = {
-		damage = 40,
+		damage = 37,
 		spread = 14,
 		recoil = 16,
 		spread_moving = 14,
@@ -7111,9 +7271,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.x_deagle.spread.standing = self.deagle.spread.standing
 	self.x_deagle.spread.crouching = self.deagle.spread.crouching
 	self.x_deagle.spread.steelsight = self.deagle.spread.steelsight
-	self.x_deagle.spread.moving_standing = self.deagle.spread.standing
-	self.x_deagle.spread.moving_crouching = self.deagle.spread.standing
-	self.x_deagle.spread.moving_steelsight = self.deagle.spread.steelsight
+	self.x_deagle.spread.moving_standing = self.deagle.spread.moving_standing
+	self.x_deagle.spread.moving_crouching = self.deagle.spread.moving_crouching
+	self.x_deagle.spread.moving_steelsight = self.deagle.spread.moving_steelsight
 	self.x_deagle.kick = {}
 	self.x_deagle.kick.standing = {
 		1,
@@ -7149,8 +7309,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	}
 	self.x_deagle.animations.has_steelsight_stance = true
 	self.x_deagle.animations.recoil_steelsight = true
+	self.x_deagle.panic_suppression_chance = 0.2
 	self.x_deagle.stats = {
-		damage = 160,
+		damage = 145,
 		spread = 20,
 		recoil = 8,
 		spread_moving = 4,
@@ -7196,10 +7357,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.g26.single.fire_rate = 0.09
 	self.g26.spread = {}
 	self.g26.spread.standing = self.new_m4.spread.standing
-	self.g26.spread.crouching = self.new_m4.spread.standing
+	self.g26.spread.crouching = self.new_m4.spread.crouching
 	self.g26.spread.steelsight = self.new_m4.spread.steelsight
-	self.g26.spread.moving_standing = self.new_m4.spread.standing
-	self.g26.spread.moving_crouching = self.new_m4.spread.standing
+	self.g26.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.g26.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.g26.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.g26.kick = {}
 	self.g26.kick.standing = self.glock_17.kick.standing
@@ -7229,8 +7390,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.g26.animations.equip_id = "equip_glock"
 	self.g26.animations.recoil_steelsight = true
 	self.g26.global_value = "pd2_clan"
+	self.g26.panic_suppression_chance = 0.2
 	self.g26.stats = {
-		damage = 40,
+		damage = 37,
 		spread = 14,
 		recoil = 16,
 		spread_moving = 14,
@@ -7264,9 +7426,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.spas12.use_data.selection_index = 2
 	self.spas12.use_data.align_place = "right_hand"
 	self.spas12.DAMAGE = 6
-	self.spas12.damage_near = 700
-	self.spas12.damage_far = 1800
-	self.spas12.rays = 5
+	self.spas12.damage_near = 1000
+	self.spas12.damage_far = 2000
+	self.spas12.rays = 12
 	self.spas12.CLIP_AMMO_MAX = 6
 	self.spas12.NR_CLIPS_MAX = 11
 	self.spas12.AMMO_MAX = self.spas12.CLIP_AMMO_MAX * self.spas12.NR_CLIPS_MAX
@@ -7316,8 +7478,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.spas12.animations.equip_id = "equip_r870_shotgun"
 	self.spas12.animations.recoil_steelsight = true
 	self.spas12.global_value = "pd2_clan"
+	self.spas12.panic_suppression_chance = 0.2
 	self.spas12.stats = {
-		damage = 30,
+		damage = 40,
 		spread = 8,
 		recoil = 12,
 		spread_moving = 8,
@@ -7372,8 +7535,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.mg42.spread.standing = self.new_m4.spread.standing
 	self.mg42.spread.crouching = self.new_m4.spread.crouching
 	self.mg42.spread.steelsight = self.new_m4.spread.steelsight
-	self.mg42.spread.moving_standing = self.new_m4.spread.standing
-	self.mg42.spread.moving_crouching = self.new_m4.spread.standing
+	self.mg42.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.mg42.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.mg42.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.mg42.kick = {}
 	self.mg42.kick.standing = {
@@ -7415,7 +7578,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.mg42.animations.bipod_recoil_exit = "bipod_recoil_exit"
 	self.mg42.global_value = "gage_pack_historical"
 	self.mg42.texture_bundle_folder = "gage_pack_historical"
-	self.mg42.panic_suppression_chance = 0.1
+	self.mg42.panic_suppression_chance = 0.2
 	self.mg42.stats = {
 		damage = 36,
 		spread = 8,
@@ -7463,10 +7626,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.c96.single.fire_rate = 0.09
 	self.c96.spread = {}
 	self.c96.spread.standing = self.new_m4.spread.standing
-	self.c96.spread.crouching = self.new_m4.spread.standing
+	self.c96.spread.crouching = self.new_m4.spread.crouching
 	self.c96.spread.steelsight = self.new_m4.spread.steelsight
-	self.c96.spread.moving_standing = self.new_m4.spread.standing
-	self.c96.spread.moving_crouching = self.new_m4.spread.standing
+	self.c96.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.c96.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.c96.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.c96.kick = {}
 	self.c96.kick.standing = self.glock_17.kick.standing
@@ -7497,8 +7660,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.c96.animations.recoil_steelsight = true
 	self.c96.global_value = "gage_pack_historical"
 	self.c96.texture_bundle_folder = "gage_pack_historical"
+	self.c96.panic_suppression_chance = 0.2
 	self.c96.stats = {
-		damage = 40,
+		damage = 37,
 		spread = 12,
 		recoil = 16,
 		spread_moving = 12,
@@ -7548,10 +7712,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.sterling.auto.fire_rate = 0.11
 	self.sterling.spread = {}
 	self.sterling.spread.standing = self.new_m4.spread.standing
-	self.sterling.spread.crouching = self.new_m4.spread.standing
+	self.sterling.spread.crouching = self.new_m4.spread.crouching
 	self.sterling.spread.steelsight = self.new_m4.spread.steelsight
-	self.sterling.spread.moving_standing = self.new_m4.spread.standing
-	self.sterling.spread.moving_crouching = self.new_m4.spread.standing
+	self.sterling.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.sterling.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.sterling.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.sterling.kick = {}
 	self.sterling.kick.standing = self.new_m4.kick.standing
@@ -7582,7 +7746,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.sterling.animations.recoil_steelsight = true
 	self.sterling.global_value = "gage_pack_historical"
 	self.sterling.texture_bundle_folder = "gage_pack_historical"
-	self.sterling.panic_suppression_chance = 0.05
+	self.sterling.panic_suppression_chance = 0.2
 	self.sterling.stats = {
 		damage = 36,
 		spread = 8,
@@ -7638,8 +7802,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.mosin.spread.standing = self.new_m4.spread.standing
 	self.mosin.spread.crouching = self.new_m4.spread.crouching
 	self.mosin.spread.steelsight = self.new_m4.spread.steelsight
-	self.mosin.spread.moving_standing = self.new_m4.spread.standing
-	self.mosin.spread.moving_crouching = self.new_m4.spread.standing
+	self.mosin.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.mosin.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.mosin.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.mosin.kick = {}
 	self.mosin.kick.standing = {
@@ -7678,7 +7842,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.mosin.can_shoot_through_enemy = true
 	self.mosin.can_shoot_through_shield = true
 	self.mosin.can_shoot_through_wall = true
-	self.mosin.panic_suppression_chance = 0.1
+	self.mosin.panic_suppression_chance = 0.2
 	self.mosin.stats = {
 		damage = 140,
 		spread = 24,
@@ -7734,8 +7898,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.m1928.spread.standing = self.new_m4.spread.standing
 	self.m1928.spread.crouching = self.new_m4.spread.crouching
 	self.m1928.spread.steelsight = self.new_m4.spread.steelsight
-	self.m1928.spread.moving_standing = self.new_m4.spread.standing
-	self.m1928.spread.moving_crouching = self.new_m4.spread.standing
+	self.m1928.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.m1928.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.m1928.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.m1928.kick = {}
 	self.m1928.kick.standing = {
@@ -7771,7 +7935,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.m1928.animations.recoil_steelsight = true
 	self.m1928.global_value = "pd2_clan"
 	self.m1928.texture_bundle_folder = "pines"
-	self.m1928.panic_suppression_chance = 0.1
+	self.m1928.panic_suppression_chance = 0.2
 	self.m1928.stats = {
 		damage = 40,
 		spread = 13,
@@ -7824,8 +7988,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.l85a2.spread.standing = self.new_m4.spread.standing
 	self.l85a2.spread.crouching = self.new_m4.spread.crouching
 	self.l85a2.spread.steelsight = self.new_m4.spread.steelsight
-	self.l85a2.spread.moving_standing = self.new_m4.spread.standing
-	self.l85a2.spread.moving_crouching = self.new_m4.spread.standing
+	self.l85a2.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.l85a2.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.l85a2.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.l85a2.kick = {}
 	self.l85a2.kick.standing = {
@@ -7861,9 +8025,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.l85a2.animations.recoil_steelsight = true
 	self.l85a2.global_value = "character_pack_clover"
 	self.l85a2.texture_bundle_folder = "character_pack_clover"
+	self.l85a2.panic_suppression_chance = 0.2
 	self.l85a2.stats = {
 		damage = 40,
-		spread = 15,
+		spread = 17,
 		recoil = 16,
 		spread_moving = 15,
 		zoom = 1,
@@ -7913,8 +8078,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.vhs.spread.standing = self.new_m4.spread.standing
 	self.vhs.spread.crouching = self.new_m4.spread.crouching
 	self.vhs.spread.steelsight = self.new_m4.spread.steelsight
-	self.vhs.spread.moving_standing = self.new_m4.spread.standing
-	self.vhs.spread.moving_crouching = self.new_m4.spread.standing
+	self.vhs.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.vhs.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.vhs.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.vhs.kick = {}
 	self.vhs.kick.standing = {
@@ -7950,9 +8115,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.vhs.animations.recoil_steelsight = true
 	self.vhs.global_value = "character_pack_dragan"
 	self.vhs.texture_bundle_folder = "character_pack_dragan"
+	self.vhs.panic_suppression_chance = 0.2
 	self.vhs.stats = {
 		damage = 40,
-		spread = 14,
+		spread = 16,
 		recoil = 16,
 		spread_moving = 15,
 		zoom = 1,
@@ -7997,10 +8163,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.hs2000.single.fire_rate = 0.09
 	self.hs2000.spread = {}
 	self.hs2000.spread.standing = self.new_m4.spread.standing
-	self.hs2000.spread.crouching = self.new_m4.spread.standing
+	self.hs2000.spread.crouching = self.new_m4.spread.crouching
 	self.hs2000.spread.steelsight = self.new_m4.spread.steelsight
-	self.hs2000.spread.moving_standing = self.new_m4.spread.standing
-	self.hs2000.spread.moving_crouching = self.new_m4.spread.standing
+	self.hs2000.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.hs2000.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.hs2000.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.hs2000.kick = {}
 	self.hs2000.kick.standing = self.glock_17.kick.standing
@@ -8031,8 +8197,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.hs2000.animations.recoil_steelsight = true
 	self.hs2000.global_value = "the_bomb"
 	self.hs2000.texture_bundle_folder = "the_bomb"
+	self.hs2000.panic_suppression_chance = 0.2
 	self.hs2000.stats = {
-		damage = 80,
+		damage = 65,
 		spread = 18,
 		recoil = 14,
 		spread_moving = 18,
@@ -8046,7 +8213,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	}
 	self.m134 = {}
 	self.m134.category = "minigun"
-	self.m134.has_description = true
+	self.m134.has_description = false
 	self.m134.damage_melee = damage_melee_default
 	self.m134.damage_melee_effect_mul = damage_melee_effect_multiplier_default
 	self.m134.sounds = {}
@@ -8083,10 +8250,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.m134.auto.fire_rate = 0.05
 	self.m134.spread = {}
 	self.m134.spread.standing = self.new_m4.spread.standing
-	self.m134.spread.crouching = self.new_m4.spread.standing
+	self.m134.spread.crouching = self.new_m4.spread.crouching
 	self.m134.spread.steelsight = self.new_m4.spread.steelsight
-	self.m134.spread.moving_standing = self.new_m4.spread.standing
-	self.m134.spread.moving_crouching = self.new_m4.spread.standing
+	self.m134.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.m134.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.m134.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.m134.kick = {}
 	self.m134.kick.standing = {
@@ -8123,7 +8290,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.m134.animations.thq_align_anim = "thq"
 	self.m134.global_value = "overkill_pack"
 	self.m134.texture_bundle_folder = "dlc_pack_overkill"
-	self.m134.panic_suppression_chance = 0.1
+	self.m134.panic_suppression_chance = 0.2
 	self.m134.stats = {
 		damage = 38,
 		spread = 5,
@@ -8221,7 +8388,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.rpg7.animations.recoil_steelsight = true
 	self.rpg7.global_value = "overkill_pack"
 	self.rpg7.texture_bundle_folder = "dlc_pack_overkill"
-	self.rpg7.panic_suppression_chance = 0.3
+	self.rpg7.panic_suppression_chance = 0.2
 	self.rpg7.ignore_damage_upgrades = true
 	self.rpg7.stats = {
 		damage = 100,
@@ -8275,10 +8442,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.cobray.auto.fire_rate = 0.05
 	self.cobray.spread = {}
 	self.cobray.spread.standing = self.new_m4.spread.standing
-	self.cobray.spread.crouching = self.new_m4.spread.standing
+	self.cobray.spread.crouching = self.new_m4.spread.crouching
 	self.cobray.spread.steelsight = self.new_m4.spread.steelsight
-	self.cobray.spread.moving_standing = self.new_m4.spread.standing
-	self.cobray.spread.moving_crouching = self.new_m4.spread.standing
+	self.cobray.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.cobray.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.cobray.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.cobray.kick = {}
 	self.cobray.kick.standing = {
@@ -8314,7 +8481,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.cobray.animations.recoil_steelsight = true
 	self.cobray.global_value = "hlm2_deluxe"
 	self.cobray.texture_bundle_folder = "hlm2"
-	self.cobray.panic_suppression_chance = 0.05
+	self.cobray.panic_suppression_chance = 0.2
 	self.cobray.stats = {
 		damage = 40,
 		spread = 14,
@@ -8358,7 +8525,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.b682.DAMAGE = 6
 	self.b682.damage_near = 1000
 	self.b682.damage_far = 2000
-	self.b682.rays = 6
+	self.b682.rays = 12
 	self.b682.CLIP_AMMO_MAX = 2
 	self.b682.NR_CLIPS_MAX = 14
 	self.b682.AMMO_MAX = self.b682.CLIP_AMMO_MAX * self.b682.NR_CLIPS_MAX
@@ -8408,6 +8575,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.b682.animations = {}
 	self.b682.animations.equip_id = "equip_b682"
 	self.b682.animations.recoil_steelsight = true
+	self.b682.panic_suppression_chance = 0.2
 	self.b682.global_value = "pd2_clan"
 	self.b682.texture_bundle_folder = "character_pack_bonnie"
 	self.b682.stats = {
@@ -8458,10 +8626,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.x_g22c.single.fire_rate = 0.12
 	self.x_g22c.spread = {}
 	self.x_g22c.spread.standing = self.new_m4.spread.standing
-	self.x_g22c.spread.crouching = self.new_m4.spread.standing
+	self.x_g22c.spread.crouching = self.new_m4.spread.crouching
 	self.x_g22c.spread.steelsight = self.new_m4.spread.steelsight
-	self.x_g22c.spread.moving_standing = self.new_m4.spread.standing
-	self.x_g22c.spread.moving_crouching = self.new_m4.spread.standing
+	self.x_g22c.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.x_g22c.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.x_g22c.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.x_g22c.kick = {}
 	self.x_g22c.kick.standing = {
@@ -8499,9 +8667,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	}
 	self.x_g22c.animations.has_steelsight_stance = true
 	self.x_g22c.animations.recoil_steelsight = true
+	self.x_g22c.panic_suppression_chance = 0.2
 	self.x_g22c.texture_bundle_folder = "butcher_pack_mods"
 	self.x_g22c.stats = {
-		damage = 80,
+		damage = 65,
 		spread = 18,
 		recoil = 14,
 		spread_moving = 18,
@@ -8547,10 +8716,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.x_g17.single.fire_rate = 0.12
 	self.x_g17.spread = {}
 	self.x_g17.spread.standing = self.new_m4.spread.standing
-	self.x_g17.spread.crouching = self.new_m4.spread.standing
+	self.x_g17.spread.crouching = self.new_m4.spread.crouching
 	self.x_g17.spread.steelsight = self.new_m4.spread.steelsight
-	self.x_g17.spread.moving_standing = self.new_m4.spread.standing
-	self.x_g17.spread.moving_crouching = self.new_m4.spread.standing
+	self.x_g17.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.x_g17.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.x_g17.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.x_g17.kick = {}
 	self.x_g17.kick.standing = {
@@ -8588,9 +8757,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	}
 	self.x_g17.animations.has_steelsight_stance = true
 	self.x_g17.animations.recoil_steelsight = true
+	self.x_g17.panic_suppression_chance = 0.2
 	self.x_g17.texture_bundle_folder = "butcher_pack_mods"
 	self.x_g17.stats = {
-		damage = 40,
+		damage = 37,
 		spread = 14,
 		recoil = 16,
 		spread_moving = 14,
@@ -8636,10 +8806,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.x_usp.single.fire_rate = 0.12
 	self.x_usp.spread = {}
 	self.x_usp.spread.standing = self.new_m4.spread.standing
-	self.x_usp.spread.crouching = self.new_m4.spread.standing
+	self.x_usp.spread.crouching = self.new_m4.spread.crouching
 	self.x_usp.spread.steelsight = self.new_m4.spread.steelsight
-	self.x_usp.spread.moving_standing = self.new_m4.spread.standing
-	self.x_usp.spread.moving_crouching = self.new_m4.spread.standing
+	self.x_usp.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.x_usp.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.x_usp.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.x_usp.kick = {}
 	self.x_usp.kick.standing = {
@@ -8677,9 +8847,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	}
 	self.x_usp.animations.has_steelsight_stance = true
 	self.x_usp.animations.recoil_steelsight = true
+	self.x_usp.panic_suppression_chance = 0.2
 	self.x_usp.texture_bundle_folder = "butcher_pack_mods"
 	self.x_usp.stats = {
-		damage = 80,
+		damage = 65,
 		spread = 18,
 		recoil = 14,
 		spread_moving = 18,
@@ -8693,7 +8864,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	}
 	self.flamethrower_mk2 = {}
 	self.flamethrower_mk2.category = "flamethrower"
-	self.flamethrower_mk2.has_description = true
+	self.flamethrower_mk2.has_description = false
 	self.flamethrower_mk2.damage_melee = damage_melee_default
 	self.flamethrower_mk2.damage_melee_effect_mul = damage_melee_effect_multiplier_default
 	self.flamethrower_mk2.sounds = {}
@@ -8768,6 +8939,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.flamethrower_mk2.animations.recoil_steelsight = false
 	self.flamethrower_mk2.flame_max_range = 1000
 	self.flamethrower_mk2.single_flame_effect_duration = 1
+	self.flamethrower_mk2.panic_suppression_chance = 0.2
 	self.flamethrower_mk2.global_value = "bbq"
 	self.flamethrower_mk2.texture_bundle_folder = "bbq"
 	self.flamethrower_mk2.fire_dot_data = {
@@ -8876,6 +9048,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.m32.animations.recoil_steelsight = true
 	self.m32.global_value = "bbq"
 	self.m32.texture_bundle_folder = "bbq"
+	self.m32.panic_suppression_chance = 0.2
 	self.m32.ignore_damage_upgrades = true
 	self.m32.stats = {
 		damage = 170,
@@ -8917,7 +9090,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.aa12.use_data.selection_index = 2
 	self.aa12.use_data.align_place = "right_hand"
 	self.aa12.DAMAGE = 6
-	self.aa12.damage_near = 800
+	self.aa12.damage_near = 1000
 	self.aa12.damage_far = 2000
 	self.aa12.rays = 12
 	self.aa12.CLIP_AMMO_MAX = 8
@@ -8966,8 +9139,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.aa12.animations.recoil_steelsight = true
 	self.aa12.global_value = "bbq"
 	self.aa12.texture_bundle_folder = "bbq"
+	self.aa12.panic_suppression_chance = 0.2
 	self.aa12.stats = {
-		damage = 23,
+		damage = 33,
 		spread = 8,
 		recoil = 12,
 		spread_moving = 8,
@@ -9023,12 +9197,12 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.peacemaker.AMMO_MAX = self.peacemaker.CLIP_AMMO_MAX * self.peacemaker.NR_CLIPS_MAX
 	self.peacemaker.AMMO_PICKUP = self:_pickup_chance(self.peacemaker.AMMO_MAX, 1)
 	self.peacemaker.spread = {}
-	self.peacemaker.spread.standing = self.r870.spread.standing
-	self.peacemaker.spread.crouching = self.r870.spread.crouching
-	self.peacemaker.spread.steelsight = self.r870.spread.steelsight
-	self.peacemaker.spread.moving_standing = self.r870.spread.moving_standing
-	self.peacemaker.spread.moving_crouching = self.r870.spread.moving_crouching
-	self.peacemaker.spread.moving_steelsight = self.r870.spread.moving_steelsight
+	self.peacemaker.spread.standing = self.new_m4.spread.standing
+	self.peacemaker.spread.crouching = self.new_m4.spread.crouching
+	self.peacemaker.spread.steelsight = self.new_m4.spread.steelsight
+	self.peacemaker.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.peacemaker.spread.moving_crouching = self.new_m4.spread.moving_crouching
+	self.peacemaker.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.peacemaker.kick = {}
 	self.peacemaker.kick.standing = {
 		2.9,
@@ -9062,8 +9236,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.peacemaker.animations.recoil_steelsight = true
 	self.peacemaker.global_value = "west"
 	self.peacemaker.texture_bundle_folder = "west"
+	self.peacemaker.panic_suppression_chance = 0.2
 	self.peacemaker.stats = {
-		damage = 195,
+		damage = 180,
 		spread = 22,
 		recoil = 4,
 		spread_moving = 22,
@@ -9120,10 +9295,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.winchester1874.single.fire_rate = 0.7
 	self.winchester1874.spread = {}
 	self.winchester1874.spread.standing = self.new_m4.spread.standing
-	self.winchester1874.spread.crouching = self.new_m4.spread.standing
+	self.winchester1874.spread.crouching = self.new_m4.spread.crouching
 	self.winchester1874.spread.steelsight = self.new_m4.spread.steelsight
-	self.winchester1874.spread.moving_standing = self.new_m4.spread.standing
-	self.winchester1874.spread.moving_crouching = self.new_m4.spread.standing
+	self.winchester1874.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.winchester1874.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.winchester1874.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.winchester1874.kick = {}
 	self.winchester1874.kick.standing = {
@@ -9161,7 +9336,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.winchester1874.can_shoot_through_enemy = true
 	self.winchester1874.can_shoot_through_shield = true
 	self.winchester1874.can_shoot_through_wall = true
-	self.winchester1874.panic_suppression_chance = 0.1
+	self.winchester1874.panic_suppression_chance = 0.2
 	self.winchester1874.stats = {
 		damage = 160,
 		spread = 24,
@@ -9247,7 +9422,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.plainsrider.animations.recoil_steelsight = false
 	self.plainsrider.global_value = "west"
 	self.plainsrider.texture_bundle_folder = "west"
-	self.plainsrider.panic_suppression_chance = 0.3
+	self.plainsrider.panic_suppression_chance = 0.2
 	self.plainsrider.ignore_damage_upgrades = true
 	self.plainsrider.stats = {
 		damage = 97,
@@ -9301,10 +9476,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.mateba.AMMO_PICKUP = self:_pickup_chance(self.mateba.AMMO_MAX, 1)
 	self.mateba.spread = {}
 	self.mateba.spread.standing = self.new_m4.spread.standing
-	self.mateba.spread.crouching = self.new_m4.spread.standing
+	self.mateba.spread.crouching = self.new_m4.spread.crouching
 	self.mateba.spread.steelsight = self.new_m4.spread.steelsight
-	self.mateba.spread.moving_standing = self.new_m4.spread.standing
-	self.mateba.spread.moving_crouching = self.new_m4.spread.standing
+	self.mateba.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.mateba.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.mateba.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.mateba.kick = {}
 	self.mateba.kick.standing = self.glock_17.kick.standing
@@ -9335,8 +9510,9 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.mateba.animations.recoil_steelsight = true
 	self.mateba.global_value = "arena"
 	self.mateba.texture_bundle_folder = "dlc_arena"
+	self.mateba.panic_suppression_chance = 0.2
 	self.mateba.stats = {
-		damage = 195,
+		damage = 180,
 		spread = 22,
 		recoil = 4,
 		spread_moving = 22,
@@ -9385,10 +9561,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.asval.auto.fire_rate = 0.067
 	self.asval.spread = {}
 	self.asval.spread.standing = self.new_m4.spread.standing
-	self.asval.spread.crouching = self.new_m4.spread.standing
+	self.asval.spread.crouching = self.new_m4.spread.crouching
 	self.asval.spread.steelsight = self.new_m4.spread.steelsight
-	self.asval.spread.moving_standing = self.new_m4.spread.standing
-	self.asval.spread.moving_crouching = self.new_m4.spread.standing
+	self.asval.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.asval.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.asval.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.asval.kick = {}
 	self.asval.kick.standing = self.new_m4.kick.standing
@@ -9422,9 +9598,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.asval.challenges.weapon = "ak47"
 	self.asval.global_value = "character_pack_sokol"
 	self.asval.texture_bundle_folder = "character_pack_sokol"
+	self.asval.panic_suppression_chance = 0.2
 	self.asval.stats = {
 		damage = 36,
-		spread = 13,
+		spread = 15,
 		recoil = 17,
 		spread_moving = 8,
 		zoom = 3,
@@ -9470,10 +9647,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.sub2000.single.fire_rate = 0.085
 	self.sub2000.spread = {}
 	self.sub2000.spread.standing = self.new_m4.spread.standing
-	self.sub2000.spread.crouching = self.new_m4.spread.standing
+	self.sub2000.spread.crouching = self.new_m4.spread.crouching
 	self.sub2000.spread.steelsight = self.new_m4.spread.steelsight
-	self.sub2000.spread.moving_standing = self.new_m4.spread.standing
-	self.sub2000.spread.moving_crouching = self.new_m4.spread.standing
+	self.sub2000.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.sub2000.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.sub2000.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.sub2000.kick = {}
 	self.sub2000.kick.standing = self.new_m4.kick.standing
@@ -9498,6 +9675,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.sub2000.shake.fire_steelsight_multiplier = 1
 	self.sub2000.autohit = autohit_rifle_default
 	self.sub2000.aim_assist = aim_assist_rifle_default
+	self.sub2000.panic_suppression_chance = 0.2
 	self.sub2000.weapon_hold = "sub2000"
 	self.sub2000.animations = {}
 	self.sub2000.animations.equip_id = "sub2000_equip"
@@ -9505,8 +9683,8 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.sub2000.global_value = "kenaz"
 	self.sub2000.texture_bundle_folder = "kenaz"
 	self.sub2000.stats = {
-		damage = 80,
-		spread = 19,
+		damage = 65,
+		spread = 21,
 		recoil = 9,
 		spread_moving = 16,
 		zoom = 3,
@@ -9556,10 +9734,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.wa2000.single.fire_rate = 0.4
 	self.wa2000.spread = {}
 	self.wa2000.spread.standing = self.new_m4.spread.standing
-	self.wa2000.spread.crouching = self.new_m4.spread.standing
+	self.wa2000.spread.crouching = self.new_m4.spread.crouching
 	self.wa2000.spread.steelsight = self.new_m4.spread.steelsight
-	self.wa2000.spread.moving_standing = self.new_m4.spread.standing
-	self.wa2000.spread.moving_crouching = self.new_m4.spread.standing
+	self.wa2000.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.wa2000.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.wa2000.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.wa2000.kick = {}
 	self.wa2000.kick.standing = {
@@ -9593,7 +9771,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.wa2000.animations = {}
 	self.wa2000.animations.equip_id = "equip_wa2000"
 	self.wa2000.animations.recoil_steelsight = true
-	self.wa2000.panic_suppression_chance = 0.1
+	self.wa2000.panic_suppression_chance = 0.2
 	self.wa2000.global_value = "turtles"
 	self.wa2000.texture_bundle_folder = "turtles"
 	self.wa2000.can_shoot_through_enemy = true
@@ -9652,10 +9830,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.polymer.auto.fire_rate = 0.05
 	self.polymer.spread = {}
 	self.polymer.spread.standing = self.new_m4.spread.standing
-	self.polymer.spread.crouching = self.new_m4.spread.standing
+	self.polymer.spread.crouching = self.new_m4.spread.crouching
 	self.polymer.spread.steelsight = self.new_m4.spread.steelsight
-	self.polymer.spread.moving_standing = self.new_m4.spread.standing
-	self.polymer.spread.moving_crouching = self.new_m4.spread.standing
+	self.polymer.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.polymer.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.polymer.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.polymer.kick = {}
 	self.polymer.kick.standing = {
@@ -9691,7 +9869,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.polymer.animations.recoil_steelsight = true
 	self.polymer.global_value = "turtles"
 	self.polymer.texture_bundle_folder = "turtles"
-	self.polymer.panic_suppression_chance = 0.05
+	self.polymer.panic_suppression_chance = 0.2
 	self.polymer.stats = {
 		damage = 42,
 		spread = 14,
@@ -9786,7 +9964,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.hunter.animations.recoil_steelsight = true
 	self.hunter.global_value = "turtles"
 	self.hunter.texture_bundle_folder = "turtles"
-	self.hunter.panic_suppression_chance = 0.05
+	self.hunter.panic_suppression_chance = 0.2
 	self.hunter.ignore_damage_upgrades = true
 	self.hunter.stats = {
 		damage = 100,
@@ -9840,10 +10018,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.baka.auto.fire_rate = 0.05
 	self.baka.spread = {}
 	self.baka.spread.standing = self.new_m4.spread.standing
-	self.baka.spread.crouching = self.new_m4.spread.standing
+	self.baka.spread.crouching = self.new_m4.spread.crouching
 	self.baka.spread.steelsight = self.new_m4.spread.steelsight
-	self.baka.spread.moving_standing = self.new_m4.spread.standing
-	self.baka.spread.moving_crouching = self.new_m4.spread.standing
+	self.baka.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.baka.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.baka.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.baka.kick = {}
 	self.baka.kick.standing = {
@@ -9879,6 +10057,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.baka.animations.recoil_steelsight = true
 	self.baka.global_value = "dragon"
 	self.baka.texture_bundle_folder = "dragon"
+	self.baka.panic_suppression_chance = 0.2
 	self.baka.stats = {
 		damage = 36,
 		spread = 8,
@@ -9973,7 +10152,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.arblast.animations.recoil_steelsight = true
 	self.arblast.global_value = "steel"
 	self.arblast.texture_bundle_folder = "steel"
-	self.arblast.panic_suppression_chance = 0.05
+	self.arblast.panic_suppression_chance = 0.2
 	self.arblast.ignore_damage_upgrades = true
 	self.arblast.stats = {
 		damage = 53,
@@ -10070,7 +10249,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.frankish.animations.recoil_steelsight = true
 	self.frankish.global_value = "steel"
 	self.frankish.texture_bundle_folder = "steel"
-	self.frankish.panic_suppression_chance = 0.05
+	self.frankish.panic_suppression_chance = 0.2
 	self.frankish.ignore_damage_upgrades = true
 	self.frankish.stats = {
 		damage = 120,
@@ -10155,7 +10334,7 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.long.animations.recoil_steelsight = false
 	self.long.global_value = "steel"
 	self.long.texture_bundle_folder = "steel"
-	self.long.panic_suppression_chance = 0.3
+	self.long.panic_suppression_chance = 0.2
 	self.long.ignore_damage_upgrades = true
 	self.long.stats = {
 		damage = 65,
@@ -10212,10 +10391,10 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 	self.par.auto.fire_rate = 0.076
 	self.par.spread = {}
 	self.par.spread.standing = self.new_m4.spread.standing
-	self.par.spread.crouching = self.new_m4.spread.standing
+	self.par.spread.crouching = self.new_m4.spread.crouching
 	self.par.spread.steelsight = self.new_m4.spread.steelsight
-	self.par.spread.moving_standing = self.new_m4.spread.standing
-	self.par.spread.moving_crouching = self.new_m4.spread.standing
+	self.par.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.par.spread.moving_crouching = self.new_m4.spread.moving_crouching
 	self.par.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
 	self.par.kick = {}
 	self.par.kick.standing = {
@@ -10270,6 +10449,185 @@ function WeaponTweakData:_init_new_weapons(autohit_rifle_default, autohit_pistol
 		total_ammo_mod = 21,
 		value = 9
 	}
+	self.sparrow = {}
+	self.sparrow.category = "pistol"
+	self.sparrow.damage_melee = damage_melee_default
+	self.sparrow.damage_melee_effect_mul = damage_melee_effect_multiplier_default
+	self.sparrow.sounds = {}
+	self.sparrow.sounds.fire = "sparrow_fire"
+	self.sparrow.sounds.enter_steelsight = "pistol_steel_sight_enter"
+	self.sparrow.sounds.leave_steelsight = "pistol_steel_sight_exit"
+	self.sparrow.sounds.dryfire = "secondary_dryfire"
+	self.sparrow.timers = {}
+	self.sparrow.timers.reload_not_empty = 1.47
+	self.sparrow.timers.reload_empty = 2.12
+	self.sparrow.timers.unequip = 0.5
+	self.sparrow.timers.equip = 0.5
+	self.sparrow.name_id = "bm_w_sparrow"
+	self.sparrow.desc_id = "bm_w_sparrow_desc"
+	self.sparrow.description_id = "des_sparrow"
+	self.sparrow.muzzleflash = "effects/payday2/particles/weapons/9mm_auto_fps"
+	self.sparrow.muzzleflash_silenced = "effects/payday2/particles/weapons/9mm_auto_silence_fps"
+	self.sparrow.shell_ejection = "effects/payday2/particles/weapons/shells/shell_9mm"
+	self.sparrow.use_data = {}
+	self.sparrow.use_data.selection_index = 1
+	self.sparrow.DAMAGE = 1
+	self.sparrow.CLIP_AMMO_MAX = 12
+	self.sparrow.NR_CLIPS_MAX = 5
+	self.sparrow.AMMO_MAX = self.sparrow.CLIP_AMMO_MAX * self.sparrow.NR_CLIPS_MAX
+	self.sparrow.AMMO_PICKUP = self:_pickup_chance(self.sparrow.AMMO_MAX, 1)
+	self.sparrow.FIRE_MODE = "single"
+	self.sparrow.fire_mode_data = {}
+	self.sparrow.fire_mode_data.fire_rate = 0.09
+	self.sparrow.single = {}
+	self.sparrow.single.fire_rate = 0.09
+	self.sparrow.spread = {}
+	self.sparrow.spread.standing = self.new_m4.spread.standing
+	self.sparrow.spread.crouching = self.new_m4.spread.crouching
+	self.sparrow.spread.steelsight = self.new_m4.spread.steelsight
+	self.sparrow.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.sparrow.spread.moving_crouching = self.new_m4.spread.moving_crouching
+	self.sparrow.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
+	self.sparrow.kick = {}
+	self.sparrow.kick.standing = self.glock_17.kick.standing
+	self.sparrow.kick.crouching = self.sparrow.kick.standing
+	self.sparrow.kick.steelsight = self.sparrow.kick.standing
+	self.sparrow.crosshair = {}
+	self.sparrow.crosshair.standing = {}
+	self.sparrow.crosshair.crouching = {}
+	self.sparrow.crosshair.steelsight = {}
+	self.sparrow.crosshair.standing.offset = 0.1
+	self.sparrow.crosshair.standing.moving_offset = 0.4
+	self.sparrow.crosshair.standing.kick_offset = 0.3
+	self.sparrow.crosshair.crouching.offset = 0.1
+	self.sparrow.crosshair.crouching.moving_offset = 0.5
+	self.sparrow.crosshair.crouching.kick_offset = 0.2
+	self.sparrow.crosshair.steelsight.hidden = true
+	self.sparrow.crosshair.steelsight.offset = 0
+	self.sparrow.crosshair.steelsight.moving_offset = 0
+	self.sparrow.crosshair.steelsight.kick_offset = 0.1
+	self.sparrow.shake = {}
+	self.sparrow.shake.fire_multiplier = 1
+	self.sparrow.shake.fire_steelsight_multiplier = -1
+	self.sparrow.autohit = autohit_pistol_default
+	self.sparrow.aim_assist = aim_assist_pistol_default
+	self.sparrow.weapon_hold = "colt_1911"
+	self.sparrow.animations = {}
+	self.sparrow.animations.equip_id = "equip_glock"
+	self.sparrow.animations.recoil_steelsight = true
+	self.sparrow.global_value = "berry"
+	self.sparrow.texture_bundle_folder = "rip"
+	self.sparrow.panic_suppression_chance = 0.2
+	self.sparrow.stats = {
+		damage = 145,
+		spread = 18,
+		recoil = 9,
+		spread_moving = 18,
+		zoom = 3,
+		concealment = 29,
+		suppression = 15,
+		alert_size = 7,
+		extra_ammo = 6,
+		total_ammo_mod = 21,
+		value = 4
+	}
+	self.model70 = {}
+	self.model70.category = "snp"
+	self.model70.upgrade_blocks = {
+		weapon = {
+			"clip_ammo_increase"
+		}
+	}
+	self.model70.damage_melee = damage_melee_default
+	self.model70.damage_melee_effect_mul = damage_melee_effect_multiplier_default
+	self.model70.sounds = {}
+	self.model70.sounds.fire = "model70_fire"
+	self.model70.sounds.dryfire = "primary_dryfire"
+	self.model70.sounds.enter_steelsight = "lmg_steelsight_enter"
+	self.model70.sounds.leave_steelsight = "lmg_steelsight_exit"
+	self.model70.timers = {}
+	self.model70.timers.reload_not_empty = 3.35
+	self.model70.timers.reload_empty = 4.5
+	self.model70.timers.unequip = 0.45
+	self.model70.timers.equip = 0.75
+	self.model70.name_id = "bm_w_model70"
+	self.model70.desc_id = "bm_w_model70_desc"
+	self.model70.description_id = "des_model70"
+	self.model70.muzzleflash = "effects/payday2/particles/weapons/big_762_auto_fps"
+	self.model70.shell_ejection = "effects/payday2/particles/weapons/shells/shell_sniper"
+	self.model70.use_data = {}
+	self.model70.use_data.selection_index = 2
+	self.model70.use_data.align_place = "right_hand"
+	self.model70.DAMAGE = 1
+	self.model70.CLIP_AMMO_MAX = 5
+	self.model70.NR_CLIPS_MAX = 6
+	self.model70.AMMO_MAX = self.model70.CLIP_AMMO_MAX * self.model70.NR_CLIPS_MAX
+	self.model70.AMMO_PICKUP = {0.7, 1}
+	self.model70.FIRE_MODE = "single"
+	self.model70.fire_mode_data = {}
+	self.model70.fire_mode_data.fire_rate = 1
+	self.model70.CAN_TOGGLE_FIREMODE = false
+	self.model70.single = {}
+	self.model70.single.fire_rate = 20
+	self.model70.spread = {}
+	self.model70.spread.standing = self.new_m4.spread.standing
+	self.model70.spread.crouching = self.new_m4.spread.crouching
+	self.model70.spread.steelsight = self.new_m4.spread.steelsight
+	self.model70.spread.moving_standing = self.new_m4.spread.moving_standing
+	self.model70.spread.moving_crouching = self.new_m4.spread.moving_crouching
+	self.model70.spread.moving_steelsight = self.new_m4.spread.moving_steelsight
+	self.model70.kick = {}
+	self.model70.kick.standing = {
+		3,
+		4.8,
+		-0.3,
+		0.3
+	}
+	self.model70.kick.crouching = self.model70.kick.standing
+	self.model70.kick.steelsight = self.model70.kick.standing
+	self.model70.crosshair = {}
+	self.model70.crosshair.standing = {}
+	self.model70.crosshair.crouching = {}
+	self.model70.crosshair.steelsight = {}
+	self.model70.crosshair.standing.offset = 1.14
+	self.model70.crosshair.standing.moving_offset = 1.8
+	self.model70.crosshair.standing.kick_offset = 1.6
+	self.model70.crosshair.crouching.offset = 1.1
+	self.model70.crosshair.crouching.moving_offset = 1.6
+	self.model70.crosshair.crouching.kick_offset = 1.4
+	self.model70.crosshair.steelsight.hidden = true
+	self.model70.crosshair.steelsight.offset = 1
+	self.model70.crosshair.steelsight.moving_offset = 1
+	self.model70.crosshair.steelsight.kick_offset = 1.14
+	self.model70.shake = {}
+	self.model70.shake.fire_multiplier = 3.5
+	self.model70.shake.fire_steelsight_multiplier = -3.5
+	self.model70.autohit = autohit_snp_default
+	self.model70.aim_assist = aim_assist_snp_default
+	self.model70.weapon_hold = "model70"
+	self.model70.animations = {}
+	self.model70.animations.equip_id = "equip_model70"
+	self.model70.animations.recoil_steelsight = true
+	self.model70.texture_bundle_folder = "berry"
+	self.model70.can_shoot_through_enemy = true
+	self.model70.can_shoot_through_shield = true
+	self.model70.can_shoot_through_wall = true
+	self.model70.panic_suppression_chance = 0.2
+	self.model70.stats = {
+		damage = 140,
+		spread = 24,
+		recoil = 4,
+		spread_moving = 24,
+		zoom = 1,
+		concealment = 6,
+		suppression = 5,
+		alert_size = 7,
+		extra_ammo = 6,
+		total_ammo_mod = 21,
+		value = 9
+	}
+	self.model70.armor_piercing_chance = 1
+	self.model70.stats_modifiers = {damage = 2}
 end
 function WeaponTweakData:_init_data_offhand_weapons()
 	self.b92fs_primary = deep_clone(self.b92fs)
@@ -10569,6 +10927,10 @@ function WeaponTweakData:_create_table_structure()
 		auto = {}
 	}
 	self.swat_van_turret_module = {
+		sounds = {},
+		auto = {}
+	}
+	self.ceiling_turret_module = {
 		sounds = {},
 		auto = {}
 	}
@@ -10957,6 +11319,18 @@ function WeaponTweakData:_create_table_structure()
 		use_data = {},
 		auto = {}
 	}
+	self.sparrow_npc = {
+		usage = "c45",
+		sounds = {},
+		use_data = {},
+		auto = {}
+	}
+	self.model70_npc = {
+		usage = "ak47",
+		sounds = {},
+		use_data = {},
+		auto = {}
+	}
 end
 function WeaponTweakData:_precalculate_values_wip()
 end
@@ -11059,4 +11433,6 @@ function WeaponTweakData:_precalculate_values()
 	self.frankish_npc.AMMO_MAX = self.frankish_npc.CLIP_AMMO_MAX * self.frankish_npc.NR_CLIPS_MAX
 	self.long_npc.AMMO_MAX = self.long_npc.CLIP_AMMO_MAX * self.long_npc.NR_CLIPS_MAX
 	self.par_npc.AMMO_MAX = self.par_npc.CLIP_AMMO_MAX * self.par_npc.NR_CLIPS_MAX
+	self.sparrow_npc.AMMO_MAX = self.sparrow_npc.CLIP_AMMO_MAX * self.sparrow_npc.NR_CLIPS_MAX
+	self.model70_npc.AMMO_MAX = self.model70_npc.CLIP_AMMO_MAX * self.model70_npc.NR_CLIPS_MAX
 end

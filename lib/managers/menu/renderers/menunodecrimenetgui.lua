@@ -1,4 +1,5 @@
 require("lib/managers/menu/renderers/MenuNodeBaseGui")
+require("lib/utils/InventoryDescription")
 local make_fine_text = function(text)
 	local x, y, w, h = text:text_rect()
 	text:set_size(w, h)
@@ -2703,6 +2704,9 @@ function MenuNodeOpenContainerGui:setup(half_fade)
 	if alive(self.safe_rect_panel:child("open_safe_panel")) then
 		self.safe_rect_panel:remove(self.safe_rect_panel:child("open_safe_panel"))
 	end
+	if alive(self.safe_rect_panel:child("info_panel")) then
+		self.safe_rect_panel:remove(self.safe_rect_panel:child("info_panel"))
+	end
 	if alive(self._fullscreen_panel) then
 		self._fullscreen_panel:parent():remove(self._fullscreen_panel)
 	end
@@ -2716,13 +2720,8 @@ function MenuNodeOpenContainerGui:setup(half_fade)
 	local wanted_height = (2.5 * safe_w + padding) / 3
 	local w = safe_w
 	local h = safe_h
-	if wanted_width < wanted_height then
-		w = wanted_width
-		h = (2.5 * wanted_width + padding) / 3
-	else
-		h = wanted_height
-		w = (3 * wanted_height - padding) / 2.5
-	end
+	w = wanted_width
+	h = (2.5 * wanted_width + padding) / 3
 	local mc_full_ws = managers.menu_component:fullscreen_ws()
 	self._fullscreen_panel = mc_full_ws:panel():panel({
 		name = "open_contatiner",
@@ -2744,6 +2743,15 @@ function MenuNodeOpenContainerGui:setup(half_fade)
 	end)
 	self._panel:set_size(w + 20, h + 20)
 	self._panel:set_center(self.safe_rect_panel:w() / 2, self.safe_rect_panel:h() / 2)
+	local info_panel = self.safe_rect_panel:panel({
+		name = "info_panel",
+		w = (safe_w - w) * 0.75,
+		h = self._panel:h(),
+		layer = 151
+	})
+	info_panel:set_right(self.safe_rect_panel:w())
+	info_panel:set_top(self._panel:top())
+	self._panel:set_right(info_panel:left() - 10)
 	self.boxgui = BoxGuiObject:new(self._panel, {
 		sides = {
 			1,
@@ -2763,6 +2771,9 @@ function MenuNodeOpenContainerGui:setup(half_fade)
 		w = self._panel:w() - 20,
 		h = self._panel:h() - 20,
 		layer = 1
+	})
+	self._legend_panel = panel:panel({
+		h = tweak_data.menu.pd2_medium_font_size
 	})
 	local title_text = container_data.show_only and managers.localization:to_upper_text("menu_steam_market_content_" .. container_data.content) or managers.localization:to_upper_text("menu_ti_steam_open_safe_title", {
 		name = managers.localization:text(tweak_data.economy.safes[data.safe].name_id),
@@ -2927,14 +2938,15 @@ function MenuNodeOpenContainerGui:setup(half_fade)
 				text = nil,
 				blur = nil,
 				highlighted = false,
-				clbk = callback(self, self, "preview_weapon_cosmetics_callback", {
+				clbk = callback(self, self, "weapon_cosmetics_callback"),
+				image = select_box,
+				highlighted_color = Color(1, 1, 1),
+				default_color = Color(0, 0, 0, 0),
+				params = {
 					weapon_id = c_td.weapon_id,
 					cosmetic_id = content.entry,
 					quality = "mint"
-				}),
-				image = select_box,
-				highlighted_color = Color(1, 1, 1),
-				default_color = Color(0, 0, 0, 0)
+				}
 			})
 		else
 			if content.category == "contents" and c_td.rarity == "legendary" then
@@ -2960,15 +2972,136 @@ function MenuNodeOpenContainerGui:setup(half_fade)
 	})
 	self.item_panel:set_world_left(safe_panel:world_right() + padding - self.node:parameters().align_line_proportions * self.item_panel:w())
 	self.item_panel:set_world_center_y(safe_panel:world_center_y())
+	info_panel:set_world_top(content_panel:world_top())
+	info_panel:set_h(self._panel:bottom() - info_panel:top())
+	info_panel:rect({
+		color = Color.black,
+		alpha = 0.75
+	})
+	BoxGuiObject:new(info_panel, {
+		sides = {
+			1,
+			1,
+			1,
+			1
+		}
+	})
+	self._info_panel = info_panel:panel({
+		x = 10,
+		y = 10,
+		w = info_panel:w() - 20,
+		h = info_panel:h() - 2,
+		layer = 1
+	})
 end
-function MenuNodeOpenContainerGui:preview_weapon_cosmetics_callback(data)
-	managers.blackmarket:view_weapon_platform_with_cosmetics(data.weapon_id, {
-		id = data.cosmetic_id,
-		quality = data.cosmetic_quality
-	}, function()
-		managers.menu:open_node("inventory_tradable_container_preview_node", {})
-		managers.menu_component:hide_blackmarket_gui()
-	end)
+function MenuNodeOpenContainerGui:update_info(button)
+	if button == self._selected_button then
+		return
+	end
+	self._selected_button = button
+	self._info_panel:clear()
+	if button then
+		local title_text = self._info_panel:text({
+			text = utf8.to_upper(managers.weapon_factory:get_weapon_name_by_weapon_id(button.params.weapon_id)) .. " | " .. managers.localization:to_upper_text(tweak_data.blackmarket.weapon_skins[button.params.cosmetic_id].name_id),
+			font = tweak_data.menu.pd2_small_font,
+			font_size = tweak_data.menu.pd2_small_font_size,
+			color = tweak_data.economy.rarities[tweak_data.blackmarket.weapon_skins[button.params.cosmetic_id].rarity].color,
+			blend_mode = "add",
+			wrap = true,
+			wrap_word = true
+		})
+		make_fine_text(title_text)
+		local desc, colors = InventoryDescription.create_description_item({
+			instance_id = 0,
+			entry = button.params.cosmetic_id,
+			category = "weapon_skins",
+			quality = nil,
+			bonus = nil
+		}, tweak_data.blackmarket.weapon_skins[button.params.cosmetic_id], {
+			default = tweak_data.screen_colors.text,
+			mods = tweak_data.screen_colors.text
+		}, true)
+		local desc_text = self._info_panel:text({
+			text = desc,
+			font = tweak_data.menu.pd2_small_font,
+			font_size = tweak_data.menu.pd2_small_font_size,
+			color = tweak_data.screen_colors.text,
+			wrap = true,
+			word_wrap = true,
+			blend_mode = "add"
+		})
+		managers.menu_component:add_colors_to_text_object(desc_text, unpack(colors))
+		make_fine_text(desc_text)
+		desc_text:set_top(title_text:bottom() + 5)
+	end
+	self:update_legends(button)
+end
+function MenuNodeOpenContainerGui:update_legends(button)
+	self._legend_panel:clear()
+	if button then
+		local preview_text = self._legend_panel:text({
+			text = managers.localization:to_upper_text("menu_mouse_preview"),
+			font = tweak_data.menu.pd2_small_font,
+			font_size = tweak_data.menu.pd2_small_font_size,
+			color = tweak_data.screen_colors.text
+		})
+		make_fine_text(preview_text)
+		local search_text = self._legend_panel:text({
+			text = managers.localization:to_upper_text("menu_mouse_search_market"),
+			font = tweak_data.menu.pd2_small_font,
+			font_size = tweak_data.menu.pd2_small_font_size,
+			color = tweak_data.screen_colors.text
+		})
+		make_fine_text(search_text)
+		local preview_icon = self._legend_panel:bitmap({
+			name = "icon",
+			texture = "guis/textures/pd2/mouse_buttons",
+			texture_rect = {
+				18,
+				1,
+				17,
+				23
+			},
+			w = 17,
+			h = 23,
+			blend_mode = "add"
+		})
+		local search_icon = self._legend_panel:bitmap({
+			name = "icon",
+			texture = "guis/textures/pd2/mouse_buttons",
+			texture_rect = {
+				1,
+				1,
+				17,
+				23
+			},
+			w = 17,
+			h = 23,
+			blend_mode = "add"
+		})
+		preview_text:set_right(self._legend_panel:w())
+		preview_icon:set_right(preview_text:left())
+		search_text:set_right(preview_icon:left() - 4)
+		search_icon:set_right(search_text:left())
+	end
+end
+function MenuNodeOpenContainerGui:weapon_cosmetics_callback(button, data)
+	if button == Idstring("1") then
+		managers.blackmarket:view_weapon_platform_with_cosmetics(data.weapon_id, {
+			id = data.cosmetic_id,
+			quality = data.cosmetic_quality
+		}, function()
+			managers.menu:open_node("inventory_tradable_container_preview_node", {
+				{
+					id = data.cosmetic_id,
+					quality = data.cosmetic_quality
+				}
+			})
+			managers.menu_component:hide_blackmarket_gui()
+		end)
+	elseif button == Idstring("0") then
+		MenuCallbackHandler:steam_find_item_from_community(nil, data)
+	end
 end
 function MenuNodeOpenContainerGui:set_visible(visible)
 	MenuNodeOpenContainerGui.super.set_visible(self, visible)
@@ -2981,8 +3114,36 @@ function MenuNodeOpenContainerGui:close()
 	end
 end
 MenuNodeContainerPreviewGui = MenuNodeContainerPreviewGui or class(MenuNodeGui)
-function MenuNodeContainerPreviewGui:init(...)
-	MenuNodeContainerPreviewGui.super.init(self, ...)
+function MenuNodeContainerPreviewGui:init(node, layer, parameters)
+	MenuNodeContainerPreviewGui.super.init(self, node, layer, parameters)
+	if alive(self.safe_rect_panel:child("title_text")) then
+		self.safe_rect_panel:remove(self.safe_rect_panel:child("title_text"))
+	end
+	local data = node:parameters().menu_component_data
+	if data and data.id then
+		local tweak = tweak_data.blackmarket.weapon_skins[data.id]
+		local title_string = ""
+		if tweak.weapon_id then
+			title_string = utf8.to_upper(managers.weapon_factory:get_weapon_name_by_weapon_id(tweak.weapon_id)) .. " | "
+		end
+		title_string = title_string .. managers.localization:text(tweak.name_id)
+		if data.quality then
+			title_string = title_string .. ", " .. managers.localization:text(tweak_data.economy.qualities[data.quality].name_id)
+		end
+		if data.bonus then
+			local bonus = tweak.bonus
+			if bonus then
+				title_string = title_string .. ", " .. managers.localization:text("menu_bm_inventory_bonus")
+			end
+		end
+		self.safe_rect_panel:text({
+			name = "title_text",
+			text = title_string,
+			font = tweak_data.menu.pd2_small_font,
+			font_size = tweak_data.menu.pd2_small_font_size,
+			color = tweak_data.economy.rarities[tweak.rarity].color or tweak_data.screen_colors.text
+		})
+	end
 end
 function MenuNodeContainerPreviewGui:close(...)
 	MenuNodeContainerPreviewGui.super.close(self, ...)

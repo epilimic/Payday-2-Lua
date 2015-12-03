@@ -13,21 +13,29 @@ function BaseVehicleState:enter(state_data, enter_data)
 end
 function BaseVehicleState:exit(state_data)
 end
-function BaseVehicleState:get_action_for_interaction(pos, locator)
-	local action = VehicleDrivingExt.INTERACT_INVALID
+function BaseVehicleState:get_action_for_interaction(pos, locator, tweak_data)
 	local locator_name = locator:name()
-	if locator_name == VehicleDrivingExt.LOCATOR_INTERACT_DRIVE then
-		action = VehicleDrivingExt.INTERACT_DRIVE
-	elseif locator_name == VehicleDrivingExt.LOCATOR_INTERACT_ENTER or locator_name == VehicleDrivingExt.LOCATOR_INTERACT_ENTER_FRONT or locator_name == VehicleDrivingExt.LOCATOR_INTERACT_ENTER_BACK_LEFT or locator_name == VehicleDrivingExt.LOCATOR_INTERACT_ENTER_BACK_RIGHT then
-		action = VehicleDrivingExt.INTERACT_ENTER
-	elseif locator_name == VehicleDrivingExt.LOCATOR_INTERACT_LOOT_LEFT or locator_name == VehicleDrivingExt.LOCATOR_INTERACT_LOOT_RIGHT or locator_name == VehicleDrivingExt.LOCATOR_INTERACT_LOOT and self._unit:vehicle_driving()._loot and #self._unit:vehicle_driving()._loot > 0 then
-		action = VehicleDrivingExt.INTERACT_LOOT
-	elseif locator_name == VehicleDrivingExt.LOCATOR_INTERACT_REPAIR then
-		action = VehicleDrivingExt.INTERACT_REPAIR
-	elseif locator_name == VehicleDrivingExt.LOCATOR_INTERACT_TRUNK then
-		action = VehicleDrivingExt.INTERACT_TRUNK
+	for _, seat in pairs(tweak_data.seats) do
+		if locator_name == Idstring(VehicleDrivingExt.INTERACTION_PREFIX .. seat.name) then
+			if seat.driving then
+				return VehicleDrivingExt.INTERACT_DRIVE
+			else
+				return VehicleDrivingExt.INTERACT_ENTER
+			end
+		end
 	end
-	return action
+	for _, loot_point in pairs(tweak_data.loot_points) do
+		if locator_name == Idstring(VehicleDrivingExt.INTERACTION_PREFIX .. loot_point.name) then
+			return VehicleDrivingExt.INTERACT_LOOT
+		end
+	end
+	if tweak_data.repair_point and locator_name == Idstring(VehicleDrivingExt.INTERACTION_PREFIX .. tweak_data.repair_point) then
+		return VehicleDrivingExt.INTERACT_REPAIR
+	end
+	if tweak_data.trunk_point and locator_name == Idstring(VehicleDrivingExt.INTERACTION_PREFIX .. tweak_data.trunk_point) then
+		return VehicleDrivingExt.INTERACT_TRUNK
+	end
+	return VehicleDrivingExt.INTERACT_INVALID
 end
 function BaseVehicleState:adjust_interactions()
 	if not self._unit:vehicle_driving():is_interaction_allowed() then

@@ -643,10 +643,6 @@ function AiLayer:_clear_graphs()
 	managers.navigation:clear()
 end
 function AiLayer:_clear_selected_nav_segment()
-	local confirm = EWS:message_box(Global.frame_panel, "Clear selected graph segment?", "AI", "YES_NO,ICON_QUESTION", Vector3(-1, -1, 0))
-	if confirm == "NO" then
-		return
-	end
 	print("[AiLayer:_clear_selected_nav_segment]")
 	local selected = self._graphs:selected_indices()
 	local units = self:_get_units("surface", "selected")

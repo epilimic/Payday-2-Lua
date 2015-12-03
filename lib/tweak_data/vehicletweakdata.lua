@@ -5,6 +5,8 @@ function VehicleTweakData:init(tweak_data)
 	self:_init_data_forklift()
 	self:_init_data_forklift_2()
 	self:_init_data_box_truck_1()
+	self:_init_data_boat_rib_1()
+	self:_init_data_blackhawk_1()
 end
 function VehicleTweakData:_init_data_falcogini()
 	self.falcogini = {}
@@ -45,8 +47,7 @@ function VehicleTweakData:_init_data_falcogini()
 		}
 	}
 	self.falcogini.loot_points = {
-		loot_left = {name = "loot_left"},
-		loot_right = {name = "loot_right"}
+		loot = {name = "loot"}
 	}
 	self.falcogini.damage = {max_health = 100000}
 	self.falcogini.max_speed = 200
@@ -74,7 +75,6 @@ function VehicleTweakData:_init_data_muscle()
 		longitudal_slip_treshold = 0.8,
 		engine_sound_event = "muscle",
 		broken_engine = "falcogini_engine_broken_loop",
-		engine_start = "muscle_engine_start",
 		door_close = "car_door_open",
 		slip = "car_skid_01",
 		slip_stop = "car_skid_stop_01",
@@ -109,8 +109,10 @@ function VehicleTweakData:_init_data_muscle()
 	}
 	self.muscle.loot_points = {
 		loot_left = {name = "loot_left"},
-		loot_right = {name = "loot_right"}
+		loot_right = {name = "loot_right"},
+		loot = {name = "loot"}
 	}
+	self.muscle.trunk_point = "trunk"
 	self.muscle.damage = {max_health = 9000000}
 	self.muscle.max_speed = 160
 	self.muscle.max_rpm = 8000
@@ -270,4 +272,133 @@ function VehicleTweakData:_init_data_box_truck_1()
 	self.box_truck_1.interact_distance = 350
 	self.box_truck_1.driver_camera_offset = Vector3(0, 0.2, 2.5)
 	self.box_truck_1.fov = 75
+end
+function VehicleTweakData:_init_data_boat_rib_1()
+	self.boat_rib_1 = {}
+	self.boat_rib_1.name = "Rib Boat"
+	self.boat_rib_1.hud_label_offset = 1
+	self.boat_rib_1.animations = {
+		vehicle_id = "boat_rib_1",
+		driver = "drive_boat_rib_1_driver",
+		passenger_front = "drive_boat_rib_1_passanger",
+		passenger_back_left = "drive_boat_rib_1_back_left",
+		passenger_back_right = "drive_boat_rib_1_back_right"
+	}
+	self.boat_rib_1.sound = {
+		bump_treshold = 0.3,
+		lateral_slip_treshold = 0.2,
+		longitudal_slip_treshold = 0.2,
+		engine_sound_event = "drive_rubber_boat",
+		engine_start = "car_silence",
+		door_close = "car_silence",
+		going_reverse = "car_silence",
+		going_reverse_stop = "car_silence",
+		slip = "water_splash_skid",
+		slip_stop = "car_silence",
+		bump = "water_splash_bump",
+		bump_rtpc = "car_bump_vel",
+		hit = "water_splash_skid",
+		hit_rtpc = "car_hit_vel",
+		engine_speed_rtpc = "car_falcogini_speed",
+		engine_rpm_rtpc = "car_falcogini_rpm"
+	}
+	self.boat_rib_1.seats = {
+		driver = {name = "driver", driving = true},
+		passenger_front = {
+			name = "passenger_front",
+			driving = false,
+			allow_shooting = true,
+			has_shooting_mode = false
+		},
+		passenger_back_left = {
+			name = "passenger_back_left",
+			driving = false,
+			allow_shooting = true,
+			has_shooting_mode = false
+		},
+		passenger_back_right = {
+			name = "passenger_back_right",
+			driving = false,
+			allow_shooting = true,
+			has_shooting_mode = false
+		}
+	}
+	self.boat_rib_1.loot_points = {
+		loot_left = {name = "loot"}
+	}
+	self.boat_rib_1.damage = {max_health = 9000000}
+	self.boat_rib_1.max_speed = 20
+	self.boat_rib_1.max_rpm = 1600
+	self.boat_rib_1.loot_drop_point = "v_repair_engine"
+	self.boat_rib_1.max_loot_bags = 1
+	self.boat_rib_1.interact_distance = 350
+	self.boat_rib_1.driver_camera_offset = Vector3(0, 0, 3.5)
+	self.boat_rib_1.fov = 70
+end
+function VehicleTweakData:_init_data_blackhawk_1()
+	self.blackhawk_1 = {}
+	self.blackhawk_1.name = "Blackhawk"
+	self.blackhawk_1.hud_label_offset = 150
+	self.blackhawk_1.animations = {
+		vehicle_id = "blackhawk_1",
+		driver = "drive_blackhawk_1_driver",
+		passenger_front = "drive_blackhawk_1_passanger",
+		passenger_back_left = "drive_blackhawk_1_back_left",
+		passenger_back_right = "drive_blackhawk_1_back_right"
+	}
+	self.blackhawk_1.sound = {
+		bump_treshold = 8,
+		lateral_slip_treshold = 0.35,
+		longitudal_slip_treshold = 0.8,
+		engine_sound_event = "heli_silence",
+		broken_engine = "heli_silence",
+		engine_start = "heli_silence",
+		door_close = "heli_silence",
+		slip = "heli_silence",
+		slip_stop = "heli_silence",
+		bump = "heli_silence",
+		bump_rtpc = "heli_silence",
+		hit = "heli_silence",
+		hit_rtpc = "heli_silence",
+		engine_speed_rtpc = "heli_silence",
+		engine_rpm_rtpc = "heli_silence"
+	}
+	self.blackhawk_1.seats = {
+		driver = {
+			name = "driver",
+			driving = false,
+			allow_shooting = false,
+			has_shooting_mode = false
+		},
+		passenger_front = {
+			name = "passenger_front",
+			driving = false,
+			allow_shooting = false,
+			has_shooting_mode = false
+		},
+		passenger_back_left = {
+			name = "passenger_back_left",
+			driving = false,
+			allow_shooting = false,
+			has_shooting_mode = false
+		},
+		passenger_back_right = {
+			name = "passenger_back_right",
+			driving = false,
+			allow_shooting = false,
+			has_shooting_mode = false
+		}
+	}
+	self.blackhawk_1.loot_points = {
+		loot_left = {name = "loot_left"},
+		loot_right = {name = "loot_right"}
+	}
+	self.blackhawk_1.damage = {max_health = 9000000}
+	self.blackhawk_1.max_speed = 160
+	self.blackhawk_1.max_rpm = 8000
+	self.blackhawk_1.loot_drop_point = "v_repair_engine"
+	self.blackhawk_1.max_loot_bags = 4
+	self.blackhawk_1.interact_distance = 350
+	self.blackhawk_1.driver_camera_offset = Vector3(0, 0, 0)
+	self.blackhawk_1.fov = 75
 end

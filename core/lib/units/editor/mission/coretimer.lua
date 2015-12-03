@@ -4,6 +4,7 @@ CoreTimerUnitElement.SAVE_UNIT_ROTATION = false
 CoreTimerUnitElement.INSTANCE_VAR_NAMES = {
 	{type = "number", value = "timer"}
 }
+CoreTimerUnitElement.RANDOMS = {"timer"}
 TimerUnitElement = TimerUnitElement or class(CoreTimerUnitElement)
 function TimerUnitElement:init(...)
 	TimerUnitElement.super.init(self, ...)
@@ -11,7 +12,7 @@ end
 function CoreTimerUnitElement:init(unit)
 	CoreTimerUnitElement.super.init(self, unit)
 	self._digital_gui_units = {}
-	self._hed.timer = 0
+	self._hed.timer = {0, 0}
 	self._hed.digital_gui_unit_ids = {}
 	table.insert(self._save_values, "timer")
 	table.insert(self._save_values, "digital_gui_unit_ids")
@@ -137,10 +138,11 @@ function CoreTimerUnitElement:_build_panel(panel, panel_sizer)
 		remove_filter = callback(self, self, "_remove_unit_filter"),
 		remove_result = callback(self, self, "_remove_unit")
 	})
-	self:_build_value_number(panel, panel_sizer, "timer", {floats = 1, min = 0}, "Specifies how long time (in seconds) to wait before execute")
+	self:_build_value_random_number(panel, panel_sizer, "timer", {floats = 1, min = 0}, "Specifies how long time (in seconds) to wait before execute")
 	self:_add_help_text("Creates a timer element. When the timer runs out, execute will be run. The timer element can be operated on using the logic_timer_operator")
 end
 CoreTimerOperatorUnitElement = CoreTimerOperatorUnitElement or class(MissionElement)
+CoreTimerOperatorUnitElement.RANDOMS = {"time"}
 TimerOperatorUnitElement = TimerOperatorUnitElement or class(CoreTimerOperatorUnitElement)
 function TimerOperatorUnitElement:init(...)
 	TimerOperatorUnitElement.super.init(self, ...)
@@ -148,7 +150,7 @@ end
 function CoreTimerOperatorUnitElement:init(unit)
 	CoreTimerOperatorUnitElement.super.init(self, unit)
 	self._hed.operation = "none"
-	self._hed.time = 0
+	self._hed.time = {0, 0}
 	self._hed.elements = {}
 	table.insert(self._save_values, "operation")
 	table.insert(self._save_values, "time")
@@ -214,7 +216,7 @@ function CoreTimerOperatorUnitElement:_build_panel(panel, panel_sizer)
 		"reset",
 		"set_time"
 	}, "Select an operation for the selected elements")
-	self:_build_value_number(panel, panel_sizer, "time", {floats = 1, min = 0}, "Amount of time to add, subtract or set to the timers.")
+	self:_build_value_random_number(panel, panel_sizer, "time", {floats = 1, min = 0}, "Amount of time to add, subtract or set to the timers.")
 	self:_add_help_text("This element can modify logic_timer element. Select timers to modify using insert and clicking on the elements.")
 end
 CoreTimerTriggerUnitElement = CoreTimerTriggerUnitElement or class(MissionElement)

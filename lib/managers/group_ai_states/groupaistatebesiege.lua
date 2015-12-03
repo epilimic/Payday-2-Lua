@@ -822,7 +822,7 @@ function GroupAIStateBesiege:_choose_best_groups(best_groups, group, group_types
 				total_weight = total_weight + mod_weight
 			end
 		else
-			debug_pause("[GroupAIStateBesiege:_find_spawn_group_near_area] inexistent spawn_group:", group_type, ". element id:", my_spawn_group.mission_element._id)
+			debug_pause("[GroupAIStateBesiege:_choose_best_groups] inexistent spawn_group:", group_type, ". element id:", group.mission_element._id)
 		end
 	end
 	return total_weight
@@ -3043,23 +3043,31 @@ function GroupAIStateBesiege:_spawn_phalanx()
 				1
 			}
 		}
-		local spawn_group, spawn_group_type = self:_find_spawn_group_near_area(phalanx_area, phalanx_group, nil, nil, nil)
-		if spawn_group.spawn_pts[1] and spawn_group.spawn_pts[1].pos then
-			local spawn_pos = spawn_group.spawn_pts[1].pos
-			local spawn_nav_seg = managers.navigation:get_nav_seg_from_pos(spawn_pos)
-			local spawn_area = self:get_area_from_nav_seg_id(spawn_nav_seg)
+		if phalanx_area then
+			local spawn_group, spawn_group_type = self:_find_spawn_group_near_area(phalanx_area, phalanx_group, nil, nil, nil)
 			if spawn_group then
-				local grp_objective = {
-					type = "defend_area",
-					area = spawn_area,
-					nav_seg = spawn_nav_seg
-				}
-				print("Phalanx spawn started!")
-				self._phalanx_spawn_group = self:_spawn_in_group(spawn_group, spawn_group_type, grp_objective, nil)
-				self:set_assault_endless(true)
-				managers.game_play_central:announcer_say("cpa_a02_01")
-				managers.network:session():send_to_peers_synched("group_ai_event", self:get_sync_event_id("phalanx_spawned"), 0)
+				if spawn_group.spawn_pts[1] and spawn_group.spawn_pts[1].pos then
+					local spawn_pos = spawn_group.spawn_pts[1].pos
+					local spawn_nav_seg = managers.navigation:get_nav_seg_from_pos(spawn_pos)
+					local spawn_area = self:get_area_from_nav_seg_id(spawn_nav_seg)
+					if spawn_group then
+						local grp_objective = {
+							type = "defend_area",
+							area = spawn_area,
+							nav_seg = spawn_nav_seg
+						}
+						print("Phalanx spawn started!")
+						self._phalanx_spawn_group = self:_spawn_in_group(spawn_group, spawn_group_type, grp_objective, nil)
+						self:set_assault_endless(true)
+						managers.game_play_central:announcer_say("cpa_a02_01")
+						managers.network:session():send_to_peers_synched("group_ai_event", self:get_sync_event_id("phalanx_spawned"), 0)
+					end
+				end
+			else
+				print("Could not get spawn_group from phalanx_area!")
 			end
+		else
+			print("Could not get area from phalanx_center_nav_seg!")
 		end
 	else
 		print("self._phalanx_center_pos NOT SET!!!")

@@ -33,6 +33,7 @@ function DLCTweakData:init(tweak_data)
 		turtles = true,
 		dragon = true,
 		steel = true,
+		rip = true,
 		pd2_goty = 1,
 		pd2_hw_boxing = true,
 		hlm2 = true,
@@ -640,42 +641,6 @@ function DLCTweakData:init(tweak_data)
 		{
 			type_items = "masks",
 			item_entry = "satan",
-			amount = 1
-		}
-	}
-	self.free_halloween_textures = {}
-	self.free_halloween_textures.free = true
-	self.free_halloween_textures.content = {}
-	self.free_halloween_textures.content.loot_global_value = "halloween"
-	self.free_halloween_textures.content.loot_drops = {
-		{
-			type_items = "textures",
-			item_entry = "pumpgrin",
-			amount = 1
-		},
-		{
-			type_items = "textures",
-			item_entry = "shout",
-			amount = 1
-		},
-		{
-			type_items = "textures",
-			item_entry = "webbed",
-			amount = 1
-		},
-		{
-			type_items = "textures",
-			item_entry = "hannibalistic",
-			amount = 1
-		},
-		{
-			type_items = "textures",
-			item_entry = "stitches",
-			amount = 1
-		},
-		{
-			type_items = "textures",
-			item_entry = "doomweaver",
 			amount = 1
 		}
 	}
@@ -4207,6 +4172,114 @@ function DLCTweakData:init(tweak_data)
 		{
 			type_items = "textures",
 			item_entry = "checkered_out",
+			amount = 1
+		}
+	}
+	self.rip_free = {}
+	self.rip_free.content = {}
+	self.rip_free.free = true
+	self.rip_free.content.loot_global_value = "infamous"
+	self.rip_free.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "bodhi",
+			amount = 1
+		},
+		{
+			type_items = "weapon_mods",
+			item_entry = "wpn_fps_snp_model70_iron_sight",
+			amount = 1
+		}
+	}
+	self.berry = {}
+	self.berry.dlc = "has_berry"
+	self.berry.content = {}
+	self.berry.content.loot_drops = {}
+	self.ach_berry_2 = {}
+	self.ach_berry_2.dlc = "has_achievement"
+	self.ach_berry_2.achievement_id = "berry_2"
+	self.ach_berry_2.content = {}
+	self.ach_berry_2.content.loot_global_value = "berry"
+	self.ach_berry_2.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "water_spirit",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "flow",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "sunavatar",
+			amount = 1
+		}
+	}
+	self.ach_berry_5 = {}
+	self.ach_berry_5.dlc = "has_achievement"
+	self.ach_berry_5.achievement_id = "berry_5"
+	self.ach_berry_5.content = {}
+	self.ach_berry_5.content.loot_global_value = "berry"
+	self.ach_berry_5.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "tane",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "sancti",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "tribalface",
+			amount = 1
+		}
+	}
+	self.ach_jerry_3 = {}
+	self.ach_jerry_3.dlc = "has_achievement"
+	self.ach_jerry_3.achievement_id = "jerry_3"
+	self.ach_jerry_3.content = {}
+	self.ach_jerry_3.content.loot_global_value = "berry"
+	self.ach_jerry_3.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "oro",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "glade",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "tribalwave",
+			amount = 1
+		}
+	}
+	self.ach_jerry_4 = {}
+	self.ach_jerry_4.dlc = "has_achievement"
+	self.ach_jerry_4.achievement_id = "jerry_4"
+	self.ach_jerry_4.content = {}
+	self.ach_jerry_4.content.loot_global_value = "berry"
+	self.ach_jerry_4.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "maui",
+			amount = 1
+		},
+		{
+			type_items = "materials",
+			item_entry = "wade",
+			amount = 1
+		},
+		{
+			type_items = "textures",
+			item_entry = "ornamentalcrown",
 			amount = 1
 		}
 	}

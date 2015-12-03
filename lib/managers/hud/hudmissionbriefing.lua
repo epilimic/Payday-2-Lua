@@ -570,7 +570,6 @@ function HUDMissionBriefing:set_kit_selection(peer_id, category, id, slot)
 	print("set_kit_selection( peer_id, category, id, slot )", peer_id, category, id, slot)
 end
 function HUDMissionBriefing:set_slot_outfit(peer_id, criminal_name, outfit)
-	print("set_slot_outfit( peer_id, criminal_name, outfit )", peer_id, criminal_name, inspect(outfit))
 	local slot = self._ready_slot_panel:child("slot_" .. tostring(peer_id))
 	if not slot or not alive(slot) then
 		return

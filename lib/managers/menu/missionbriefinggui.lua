@@ -1662,7 +1662,7 @@ function TeamLoadoutItem:set_slot_outfit(slot, criminal_name, outfit)
 				end
 			end
 		end
-		if outfit.primary.cosmetics and outfit.primary.cosmetics.bonus then
+		if outfit.primary.cosmetics and outfit.primary.cosmetics.bonus and not managers.job:is_current_job_competitive() then
 			local bonus_data = tweak_data.economy.bonuses[tweak_data.blackmarket.weapon_skins[outfit.primary.cosmetics.id].bonus]
 			if bonus_data and (bonus_data.exp_multiplier or bonus_data.money_multiplier) then
 				local perk_object = player_slot.panel:bitmap({
@@ -1730,14 +1730,14 @@ function TeamLoadoutItem:set_slot_outfit(slot, criminal_name, outfit)
 						h = 16,
 						rotation = math.random(2) - 1.5,
 						alpha = 0.8,
-						layer = 1
+						layer = 2
 					})
 					perk_object:set_rightbottom(secondary_bitmap:right() - perk_index * 16, secondary_bitmap:bottom() - 5)
 					perk_index = perk_index + 1
 				end
 			end
 		end
-		if outfit.secondary.cosmetics and outfit.secondary.cosmetics.bonus then
+		if outfit.secondary.cosmetics and outfit.secondary.cosmetics.bonus and not managers.job:is_current_job_competitive() then
 			local bonus_data = tweak_data.economy.bonuses[tweak_data.blackmarket.weapon_skins[outfit.secondary.cosmetics.id].bonus]
 			if bonus_data and (bonus_data.exp_multiplier or bonus_data.money_multiplier) then
 				local perk_object = player_slot.panel:bitmap({
@@ -2634,6 +2634,9 @@ function MissionBriefingGui:init(saferect_ws, fullrect_ws, node)
 		self:create_asset_tab()
 	end
 	self._items[self._selected_item]:select(true)
+	if managers.job:is_current_job_competitive() then
+		self:set_description_text_id("menu_competitive_rules")
+	end
 	self._enabled = true
 	self:flash_ready()
 end

@@ -26,10 +26,17 @@ function ControllerManager:set_user_mod(connection_name, params)
 	managers.user:set_setting("controller_mod_type", managers.controller:get_default_wrapper_type())
 	managers.user:set_setting("controller_mod", Global.controller_manager.user_mod, true)
 end
-function ControllerManager:clear_user_mod()
-	Global.controller_manager.user_mod = {}
+function ControllerManager:clear_user_mod(category, CONTROLS_INFO)
+	Global.controller_manager.user_mod = Global.controller_manager.user_mod or {}
+	local names = table.map_keys(Global.controller_manager.user_mod)
+	for _, name in ipairs(names) do
+		if CONTROLS_INFO[name].category == category then
+			Global.controller_manager.user_mod[name] = nil
+		end
+	end
 	managers.user:set_setting("controller_mod_type", managers.controller:get_default_wrapper_type())
 	managers.user:set_setting("controller_mod", Global.controller_manager.user_mod, true)
+	self:load_user_mod()
 end
 function ControllerManager:load_user_mod()
 	if Global.controller_manager.user_mod then

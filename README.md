@@ -5,3 +5,4 @@ Decompiled source code of PAYDAY 2's Lua scripts
 * lib/managers/menu/playerinventorygui.lua
 * lib/managers/lootdropmanager.lua
 * core/lib/units/editor/mission/coreareatrigger.lua
+* lib/states/missionendstate.lua

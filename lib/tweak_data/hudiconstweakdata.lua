@@ -1284,6 +1284,15 @@ function HudIconsTweakData:init()
 			32
 		}
 	}
+	self.equipment_blow_torch = {
+		texture = "guis/textures/pd2/hud_pickups",
+		texture_rect = {
+			96,
+			192,
+			32,
+			32
+		}
+	}
 	self.interaction_free = {
 		texture = "guis/textures/hud_icons",
 		texture_rect = {

@@ -328,14 +328,15 @@ Defaulting to ]] .. self.DEFAULT_TEXTURE .. ".", "Writing To Disk", "OK,ICON_WAR
 	Application:data_compile({
 		platform = string.lower(SystemInfo:platform():s()),
 		source_root = managers.database:base_path(),
-		target_db_root = Application:base_path() .. "/assets",
+		target_db_root = Application:base_path() .. "assets",
 		target_db_name = "all",
 		source_files = {
 			managers.database:entry_relative_path(path),
 			managers.database:entry_relative_path(global_file)
 		},
 		verbose = false,
-		send_idstrings = false
+		send_idstrings = false,
+		preprocessor_definitions = "preprocessor_definitions"
 	})
 	DB:reload()
 	managers.database:clear_all_cached_indices()
@@ -353,13 +354,14 @@ function CoreMaterialEditor:_save_global_to_disk(recompile)
 		Application:data_compile({
 			platform = string.lower(SystemInfo:platform():s()),
 			source_root = managers.database:base_path(),
-			target_db_root = Application:base_path() .. "/assets",
+			target_db_root = Application:base_path() .. "assets",
 			target_db_name = "all",
 			source_files = {
 				managers.database:entry_relative_path(global_file)
 			},
 			verbose = false,
-			send_idstrings = false
+			send_idstrings = false,
+			preprocessor_definitions = "preprocessor_definitions"
 		})
 		DB:reload()
 		managers.database:clear_all_cached_indices()

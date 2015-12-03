@@ -214,6 +214,11 @@ function NarrativeTweakData:init()
 	self.contacts.events.description_id = "heist_contact_events_description"
 	self.contacts.events.package = "packages/contact_bain"
 	self.contacts.events.assets_gui = Idstring("guis/mission_briefing/preload_contact_bain")
+	self.contacts.locke = {}
+	self.contacts.locke.name_id = "heist_contact_locke"
+	self.contacts.locke.description_id = "heist_contact_locke_description"
+	self.contacts.locke.package = "packages/contact_locke"
+	self.contacts.locke.assets_gui = Idstring("guis/dlcs/berry/guis/preload_contact_locke")
 	self.jobs = {}
 	self.jobs.firestarter = {}
 	self.jobs.firestarter.name_id = "heist_firestarter"
@@ -3329,6 +3334,114 @@ function NarrativeTweakData:init()
 		40000,
 		40000
 	}
+	self.jobs.pbr = {}
+	self.jobs.pbr.name_id = "heist_pbr"
+	self.jobs.pbr.briefing_id = "heist_pbr_crimenet"
+	self.jobs.pbr.package = "packages/narr_jerry1"
+	self.jobs.pbr.contact = "locke"
+	self.jobs.pbr.region = "street"
+	self.jobs.pbr.dlc = "berry"
+	self.jobs.pbr.jc = 30
+	self.jobs.pbr.chain = {
+		{
+			level_id = "pbr",
+			type_id = "heist_type_assault",
+			type = "d"
+		}
+	}
+	self.jobs.pbr.briefing_event = "loc_jr1_cbf_01"
+	self.jobs.pbr.debrief_event = nil
+	self.jobs.pbr.crimenet_callouts = {
+		"loc_jr1_cnc_01"
+	}
+	self.jobs.pbr.crimenet_videos = {
+		"cn_jewel1",
+		"cn_jewel2",
+		"cn_jewel3"
+	}
+	self.jobs.pbr.payout = {
+		60000,
+		74000,
+		125000,
+		185000,
+		260000
+	}
+	self.jobs.pbr.contract_cost = {
+		31000,
+		62000,
+		155000,
+		310000,
+		400000
+	}
+	self.jobs.pbr.contract_visuals = {}
+	self.jobs.pbr.contract_visuals.min_mission_xp = {
+		22400,
+		22400,
+		22400,
+		22400,
+		22400
+	}
+	self.jobs.pbr.contract_visuals.max_mission_xp = {
+		32000,
+		32000,
+		32000,
+		32000,
+		32000
+	}
+	self.jobs.pbr2 = {}
+	self.jobs.pbr2.name_id = "heist_pbr2"
+	self.jobs.pbr2.briefing_id = "heist_pbr2_crimenet"
+	self.jobs.pbr2.package = "packages/narr_jerry2"
+	self.jobs.pbr2.contact = "locke"
+	self.jobs.pbr2.region = "street"
+	self.jobs.pbr2.dlc = "berry"
+	self.jobs.pbr2.jc = 30
+	self.jobs.pbr2.chain = {
+		{
+			level_id = "pbr2",
+			type_id = "heist_type_assault",
+			type = "d"
+		}
+	}
+	self.jobs.pbr2.briefing_event = "loc_jr2_cbf_01"
+	self.jobs.pbr2.debrief_event = nil
+	self.jobs.pbr2.crimenet_callouts = {
+		"loc_jr2_cnc_01"
+	}
+	self.jobs.pbr2.crimenet_videos = {
+		"cn_jewel1",
+		"cn_jewel2",
+		"cn_jewel3"
+	}
+	self.jobs.pbr2.payout = {
+		115000,
+		230000,
+		575000,
+		1150000,
+		1500000
+	}
+	self.jobs.pbr2.contract_cost = {
+		31000,
+		62000,
+		155000,
+		310000,
+		400000
+	}
+	self.jobs.pbr2.contract_visuals = {}
+	self.jobs.pbr2.contract_visuals.min_mission_xp = {
+		31100,
+		31100,
+		31100,
+		31100,
+		31100
+	}
+	self.jobs.pbr2.contract_visuals.max_mission_xp = {
+		31100,
+		31100,
+		31100,
+		31100,
+		31100
+	}
 	self.jobs.nail = {}
 	self.jobs.nail.name_id = "heist_nail"
 	self.jobs.nail.briefing_id = "heist_nail_crimenet"
@@ -3438,7 +3551,9 @@ function NarrativeTweakData:init()
 		"jolly",
 		"red2",
 		"dinner",
-		"nail"
+		"nail",
+		"pbr",
+		"pbr2"
 	}
 	if SystemInfo:platform() == Idstring("WIN32") then
 		table.insert(self._jobs_index, "roberts")
@@ -3528,6 +3643,17 @@ function NarrativeTweakData:create_job_name(job_id, skip_professional)
 			start = s_len,
 			stop = e_len,
 			color = tweak_data.screen_colors.pro_color
+		})
+	end
+	if job_tweak.competitive then
+		local competitive_text = "  " .. managers.localization:to_upper_text("cn_menu_competitive_job")
+		local s_len = utf8.len(text_id)
+		text_id = text_id .. competitive_text
+		local e_len = utf8.len(text_id)
+		table.insert(color_ranges, {
+			start = s_len,
+			stop = e_len,
+			color = tweak_data.screen_colors.competitive_color
 		})
 	end
 	return text_id, color_ranges

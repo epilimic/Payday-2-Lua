@@ -226,7 +226,7 @@ function ListenerManager:set_listener(listener_id, distance_obj, orientation_obj
 		local listener_map = self._category_map[category_id]
 		if listener_map then
 			if listener_map[listener_id] then
-				local listener = listener_map[listener_id]
+				local listener = listener_map[listener_id].listener
 				listener:link_position(distance_obj)
 				if orientation_obj then
 					listener:link_orientation(orientation_obj)

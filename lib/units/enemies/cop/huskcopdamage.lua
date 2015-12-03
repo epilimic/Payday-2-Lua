@@ -22,4 +22,5 @@ function HuskCopDamage:die(variant)
 	if self._unit:base():char_tweak().die_sound_event then
 		self._unit:sound():play(self._unit:base():char_tweak().die_sound_event, nil, nil)
 	end
+	self:_on_death()
 end

@@ -6,7 +6,9 @@ end
 function CoreUnitSequenceUnitElement:init(unit)
 	MissionElement.init(self, unit)
 	self._hed.trigger_list = {}
+	self._hed.only_for_local_player = nil
 	table.insert(self._save_values, "trigger_list")
+	table.insert(self._save_values, "only_for_local_player")
 end
 function CoreUnitSequenceUnitElement:update_unselected(...)
 	MissionElement.update_unselected(self, ...)
@@ -92,6 +94,7 @@ function CoreUnitSequenceUnitElement:_build_panel(panel, panel_sizer)
 	self:_create_panel()
 	panel = panel or self._panel
 	panel_sizer = panel_sizer or self._panel_sizer
+	self:_build_value_checkbox(panel, panel_sizer, "only_for_local_player")
 	local help = {}
 	help.text = "Use the \"Edit Triggable\" interface, which you enable in the down left toolbar, to select and edit which units and sequences you want to run."
 	help.panel = panel

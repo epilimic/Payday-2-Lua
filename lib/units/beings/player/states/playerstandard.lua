@@ -41,6 +41,7 @@ PlayerStandard.IDS_PROJECTILE_ENTER = Idstring("throw_projectile_enter")
 PlayerStandard.IDS_CHARGE = Idstring("charge")
 PlayerStandard.IDS_BASE = Idstring("base")
 PlayerStandard.IDS_CASH_INSPECT = Idstring("cash_inspect")
+PlayerStandard.IDS_FALLING = Idstring("falling")
 PlayerStandard.debug_bipod = nil
 function PlayerStandard:init(unit)
 	PlayerMovementState.init(self, unit)
@@ -218,6 +219,9 @@ end
 function PlayerStandard:interaction_blocked()
 	return self:is_deploying() or self:_on_zipline()
 end
+function PlayerStandard:bleed_out_blocked()
+	return false
+end
 function PlayerStandard:update(t, dt)
 	if self.debug_bipod then
 		self._equipped_unit:base():_debug_bipod()
@@ -349,21 +353,27 @@ function PlayerStandard:_update_fwd_ray()
 		end
 	end
 end
+function PlayerStandard:_create_on_controller_disabled_input()
+	local release_interact = Global.game_settings.single_player or not managers.menu:get_controller():get_input_bool("interact")
+	local input = {
+		is_customized = true,
+		btn_steelsight_release = true,
+		btn_interact_release = release_interact,
+		btn_use_item_release = true,
+		btn_melee_release = true
+	}
+	return input
+end
 local win32 = SystemInfo:platform() == Idstring("WIN32")
 function PlayerStandard:_get_input(t, dt)
 	if self._state_data.controller_enabled ~= self._controller:enabled() then
 		if self._state_data.controller_enabled then
-			local release_interact = Global.game_settings.single_player or not managers.menu:get_controller():get_input_bool("interact")
-			local input = {
-				btn_steelsight_release = true,
-				btn_interact_release = release_interact,
-				btn_use_item_release = true
-			}
 			self._state_data.controller_enabled = self._controller:enabled()
-			return input
+			return self:_create_on_controller_disabled_input()
 		end
 	elseif not self._state_data.controller_enabled then
 		local input = {
+			is_customized = true,
 			btn_interact_release = managers.menu:get_controller():get_input_released("interact")
 		}
 		return input
@@ -376,6 +386,9 @@ function PlayerStandard:_get_input(t, dt)
 		return {}
 	end
 	local input = {
+		any_input_pressed = pressed,
+		any_input_released = released,
+		any_input_downed = downed,
 		btn_stats_screen_press = pressed and not self._unit:base():stats_screen_visible() and self._controller:get_input_pressed("stats_screen"),
 		btn_stats_screen_release = released and self._unit:base():stats_screen_visible() and self._controller:get_input_released("stats_screen"),
 		btn_duck_press = pressed and self._controller:get_input_pressed("duck"),
@@ -523,18 +536,14 @@ function PlayerStandard:_update_check_actions(t, dt)
 			new_action = self:_check_action_throw_projectile(t, input)
 		end
 	end
-	if managers.player:current_state() ~= "driving" and not new_action then
-		new_action = self:_check_action_interact(t, input)
-	end
+	new_action = new_action or self:_check_action_interact(t, input)
 	self:_check_action_jump(t, input)
 	self:_check_action_run(t, input)
 	self:_check_action_ladder(t, input)
 	self:_check_action_zipline(t, input)
 	self:_check_action_cash_inspect(t, input)
 	self:_check_action_deploy_bipod(t, input)
-	if managers.player:current_state() ~= "driving" then
-		self:_check_action_duck(t, input)
-	end
+	self:_check_action_duck(t, input)
 	self:_check_action_steelsight(t, input)
 	self:_find_pickups(t)
 end
@@ -1172,7 +1181,8 @@ function PlayerStandard:_start_action_throw_grenade(t, input)
 	else
 		self._ext_camera:play_redirect(Idstring("throw_grenade"))
 	end
-	self._state_data.throw_grenade_expire_t = t + 1.1
+	local projectile_data = tweak_data.blackmarket.projectiles[equipped_grenade]
+	self._state_data.throw_grenade_expire_t = t + (projectile_data.expire_t or 1.1)
 	self:_stance_entered()
 end
 function PlayerStandard:_update_throw_grenade_timers(t, input)
@@ -2203,7 +2213,7 @@ function PlayerStandard:_start_action_intimidate(t)
 			interact_type = "cmd_point"
 			prime_target.unit:contour():add("mark_unit", true)
 		elseif voice_type == "mark_turret" then
-			sound_name = "f42_any"
+			sound_name = "f44x_any"
 			interact_type = "cmd_point"
 			prime_target.unit:contour():add("mark_unit_dangerous", true)
 		end

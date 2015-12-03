@@ -407,7 +407,7 @@ function SentryGunBrain:_upd_flash_grenade(t)
 		self._grenade_m_pos = mvector3.copy(ground_ray.hit_position)
 		mvector3.set_z(self._grenade_m_pos, self._grenade_m_pos.z + 3)
 		for u_key, attention_info in pairs(self._detected_attention_objects) do
-			if attention_info.identified and mvector3.distance_sq(self._grenade_m_pos, attention_info.last_verified_pos) < max_range * max_range then
+			if attention_info.identified and attention_info.last_verified_pos and mvector3.distance_sq(self._grenade_m_pos, attention_info.last_verified_pos) < max_range * max_range then
 				managers.groupai:state():detonate_cs_grenade(self._grenade_m_pos, m_pos, grenade_tweak.effect_duration)
 				self._next_flash_grenade_chk_t = check_t + math.lerp(grenade_tweak.quiet_time[1], grenade_tweak.quiet_time[2], math.random())
 			else

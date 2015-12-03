@@ -174,7 +174,7 @@ end
 function ElementSpawnEnemyDummy:kill_all_units()
 	for _, unit in ipairs(self._units) do
 		if alive(unit) then
-			unit:character_damage():damage_mission({damage = 1000})
+			unit:character_damage():damage_mission({damage = 1000, forced = true})
 		end
 	end
 end

@@ -17,3 +17,6 @@ function ElementBlurZone:on_executed(instigator)
 	end
 	ElementBlurZone.super.on_executed(self, instigator)
 end
+function ElementBlurZone:operation_remove()
+	managers.environment_controller:set_blurzone(self._id, -1)
+end

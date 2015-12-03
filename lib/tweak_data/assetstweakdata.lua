@@ -55,6 +55,12 @@ function AssetsTweakData:_init_risk_assets(tweak_data)
 	self.risk_death_squad.stages = "all"
 	self.risk_death_squad.exclude_stages = {"safehouse"}
 	self.risk_death_squad.risk_lock = 3
+	self.risk_death_wish = {}
+	self.risk_death_wish.name_id = "menu_asset_risklevel_4"
+	self.risk_death_wish.texture = "guis/textures/pd2/mission_briefing/assets/assets_risklevel_4"
+	self.risk_death_wish.stages = "all"
+	self.risk_death_wish.exclude_stages = {"safehouse"}
+	self.risk_death_wish.risk_lock = 4
 end
 function AssetsTweakData:_init_gage_assets(tweak_data)
 	self.gage_assignment = {}
@@ -169,6 +175,7 @@ function AssetsTweakData:_init_assets(tweak_data)
 		"arena",
 		"jolly",
 		"red2",
+		"pbr2",
 		"dinner",
 		"nail"
 	}
@@ -196,6 +203,7 @@ function AssetsTweakData:_init_assets(tweak_data)
 		"arena",
 		"jolly",
 		"red2",
+		"pbr2",
 		"dinner",
 		"nail"
 	}
@@ -220,6 +228,7 @@ function AssetsTweakData:_init_assets(tweak_data)
 		"arena",
 		"jolly",
 		"red2",
+		"pbr2",
 		"dinner",
 		"nail"
 	}

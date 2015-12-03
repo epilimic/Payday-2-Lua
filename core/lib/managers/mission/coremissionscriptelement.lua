@@ -47,6 +47,12 @@ function MissionScriptElement:get_random_table_value(value)
 	end
 	return value[1] + math.random(value[2] + 1) - 1
 end
+function MissionScriptElement:get_random_table_value_float(value)
+	if tonumber(value) then
+		return value
+	end
+	return value[1] + math.rand(value[2])
+end
 function MissionScriptElement:enabled()
 	return self._values.enabled
 end

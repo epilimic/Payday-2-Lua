@@ -15,7 +15,8 @@ ElementSpecialObjective._AI_GROUPS = {
 ElementSpecialObjective._PATHING_STYLES = {
 	"destination",
 	"precise",
-	"coarse"
+	"coarse",
+	"warp"
 }
 ElementSpecialObjective._ATTITUDES = {"avoid", "engage"}
 ElementSpecialObjective._TRIGGER_ON = {"interact"}
@@ -298,6 +299,9 @@ function ElementSpecialObjective:operation_remove()
 			for u_key, unit in pairs(cpy) do
 				if self._receiver_units[u_key] and unit:brain():is_available_for_assignment() then
 					unit:brain():set_objective(nil)
+				end
+				if not self._receiver_units then
+				else
 				end
 			end
 		end

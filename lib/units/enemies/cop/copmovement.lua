@@ -9,6 +9,7 @@ require("lib/units/enemies/cop/actions/upper_body/CopActionShoot")
 require("lib/units/enemies/cop/actions/upper_body/CopActionReload")
 require("lib/units/enemies/cop/actions/upper_body/CopActionTase")
 require("lib/units/enemies/cop/actions/full_body/CopActionDodge")
+require("lib/units/enemies/cop/actions/full_body/CopActionWarp")
 require("lib/units/enemies/spooc/actions/lower_body/ActionSpooc")
 require("lib/units/civilians/actions/lower_body/CivilianActionWalk")
 require("lib/units/civilians/actions/lower_body/EscortWithSuitcaseActionWalk")
@@ -108,7 +109,8 @@ local action_variants = {
 		reload = CopActionReload,
 		spooc = ActionSpooc,
 		tase = CopActionTase,
-		dodge = CopActionDodge
+		dodge = CopActionDodge,
+		warp = CopActionWarp
 	}
 }
 local security_variant = action_variants.security

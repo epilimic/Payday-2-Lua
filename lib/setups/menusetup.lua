@@ -46,32 +46,18 @@ function MenuSetup:load_packages()
 		if not PackageManager:loaded("packages/game_base_init") then
 			PackageManager:load("packages/game_base_init")
 			PackageManager:load("packages/game_base")
-			if PackageManager:package_exists("packages/wip/game_base") and not PackageManager:loaded("packages/wip/game_base") then
-				PackageManager:load("packages/wip/game_base")
-			end
 			Global._game_base_package_loaded = true
 		end
 	elseif not PackageManager:loaded("packages/game_base_init") then
 		do
 			local _load_wip_func = function()
-				if PackageManager:package_exists("packages/wip/game_base") then
-					if not PackageManager:loaded("packages/wip/game_base") then
-						PackageManager:load("packages/wip/game_base", function()
-							Global._game_base_package_loaded = true
-						end)
-					end
-				else
-					Global._game_base_package_loaded = true
-				end
+				Global._game_base_package_loaded = true
 			end
 			local function load_base_func()
 				PackageManager:load("packages/game_base", _load_wip_func)
 			end
 			PackageManager:load("packages/game_base_init", load_base_func)
 		end
-	end
-	if PackageManager:package_exists("packages/wip/start_menu") and not PackageManager:loaded("packages/wip/start_menu") then
-		PackageManager:load("packages/wip/start_menu")
 	end
 end
 function MenuSetup:gather_packages_to_unload()
@@ -89,9 +75,6 @@ function MenuSetup:gather_packages_to_unload()
 			if bundled and (bundled == true or bundled == 1) and PackageManager:package_exists(package) and PackageManager:loaded(package) then
 				table.insert(self._packages_to_unload, package)
 			end
-		end
-		if PackageManager:loaded("packages/wip/start_menu") then
-			table.insert(self._packages_to_unload, "packages/wip/start_menu")
 		end
 	end
 end

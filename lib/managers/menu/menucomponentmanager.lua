@@ -1842,6 +1842,11 @@ function MenuComponentManager:show_blackmarket_gui()
 		self._blackmarket_gui:show()
 	end
 end
+function MenuComponentManager:get_bonus_stats_blackmarket_gui(cosmetic_id, weapon_id, bonus)
+	if self._blackmarket_gui then
+		return self._blackmarket_gui:get_bonus_stats(cosmetic_id, weapon_id, bonus)
+	end
+end
 function MenuComponentManager:_create_server_info_gui()
 	if self._server_info_gui then
 		self:close_server_info_gui()
@@ -2411,7 +2416,7 @@ function MenuComponentManager:create_weapon_mod_icon_list(weapon, category, fact
 			local is_auto = tweak_data.weapon[weapon] and tweak_data.weapon[weapon].FIRE_MODE == "auto"
 			local weapon_skin_bonus = false
 			if types.weapon_skin_bonuses and table.contains(types.weapon_skin_bonuses, name) then
-				equipped = true
+				equipped = not managers.job:is_current_job_competitive()
 				weapon_skin_bonus = true
 			elseif name == "weapon_cosmetics" then
 				equipped = not not managers.blackmarket:get_weapon_cosmetics(category, slot)

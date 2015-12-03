@@ -20,16 +20,6 @@ VehicleDrivingExt.INTERACT_LOOT = 1
 VehicleDrivingExt.INTERACT_REPAIR = 2
 VehicleDrivingExt.INTERACT_DRIVE = 3
 VehicleDrivingExt.INTERACT_TRUNK = 4
-VehicleDrivingExt.LOCATOR_INTERACT_ENTER = Idstring("interact_passenger_front")
-VehicleDrivingExt.LOCATOR_INTERACT_ENTER_FRONT = Idstring("interact_passenger_front")
-VehicleDrivingExt.LOCATOR_INTERACT_ENTER_BACK_LEFT = Idstring("interact_passenger_back_left")
-VehicleDrivingExt.LOCATOR_INTERACT_ENTER_BACK_RIGHT = Idstring("interact_passenger_back_right")
-VehicleDrivingExt.LOCATOR_INTERACT_LOOT_LEFT = Idstring("v_loot_left")
-VehicleDrivingExt.LOCATOR_INTERACT_LOOT_RIGHT = Idstring("v_loot_right")
-VehicleDrivingExt.LOCATOR_INTERACT_LOOT = Idstring("interact_loot")
-VehicleDrivingExt.LOCATOR_INTERACT_REPAIR = Idstring("v_repair_engine")
-VehicleDrivingExt.LOCATOR_INTERACT_DRIVE = Idstring("interact_driver")
-VehicleDrivingExt.LOCATOR_INTERACT_TRUNK = Idstring("interact_trunk")
 VehicleDrivingExt.STATE_INVALID = "invalid"
 VehicleDrivingExt.STATE_INACTIVE = "inactive"
 VehicleDrivingExt.STATE_PARKED = "parked"
@@ -54,6 +44,7 @@ VehicleDrivingExt.SEQUENCE_FULL_DAMAGED = "int_seq_full_damaged"
 VehicleDrivingExt.SEQUENCE_REPAIRED = "int_seq_repaired"
 VehicleDrivingExt.SEQUENCE_TRUNK_OPEN = "anim_trunk_open"
 VehicleDrivingExt.SEQUENCE_TRUNK_CLOSE = "anim_trunk_close"
+VehicleDrivingExt.PLAYER_CAPSULE_OFFSET = Vector3(0, 0, -150)
 function VehicleDrivingExt:init(unit)
 	self._unit = unit
 	self._unit:set_extension_update_enabled(Idstring("vehicle_driving"), true)
@@ -202,7 +193,7 @@ function VehicleDrivingExt:_manage_position_reservation()
 	end
 end
 function VehicleDrivingExt:get_action_for_interaction(pos, locator)
-	return self._current_state:get_action_for_interaction(pos, locator)
+	return self._current_state:get_action_for_interaction(pos, locator, self._tweak_data)
 end
 function VehicleDrivingExt:set_interaction_allowed(allowed)
 	self._interaction_allowed = allowed
@@ -431,7 +422,7 @@ function VehicleDrivingExt:sync_store_loot_in_vehicle(unit, carry_id, multiplier
 end
 function VehicleDrivingExt:_loot_filter_func(carry_data)
 	local carry_id = carry_data:carry_id()
-	if carry_id == "gold" or carry_id == "money" or carry_id == "diamonds" or carry_id == "coke" or carry_id == "weapon" or carry_id == "painting" or carry_id == "circuit" or carry_id == "diamonds" or carry_id == "engine_01" or carry_id == "engine_02" or carry_id == "engine_03" or carry_id == "engine_04" or carry_id == "engine_05" or carry_id == "engine_06" or carry_id == "engine_07" or carry_id == "engine_08" or carry_id == "engine_09" or carry_id == "engine_10" or carry_id == "engine_11" or carry_id == "engine_12" or carry_id == "meth" or carry_id == "lance_bag" or carry_id == "lance_bag_large" or carry_id == "grenades" or carry_id == "ammo" or carry_id == "cage_bag" or carry_id == "turret" or carry_id == "artifact_statue" or carry_id == "samurai_suit" or carry_id == "equipment_bag" or carry_id == "cro_loot1" or carry_id == "cro_loot2" or carry_id == "ladder_bag" or carry_id == "warhead" or carry_id == "paper_roll" or carry_id == "counterfeit_money" or carry_id == "safe_wpn" or carry_id == "safe_ovk" then
+	if carry_id == "gold" or carry_id == "money" or carry_id == "diamonds" or carry_id == "coke" or carry_id == "weapon" or carry_id == "painting" or carry_id == "circuit" or carry_id == "diamonds" or carry_id == "engine_01" or carry_id == "engine_02" or carry_id == "engine_03" or carry_id == "engine_04" or carry_id == "engine_05" or carry_id == "engine_06" or carry_id == "engine_07" or carry_id == "engine_08" or carry_id == "engine_09" or carry_id == "engine_10" or carry_id == "engine_11" or carry_id == "engine_12" or carry_id == "meth" or carry_id == "lance_bag" or carry_id == "lance_bag_large" or carry_id == "grenades" or carry_id == "ammo" or carry_id == "cage_bag" or carry_id == "turret" or carry_id == "artifact_statue" or carry_id == "samurai_suit" or carry_id == "equipment_bag" or carry_id == "cro_loot1" or carry_id == "cro_loot2" or carry_id == "ladder_bag" or carry_id == "warhead" or carry_id == "paper_roll" or carry_id == "counterfeit_money" or carry_id == "safe_wpn" or carry_id == "safe_ovk" or carry_id == "prototype" or carry_id == "master_server" or carry_id == "lost_artifact" or carry_id == "masterpiece_painting" then
 		return true
 	elseif tweak_data.carry[carry_data:carry_id()].is_unique_loot then
 		return true
@@ -443,8 +434,8 @@ function VehicleDrivingExt:_catch_loot()
 		return false
 	end
 	for _, loot_point in pairs(self._loot_points) do
-		local pos = loot_point.object:position()
-		if loot_point.object ~= nil then
+		if loot_point.object then
+			local pos = loot_point.object:position()
 			local equipement = World:find_units_quick("sphere", pos, 100, 14)
 			for _, unit in ipairs(equipement) do
 				local carry_data = unit:carry_data()
@@ -460,7 +451,7 @@ function VehicleDrivingExt:get_nearest_loot_point(pos)
 	local nearest_loot_point
 	local min_distance = 1.0E20
 	for name, loot_point in pairs(self._loot_points) do
-		if loot_point.object ~= nil then
+		if loot_point.object then
 			local loot_point_pos = loot_point.object:position()
 			local distance = mvector3.distance(loot_point_pos, pos)
 			if min_distance > distance then
@@ -654,6 +645,14 @@ function VehicleDrivingExt:get_available_seat(position)
 		end
 	end
 	return nearest_seat, min_distance
+end
+function VehicleDrivingExt:has_driving_seat()
+	for _, seat in pairs(self._seats) do
+		if seat.driving then
+			return true
+		end
+	end
+	return false
 end
 function VehicleDrivingExt:find_seat_for_player(player)
 	for _, seat in pairs(self._seats) do
@@ -1022,8 +1021,16 @@ end
 function VehicleDrivingExt:_start_engine_sound()
 	if not self._playing_engine_sound and self._engine_soundsource then
 		self._playing_engine_sound = true
-		self._engine_soundsource:post_event(self._tweak_data.sound.engine_start)
-		self._engine_soundsource:post_event(self._tweak_data.sound.engine_sound_event)
+		if self._tweak_data.sound.engine_start then
+			self._engine_soundsource:post_event(self._tweak_data.sound.engine_start)
+		else
+			Application:error("[Vehicle] No sound specified for engine_start")
+		end
+		if self._tweak_data.sound.engine_sound_event then
+			self._engine_soundsource:post_event(self._tweak_data.sound.engine_sound_event)
+		else
+			Application:error("[Vehicle] No sound specified for engine_sound_event")
+		end
 		self._playing_engine_sound = true
 	end
 end

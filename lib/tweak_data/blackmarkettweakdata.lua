@@ -142,6 +142,10 @@ function BlackMarketTweakData:_init_characters()
 		texture_bundle_folder = "dragon",
 		dlc = "dragon"
 	}
+	self.characters.locked.bodhi = {
+		sequence = "var_mtr_bodhi",
+		texture_bundle_folder = "rip"
+	}
 	self.characters.female_1 = {}
 	self.characters.female_1.fps_unit = "units/payday2/characters/fps_mover/fps_female_1_mover"
 	self.characters.female_1.npc_unit = "units/payday2/characters/npc_criminal_female_1/npc_criminal_female_1"
@@ -215,6 +219,9 @@ function BlackMarketTweakData:_init_characters()
 	self.characters.ai_dragon = {}
 	self.characters.ai_dragon.npc_unit = "units/payday2/characters/npc_criminals_suit_1/dragon/npc_criminal_suit_dragon"
 	self.characters.ai_dragon.sequence = "var_mtr_jiro"
+	self.characters.ai_bodhi = {}
+	self.characters.ai_bodhi.npc_unit = "units/payday2/characters/npc_criminals_suit_1/bodhi/npc_criminal_suit_bodhi"
+	self.characters.ai_bodhi.sequence = "var_mtr_bodhi"
 end
 function BlackMarketTweakData:_init_cash()
 	self.cash = {}

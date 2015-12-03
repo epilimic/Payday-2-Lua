@@ -262,9 +262,9 @@ end
 function HUDManager:_recompile(dir)
 	local source_files = self:_source_files(dir)
 	local t = {
-		platform = "win32",
+		platform = string.lower(SystemInfo:platform():s()),
 		source_root = managers.database:root_path() .. "/assets",
-		target_db_root = managers.database:root_path() .. "/packages/win32/assets",
+		target_db_root = Application:base_path() .. "assets",
 		target_db_name = "all",
 		source_files = source_files,
 		verbose = false,

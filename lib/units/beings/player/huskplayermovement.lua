@@ -1026,6 +1026,7 @@ function HuskPlayerMovement:_upd_sequenced_events(t, dt)
 		World:effect_manager():fade_kill(self._tase_effect)
 	end
 	local event_type = next_event.type
+	self:_cleanup_previous_state(next_event.previous_state)
 	if event_type == "move" then
 		next_event.commencing = true
 		self:_start_movement(next_event.path)
@@ -1066,6 +1067,14 @@ function HuskPlayerMovement:_upd_sequenced_events(t, dt)
 		end
 	elseif event_type == "jump" then
 		self:_start_jumping(next_event)
+	end
+	local event_type = next_event and not next_event.commencing and next_event.type
+	if event_type == "jerry1" then
+		if self:_start_freefall(next_event) then
+			table.remove(sequenced_events, 1)
+		end
+	elseif event_type == "jerry2" and self:_start_parachute(next_event) then
+		table.remove(sequenced_events, 1)
 	end
 end
 function HuskPlayerMovement:_add_sequenced_event(event_desc)
@@ -1941,6 +1950,13 @@ function HuskPlayerMovement:sync_movement_state(state, down_time)
 		local peer_id = managers.network:session():peer_by_unit(self._unit):id()
 		managers.groupai:state():on_player_criminal_death(peer_id)
 	end
+	if state == "jerry1" then
+		local event_desc = {type = "jerry1", previous_state = previous_state}
+		self:_add_sequenced_event(event_desc)
+	elseif state == "jerry2" then
+		local event_desc = {type = "jerry2", previous_state = previous_state}
+		self:_add_sequenced_event(event_desc)
+	end
 end
 function HuskPlayerMovement:on_cuffed()
 	self._unit:network():send_to_unit({
@@ -2263,6 +2279,21 @@ function HuskPlayerMovement:sync_attention_setting(setting_name, state)
 		self._unit:movement():attention_handler():remove_attention(setting_name)
 	end
 end
+function HuskPlayerMovement:is_SPOOC_attack_allowed()
+	if self._unit:character_damage():get_mission_blocker("invulnerable") then
+		return false
+	end
+	if self._vehicle then
+		return false
+	end
+	return true
+end
+function HuskPlayerMovement:is_taser_attack_allowed()
+	if self._unit:character_damage():get_mission_blocker("invulnerable") then
+		return false
+	end
+	return true
+end
 function HuskPlayerMovement:on_enter_zipline(zipline_unit)
 	local event_desc = {type = "zipline", zipline_unit = zipline_unit}
 	self:_add_sequenced_event(event_desc)
@@ -2311,6 +2342,7 @@ function HuskPlayerMovement:on_exit_vehicle()
 	self._machine:forbid_modifier(self._head_modifier_name)
 	self._machine:forbid_modifier(self._arm_modifier_name)
 	self._machine:forbid_modifier(self._mask_off_modifier_name)
+	self._vehicle = nil
 	self._look_modifier:set_target_y(self._look_dir)
 	self._vehicle_shooting_stance = PlayerDriving.STANCE_NORMAL
 	self._unit:inventory():show_equipped_unit()
@@ -2468,4 +2500,119 @@ end
 function HuskPlayerMovement:_exit_jumping()
 	table.remove(self._sequenced_events, 1)
 	self._movement_updator = callback(self, self, "_upd_move_standard")
+end
+function HuskPlayerMovement:_cleanup_previous_state(previous_state)
+	if alive(self._parachute_unit) then
+		local position = self._parachute_unit:position()
+		local rotation = self._parachute_unit:rotation()
+		self._parachute_unit:unlink()
+		self._parachute_unit:set_slot(0)
+		World:delete_unit(self._parachute_unit)
+		self._parachute_unit = nil
+		if previous_state == "jerry2" then
+			local unit = safe_spawn_unit(Idstring("units/pd2_dlc_jerry/props/jry_equipment_parachute/jry_equipment_parachute_ragdoll"), position, rotation)
+			unit:damage():run_sequence_simple("make_dynamic")
+		end
+		self._unit:inventory():show_equipped_unit()
+	end
+end
+function HuskPlayerMovement:_start_freefall(event_desc)
+	Application:debug("[HuskPlayerMovement:_start_freefall] STARTED")
+	self._unit:inventory():hide_equipped_unit()
+	if not self._ext_anim.freefall then
+		self:play_redirect("freefall_fwd")
+	end
+	self._sync_look_dir = self._look_dir
+	self._last_vel_z = 360
+	self._terminal_velocity = tweak_data.player.freefall.terminal_velocity
+	self._gravity = tweak_data.player.freefall.gravity
+	self._damping = tweak_data.player.freefall.gravity / tweak_data.player.freefall.terminal_velocity
+	self._anim_name = "freefall"
+	if self._atention_on then
+		self._machine:forbid_modifier(self._look_modifier_name)
+		self._machine:forbid_modifier(self._head_modifier_name)
+		self._machine:forbid_modifier(self._arm_modifier_name)
+		self._machine:forbid_modifier(self._mask_off_modifier_name)
+		self._atention_on = false
+	end
+	self._movement_updator = callback(self, self, "_upd_move_fall")
+	self._attention_updator = callback(self, self, "_upd_attention_fall")
+	return true
+end
+function HuskPlayerMovement:_start_parachute(event_desc)
+	Application:debug("[HuskPlayerMovement:_start_parachute] STARTED")
+	self._unit:inventory():hide_equipped_unit()
+	self:play_redirect("freefall_to_parachute")
+	self._sync_look_dir = self._look_dir
+	self._terminal_velocity = tweak_data.player.parachute.terminal_velocity
+	self._damping = tweak_data.player.parachute.gravity / tweak_data.player.parachute.terminal_velocity
+	self._gravity = tweak_data.player.parachute.gravity
+	self._anim_name = "parachute"
+	if self._atention_on then
+		self._machine:forbid_modifier(self._look_modifier_name)
+		self._machine:forbid_modifier(self._head_modifier_name)
+		self._machine:forbid_modifier(self._arm_modifier_name)
+		self._machine:forbid_modifier(self._mask_off_modifier_name)
+		self._atention_on = false
+	end
+	self._movement_updator = callback(self, self, "_upd_move_fall")
+	self._attention_updator = callback(self, self, "_upd_attention_fall")
+	self._parachute_unit = safe_spawn_unit(Idstring("units/pd2_dlc_jerry/props/jry_equipment_parachute/jry_equipment_parachute"), self._unit:position() + Vector3(0, 0, 100), self._unit:rotation())
+	self._parachute_unit:damage():run_sequence_simple("animation_unfold")
+	self._unit:link(self._unit:orientation_object():name(), self._parachute_unit)
+	return true
+end
+function HuskPlayerMovement:_upd_move_fall(t, dt)
+	if self._load_data or not self._sync_fall_pos then
+		return
+	end
+	if self._last_vel_z == 0 then
+		self._last_vel_z = self._m_pos.z
+	end
+	local pos = Vector3()
+	if self._last_vel_z == self._terminal_velocity then
+	elseif self._last_vel_z < self._terminal_velocity then
+		self._last_vel_z = self._last_vel_z * math.exp(-dt * self._damping)
+		self._last_vel_z = self._last_vel_z + self._gravity * dt
+		if self._last_vel_z > self._terminal_velocity then
+			self._last_vel_z = self._terminal_velocity
+		end
+	else
+		self._last_vel_z = self._last_vel_z - self._gravity * dt
+		if self._last_vel_z < self._terminal_velocity then
+			self._last_vel_z = self._terminal_velocity
+		end
+	end
+	mvector3.lerp(pos, self._m_pos, self._sync_fall_pos, dt)
+	local new_z = pos.z - self._last_vel_z * dt
+	mvec3_set_z(pos, new_z)
+	local yaw_diff = self._m_rot:yaw() - self._sync_fall_rot:yaw()
+	local rot = self._m_rot:slerp(self._sync_fall_rot, dt)
+	if math.abs(yaw_diff) > 2 then
+		if yaw_diff > 0 then
+			if not self._ext_anim.right then
+				self:play_redirect(self._anim_name .. "_r")
+			end
+		elseif not self._ext_anim.left then
+			self:play_redirect(self._anim_name .. "_l")
+		end
+	elseif not self._ext_anim.fwd then
+		self:play_redirect(self._anim_name .. "_fwd")
+	end
+	self:set_rotation(rot)
+	self:set_position(pos)
+end
+function HuskPlayerMovement:_upd_attention_fall(dt)
+	if not self._atention_on then
+		self._atention_on = true
+		self._machine:force_modifier(self._head_modifier_name)
+	end
+	if self._sync_look_dir then
+		self:update_sync_look_dir(dt)
+	end
+end
+function HuskPlayerMovement:sync_fall_position(pos, rot)
+	self._sync_fall_pos = pos
+	self._sync_fall_rot = rot
+	self._sync_fall_dt = 0
 end

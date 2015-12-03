@@ -75,6 +75,7 @@ require("lib/units/UnitDamage")
 require("lib/units/props/DigitalGui")
 require("lib/units/props/TextGui")
 require("lib/units/props/MaterialControl")
+require("lib/utils/StatisticsGenerator")
 require("lib/units/MaskExt")
 script_data = script_data or {}
 game_state_machine = game_state_machine or nil
@@ -125,8 +126,8 @@ function Setup:load_packages()
 	if not PackageManager:loaded("packages/dyn_resources") then
 		PackageManager:load("packages/dyn_resources")
 	end
-	if Application:ews_enabled() and not PackageManager:loaded("packages/wip/editor") then
-		PackageManager:load("packages/wip/editor")
+	if Application:ews_enabled() and not PackageManager:loaded("packages/production/editor") then
+		PackageManager:load("packages/production/editor")
 	end
 end
 function Setup:init_managers(managers)
@@ -138,6 +139,7 @@ function Setup:init_managers(managers)
 		reputation_permission = 0,
 		drop_in_allowed = true,
 		kick_option = 1,
+		job_plan = -1,
 		search_appropriate_jobs = true,
 		auto_kick = true,
 		is_playing = false
@@ -226,10 +228,12 @@ function Setup:_start_loading_screen()
 		load_level_data.menu_tweak_data = tweak_data.menu
 		load_level_data.scale_tweak_data = tweak_data.scale
 		load_level_data.tip_id = tweak_data.tips:get_a_tip()
-		load_level_data.controller_coords = tweak_data:get_controller_help_coords()
+		local coords = tweak_data:get_controller_help_coords()
+		load_level_data.controller_coords = coords and coords[table.random({"normal", "vehicle"})]
 		if load_level_data.controller_coords then
 			for id, data in pairs(load_level_data.controller_coords) do
-				data.string = managers.localization:to_upper_text(id)
+				data.string = managers.localization:to_upper_text(data.id)
+				data.color = data.id == "menu_button_unassigned" and Color(0.5, 0.5, 0.5) or Color.white
 			end
 		end
 		local load_data = load_level_data.level_tweak_data.load_data

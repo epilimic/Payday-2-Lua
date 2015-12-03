@@ -1,4 +1,5 @@
 require("lib/managers/menu/WalletGuiObject")
+require("lib/utils/InventoryDescription")
 local IS_WIN_32 = SystemInfo:platform() == Idstring("WIN32")
 local NOT_WIN_32 = not IS_WIN_32
 local TOP_ADJUSTMENT = NOT_WIN_32 and 50 or 55
@@ -1223,7 +1224,7 @@ PlayerInventoryGui._update_info_weapon_mod = function(self, box)
 	local tweak_stats = tweak_data.weapon.stats
 	local modifier_stats = tweak_data.weapon[crafted.weapon_id].stats_modifiers
 	if not part_id or managers.weapon_factory:is_part_standard_issue_by_weapon_id(mod_data.name, part_id) then
-		local total_base_stats, total_mods_stats, total_skill_stats = self:_get_stats(crafted.weapon_id, mod_data.category, mod_data.slot)
+		local total_base_stats, total_mods_stats, total_skill_stats = WeaponDescription._get_stats(crafted.weapon_id, mod_data.category, mod_data.slot)
 		self:set_info_text(" ")
 		for _,stat in ipairs(self._stats_shown) do
 			self._stats_texts[stat.name].equip:set_text("")
@@ -1237,8 +1238,8 @@ PlayerInventoryGui._update_info_weapon_mod = function(self, box)
 		return 
 	end
 	local tweak_parts = tweak_data.weapon.factory.parts[part_id]
-	local mod_stats = self:_get_stats_for_mod(part_id, mod_data.name, mod_data.category, mod_data.slot)
-	local total_base_stats, total_mods_stats, total_skill_stats = self:_get_stats(crafted.weapon_id, mod_data.category, mod_data.slot)
+	local mod_stats = WeaponDescription.get_stats_for_mod(part_id, mod_data.name, mod_data.category, mod_data.slot)
+	local total_base_stats, total_mods_stats, total_skill_stats = WeaponDescription._get_stats(crafted.weapon_id, mod_data.category, mod_data.slot)
 	do
 		local text_string = managers.weapon_factory:get_part_name_by_part_id(part_id)
 		self:set_info_text(text_string)
@@ -1297,7 +1298,7 @@ PlayerInventoryGui._update_info_weapon_mod = function(self, box)
 		end
 		 -- WARNING: missing end command somewhere! Added here
 	end
-	-- WARNING: F->nextEndif is not empty. Unhandled nextEndif->addr = 229 
+	-- WARNING: F->nextEndif is not empty. Unhandled nextEndif->addr = 232 
 end
 
 PlayerInventoryGui._update_info_weapon = function(self, name)
@@ -1306,7 +1307,7 @@ PlayerInventoryGui._update_info_weapon = function(self, name)
 	local category = name == "primary" and "primaries" or "secondaries"
 	local equipped_item = managers.blackmarket:equipped_item(category)
 	local equipped_slot = managers.blackmarket:equipped_weapon_slot(category)
-	local base_stats, mods_stats, skill_stats = self:_get_stats(equipped_item.weapon_id, category, equipped_slot)
+	local base_stats, mods_stats, skill_stats = WeaponDescription._get_stats(equipped_item.weapon_id, category, equipped_slot)
 	local text_string = string.format("##%s##  %s", player_loadout_data[name].info_text, managers.experience:cash_string(managers.money:get_weapon_slot_sell_value(category, equipped_slot)))
 	if not player_loadout_data[name].info_text_color then
 		self:set_info_text(text_string, {tweak_data.screen_colors.text; add_colors_to_text_object = true})
@@ -1362,7 +1363,7 @@ PlayerInventoryGui._update_info_weapon = function(self, name)
 		end
 		 -- WARNING: missing end command somewhere! Added here
 	end
-	-- WARNING: F->nextEndif is not empty. Unhandled nextEndif->addr = 52 150 
+	-- WARNING: F->nextEndif is not empty. Unhandled nextEndif->addr = 53 151 
 end
 
 PlayerInventoryGui._update_info_weapon_cosmetics = function(self, name, cosmetics)
@@ -1392,7 +1393,7 @@ PlayerInventoryGui._update_info_weapon_cosmetics = function(self, name, cosmetic
 		local box = self._boxes_by_name[name]
 		local category = box.params.mod_data.category
 		local slot = box.params.mod_data.slot
-		local base_stats, mods_stats, skill_stats = self:_get_stats(c_td.weapon_id, category, slot, c_td.default_blueprint)
+		local base_stats, mods_stats, skill_stats = WeaponDescription._get_stats(c_td.weapon_id, category, slot, c_td.default_blueprint)
 		local crafted = managers.blackmarket:get_crafted_category_slot(category, slot)
 		local tweak_stats = tweak_data.weapon.stats
 		local modifier_stats = tweak_data.weapon[crafted.weapon_id].stats_modifiers
@@ -1443,7 +1444,7 @@ PlayerInventoryGui._update_info_weapon_cosmetics = function(self, name, cosmetic
 		end
 		 -- WARNING: missing end command somewhere! Added here
 	end
-	-- WARNING: F->nextEndif is not empty. Unhandled nextEndif->addr = 222 
+	-- WARNING: F->nextEndif is not empty. Unhandled nextEndif->addr = 223 
 end
 
 PlayerInventoryGui._update_info_armor = function(self, name)
@@ -2448,7 +2449,7 @@ end
 PlayerInventoryGui.open_character_menu = function(self)
 	local new_node_data = {}
 	table.insert(new_node_data, {name = "bm_menu_characters", category = "characters", on_create_func_name = "populate_characters", 
-override_slots = {4, 3}, identifier = BlackMarketGui.identifiers.character})
+override_slots = {5, 3}, identifier = BlackMarketGui.identifiers.character})
 	new_node_data.scroll_tab_anywhere = true
 	new_node_data.extra_options_panel = {h = 100, on_create_func_name = "populate_preferred_character_options"}
 	new_node_data.topic_id = "bm_menu_characters"
@@ -3052,139 +3053,6 @@ PlayerInventoryGui.create_text_button = function(self, params)
 	-- WARNING: F->nextEndif is not empty. Unhandled nextEndif->addr = 92 
 end
 
-PlayerInventoryGui.get_weapon_ammo_info = function(self, weapon_id, extra_ammo, total_ammo_mod)
-	local weapon_tweak_data = tweak_data.weapon[weapon_id]
-	local ammo_max_multiplier = managers.player:upgrade_value("player", "extra_ammo_multiplier", 1)
-	ammo_max_multiplier = ammo_max_multiplier * managers.player:upgrade_value(weapon_tweak_data.category, "extra_ammo_multiplier", 1)
-	if managers.player:has_category_upgrade("player", "add_armor_stat_skill_ammo_mul") then
-		ammo_max_multiplier = ammo_max_multiplier * managers.player:body_armor_value("skill_ammo_mul", nil, 1)
-	end
-	local get_ammo_max_per_clip = function(weapon_id)
-		-- upvalues: weapon_tweak_data , extra_ammo
-		local upgrade_blocked = function(category, upgrade)
-			-- upvalues: weapon_tweak_data
-			if not weapon_tweak_data.upgrade_blocks then
-				return false
-			end
-			if not weapon_tweak_data.upgrade_blocks[category] then
-				return false
-			end
-			return table.contains(weapon_tweak_data.upgrade_blocks[category], upgrade)
-    end
-		local clip_base = weapon_tweak_data.CLIP_AMMO_MAX
-		local clip_mod = extra_ammo and tweak_data.weapon.stats.extra_ammo[extra_ammo] or 0
-		local clip_skill = managers.player:upgrade_value(weapon_id, "clip_ammo_increase")
-		if not upgrade_blocked("weapon", "clip_ammo_increase") then
-			clip_skill = clip_skill + managers.player:upgrade_value("weapon", "clip_ammo_increase", 0)
-		end
-		if not upgrade_blocked(weapon_tweak_data.category, "clip_ammo_increase") then
-			clip_skill = clip_skill + managers.player:upgrade_value(weapon_tweak_data.category, "clip_ammo_increase", 0)
-		end
-		return clip_base + clip_mod + (clip_skill)
-  end
-	local ammo_max_per_clip = get_ammo_max_per_clip(weapon_id)
-	local ammo_max = tweak_data.weapon[weapon_id].AMMO_MAX
-	local ammo_from_mods = ammo_max * (total_ammo_mod and tweak_data.weapon.stats.total_ammo_mod[total_ammo_mod] or 0)
-	ammo_max = (ammo_max + ammo_from_mods + managers.player:upgrade_value(weapon_id, "clip_amount_increase") * ammo_max_per_clip) * (ammo_max_multiplier)
-	ammo_max_per_clip = math.min(ammo_max_per_clip, ammo_max)
-	local ammo_data = {}
-	ammo_data.base = tweak_data.weapon[weapon_id].AMMO_MAX
-	ammo_data.mod = ammo_from_mods + managers.player:upgrade_value(weapon_id, "clip_amount_increase") * ammo_max_per_clip
-	ammo_data.skill = (ammo_data.base + ammo_data.mod) * (ammo_max_multiplier) - ammo_data.base - ammo_data.mod
-	if not managers.player:has_category_upgrade("player", "extra_ammo_multiplier") and not managers.player:has_category_upgrade(weapon_tweak_data.category, "extra_ammo_multiplier") then
-		ammo_data.skill_in_effect = managers.player:has_category_upgrade("player", "add_armor_stat_skill_ammo_mul")
-	end
-	return ammo_max_per_clip, ammo_max, ammo_data
-end
-
-PlayerInventoryGui._get_skill_stats = function(self, name, category, slot, base_stats, mods_stats, silencer, single_mod, auto_mod, blueprint)
-	local skill_stats = {}
-	local tweak_stats = tweak_data.weapon.stats
-	for _,stat in pairs(self._stats_shown) do
-		skill_stats[stat.name] = {}
-		skill_stats[stat.name].value = 0
-	end
-	local detection_risk = 0
-	if category then
-		local custom_data = {}
-		custom_data[category] = managers.blackmarket:get_crafted_category_slot(category, slot)
-		detection_risk = managers.blackmarket:get_suspicion_offset_from_custom_data(custom_data, tweak_data.player.SUSPICION_OFFSET_LERP or 0.75)
-		detection_risk = detection_risk * 100
-	end
-	local base_value, base_index, modifier, multiplier = nil, nil, nil, nil
-	do
-		local weapon_tweak = tweak_data.weapon[name]
-		for _,stat in ipairs(self._stats_shown) do
-			if (not stat.stat_name and weapon_tweak.stats[stat.name]) or stat.name == "fire_rate" then
-				if stat.name == "magazine" then
-					skill_stats[stat.name].value = managers.player:upgrade_value(name, "clip_ammo_increase", 0)
-					if not weapon_tweak.upgrade_blocks or not weapon_tweak.upgrade_blocks.weapon or not table.contains(weapon_tweak.upgrade_blocks.weapon, "clip_ammo_increase") then
-						skill_stats[stat.name].value = skill_stats[stat.name].value + managers.player:upgrade_value("weapon", "clip_ammo_increase", 0)
-					end
-					if not weapon_tweak.upgrade_blocks or not weapon_tweak.upgrade_blocks[weapon_tweak.category] or not table.contains(weapon_tweak.upgrade_blocks[weapon_tweak.category], "clip_ammo_increase") then
-						skill_stats[stat.name].value = skill_stats[stat.name].value + managers.player:upgrade_value(weapon_tweak.category, "clip_ammo_increase", 0)
-					end
-					if not managers.player:has_category_upgrade(name, "clip_ammo_increase") then
-						skill_stats[stat.name].skill_in_effect = managers.player:has_category_upgrade("weapon", "clip_ammo_increase")
-					end
-			else
-				end
-			end
-			if stat.name == "totalammo" then
-				for _,stat in (for generator) do
-				end
-				base_value = math.max(base_stats[stat.name].value + mods_stats[stat.name].value, 0)
-				if base_stats[stat.name].index and mods_stats[stat.name].index then
-					base_index = base_stats[stat.name].index + mods_stats[stat.name].index
-				end
-				multiplier = 1
-				modifier = 0
-				if stat.name == "damage" then
-					multiplier = managers.blackmarket:damage_multiplier(name, weapon_tweak.category, silencer, detection_risk, nil, blueprint)
-					modifier = math.floor(managers.blackmarket:damage_addend(name, weapon_tweak.category, silencer, detection_risk, nil, blueprint) * tweak_data.gui.stats_present_multiplier * multiplier)
-				elseif stat.name == "spread" then
-					local fire_mode = ((not single_mod or not "single") and (not auto_mod or not "auto") and weapon_tweak.FIRE_MODE) or "single"
-					multiplier = managers.blackmarket:accuracy_multiplier(name, weapon_tweak.category, silencer, nil, nil, fire_mode, blueprint)
-					modifier = managers.blackmarket:accuracy_addend(name, weapon_tweak.category, base_index, silencer, nil, fire_mode, blueprint) * tweak_data.gui.stats_present_multiplier
-				elseif stat.name == "recoil" then
-					multiplier = managers.blackmarket:recoil_multiplier(name, weapon_tweak.category, silencer, blueprint)
-					modifier = managers.blackmarket:recoil_addend(name, weapon_tweak.category, base_index, silencer, blueprint) * tweak_data.gui.stats_present_multiplier
-				elseif stat.name == "suppression" then
-					multiplier = managers.blackmarket:threat_multiplier(name, weapon_tweak.category, silencer)
-				elseif stat.name == "concealment" then
-					do return end
-				end
-				if stat.name == "fire_rate" then
-					multiplier = managers.blackmarket:fire_rate_multiplier(name, weapon_tweak.category, silencer, detection_risk, nil, blueprint)
-				end
-				if modifier ~= 0 then
-					local offset = math.min(tweak_stats[stat.name][1], tweak_stats[stat.name][#tweak_stats[stat.name]]) * tweak_data.gui.stats_present_multiplier
-					if stat.revert then
-						modifier = -(modifier)
-					end
-				if stat.percent then
-					end
-					if not stat.index or not #tweak_stats[stat.name] then
-						local max_stat = math.max(tweak_stats[stat.name][1], tweak_stats[stat.name][#tweak_stats[stat.name]]) * tweak_data.gui.stats_present_multiplier
-					end
-					if stat.offset then
-						max_stat = max_stat - offset
-					end
-					local ratio = modifier / (max_stat)
-					modifier = ratio * 100
-				end
-				if stat.revert then
-					multiplier = 1 / math.max(multiplier, 0.01)
-				end
-				skill_stats[stat.name].skill_in_effect = multiplier ~= 1 or modifier ~= 0
-				skill_stats[stat.name].value = modifier + base_value * (multiplier) - base_value
-			end
-			return skill_stats
-		end
-		 -- WARNING: missing end command somewhere! Added here
-	end
-end
-
 PlayerInventoryGui._get_mods_stats = function(self, name, base_stats, equipped_mods, bonus_stats)
 	local mods_stats = {}
 	local modifier_stats = tweak_data.weapon[name].stats_modifiers
@@ -3292,79 +3160,6 @@ PlayerInventoryGui._get_mods_stats = function(self, name, base_stats, equipped_m
 		end
 	end
 	return mods_stats
-end
-
-PlayerInventoryGui._get_base_stats = function(self, name)
-	local base_stats = {}
-	local index = nil
-	local tweak_stats = tweak_data.weapon.stats
-	local modifier_stats = tweak_data.weapon[name].stats_modifiers
-	for _,stat in pairs(self._stats_shown) do
-		base_stats[stat.name] = {}
-		if stat.name == "magazine" then
-			base_stats[stat.name].index = 0
-			base_stats[stat.name].value = tweak_data.weapon[name].CLIP_AMMO_MAX
-		elseif stat.name == "totalammo" then
-			index = math.clamp(tweak_data.weapon[name].stats.total_ammo_mod, 1, #tweak_stats.total_ammo_mod)
-			base_stats[stat.name].index = tweak_data.weapon[name].stats.total_ammo_mod
-			base_stats[stat.name].value = tweak_data.weapon[name].AMMO_MAX
-		elseif stat.name == "fire_rate" then
-			local fire_rate = 60 / tweak_data.weapon[name].fire_mode_data.fire_rate
-			base_stats[stat.name].value = fire_rate / 10 * 10
-		else
-			if tweak_stats[stat.name] then
-				index = math.clamp(tweak_data.weapon[name].stats[stat.name], 1, #tweak_stats[stat.name])
-				base_stats[stat.name].index = index
-				if not stat.index or not index then
-					base_stats[stat.name].value = tweak_stats[stat.name][index] * tweak_data.gui.stats_present_multiplier
-				end
-				local offset = math.min(tweak_stats[stat.name][1], tweak_stats[stat.name][#tweak_stats[stat.name]]) * tweak_data.gui.stats_present_multiplier
-				if stat.offset then
-					base_stats[stat.name].value = base_stats[stat.name].value - offset
-				end
-				if stat.revert then
-					local max_stat = math.max(tweak_stats[stat.name][1], tweak_stats[stat.name][#tweak_stats[stat.name]]) * tweak_data.gui.stats_present_multiplier
-					if stat.offset then
-						max_stat = max_stat - offset
-					end
-					base_stats[stat.name].value = max_stat - base_stats[stat.name].value
-				end
-				if modifier_stats and modifier_stats[stat.name] then
-					local mod = modifier_stats[stat.name]
-					if stat.revert and not stat.index then
-						local real_base_value = tweak_stats[stat.name][index]
-						local modded_value = real_base_value * mod
-						local offset = math.min(tweak_stats[stat.name][1], tweak_stats[stat.name][#tweak_stats[stat.name]])
-						if stat.offset then
-							modded_value = modded_value - offset
-						end
-						local max_stat = math.max(tweak_stats[stat.name][1], tweak_stats[stat.name][#tweak_stats[stat.name]])
-						if stat.offset then
-							max_stat = max_stat - offset
-						end
-						local new_value = (max_stat - (modded_value)) * tweak_data.gui.stats_present_multiplier
-						if mod ~= 0 and (tweak_stats[stat.name][1] < modded_value or modded_value < tweak_stats[stat.name][#tweak_stats[stat.name]]) then
-							new_value = (new_value + base_stats[stat.name].value / mod) / 2
-						end
-						base_stats[stat.name].value = new_value
-					end
-				else
-					base_stats[stat.name].value = base_stats[stat.name].value * mod
-				end
-			if stat.percent then
-				end
-				if not stat.index or not #tweak_stats[stat.name] then
-					local max_stat = math.max(tweak_stats[stat.name][1], tweak_stats[stat.name][#tweak_stats[stat.name]]) * tweak_data.gui.stats_present_multiplier
-				end
-				if stat.offset then
-					max_stat = max_stat - offset
-				end
-				local ratio = base_stats[stat.name].value / (max_stat)
-				base_stats[stat.name].value = ratio * 100
-			end
-		end
-	end
-	return base_stats
 end
 
 PlayerInventoryGui._get_melee_weapon_stats = function(self, name)
@@ -3521,179 +3316,6 @@ PlayerInventoryGui._get_armor_stats = function(self, name)
 		skill_stats[stat.name].skill_in_effect = skill_stats[stat.name].skill_in_effect or skill_stats[stat.name].value ~= 0
 	end
 	return base_stats, mods_stats, skill_stats
-end
-
-PlayerInventoryGui._get_stats = function(self, name, category, slot, blueprint)
-	local equipped_mods = nil
-	local silencer = false
-	local single_mod = false
-	local auto_mod = false
-	if not blueprint and (not slot or not managers.blackmarket:get_weapon_blueprint(category, slot)) then
-		local blueprint = managers.weapon_factory:get_default_blueprint_by_factory_id(managers.weapon_factory:get_factory_id_by_weapon_id(name))
-	end
-	local cosmetics = managers.blackmarket:get_weapon_cosmetics(category, slot)
-	local bonus_stats = {}
-	if cosmetics and cosmetics.id and cosmetics.bonus and not tweak_data:get_raw_value("economy", "bonuses", tweak_data.blackmarket.weapon_skins[cosmetics.id].bonus, "stats") then
-		bonus_stats = {}
-	end
-	if blueprint then
-		equipped_mods = deep_clone(blueprint)
-		local factory_id = managers.weapon_factory:get_factory_id_by_weapon_id(name)
-		local default_blueprint = managers.weapon_factory:get_default_blueprint_by_factory_id(factory_id)
-	if equipped_mods then
-		end
-		silencer = managers.weapon_factory:has_perk("silencer", factory_id, equipped_mods)
-		single_mod = managers.weapon_factory:has_perk("fire_mode_single", factory_id, equipped_mods)
-		auto_mod = managers.weapon_factory:has_perk("fire_mode_auto", factory_id, equipped_mods)
-	end
-	local base_stats = self:_get_base_stats(name)
-	local mods_stats = self:_get_mods_stats(name, base_stats, equipped_mods, bonus_stats)
-	local skill_stats = self:_get_skill_stats(name, category, slot, base_stats, mods_stats, silencer, single_mod, auto_mod, blueprint)
-	local clip_ammo, max_ammo, ammo_data = self:get_weapon_ammo_info(name, tweak_data.weapon[name].stats.extra_ammo, base_stats.totalammo.index + mods_stats.totalammo.index)
-	base_stats.totalammo.value = ammo_data.base
-	mods_stats.totalammo.value = ammo_data.mod
-	skill_stats.totalammo.value = ammo_data.skill
-	skill_stats.totalammo.skill_in_effect = ammo_data.skill_in_effect
-	local my_clip = base_stats.magazine.value + mods_stats.magazine.value + skill_stats.magazine.value
-	if max_ammo < my_clip then
-		mods_stats.magazine.value = mods_stats.magazine.value + (max_ammo - my_clip)
-	end
-	return base_stats, mods_stats, skill_stats
-end
-
-PlayerInventoryGui._get_stats_for_mod = function(self, mod_name, weapon_name, category, slot)
-	local equipped_mods = nil
-	local blueprint = managers.blackmarket:get_weapon_blueprint(category, slot)
-	if blueprint then
-		equipped_mods = deep_clone(blueprint)
-		local factory_id = managers.weapon_factory:get_factory_id_by_weapon_id(weapon_name)
-		local default_blueprint = managers.weapon_factory:get_default_blueprint_by_factory_id(factory_id)
-		for _,default_part in ipairs(default_blueprint) do
-			table.delete(equipped_mods, default_part)
-		end
-	end
-	local base_stats = self:_get_base_stats(weapon_name)
-	local mods_stats = self:_get_mods_stats(weapon_name, base_stats, equipped_mods)
-	return self:_get_weapon_mod_stats(mod_name, weapon_name, base_stats, mods_stats, equipped_mods)
-end
-
-PlayerInventoryGui._get_weapon_mod_stats = function(self, mod_name, weapon_name, base_stats, mods_stats, equipped_mods)
-	local tweak_stats = tweak_data.weapon.stats
-	local tweak_factory = tweak_data.weapon.factory.parts
-	local modifier_stats = tweak_data.weapon[weapon_name].stats_modifiers
-	local factory_id = managers.weapon_factory:get_factory_id_by_weapon_id(weapon_name)
-	local default_blueprint = (managers.weapon_factory:get_default_blueprint_by_factory_id(factory_id))
-	local part_data = nil
-	local mod_stats = {}
-	mod_stats.chosen = {}
-	mod_stats.equip = {}
-	for _,stat in pairs(self._stats_shown) do
-		mod_stats.chosen[stat.name] = 0
-		mod_stats.equip[stat.name] = 0
-	end
-	mod_stats.chosen.name = mod_name
-	if equipped_mods then
-		for _,mod in ipairs(equipped_mods) do
-			if tweak_factory[mod] and tweak_factory[mod_name].type == tweak_factory[mod].type then
-				mod_stats.equip.name = mod
-			end
-	else
-		end
-	end
-	local curr_stats = base_stats
-	do
-		local index, wanted_index = nil, nil
-		for _,mod in pairs(mod_stats) do
-			part_data = nil
-			if mod.name then
-				part_data = managers.weapon_factory:get_part_data_by_part_id_from_weapon(mod.name, factory_id, default_blueprint)
-			end
-			for _,stat in pairs(self._stats_shown) do
-				if part_data and part_data.stats then
-					if stat.name == "magazine" then
-						local ammo = part_data.stats.extra_ammo
-						ammo = ammo + (not ammo or tweak_data.weapon[weapon_name].stats.extra_ammo or 0)
-						mod[stat.name] = ammo and tweak_data.weapon.stats.extra_ammo[ammo] or 0
-					end
-				elseif stat.name == "totalammo" then
-					local chosen_index = part_data.stats.total_ammo_mod or 0
-					chosen_index = math.clamp(base_stats[stat.name].index + chosen_index, 1, #tweak_stats.total_ammo_mod)
-					mod[stat.name] = base_stats[stat.name].value * tweak_stats.total_ammo_mod[chosen_index]
-				else
-					local chosen_index = part_data.stats[stat.name] or 0
-				if tweak_stats[stat.name] then
-					end
-					wanted_index = curr_stats[stat.name].index + chosen_index
-					index = math.clamp(wanted_index, 1, #tweak_stats[stat.name])
-					if not stat.index or not index then
-						mod[stat.name] = tweak_stats[stat.name][index] * tweak_data.gui.stats_present_multiplier
-						if wanted_index ~= index then
-							print("[PlayerInventoryGui:_get_weapon_mod_stats] index went out of bound, estimating value", "mod_name", mod_name, "stat.name", stat.name, "wanted_index", wanted_index, "index", index)
-							if stat.index then
-								index = wanted_index
-							end
-						else
-							if index ~= curr_stats[stat.name].index then
-								local diff_value = tweak_stats[stat.name][index] - tweak_stats[stat.name][curr_stats[stat.name].index]
-								local diff_index = index - curr_stats[stat.name].index
-								local diff_ratio = diff_value / diff_index
-								diff_index = wanted_index - (index)
-								diff_value = (diff_index) * diff_ratio
-								mod[stat.name] = mod[stat.name] + diff_value * tweak_data.gui.stats_present_multiplier
-							end
-						end
-						local offset = math.min(tweak_stats[stat.name][1], tweak_stats[stat.name][#tweak_stats[stat.name]]) * tweak_data.gui.stats_present_multiplier
-						if stat.offset then
-							mod[stat.name] = mod[stat.name] - offset
-						end
-						if stat.revert then
-							local max_stat = math.max(tweak_stats[stat.name][1], tweak_stats[stat.name][#tweak_stats[stat.name]]) * tweak_data.gui.stats_present_multiplier
-							if stat.revert then
-								max_stat = max_stat - offset
-							end
-							mod[stat.name] = max_stat - mod[stat.name]
-						end
-						if modifier_stats and modifier_stats[stat.name] then
-							local mod_stat = modifier_stats[stat.name]
-							if stat.revert and not stat.index then
-								local real_base_value = tweak_stats[stat.name][index]
-								local modded_value = real_base_value * mod_stat
-								local offset = math.min(tweak_stats[stat.name][1], tweak_stats[stat.name][#tweak_stats[stat.name]])
-								if stat.offset then
-									modded_value = modded_value - offset
-								end
-								local max_stat = math.max(tweak_stats[stat.name][1], tweak_stats[stat.name][#tweak_stats[stat.name]])
-								if stat.offset then
-									max_stat = max_stat - offset
-								end
-								local new_value = (max_stat - (modded_value)) * tweak_data.gui.stats_present_multiplier
-								if mod_stat ~= 0 and (tweak_stats[stat.name][1] < modded_value or modded_value < tweak_stats[stat.name][#tweak_stats[stat.name]]) then
-									new_value = (new_value + mod[stat.name] / mod_stat) / 2
-								end
-								mod[stat.name] = new_value
-							end
-						else
-							mod[stat.name] = mod[stat.name] * mod_stat
-						end
-						if stat.percent then
-							if not stat.index or not #tweak_stats[stat.name] then
-								local max_stat = math.max(tweak_stats[stat.name][1], tweak_stats[stat.name][#tweak_stats[stat.name]]) * tweak_data.gui.stats_present_multiplier
-							end
-							if stat.offset then
-								max_stat = max_stat - offset
-							end
-							local ratio = mod[stat.name] / (max_stat)
-							mod[stat.name] = ratio * 100
-						end
-						mod[stat.name] = mod[stat.name] - curr_stats[stat.name].value
-					end
-				end
-			end
-			return mod_stats
-		end
-		 -- WARNING: missing end command somewhere! Added here
-	end
-	-- WARNING: F->nextEndif is not empty. Unhandled nextEndif->addr = 182 
 end
 
 

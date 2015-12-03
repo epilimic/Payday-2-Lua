@@ -10,8 +10,9 @@ function ElementModifyPlayer:on_executed(instigator)
 	if not self._values.enabled then
 		return
 	end
-	if alive(instigator) and instigator == managers.player:player_unit() then
-		instigator:character_damage():set_damage_fall_disabled(self._values.damage_fall_disabled)
+	if alive(instigator) then
+		instigator:character_damage():set_mission_damage_blockers("damage_fall_disabled", self._values.damage_fall_disabled)
+		instigator:character_damage():set_mission_damage_blockers("invulnerable", self._values.invulnerable)
 	end
 	ElementModifyPlayer.super.on_executed(self, instigator)
 end

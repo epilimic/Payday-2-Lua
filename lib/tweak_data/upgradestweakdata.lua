@@ -70,6 +70,24 @@ function UpgradesTweakData:_init_pd2_values()
 		1.1,
 		1.12
 	}
+	self.values.player.body_armor.skill_max_health_store = {
+		14,
+		13.5,
+		12.5,
+		12,
+		10.5,
+		9.5,
+		4
+	}
+	self.values.player.body_armor.skill_kill_change_regenerate_speed = {
+		14,
+		13.5,
+		12.5,
+		12,
+		10.5,
+		9.5,
+		4
+	}
 	self.values.player.special_enemy_highlight = {true}
 	self.values.player.hostage_trade = {true}
 	self.values.player.sec_camera_highlight = {true}
@@ -172,7 +190,7 @@ function UpgradesTweakData:_init_pd2_values()
 	self.values.pistol.reload_speed_multiplier = {1.5}
 	self.values.akimbo.reload_speed_multiplier = self.values.pistol.reload_speed_multiplier
 	self.values.pistol.damage_addend = {1.5}
-	self.values.akimbo.damage_addend = {0.75}
+	self.values.akimbo.damage_addend = {1.5}
 	self.values.pistol.damage_multiplier = {1.5}
 	self.values.assault_rifle.reload_speed_multiplier = {1.25}
 	self.values.assault_rifle.move_spread_multiplier = {0.5}
@@ -691,15 +709,24 @@ function UpgradesTweakData:_init_pd2_values()
 	self.values.team.akimbo.suppression_recoil_index_addend = self.values.team.akimbo.recoil_index_addend
 	self.values.team.weapon.suppression_recoil_index_addend = self.values.team.weapon.recoil_index_addend
 	self.values.shotgun.recoil_index_addend = {1}
-	self.values.assault_rifle.recoil_index_addend = {1}
+	self.values.assault_rifle.recoil_index_addend = {2}
 	self.values.weapon.silencer_recoil_index_addend = {2}
 	self.values.lmg.recoil_index_addend = {1}
-	self.values.snp.recoil_index_addend = {1}
+	self.values.snp.recoil_index_addend = {2}
 	self.values.akimbo.recoil_index_addend = {
 		-6,
 		-4,
 		-2
 	}
+	self.armor_health_store_kill_amount = 1
+	self.kill_change_regenerate_speed_percentage = false
+	self.values.player.armor_health_store_amount = {
+		0.4,
+		0.8,
+		1.2
+	}
+	self.values.player.armor_max_health_store_multiplier = {1.5}
+	self.values.player.kill_change_regenerate_speed = {1.4}
 	local editable_skill_descs = {
 		ammo_2x = {
 			{"2"},
@@ -1511,6 +1538,33 @@ function UpgradesTweakData:_init_pd2_values()
 				"25%",
 				"10%"
 			}
+		},
+		{
+			{"4", "1"},
+			{"25%"},
+			{
+				"4",
+				"10%",
+				"10%"
+			},
+			{
+				"+1",
+				"15%",
+				"45%"
+			},
+			{
+				"50%",
+				"10%",
+				"5%"
+			},
+			{"135%"},
+			{
+				"4",
+				"20%",
+				"10%"
+			},
+			{"5%", "20%"},
+			{"20%", "10%"}
 		}
 	}
 	self.specialization_descs = {}
@@ -1580,7 +1634,8 @@ function UpgradesTweakData:init()
 		name_id = "body_armor3",
 		upgrades = {
 			"body_armor3",
-			"cobray"
+			"cobray",
+			"boxcutter"
 		}
 	}
 	self.level_tree[13] = {
@@ -1588,12 +1643,18 @@ function UpgradesTweakData:init()
 		upgrades = {
 			"new_mp5",
 			"serbu",
-			"microphone"
+			"microphone",
+			"selfie"
 		}
 	}
 	self.level_tree[14] = {
 		name_id = "weapons",
-		upgrades = {"bayonet", "m1928"}
+		upgrades = {
+			"bayonet",
+			"m1928",
+			"sparrow",
+			"gator"
+		}
 	}
 	self.level_tree[15] = {
 		name_id = "weapons",
@@ -1609,7 +1670,8 @@ function UpgradesTweakData:init()
 		upgrades = {
 			"akm",
 			"g36",
-			"hunter"
+			"hunter",
+			"iceaxe"
 		}
 	}
 	self.level_tree[17] = {
@@ -1635,7 +1697,8 @@ function UpgradesTweakData:init()
 		upgrades = {
 			"olympic",
 			"mp9",
-			"baka"
+			"baka",
+			"pugio"
 		}
 	}
 	self.level_tree[20] = {
@@ -1741,7 +1804,8 @@ function UpgradesTweakData:init()
 		upgrades = {
 			"x46",
 			"tec9",
-			"tiger"
+			"tiger",
+			"model70"
 		}
 	}
 	self.level_tree[33] = {
@@ -2137,6 +2201,8 @@ function UpgradesTweakData:init()
 	self:_frankish_weapon_definitions()
 	self:_long_weapon_definitions()
 	self:_par_weapon_definitions()
+	self:_sparrow_weapon_definitions()
+	self:_model70_weapon_definitions()
 	self:_melee_weapon_definitions()
 	self:_grenades_definitions()
 	self:_carry_definitions()
@@ -3331,6 +3397,51 @@ function UpgradesTweakData:_player_definitions()
 		upgrade = {
 			category = "melee",
 			upgrade = "stacking_hit_expire_t",
+			value = 1
+		}
+	}
+	self.definitions.player_armor_health_store_amount_1 = {
+		category = "feature",
+		name_id = "menu_player_armor_health_store_amount",
+		upgrade = {
+			category = "player",
+			upgrade = "armor_health_store_amount",
+			value = 1
+		}
+	}
+	self.definitions.player_armor_health_store_amount_2 = {
+		category = "feature",
+		name_id = "menu_player_armor_health_store_amount",
+		upgrade = {
+			category = "player",
+			upgrade = "armor_health_store_amount",
+			value = 2
+		}
+	}
+	self.definitions.player_armor_health_store_amount_3 = {
+		category = "feature",
+		name_id = "menu_player_armor_health_store_amount",
+		upgrade = {
+			category = "player",
+			upgrade = "armor_health_store_amount",
+			value = 3
+		}
+	}
+	self.definitions.player_armor_max_health_store_multiplier = {
+		category = "feature",
+		name_id = "menu_player_armor_max_health_store_multiplier",
+		upgrade = {
+			category = "player",
+			upgrade = "armor_max_health_store_multiplier",
+			value = 1
+		}
+	}
+	self.definitions.player_kill_change_regenerate_speed = {
+		category = "feature",
+		name_id = "menu_player_kill_change_regenerate_speed",
+		upgrade = {
+			category = "player",
+			upgrade = "kill_change_regenerate_speed",
 			value = 1
 		}
 	}
@@ -6783,6 +6894,25 @@ function UpgradesTweakData:_melee_weapon_definitions()
 	self.definitions.cutters = {
 		category = "melee_weapon"
 	}
+	self.definitions.boxcutter = {
+		category = "melee_weapon"
+	}
+	self.definitions.selfie = {
+		category = "melee_weapon",
+		dlc = "berry"
+	}
+	self.definitions.gator = {
+		category = "melee_weapon",
+		dlc = "berry"
+	}
+	self.definitions.pugio = {
+		category = "melee_weapon",
+		dlc = "berry"
+	}
+	self.definitions.iceaxe = {
+		category = "melee_weapon",
+		dlc = "berry"
+	}
 end
 function UpgradesTweakData:_grenades_definitions()
 	self.definitions.molotov = {category = "grenade", dlc = "bbq"}
@@ -9464,5 +9594,20 @@ function UpgradesTweakData:_par_weapon_definitions()
 		category = "weapon",
 		weapon_id = "par",
 		factory_id = "wpn_fps_lmg_par"
+	}
+end
+function UpgradesTweakData:_sparrow_weapon_definitions()
+	self.definitions.sparrow = {
+		category = "weapon",
+		weapon_id = "sparrow",
+		factory_id = "wpn_fps_pis_sparrow",
+		dlc = "berry"
+	}
+end
+function UpgradesTweakData:_model70_weapon_definitions()
+	self.definitions.model70 = {
+		category = "weapon",
+		weapon_id = "model70",
+		factory_id = "wpn_fps_snp_model70"
 	}
 end

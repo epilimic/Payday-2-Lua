@@ -312,8 +312,8 @@ function CoreEditor:_init_paths()
 	self._editor_settings_path = "lib/utils/dev/editor/xml/editor"
 	self._group_presets_path = managers.database:base_path() .. "levels\\groups"
 	self._editor_temp_path = managers.database:root_path() .. "assets\\core\\temp\\editor_temp"
-	self._simulation_path = managers.database:root_path() .. "assets\\core\\temp\\editor_temp\\simulation"
-	self._simulation_cube_lights_path = managers.database:root_path() .. "assets\\core\\temp\\editor_temp\\simulation\\cube_lights"
+	self._simulation_path = self._editor_temp_path .. "\\simulation"
+	self._simulation_cube_lights_path = self._simulation_path .. "\\cube_lights"
 	if not SystemFS:exists(self._editor_temp_path) then
 		SystemFS:make_dir(self._editor_temp_path)
 	end
@@ -1455,11 +1455,12 @@ function CoreEditor:reload_units(unit_names, small_compile, skip_replace_units)
 		Application:data_compile({
 			platform = string.lower(SystemInfo:platform():s()),
 			source_root = managers.database:base_path(),
-			target_db_root = Application:base_path() .. "/assets",
+			target_db_root = Application:base_path() .. "assets",
 			target_db_name = "all",
 			source_files = files,
 			verbose = false,
-			send_idstrings = false
+			send_idstrings = false,
+			preprocessor_definitions = "preprocessor_definitions"
 		})
 		DB:reload()
 		managers.database:clear_all_cached_indices()
@@ -2424,13 +2425,14 @@ end
 function CoreEditor:_recompile(dir)
 	local source_files = self:_source_files(dir)
 	local t = {
-		platform = "win32",
+		platform = string.lower(SystemInfo:platform():s()),
 		source_root = managers.database:root_path() .. "/assets",
-		target_db_root = managers.database:root_path() .. "/packages/win32/assets",
+		target_db_root = Application:base_path() .. "assets",
 		target_db_name = "all",
 		source_files = source_files,
 		verbose = false,
-		send_idstrings = false
+		send_idstrings = false,
+		preprocessor_definitions = "preprocessor_definitions"
 	}
 	Application:data_compile(t)
 	DB:reload()
@@ -2770,11 +2772,32 @@ function CoreEditor:_save_unit_stats(dir)
 end
 function CoreEditor:_save_bundle_info_files(dir)
 	local file = SystemFS:open(dir .. "\\cube_lights.bundle_info", "w")
-	local path = managers.database:entry_relative_path(dir .. "\\cube_lights")
+	local world_path = managers.database:entry_relative_path(dir)
+	local cubelights_path = managers.database:entry_relative_path(dir .. "\\cube_lights")
+	local instances_paths = self:_get_instances_paths()
 	file:puts("<bundle_info>")
-	file:puts("\t<include folder=\"" .. path .. "\"/>")
+	file:puts("\t<!-- Level Packages -->")
+	file:puts("\t<include_package folder=\"" .. world_path .. "\"/>")
+	file:puts([[
+
+	<!-- Instances -->]])
+	for instance_path, _ in pairs(instances_paths) do
+		file:puts("\t<include_package folder=\"" .. instance_path .. "\"/>")
+		file:puts("\t<include_bundle_info folder=\"" .. instance_path .. "\"/>")
+	end
+	file:puts([[
+
+	<!-- Cube Lights -->]])
+	file:puts("\t<include folder=\"" .. cubelights_path .. "\"/>")
 	file:puts("</bundle_info>")
 	SystemFS:close(file)
+end
+function CoreEditor:_get_instances_paths()
+	local all_instance_paths = {}
+	for _, instance_data in ipairs(managers.world_instance:instance_data()) do
+		all_instance_paths[instance_data.folder] = true
+	end
+	return all_instance_paths
 end
 function CoreEditor:get_unit_stats_from_layers()
 	local units = {}

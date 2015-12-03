@@ -38,7 +38,7 @@ function CrimeNetManager:_get_jobs_by_jc()
 		local pass_all_tests = is_cooldown_ok and is_not_wrapped and is_not_dlc_or_got
 		if pass_all_tests then
 			local job_data = tweak_data.narrative:job_data(job_id)
-			local start_difficulty = job_data.professional and 1 or 0
+			local start_difficulty = job_data.competitive and 4 or job_data.professional and 1 or 0
 			local num_difficulties = Global.SKIP_OVERKILL_290 and 3 or job_data.professional and 4 or 4
 			for i = start_difficulty, num_difficulties do
 				local job_jc = math.clamp(job_data.jc + i * 10, 0, 100)
@@ -689,8 +689,7 @@ function CrimeNetManager:_find_online_games_win32(friends_only)
 								job_id = job_id,
 								is_friend = is_friend,
 								kick_option = kick_option,
-								job_plan = job_plan,
-								custom_text = room.custom_text
+								job_plan = job_plan
 							})
 						end
 					else
@@ -708,8 +707,7 @@ function CrimeNetManager:_find_online_games_win32(friends_only)
 							job_id = job_id,
 							is_friend = is_friend,
 							kick_option = kick_option,
-							job_plan = job_plan,
-							custom_text = room.custom_text
+							job_plan = job_plan
 						})
 					end
 				end
@@ -2114,9 +2112,7 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 			heat_name:set_range_color(unpack(range))
 		end
 	end
-	local use_custom_text = is_win32 and data.custom_text and data.custom_text ~= "" and data.custom_text ~= "value_pending" and data.custom_text ~= "value_missing" and true or false
 	local job_tweak = tweak_data.narrative:job_data(data.job_id)
-	local custom_string = use_custom_text and data.custom_text or ""
 	local host_string = data.host_name or is_professional and managers.localization:to_upper_text("cn_menu_pro_job") or " "
 	local job_string = data.job_id and managers.localization:to_upper_text(job_tweak.name_id) or data.level_name or "NO JOB"
 	local contact_string = utf8.to_upper(data.job_id and managers.localization:text(tweak_data.narrative.contacts[job_tweak.contact].name_id)) or "BAIN"
@@ -2143,16 +2139,6 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 			color = Color.white
 		})
 	end
-	local custom_name = side_panel:text({
-		name = "custom_name",
-		text = custom_string,
-		vertical = "bottom",
-		font = tweak_data.menu.pd2_small_font,
-		font_size = tweak_data.menu.pd2_small_font_size,
-		color = data.is_friend and friend_color or is_server and regular_color or pro_color,
-		blend_mode = "add",
-		alpha = 0
-	})
 	local host_name = side_panel:text({
 		name = "host_name",
 		text = host_string,
@@ -2207,21 +2193,6 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 		host_name:set_size(w, h)
 		host_name:set_position(x, 0)
 		if not is_server then
-		end
-		if use_custom_text then
-			custom_name:set_w(150)
-			custom_name:set_wrap(true)
-			custom_name:set_word_wrap(true)
-			custom_name:set_kern(custom_name:kern())
-			local _, _, _, h = custom_name:text_rect()
-			custom_name:set_h(h)
-			custom_name:set_position(x, 0)
-			host_name:set_h(h)
-			host_name:set_bottom(custom_name:bottom())
-			host_name:set_vertical("bottom")
-			if job_plan_icon then
-				job_plan_icon:set_bottom(host_name:bottom() - 2)
-			end
 		end
 	end
 	do
@@ -2510,7 +2481,6 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 		contact_name:set_w(0)
 		local _, _, w, h = job_name:text_rect()
 		job_name:set_size(w, h)
-		custom_name:set_right(side_panel:w())
 		host_name:set_right(side_panel:w())
 		job_name:set_right(side_panel:w())
 		contact_name:set_left(side_panel:w())
@@ -2571,27 +2541,8 @@ function CrimeNetGui:_create_job_gui(data, type, fixed_x, fixed_y, fixed_locatio
 		callout = callout,
 		text_on_right = text_on_right,
 		location = location,
-		heat_glow = heat_glow,
-		custom_text = data.custom_text,
-		use_custom_text = use_custom_text
+		heat_glow = heat_glow
 	}
-	if use_custom_text then
-		side_panel:stop()
-		side_panel:animate(function(o)
-			while true do
-				wait(4)
-				over(1, function(p)
-					host_name:set_alpha(1 - p)
-					custom_name:set_alpha(p)
-				end)
-				wait(4)
-				over(1, function(p)
-					host_name:set_alpha(p)
-					custom_name:set_alpha(1 - p)
-				end)
-			end
-		end)
-	end
 	self:update_job_gui(job, 3)
 	return job
 end
@@ -2708,8 +2659,7 @@ function CrimeNetGui:update_server_job(data, i)
 	local updated_state = self:_update_job_variable(job_index, "state", data.state)
 	local updated_friend = self:_update_job_variable(job_index, "is_friend", data.is_friend)
 	local updated_job_plan = self:_update_job_variable(job_index, "job_plan", data.job_plan)
-	local updated_custom_text = self:_update_job_variable(job_index, "custom_text", data.custom_text)
-	local recreate_job = updated_room or updated_job or updated_level_id or updated_level_data or updated_difficulty or updated_difficulty_id or updated_state or updated_friend or updated_job_plan or updated_custom_text
+	local recreate_job = updated_room or updated_job or updated_level_id or updated_level_data or updated_difficulty or updated_difficulty_id or updated_state or updated_friend or updated_job_plan
 	self:_update_job_variable(job_index, "state_name", data.state_name)
 	if self:_update_job_variable(job_index, "num_plrs", data.num_plrs) and job.peers_panel then
 		for i, peer_icon in ipairs(job.peers_panel:children()) do
@@ -2962,7 +2912,6 @@ function CrimeNetGui:check_job_pressed(x, y)
 				num_plrs = job.num_plrs or 0,
 				state = job.state,
 				host_name = job.host_name,
-				custom_text = job.custom_text,
 				special_node = job.special_node,
 				dlc = job.dlc,
 				contract_visuals = job_data and job_data.contract_visuals,
@@ -3233,7 +3182,6 @@ function CrimeNetGui:update_job_gui(job, inside)
 			local kick_icon = job.kick_option == 0 and "kick_none_icon" or "kick_vote_icon"
 			local start_h = job.side_panel:h()
 			local h = start_h
-			local use_custom_text = job.use_custom_text or false
 			local custom_name = job.side_panel:child("custom_name")
 			local host_name = job.side_panel:child("host_name")
 			local job_name = job.side_panel:child("job_name")

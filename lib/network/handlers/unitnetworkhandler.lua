@@ -171,6 +171,18 @@ function UnitNetworkHandler:action_spooc_strike(unit, pos, action_id, sender)
 	end
 	unit:movement():sync_action_spooc_strike(pos, action_id)
 end
+function UnitNetworkHandler:action_warp_start(unit, has_pos, pos, has_rot, yaw, sender)
+	if not self._verify_character(unit) or not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	local action_desc = {
+		type = "warp",
+		body_part = 1,
+		position = has_pos and pos,
+		rotation = has_rot and Rotation(360 * (yaw - 1) / 254, 0, 0)
+	}
+	unit:movement():action_request(action_desc)
+end
 function UnitNetworkHandler:friendly_fire_hit(subject_unit)
 	if not self._verify_character(subject_unit) or not self._verify_gamestate(self._gamestate_filter.any_ingame) then
 		return
@@ -1700,6 +1712,9 @@ function UnitNetworkHandler:set_health(unit, percent, sender)
 	else
 		managers.hud:set_mugshot_health(unit:unit_data().mugshot_id, percent / 100)
 	end
+	if percent ~= 100 then
+		managers.mission:call_global_event("player_damaged")
+	end
 end
 function UnitNetworkHandler:sync_equipment_possession(peer_id, equipment, amount, sender)
 	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not self._verify_sender(sender) then
@@ -2300,4 +2315,12 @@ function UnitNetworkHandler:action_land(unit, pos, sender)
 		return
 	end
 	unit:movement():sync_action_land(pos)
+end
+function UnitNetworkHandler:sync_fall_position(unit, pos, rot)
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+	if alive(unit) then
+		unit:movement():sync_fall_position(pos, rot)
+	end
 end

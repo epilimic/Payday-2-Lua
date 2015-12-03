@@ -9,6 +9,7 @@ function MenuItemInput:init(data_node, parameters)
 	self._type = MenuItemInput.TYPE
 	self._input_text = ""
 	self._input_limit = self._parameters.input_limit or 30
+	self._empty_gui_input_limit = self._parameters.empty_gui_input_limit or self._input_limit / 2
 end
 function MenuItemInput:input_text()
 	return self._input_text
@@ -43,7 +44,7 @@ function MenuItemInput:setup_gui(node, row_item)
 		blend_mdoe = "add",
 		layer = node.layers.items - 1
 	})
-	row_item.empty_gui_text:set_alpha(0.8)
+	row_item.empty_gui_text:set_alpha(1)
 	row_item.gui_text:set_text("")
 	row_item.caret = row_item.gui_panel:rect({
 		name = "caret",
@@ -70,9 +71,8 @@ function MenuItemInput:_layout_gui(node, row_item)
 	row_item.gui_panel:set_height(h)
 	row_item.gui_panel:set_width(safe_rect.width - node._mid_align(node))
 	row_item.gui_panel:set_x(node._mid_align(node))
-	if row_item.align ~= "right" or not row_item.gui_panel:w() then
-	end
-	self._align_x = node._right_align(node) - row_item.gui_panel:x()
+	self._align_right = row_item.gui_panel:w()
+	self._align_left = node._right_align(node) - row_item.gui_panel:x()
 	self:_layout(row_item)
 end
 function MenuItemInput:_layout(row_item)
@@ -83,13 +83,13 @@ function MenuItemInput:_layout(row_item)
 	row_item.empty_gui_text:set_h(h)
 	row_item.empty_gui_text:set_width(w + 5)
 	if row_item.align == "right" then
-		row_item.gui_text:set_right(self._align_x)
-		row_item.empty_gui_text:set_right(self._align_x)
+		row_item.gui_text:set_left(self._align_left)
+		row_item.empty_gui_text:set_right(self._align_right)
 	else
-		row_item.gui_text:set_left(self._align_x)
-		row_item.empty_gui_text:set_left(self._align_x)
+		row_item.gui_text:set_right(self._align_right)
+		row_item.empty_gui_text:set_left(self._align_left)
 	end
-	row_item.empty_gui_text:set_visible(row_item.gui_text:text() == "")
+	row_item.empty_gui_text:set_visible(utf8.len(row_item.gui_text:text()) < (self._empty_gui_input_limit or 1))
 	self:_update_caret(row_item)
 	self:_update_input_bg(row_item)
 	return true
@@ -99,7 +99,6 @@ function MenuItemInput:_update_input_bg(row_item)
 		return
 	end
 	row_item.input_bg:set_alpha(self._input_text ~= row_item.gui_text:text() and 0.6 or 0)
-	row_item.empty_gui_text:set_alpha(self._input_text == row_item.gui_text:text() and 0.75 or 0)
 end
 function MenuItemInput:reload(row_item, node)
 	if not row_item or not alive(row_item.gui_text) then

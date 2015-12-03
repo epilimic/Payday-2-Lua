@@ -62,6 +62,7 @@ require("lib/units/cameras/FPCameraPlayerBase")
 require("lib/units/cameras/PrevisCamera")
 require("lib/units/cameras/WaitingForPlayersCamera")
 require("lib/units/cameras/MissionAccessCamera")
+require("lib/units/cameras/VehicleCamera")
 require("lib/units/characters/CharacterAttentionObject")
 require("lib/units/enemies/cop/CopBase")
 require("lib/units/enemies/cop/CopDamage")
@@ -188,9 +189,6 @@ function GameSetup:load_packages()
 		if not PackageManager:loaded("packages/game_base") and PackageManager:package_exists("packages/game_base") then
 			PackageManager:load("packages/game_base")
 		end
-		if not PackageManager:loaded("packages/wip/game_base") and PackageManager:package_exists("packages/wip/game_base") then
-			PackageManager:load("packages/wip/game_base")
-		end
 		local prefix = "packages/dlcs/"
 		local sufix = "/game_base"
 		local package = ""
@@ -205,7 +203,7 @@ function GameSetup:load_packages()
 	local level_package
 	if not Global.level_data or not Global.level_data.level_id then
 		if not Application:editor() then
-			level_package = "packages/wip/level_debug"
+			level_package = "packages/production/level_debug"
 		end
 	else
 		local lvl_tweak_data = Global.level_data and Global.level_data.level_id and tweak_data.levels[Global.level_data.level_id]

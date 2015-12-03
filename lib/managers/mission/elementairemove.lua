@@ -11,7 +11,8 @@ function ElementAIRemove:on_executed(instigator)
 		if self._values.true_death then
 			instigator:character_damage():damage_mission({
 				damage = 1000,
-				col_ray = {}
+				col_ray = {},
+				forced = true
 			})
 		else
 			instigator:brain():set_active(false)

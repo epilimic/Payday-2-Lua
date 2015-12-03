@@ -15,7 +15,7 @@ function StatisticsTweakData:init()
 	}
 end
 function StatisticsTweakData:statistics_specializations()
-	return 12
+	return 13
 end
 function StatisticsTweakData:statistics_table()
 	local level_list = {
@@ -79,7 +79,13 @@ function StatisticsTweakData:statistics_table()
 		"hox_3",
 		"shoutout_raid",
 		"arena",
-		"kenaz"
+		"kenaz",
+		"jolly",
+		"red2",
+		"dinner",
+		"nail",
+		"pbr",
+		"pbr2"
 	}
 	local job_list = {
 		"jewelry_store",
@@ -131,7 +137,13 @@ function StatisticsTweakData:statistics_table()
 		"hox_3",
 		"shoutout_raid",
 		"arena",
-		"kenaz"
+		"kenaz",
+		"jolly",
+		"nail",
+		"red2",
+		"dinner",
+		"pbr",
+		"pbr2"
 	}
 	local mask_list = {
 		"character_locked",
@@ -360,7 +372,36 @@ function StatisticsTweakData:statistics_table()
 		"bobblehead_dozer",
 		"jiro",
 		"jiro_begins",
-		"king_of_jesters"
+		"king_of_jesters",
+		"mason_vanguard_veteran",
+		"agatha_knight",
+		"agatha_vanguard_veteran",
+		"mason_knight_veteran",
+		"vlad_armor",
+		"sputnik",
+		"tiara",
+		"rus_hat",
+		"baba_yaga",
+		"lcv",
+		"oliver",
+		"eggian",
+		"fatboy",
+		"pirate_skull",
+		"glasses_tinted_love",
+		"groucho_glasses",
+		"rageface",
+		"dawg",
+		"baitface",
+		"nomegusta",
+		"satan",
+		"invader",
+		"tormentor",
+		"bodhi",
+		"bodhi_begins",
+		"oro",
+		"water_spirit",
+		"maui",
+		"tane"
 	}
 	local weapon_list = {
 		"ak5",
@@ -453,7 +494,10 @@ function StatisticsTweakData:statistics_table()
 		"arblast",
 		"long",
 		"frankish",
-		"baka"
+		"baka",
+		"par",
+		"model70",
+		"sparrow"
 	}
 	local melee_list = {
 		"weapon",
@@ -516,7 +560,13 @@ function StatisticsTweakData:statistics_table()
 		"buck",
 		"beardy",
 		"great",
-		"morning"
+		"morning",
+		"gator",
+		"pugio",
+		"selfie",
+		"cutters",
+		"boxcutter",
+		"iceaxe"
 	}
 	local grenade_list = {
 		"frag",
@@ -556,7 +606,10 @@ function StatisticsTweakData:statistics_table()
 		"hostage_rescue",
 		"murkywater",
 		"phalanx_vip",
-		"phalanx_minion"
+		"phalanx_minion",
+		"biker",
+		"inside_man",
+		"bank_manager"
 	}
 	local armor_list = {
 		"level_1",
@@ -579,7 +632,8 @@ function StatisticsTweakData:statistics_table()
 		"jacket",
 		"bonnie",
 		"sokol",
-		"dragon"
+		"dragon",
+		"bodhi"
 	}
 	local deployable_list = {
 		"ammo_bag",

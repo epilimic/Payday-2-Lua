@@ -50,7 +50,9 @@ function CopLogicTravel.enter(data, new_logic_name, enter_params)
 	CopLogicIdle._chk_has_old_action(data, my_data)
 	local objective = data.objective
 	local path_data = objective.path_data
-	if path_data then
+	if objective.path_style == "warp" then
+		my_data.warp_pos = objective.pos
+	elseif path_data then
 		local path_style = objective.path_style
 		if path_style == "precise" then
 			local path = {
@@ -158,6 +160,16 @@ function CopLogicTravel.upd_advance(data)
 	data.t = t
 	if my_data.has_old_action then
 		CopLogicAttack._upd_stop_old_action(data, my_data)
+	elseif my_data.warp_pos then
+		local action_desc = {
+			type = "warp",
+			body_part = 1,
+			position = mvector3.copy(objective.pos),
+			rotation = objective.rot
+		}
+		if unit:movement():action_request(action_desc) then
+			CopLogicTravel._on_destination_reached(data)
+		end
 	elseif my_data.advancing then
 		if my_data.coarse_path then
 			if my_data.announce_t and t > my_data.announce_t then

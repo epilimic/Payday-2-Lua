@@ -152,7 +152,9 @@ end
 function Ladder:set_enabled(enabled)
 	self._enabled = enabled
 	if self._enabled then
-		table.insert(Ladder.active_ladders, self._unit)
+		if not table.contains(Ladder.active_ladders, self._unit) then
+			table.insert(Ladder.active_ladders, self._unit)
+		end
 	else
 		table.delete(Ladder.active_ladders, self._unit)
 	end

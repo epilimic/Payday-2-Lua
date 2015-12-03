@@ -57,6 +57,19 @@ function ElementAreaTrigger:project_instigators()
 				table.insert(instigators, data.unit)
 			end
 		end
+	elseif self._values.instigator == "hostages" then
+		if managers.groupai:state():police_hostage_count() > 0 then
+			for _, data in pairs(managers.enemy:all_enemies()) do
+				if data.unit:anim_data().surrender then
+					table.insert(instigators, data.unit)
+				end
+			end
+		end
+		for _, data in pairs(managers.enemy:all_civilians()) do
+			if data.unit:anim_data().tied then
+				table.insert(instigators, data.unit)
+			end
+		end
 	elseif self._values.instigator == "criminals" then
 		for _, data in pairs(managers.groupai:state():all_char_criminals()) do
 			table.insert(instigators, data.unit)
@@ -87,7 +100,7 @@ function ElementAreaTrigger:project_instigators()
 		if self._values.instigator == "loot" then
 			function filter_func(carry_data)
 				local carry_id = carry_data:carry_id()
-				if carry_id == "gold" or carry_id == "money" or carry_id == "diamonds" or carry_id == "coke" or carry_id == "coke_pure" or carry_id == "sandwich" or carry_id == "weapon" or carry_id == "painting" or carry_id == "circuit" or carry_id == "diamonds" or carry_id == "engine_01" or carry_id == "engine_02" or carry_id == "engine_03" or carry_id == "engine_04" or carry_id == "engine_05" or carry_id == "engine_06" or carry_id == "engine_07" or carry_id == "engine_08" or carry_id == "engine_09" or carry_id == "engine_10" or carry_id == "engine_11" or carry_id == "engine_12" or carry_id == "meth" or carry_id == "lance_bag" or carry_id == "lance_bag_large" or carry_id == "grenades" or carry_id == "ammo" or carry_id == "cage_bag" or carry_id == "turret" or carry_id == "artifact_statue" or carry_id == "samurai_suit" or carry_id == "equipment_bag" or carry_id == "cro_loot1" or carry_id == "cro_loot2" or carry_id == "ladder_bag" or carry_id == "hope_diamond" or carry_id == "mus_artifact" or carry_id == "mus_artifact_paint" or carry_id == "winch_part" or carry_id == "winch_part_e3" or carry_id == "fireworks" or carry_id == "evidence_bag" or carry_id == "watertank_empty" or carry_id == "watertank_full" or carry_id == "warhead" or carry_id == "paper_roll" or carry_id == "counterfeit_money" or carry_id == "unknown" or carry_id == "safe_wpn" or carry_id == "safe_ovk" or carry_id == "nail_muriatic_acid" or carry_id == "nail_caustic_soda" or carry_id == "nail_hydrogen_chloride" or carry_id == "nail_euphadrine_pills" or carry_id == "safe_secure_dummy" or carry_id == "din_pig" or carry_id == "meth_half" then
+				if carry_id == "gold" or carry_id == "money" or carry_id == "diamonds" or carry_id == "coke" or carry_id == "coke_pure" or carry_id == "sandwich" or carry_id == "weapon" or carry_id == "painting" or carry_id == "circuit" or carry_id == "diamonds" or carry_id == "engine_01" or carry_id == "engine_02" or carry_id == "engine_03" or carry_id == "engine_04" or carry_id == "engine_05" or carry_id == "engine_06" or carry_id == "engine_07" or carry_id == "engine_08" or carry_id == "engine_09" or carry_id == "engine_10" or carry_id == "engine_11" or carry_id == "engine_12" or carry_id == "meth" or carry_id == "lance_bag" or carry_id == "lance_bag_large" or carry_id == "grenades" or carry_id == "ammo" or carry_id == "cage_bag" or carry_id == "turret" or carry_id == "artifact_statue" or carry_id == "samurai_suit" or carry_id == "equipment_bag" or carry_id == "cro_loot1" or carry_id == "cro_loot2" or carry_id == "ladder_bag" or carry_id == "hope_diamond" or carry_id == "mus_artifact" or carry_id == "mus_artifact_paint" or carry_id == "winch_part" or carry_id == "winch_part_e3" or carry_id == "fireworks" or carry_id == "evidence_bag" or carry_id == "watertank_empty" or carry_id == "watertank_full" or carry_id == "warhead" or carry_id == "paper_roll" or carry_id == "counterfeit_money" or carry_id == "unknown" or carry_id == "safe_wpn" or carry_id == "safe_ovk" or carry_id == "nail_muriatic_acid" or carry_id == "nail_caustic_soda" or carry_id == "nail_hydrogen_chloride" or carry_id == "nail_euphadrine_pills" or carry_id == "safe_secure_dummy" or carry_id == "din_pig" or carry_id == "meth_half" or carry_id == "parachute" or carry_id == "equipment_bag_global_event" or carry_id == "prototype" or carry_id == "master_server" or carry_id == "lost_artifact" or carry_id == "breaching_charges" or carry_id == "masterpiece_painting" then
 					return true
 				end
 			end

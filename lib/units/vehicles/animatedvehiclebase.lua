@@ -179,6 +179,18 @@ function AnimatedVehicleBase:clbk_send_modules(module_units_to_sync)
 		end
 	end
 end
+function AnimatedVehicleBase:anim_clbk_blackhawk_1_at_loop_end(unit)
+	if self._wants_anim_redirect then
+		self._unit:play_redirect(Idstring(self._wants_anim_redirect))
+		self._wants_anim_redirect = nil
+	end
+end
+function AnimatedVehicleBase:clbk_request_anim_redirect(redirect_name)
+	self._wants_anim_redirect = redirect_name
+	if self._unit:damage():has_sequence("int_seq_unbend_blades") then
+		self._unit:damage():run_sequence_simple("int_seq_unbend_blades")
+	end
+end
 function AnimatedVehicleBase:save(save_data)
 	if self._modules then
 		local module_units_to_sync = {}

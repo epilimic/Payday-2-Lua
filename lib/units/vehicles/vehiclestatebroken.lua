@@ -35,7 +35,7 @@ function VehicleStateBroken:adjust_interactions()
 		self._unit:vehicle_driving()._interaction_repair = true
 	end
 end
-function VehicleStateBroken:get_action_for_interaction(pos, locator)
+function VehicleStateBroken:get_action_for_interaction(pos, locator, tweak_data)
 	local action = VehicleDrivingExt.INTERACT_INVALID
 	local seat, seat_distance = self._unit:vehicle_driving():get_available_seat(pos)
 	local loot_point, loot_point_distance = self._unit:vehicle_driving():get_nearest_loot_point(pos)

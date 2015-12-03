@@ -553,13 +553,6 @@ function MenuNodeGui:_create_menu_item(row_item)
 			h = 2
 		})
 		self:_align_chat(row_item)
-	elseif row_item.type == "input" then
-		row_item.gui_panel = self:_text_item_part(row_item, self.item_panel, self:_right_align())
-		self.ws:connect_keyboard(Input:keyboard())
-		self.item_panel:enter_text(callback(self, self, "enter_text"))
-		self.item_panel:key_press(callback(self, self, "key_press"))
-		self.item_panel:key_release(callback(self, self, "key_release"))
-		self:_align_normal(row_item)
 	elseif row_item.type == "friend" then
 		local cot_align = row_item.align == "right" and "left" or row_item.align == "left" and "right" or row_item.align
 		row_item.gui_panel = self.item_panel:panel({
@@ -658,84 +651,6 @@ function MenuNodeGui:_create_info_panel(row_item)
 		wrap = true,
 		word_wrap = true
 	})
-end
-function MenuNodeGui:_shift()
-	local k = Input:keyboard()
-	return not k:down("left shift") and not k:down("right shift") and k:has_button("shift") and k:down("shift")
-end
-function MenuNodeGui.blink(o)
-	while true do
-		o:set_color(Color(0, 1, 1, 1))
-		wait(0.3)
-		o:set_color(Color.white)
-		wait(0.3)
-	end
-end
-function MenuNodeGui:enter_text(o, s)
-	local row_item = self._highlighted_item and self:row_item(self._highlighted_item)
-	if row_item and row_item.type == "input" then
-		self._highlighted_item:set_input_text(self._highlighted_item:input_text() .. s)
-		row_item.gui_panel:set_text(self._highlighted_item:input_text())
-	end
-end
-function MenuNodeGui:update_key_down(o, k)
-	local row_item = self._highlighted_item and self:row_item(self._highlighted_item)
-	if row_item and row_item.type == "input" then
-		wait(0.6)
-		row_item = self._highlighted_item and self:row_item(self._highlighted_item)
-		while row_item and row_item.type == "input" and self._key_pressed == k do
-			local text = self._highlighted_item:input_text()
-			local n = utf8.len(text)
-			if self._key_pressed == Idstring("backspace") then
-				text = utf8.sub(text, 0, math.max(n - 1, 0))
-			elseif self._key_pressed == Idstring("delete") then
-			elseif self._key_pressed == Idstring("left") then
-			elseif self._key_pressed == Idstring("right") then
-				self._key_pressed = false
-			elseif self._key_ctrl_pressed == true and k == Idstring("v") then
-				return
-			end
-			self._highlighted_item:set_input_text(text)
-			row_item.gui_panel:set_text(self._highlighted_item:input_text())
-			wait(0.03)
-			row_item = self._highlighted_item and self:row_item(self._highlighted_item)
-		end
-	end
-end
-function MenuNodeGui:key_release(o, k)
-	if self._key_pressed == k then
-		self._key_pressed = false
-	end
-	if k == Idstring("left ctrl") or k == Idstring("right ctrl") then
-		self._key_ctrl_pressed = false
-	end
-end
-function MenuNodeGui:key_press(o, k)
-	local row_item = self._highlighted_item and self:row_item(self._highlighted_item)
-	if row_item and row_item.type == "input" then
-		local text = self._highlighted_item:input_text()
-		local n = utf8.len(text)
-		self._key_pressed = k
-		o:stop()
-		o:animate(callback(self, self, "update_key_down"), k)
-		if k == Idstring("backspace") then
-			text = utf8.sub(text, 0, math.max(n - 1, 0))
-		elseif k == Idstring("delete") then
-		elseif k == Idstring("left") then
-		elseif k == Idstring("right") then
-		elseif self._key_pressed == Idstring("end") then
-		elseif self._key_pressed == Idstring("home") then
-		elseif k == Idstring("enter") then
-		elseif k == Idstring("esc") then
-			return
-		elseif k == Idstring("left ctrl") or k == Idstring("right ctrl") then
-			self._key_ctrl_pressed = true
-		elseif self._key_ctrl_pressed == true and k == Idstring("v") then
-			return
-		end
-		self._highlighted_item:set_input_text(text)
-		row_item.gui_panel:set_text(self._highlighted_item:input_text())
-	end
 end
 function MenuNodeGui:_set_lobby_campaign(row_item)
 	if not MenuNodeGui.lobby_campaign then
@@ -943,12 +858,12 @@ function MenuNodeGui:activate_customize_controller(item)
 	self.ws:connect_keyboard(Input:keyboard())
 	self.ws:connect_mouse(Input:mouse())
 	self._listening_to_input = true
-	self._skip_first_mouse_0 = true
+	self._skip_first_activate_key = true
 	local function f(o, key)
 		self:_key_press(o, key, "keyboard", item)
 	end
 	row_item.controller_binding:set_text("_")
-	row_item.controller_binding:key_press(f)
+	row_item.controller_binding:key_release(f)
 	local function f(o, key)
 		self:_key_press(o, key, "mouse", item)
 	end
@@ -963,9 +878,13 @@ function MenuNodeGui:_key_press(o, key, input_id, item, no_add)
 	if managers.system_menu:is_active() then
 		return
 	end
-	if self._skip_first_mouse_0 then
-		self._skip_first_mouse_0 = false
-		if input_id == "mouse" and key == Idstring("0") then
+	if self._skip_first_activate_key then
+		self._skip_first_activate_key = false
+		if input_id == "mouse" then
+			if key == Idstring("0") then
+				return
+			end
+		elseif input_id == "keyboard" and key == Idstring("enter") then
 			return
 		end
 	end
@@ -1006,8 +925,9 @@ function MenuNodeGui:_key_press(o, key, input_id, item, no_add)
 			return
 		end
 	end
+	local button_category = MenuCustomizeControllerCreator.CONTROLS_INFO[item:parameters().button].category
 	local connections = managers.controller:get_settings(managers.controller:get_default_wrapper_type()):get_connection_map()
-	for _, name in ipairs(MenuCustomizeControllerCreator.CONTROLS) do
+	for _, name in ipairs(MenuCustomizeControllerCreator.controls_info_by_category(button_category)) do
 		local connection = connections[name]
 		if connection._btn_connections then
 			for name, btn_connection in pairs(connection._btn_connections) do
@@ -1058,6 +978,7 @@ function MenuNodeGui:_end_customize_controller(o, item)
 	self.ws:disconnect_keyboard()
 	self.ws:disconnect_mouse()
 	o:key_press(nil)
+	o:key_release(nil)
 	o:mouse_click(nil)
 	o:mouse_release(nil)
 	Input:mouse():remove_trigger(self._mouse_wheel_up_trigger)

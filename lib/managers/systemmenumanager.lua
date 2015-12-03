@@ -400,7 +400,6 @@ function GenericSystemMenuManager:event_active_changed(active)
 	if Global.category_print.dialog_manager then
 		cat_print("dialog_manager", "[SystemMenuManager] [Active changed] Active: " .. tostring(not not active))
 	end
-	print("dispacth from system menus", active)
 	self._active_changed_callback_handler:dispatch(active)
 end
 WinSystemMenuManager = WinSystemMenuManager or class(GenericSystemMenuManager)

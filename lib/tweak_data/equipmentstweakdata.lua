@@ -477,6 +477,11 @@ function EquipmentsTweakData:init()
 		icon = "equipment_winch_hook",
 		sync_possession = true
 	}
+	self.specials.blow_torch = {
+		text_id = "hud_int_equipment_blow_torch",
+		icon = "equipment_blow_torch",
+		sync_possession = true
+	}
 	self.max_amount = {
 		ammo_bag = 2,
 		doctor_bag = 2,

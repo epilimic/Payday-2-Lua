@@ -16,6 +16,7 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.character_locked.bonnie = "bonnie"
 	self.masks.character_locked.sokol = "sokol"
 	self.masks.character_locked.dragon = "jiro"
+	self.masks.character_locked.bodhi = "bodhi"
 	self.masks.skull = {}
 	self.masks.skull.unit = "units/payday2/masks/msk_skull/msk_skull"
 	self.masks.skull.name_id = "bm_msk_skull"
@@ -1682,7 +1683,8 @@ function BlackMarketTweakData:_init_masks()
 		jacket = "balaclava_wolf",
 		bonnie = "balaclava_dallas",
 		sokol = "balaclava_sokol",
-		dragon = "balaclava_dallas"
+		dragon = "balaclava_dallas",
+		bodhi = "balaclava_dallas"
 	}
 	self.masks.the_overkill_mask = {}
 	self.masks.the_overkill_mask.unit = "units/pd2_dlc_overkill_pack/masks/msk_the_overkill_mask/msk_the_overkill_mask"
@@ -2349,6 +2351,53 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.tormentor.pcs = {}
 	self.masks.tormentor.value = 0
 	self.masks.tormentor.sort_number = 12
+	self.masks.bodhi = {}
+	self.masks.bodhi.unit = "units/pd2_dlc_rip/masks/bodhi/msk_bodhi"
+	self.masks.bodhi.name_id = "bm_msk_bodhi"
+	self.masks.bodhi.pcs = {}
+	self.masks.bodhi.value = 0
+	self.masks.bodhi.global_value = "infamous"
+	self.masks.bodhi.texture_bundle_folder = "rip"
+	self.masks.bodhi_begins = {}
+	self.masks.bodhi_begins.unit = "units/pd2_dlc_rip/masks/bodhi_begins/msk_bodhi_begins"
+	self.masks.bodhi_begins.name_id = "bm_msk_bodhi_begins"
+	self.masks.bodhi_begins.pcs = {
+		10,
+		20,
+		30,
+		40
+	}
+	self.masks.bodhi_begins.value = 0
+	self.masks.bodhi_begins.global_value = "infamous"
+	self.masks.bodhi_begins.texture_bundle_folder = "rip"
+	self.masks.water_spirit = {}
+	self.masks.water_spirit.unit = "units/pd2_dlc_jerry/masks/msk_water_spirit/msk_water_spirit"
+	self.masks.water_spirit.name_id = "bm_msk_water_spirit"
+	self.masks.water_spirit.pcs = {}
+	self.masks.water_spirit.value = 0
+	self.masks.water_spirit.dlc = "berry"
+	self.masks.water_spirit.texture_bundle_folder = "berry"
+	self.masks.tane = {}
+	self.masks.tane.unit = "units/pd2_dlc_jerry/masks/tane/msk_tane"
+	self.masks.tane.name_id = "bm_msk_tane"
+	self.masks.tane.pcs = {}
+	self.masks.tane.value = 0
+	self.masks.tane.dlc = "berry"
+	self.masks.tane.texture_bundle_folder = "berry"
+	self.masks.oro = {}
+	self.masks.oro.unit = "units/pd2_dlc_jerry/masks/oro/msk_oro"
+	self.masks.oro.name_id = "bm_msk_oro"
+	self.masks.oro.pcs = {}
+	self.masks.oro.value = 0
+	self.masks.oro.dlc = "berry"
+	self.masks.oro.texture_bundle_folder = "berry"
+	self.masks.maui = {}
+	self.masks.maui.unit = "units/pd2_dlc_jerry/masks/maui/msk_maui"
+	self.masks.maui.name_id = "bm_msk_maui"
+	self.masks.maui.pcs = {}
+	self.masks.maui.value = 0
+	self.masks.maui.dlc = "berry"
+	self.masks.maui.texture_bundle_folder = "berry"
 	if SystemInfo:platform() == Idstring("PS3") then
 		self.masks.sweettooth = {}
 		self.masks.sweettooth.unit = "units/pd2_dlc_consoles/masks/msk_sweettooth/msk_sweettooth"

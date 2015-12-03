@@ -1364,6 +1364,9 @@ function GroupAIStateBase:on_criminal_disabled(unit, custom_status)
 	print("GroupAIStateBase:on_criminal_disabled", "custom_status", custom_status)
 	local criminal_key = unit:key()
 	local record = self._criminals[criminal_key]
+	if not record then
+		return
+	end
 	record.disabled_t = self._t
 	record.status = custom_status or "disabled"
 	if Network:is_server() then
@@ -2383,15 +2386,10 @@ function GroupAIStateBase:_determine_objective_for_criminal_AI(unit)
 end
 function GroupAIStateBase:_coach_last_man_clbk()
 	if table.size(self:all_char_criminals()) == 1 and self:bain_state() then
-		local _, crim = next(self:all_char_criminals())
-		local standing_name = managers.criminals:character_name_by_unit(crim.unit)
-		if standing_name == managers.criminals:local_character_name() then
-			local ssuffix = managers.criminals:character_static_data_by_name(standing_name).ssuffix
-			if self:hostage_count() <= 0 then
-				managers.dialog:queue_dialog("ban_h40" .. ssuffix, {})
-			else
-				managers.dialog:queue_dialog("ban_h42" .. ssuffix, {})
-			end
+		if self:hostage_count() <= 0 then
+			managers.dialog:queue_dialog("Play_ban_h40", {})
+		else
+			managers.dialog:queue_dialog("Play_ban_h42", {})
 		end
 	end
 end

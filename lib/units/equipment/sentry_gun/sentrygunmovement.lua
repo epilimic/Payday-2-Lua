@@ -512,9 +512,8 @@ function SentryGunMovement:save(save_data)
 		if self._attention.pos then
 			my_save_data.attention = self._attention
 		elseif self._attention.unit:id() == -1 then
-			my_save_data.attention = {
-				pos = self._attention.unit:movement():m_com()
-			}
+			local attention_pos = self._attention.handler and self._attention.handler:get_detection_m_pos() or self._attention.unit:movement() and self._attention.unit:movement():m_com() or self._unit:position()
+			my_save_data.attention = {pos = attention_pos}
 		else
 			managers.enemy:add_delayed_clbk("clbk_sync_attention" .. tostring(self._unit:key()), callback(self, CopMovement, "clbk_sync_attention", self._attention), TimerManager:game():time() + 0.1)
 		end
@@ -580,9 +579,9 @@ function SentryGunMovement:set_team(team_data)
 	local turret_units = managers.groupai:state():turrets()
 	if turret_units and table.contains(turret_units, self._unit) then
 		if self._unit:movement():team().foes[tweak_data.levels:get_default_team_ID("player")] then
-			self._unit:contour():remove("mark_unit_friendly", true)
+			self._unit:contour():remove("mark_unit_friendly", false)
 		else
-			self._unit:contour():add("mark_unit_friendly", true)
+			self._unit:contour():add("mark_unit_friendly", false)
 		end
 	end
 end

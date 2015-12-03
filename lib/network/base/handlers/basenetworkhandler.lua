@@ -13,7 +13,9 @@ BaseNetworkHandler._gamestate_filter = {
 		ingame_waiting_for_players = true,
 		ingame_waiting_for_respawn = true,
 		ingame_access_camera = true,
-		ingame_driving = true
+		ingame_driving = true,
+		ingame_parachuting = true,
+		ingame_freefall = true
 	},
 	any_ingame_playing = {
 		ingame_standard = true,
@@ -27,7 +29,9 @@ BaseNetworkHandler._gamestate_filter = {
 		ingame_incapacitated = true,
 		ingame_waiting_for_respawn = true,
 		ingame_access_camera = true,
-		ingame_driving = true
+		ingame_driving = true,
+		ingame_parachuting = true,
+		ingame_freefall = true
 	},
 	downed = {
 		ingame_bleed_out = true,

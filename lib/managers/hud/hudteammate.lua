@@ -210,10 +210,48 @@ function HUDTeammate:init(i, teammates_panel, is_player, width)
 		alpha = 1,
 		w = radial_health_panel:w(),
 		h = radial_health_panel:h(),
-		layer = 2
+		layer = 3
 	})
 	radial_custom:set_color(Color(1, 0, 0, 0))
 	radial_custom:hide()
+	if main_player then
+		local radial_rip = radial_health_panel:bitmap({
+			name = "radial_rip",
+			texture = "guis/textures/pd2/hud_rip",
+			texture_rect = {
+				64,
+				0,
+				-64,
+				64
+			},
+			render_template = "VertexColorTexturedRadial",
+			blend_mode = "add",
+			alpha = 1,
+			w = radial_health_panel:w(),
+			h = radial_health_panel:h(),
+			layer = 3
+		})
+		radial_rip:set_color(Color(1, 0, 0, 0))
+		radial_rip:hide()
+		local radial_rip_bg = radial_health_panel:bitmap({
+			name = "radial_rip_bg",
+			texture = "guis/textures/pd2/hud_rip_bg",
+			texture_rect = {
+				64,
+				0,
+				-64,
+				64
+			},
+			render_template = "VertexColorTexturedRadial",
+			blend_mode = "normal",
+			alpha = 1,
+			w = radial_health_panel:w(),
+			h = radial_health_panel:h(),
+			layer = 1
+		})
+		radial_rip_bg:set_color(Color(1, 0, 0, 0))
+		radial_rip_bg:set_visible(managers.player:has_category_upgrade("player", "armor_health_store_amount"))
+	end
 	local x, y, w, h = radial_health_panel:shape()
 	teammate_panel:bitmap({
 		name = "condition_icon",
@@ -923,11 +961,30 @@ function HUDTeammate:set_health(data)
 	local teammate_panel = self._panel:child("player")
 	local radial_health_panel = teammate_panel:child("radial_health_panel")
 	local radial_health = radial_health_panel:child("radial_health")
+	local radial_rip = radial_health_panel:child("radial_rip")
+	local radial_rip_bg = radial_health_panel:child("radial_rip_bg")
 	local red = data.current / data.total
+	radial_health:stop()
 	if red < radial_health:color().red then
 		self:_damage_taken()
+		radial_health:set_color(Color(1, red, 1, 1))
+		if alive(radial_rip) then
+			radial_rip:set_rotation((1 - radial_health:color().r) * 360)
+			radial_rip_bg:set_rotation((1 - radial_health:color().r) * 360)
+		end
+	else
+		radial_health:animate(function(o)
+			local s = radial_health:color().r
+			local e = red
+			over(0.2, function(p)
+				radial_health:set_color(Color(1, math.lerp(s, e, p), 1, 1))
+				if alive(radial_rip) then
+					radial_rip:set_rotation((1 - radial_health:color().r) * 360)
+					radial_rip_bg:set_rotation((1 - radial_health:color().r) * 360)
+				end
+			end)
+		end)
 	end
-	radial_health:set_color(Color(1, red, 1, 1))
 end
 function HUDTeammate:set_armor(data)
 	local teammate_panel = self._panel:child("player")
@@ -1296,4 +1353,41 @@ function HUDTeammate:_animate_timer_flash()
 		condition_timer:set_font_size(math.lerp(tweak_data.hud_players.timer_size, tweak_data.hud_players.timer_flash_size, n))
 	end
 	condition_timer:set_font_size(30)
+end
+function HUDTeammate:set_stored_health_max(stored_health_ratio)
+	local teammate_panel = self._panel:child("player")
+	local radial_health_panel = teammate_panel:child("radial_health_panel")
+	local radial_rip_bg = radial_health_panel:child("radial_rip_bg")
+	if alive(radial_rip_bg) then
+		local red = math.min(stored_health_ratio, 1)
+		radial_rip_bg:set_color(Color(1, red, 1, 1))
+	end
+end
+function HUDTeammate:set_stored_health(stored_health_ratio)
+	local teammate_panel = self._panel:child("player")
+	local radial_health_panel = teammate_panel:child("radial_health_panel")
+	local radial_rip = radial_health_panel:child("radial_rip")
+	if alive(radial_rip) then
+		do
+			local radial_health = radial_health_panel:child("radial_health")
+			local radial_rip_bg = radial_health_panel:child("radial_rip_bg")
+			local red = math.min(stored_health_ratio, 1)
+			radial_rip:set_visible(red > 0)
+			radial_rip:stop()
+			radial_rip:set_rotation((1 - radial_health:color().r) * 360)
+			radial_rip_bg:set_rotation((1 - radial_health:color().r) * 360)
+			print(red)
+			if red < radial_rip:color().red then
+				radial_rip:set_color(Color(1, red, 1, 1))
+			else
+				radial_rip:animate(function(o)
+					local s = radial_rip:color().r
+					local e = red
+					over(0.2, function(p)
+						radial_rip:set_color(Color(1, math.lerp(s, e, p), 1, 1))
+					end)
+				end)
+			end
+		end
+	end
 end

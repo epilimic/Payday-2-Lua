@@ -66,7 +66,7 @@ function ActionSpooc:init(action_desc, common_data)
 			return
 		end
 		self._target_unit = attention and attention.unit
-		is_local = self._target_unit and (self._target_unit:base().is_local_player or is_server and not self._target_unit:base().is_husk_player)
+		is_local = alive(self._target_unit) and (self._target_unit:base().is_local_player or is_server and not self._target_unit:base().is_husk_player)
 	end
 	if not is_server then
 		local host_stop_pos = self._ext_movement:m_host_stop_pos()
@@ -181,6 +181,9 @@ function ActionSpooc:_chk_can_strike()
 end
 function ActionSpooc:_chk_target_invalid()
 	if not self._target_unit then
+		return true
+	end
+	if self._target_unit:base().is_local_player and not self._target_unit:movement():is_SPOOC_attack_allowed() then
 		return true
 	end
 	if self._target_unit:movement():zipline_unit() then

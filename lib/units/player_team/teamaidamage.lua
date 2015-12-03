@@ -203,7 +203,7 @@ function TeamAIDamage:damage_fire(attack_data)
 	return result
 end
 function TeamAIDamage:damage_mission(attack_data)
-	if self._dead or self._invulnerable then
+	if self._dead or self._invulnerable and not attack_data.forced then
 		return
 	end
 	local result

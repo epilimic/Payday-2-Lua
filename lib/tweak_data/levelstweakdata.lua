@@ -949,7 +949,7 @@ function LevelsTweakData:init()
 	self.red2.name_id = "heist_red2_hl"
 	self.red2.briefing_id = "heist_red2_briefing"
 	self.red2.briefing_dialog = "Play_pln_fwb_brf_01"
-	self.red2.world_name = "narratives/bain/red2"
+	self.red2.world_name = "narratives/classics/red2"
 	self.red2.intro_event = "Play_pln_fwb_intro_01"
 	self.red2.outro_event = {
 		"Play_pln_fwb_34",
@@ -966,7 +966,7 @@ function LevelsTweakData:init()
 	self.dinner.name_id = "heist_dinner_hl"
 	self.dinner.briefing_id = "heist_dinner_briefing"
 	self.dinner.briefing_dialog = "Play_pln_dn1_brf_01"
-	self.dinner.world_name = "narratives/bain/dinner"
+	self.dinner.world_name = "narratives/classics/dinner"
 	self.dinner.intro_event = "Play_pln_dn1_intro_01"
 	self.dinner.outro_event = {
 		"Play_pln_dn1_31"
@@ -977,6 +977,32 @@ function LevelsTweakData:init()
 	}
 	self.dinner.cube = "cube_apply_heist_bank"
 	self.dinner.max_bags = 20
+	self.pbr = {}
+	self.pbr.name_id = "heist_pbr_hl"
+	self.pbr.briefing_id = "heist_pbr_briefing"
+	self.pbr.briefing_dialog = "Play_pln_jr1_brf_01"
+	self.pbr.world_name = "narratives/pbr/berry"
+	self.pbr.intro_event = "Play_mer_jr1_intro_01"
+	self.pbr.outro_event = "Play_pln_jr1_09"
+	self.pbr.music = "heist"
+	self.pbr.package = {
+		"packages/narr_jerry1"
+	}
+	self.pbr.cube = "cube_apply_heist_bank"
+	self.pbr.max_bags = 20
+	self.pbr2 = {}
+	self.pbr2.name_id = "heist_pbr2_hl"
+	self.pbr2.briefing_id = "heist_pbr2_briefing"
+	self.pbr2.briefing_dialog = "Play_pln_jr2_brf_01"
+	self.pbr2.world_name = "narratives/pbr/jerry"
+	self.pbr2.intro_event = "Play_pln_jr2_intro_01"
+	self.pbr2.outro_event = "Play_loc_jr2_44"
+	self.pbr2.music = "heist"
+	self.pbr2.package = {
+		"packages/narr_jerry2"
+	}
+	self.pbr2.cube = "cube_apply_heist_bank"
+	self.pbr.max_bags = 20
 	self.nail = {}
 	self.nail.name_id = "heist_nail_hl"
 	self.nail.briefing_id = "heist_nail_briefing"
@@ -1063,6 +1089,8 @@ function LevelsTweakData:init()
 		"jolly",
 		"red2",
 		"dinner",
+		"pbr",
+		"pbr2",
 		"nail"
 	}
 	if SystemInfo:platform() == Idstring("WIN32") then

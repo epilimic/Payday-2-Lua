@@ -64,6 +64,26 @@ function ControllerWrapperPC:virtual_connect2(controller_id, controller, input_n
 			0,
 			1
 		}
+		btn_data.accelerate = {
+			1,
+			0,
+			1
+		}
+		btn_data.brake = {
+			1,
+			0,
+			-1
+		}
+		btn_data.turn_left = {
+			0,
+			0,
+			-1
+		}
+		btn_data.turn_right = {
+			0,
+			0,
+			1
+		}
 		if not self._virtual_controller:has_axis(Idstring(connection_name)) then
 			self._virtual_controller:add_axis(Idstring(connection_name))
 		end

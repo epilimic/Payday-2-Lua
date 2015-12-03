@@ -56,6 +56,9 @@ function TeamAILogicTravel.enter(data, new_logic_name, enter_params)
 		if data.objective.follow_unit then
 			my_data.cover_wait_t = {0, 0}
 		end
+		if data.objective.path_style == "warp" then
+			my_data.warp_pos = data.objective.pos
+		end
 	end
 	data.unit:movement():set_allow_fire(false)
 	my_data.weapon_range = data.char_tweak.weapon[data.unit:inventory():equipped_unit():base():weapon_tweak_data().usage].range

@@ -106,7 +106,9 @@ function MenuNodeBaseGui:create_text_button(params)
 		blur = gui_blur,
 		highlighted = false,
 		clbk = clbk,
-		image = nil
+		image = nil,
+		legend_text = nil,
+		params = params.params
 	})
 	return button_panel
 end
@@ -134,6 +136,8 @@ function MenuNodeBaseGui:create_gui_box(panel, params)
 		table.insert(self._gui_boxes, box)
 	end
 end
+function MenuNodeBaseGui:update_info(button)
+end
 function MenuNodeBaseGui:mouse_moved(o, x, y)
 	local used, icon = false, "arrow"
 	for _, button in ipairs(self._text_buttons) do
@@ -149,6 +153,7 @@ function MenuNodeBaseGui:mouse_moved(o, x, y)
 						button.image:set_color(button.highlighted_color or self.button_highlighted_color)
 					end
 				end
+				self:update_info(button)
 				used, icon = true, "link"
 			elseif button.highlighted then
 				button.highlighted = false
@@ -161,14 +166,17 @@ function MenuNodeBaseGui:mouse_moved(o, x, y)
 			end
 		end
 	end
+	if not used then
+		self:update_info()
+	end
 	return used, icon
 end
 function MenuNodeBaseGui:mouse_pressed(button, x, y)
-	if button == Idstring("0") then
-		for _, button in ipairs(self._text_buttons) do
-			if alive(button.panel) and button.panel:visible() and button.panel:inside(x, y) then
-				if button.clbk then
-					button.clbk(button)
+	if button == Idstring("0") or button == Idstring("1") then
+		for _, btn in ipairs(self._text_buttons) do
+			if alive(btn.panel) and btn.panel:visible() and btn.panel:inside(x, y) then
+				if btn.clbk then
+					btn.clbk(button, btn.params)
 				end
 				managers.menu_component:post_event("menu_enter")
 				return true

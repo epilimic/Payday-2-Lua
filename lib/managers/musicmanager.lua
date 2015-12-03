@@ -281,7 +281,9 @@ function MusicManager:jukebox_default_tracks()
 		heist_jolly = "track_30",
 		heist_red2 = "track_31",
 		heist_dinner = "track_35",
-		heist_nail = "track_36"
+		heist_nail = "track_36",
+		heist_pbr = "all",
+		heist_pbr2 = "all"
 	}
 	if managers.dlc:has_armored_transport() or managers.dlc:has_soundtrack_or_cce() then
 		default_options.heist_arm_cro = "track_09"
@@ -308,6 +310,12 @@ function MusicManager:jukebox_default_tracks()
 	if managers.dlc:has_kenaz() or managers.dlc:has_soundtrack_or_cce() then
 		default_options.heist_kenaz_full = "track_29"
 	end
+	if managers.dlc:has_berry() or managers.dlc:has_soundtrack_or_cce() then
+		default_options.heist_pbr = "track_37"
+	end
+	if managers.dlc:has_berry() or managers.dlc:has_soundtrack_or_cce() then
+		default_options.heist_pbr2 = "track_38"
+	end
 	return default_options
 end
 function MusicManager:jukebox_music_tracks()
@@ -323,7 +331,8 @@ function MusicManager:jukebox_music_tracks()
 		diamond = not managers.dlc or managers.dlc:has_hope_diamond() or managers.dlc:has_soundtrack_or_cce(),
 		thebomb = not managers.dlc or managers.dlc:has_the_bomb() or managers.dlc:has_soundtrack_or_cce(),
 		kenaz = not managers.dlc or managers.dlc:has_kenaz() or managers.dlc:has_soundtrack_or_cce(),
-		payday = managers.dlc and managers.dlc:has_pdth_soundtrack()
+		payday = managers.dlc and managers.dlc:has_pdth_soundtrack(),
+		berry = not managers.dlc or managers.dlc:has_berry() or managers.dlc:has_soundtrack_or_cce()
 	}
 	for _, data in ipairs(tweak_data.music.track_list) do
 		table.insert(tracks, data.track)
@@ -346,7 +355,8 @@ function MusicManager:jukebox_menu_tracks()
 		bsides = managers.dlc and managers.dlc:has_bsides_soundtrack(),
 		payday = managers.dlc and managers.dlc:has_pdth_soundtrack(),
 		xmas = managers.dlc and managers.dlc:has_xmas_soundtrack(),
-		alesso = managers.dlc and managers.dlc:has_arena()
+		alesso = managers.dlc and managers.dlc:has_arena(),
+		berry = not managers.dlc or managers.dlc:has_berry() or managers.dlc:has_soundtrack_or_cce()
 	}
 	for _, data in ipairs(tweak_data.music.track_menu_list) do
 		table.insert(tracks, data.track)

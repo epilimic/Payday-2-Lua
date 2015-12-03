@@ -12,6 +12,8 @@ require("lib/units/beings/player/states/PlayerIncapacitated")
 require("lib/units/beings/player/states/PlayerCarry")
 require("lib/units/beings/player/states/PlayerBipod")
 require("lib/units/beings/player/states/PlayerDriving")
+require("lib/units/beings/player/states/PlayerFreefall")
+require("lib/units/beings/player/states/PlayerParachuting")
 PlayerMovement = PlayerMovement or class()
 PlayerMovement._STAMINA_INIT = tweak_data.player.movement_state.stamina.STAMINA_INIT or 10
 PlayerMovement.OUT_OF_WORLD_Z = -4000
@@ -101,7 +103,9 @@ function PlayerMovement:_setup_states()
 		civilian = PlayerCivilian:new(unit),
 		carry = PlayerCarry:new(unit),
 		bipod = PlayerBipod:new(unit),
-		driving = PlayerDriving:new(unit)
+		driving = PlayerDriving:new(unit),
+		jerry2 = PlayerParachuting:new(unit),
+		jerry1 = PlayerFreefall:new(unit)
 	}
 end
 function PlayerMovement:set_character_anim_variables()
@@ -306,7 +310,7 @@ function PlayerMovement:on_SPOOCed(enemy_unit)
 		self._current_state:discharge_melee()
 		return "countered"
 	end
-	if self._unit:character_damage()._god_mode then
+	if self._unit:character_damage()._god_mode or self._unit:character_damage():get_mission_blocker("invulnerable") then
 		return
 	end
 	if self._current_state_name == "standard" or self._current_state_name == "carry" or self._current_state_name == "bleed_out" or self._current_state_name == "tased" or self._current_state_name == "bipod" then
@@ -314,6 +318,21 @@ function PlayerMovement:on_SPOOCed(enemy_unit)
 		managers.achievment:award(tweak_data.achievement.finally.award)
 		return true
 	end
+end
+function PlayerMovement:is_SPOOC_attack_allowed()
+	if self._unit:character_damage():get_mission_blocker("invulnerable") then
+		return false
+	end
+	if self._current_state_name == "driving" then
+		return false
+	end
+	return true
+end
+function PlayerMovement:is_taser_attack_allowed()
+	if self._unit:character_damage():get_mission_blocker("invulnerable") then
+		return false
+	end
+	return true
 end
 function PlayerMovement:on_non_lethal_electrocution()
 	self._state_data.non_lethal_electrocution = true

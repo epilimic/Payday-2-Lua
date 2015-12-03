@@ -57,6 +57,14 @@ function MissionDoorTweakData:init()
 			unit = Idstring("units/payday2/equipment/gen_equipment_shape_charge/gen_equipment_shape_charge")
 		}
 	}
+	self.reinforced_door_single = {}
+	self.reinforced_door_single.devices = {}
+	self.reinforced_door_single.devices.c4 = {
+		{
+			align = "a_shp_charge_1",
+			unit = Idstring("units/payday2/equipment/gen_equipment_shape_charge/gen_equipment_shape_charge_single")
+		}
+	}
 	self.reinforced_door_mcm = {}
 	self.reinforced_door_mcm.devices = {}
 	self.reinforced_door_mcm.devices.c4 = {

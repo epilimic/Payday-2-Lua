@@ -177,6 +177,38 @@ function CopDamage:_dismember_body_part(attack_data)
 		self._unit:damage():run_sequence_simple(dismembers[hit_body_part:key()])
 	end
 end
+function CopDamage:_check_special_death_conditions(variant, body, attacker_unit, weapon_unit)
+	local special_deaths = self._unit:base():char_tweak().special_deaths
+	if not special_deaths or not special_deaths[variant] then
+		return
+	end
+	local body_data = special_deaths[variant][body:name():key()]
+	if not body_data then
+		return
+	end
+	local attacker_name = managers.criminals:character_name_by_unit(attacker_unit)
+	if not body_data.character_name or body_data.character_name ~= attacker_name then
+		return
+	end
+	if body_data.weapon_id and alive(weapon_unit) then
+		local factory_id = weapon_unit:base()._factory_id
+		if not factory_id then
+			return
+		end
+		if weapon_unit:base():is_npc() then
+			factory_id = utf8.sub(factory_id, 1, -5)
+		end
+		local weapon_id = managers.weapon_factory:get_weapon_id_by_factory_id(factory_id)
+		if body_data.weapon_id == weapon_id then
+			if self._unit:damage():has_sequence(body_data.sequence) then
+				self._unit:damage():run_sequence_simple(body_data.sequence)
+			end
+			if body_data.special_comment and attacker_unit == managers.player:player_unit() then
+				return body_data.special_comment
+			end
+		end
+	end
+end
 function CopDamage:damage_bullet(attack_data)
 	if self._dead or self._invulnerable then
 		return
@@ -294,7 +326,8 @@ function CopDamage:damage_bullet(attack_data)
 			managers.statistics:killed_by_anyone(data)
 		end
 		if attack_data.attacker_unit == managers.player:player_unit() then
-			self:_comment_death(attack_data.attacker_unit, self._unit:base()._tweak_table)
+			local special_comment = self:_check_special_death_conditions(attack_data.variant, attack_data.col_ray.body, attack_data.attacker_unit, attack_data.weapon_unit)
+			self:_comment_death(attack_data.attacker_unit, self._unit:base()._tweak_table, special_comment)
 			self:_show_death_hint(self._unit:base()._tweak_table)
 			local attacker_state = managers.player:current_state()
 			data.attacker_state = attacker_state
@@ -363,7 +396,7 @@ function CopDamage:_check_damage_achievements(attack_data, head)
 		local unit_anim = self._unit.anim_data and self._unit:anim_data()
 		local achievements = tweak_data.achievement.enemy_kill_achievements or {}
 		local current_mask_id = managers.blackmarket:equipped_mask().mask_id
-		local weapons_pass, weapon_pass, fire_mode_pass, ammo_pass, enemy_pass, enemy_weapon_pass, mask_pass, hiding_pass, head_pass, steelsight_pass, distance_pass, zipline_pass, rope_pass, one_shot_pass, weapon_type_pass, level_pass, part_pass, parts_pass, timer_pass, cop_pass, gangster_pass, civilian_pass, count_no_reload_pass, count_pass, all_pass, memory
+		local weapons_pass, weapon_pass, fire_mode_pass, ammo_pass, enemy_pass, enemy_weapon_pass, mask_pass, hiding_pass, head_pass, steelsight_pass, distance_pass, zipline_pass, rope_pass, one_shot_pass, weapon_type_pass, level_pass, part_pass, parts_pass, timer_pass, cop_pass, gangster_pass, civilian_pass, count_no_reload_pass, count_pass, count_in_row_pass, all_pass, memory
 		local kill_count_no_reload = managers.job:get_memory("kill_count_no_reload_" .. tostring(attack_weapon:base()._name_id), true)
 		kill_count_no_reload = (kill_count_no_reload or 0) + 1
 		managers.job:set_memory("kill_count_no_reload_" .. tostring(attack_weapon:base()._name_id), kill_count_no_reload, true)
@@ -419,6 +452,20 @@ function CopDamage:_check_damage_achievements(attack_data, head)
 				end
 			end
 			all_pass = all_pass and timer_pass
+			count_in_row_pass = not achievement_data.count_in_row
+			if achievement_data.count_in_row then
+				memory = managers.job:get_memory(achievement, true) or 0
+				if memory then
+					if all_pass then
+						memory = memory + 1
+						count_in_row_pass = memory >= achievement_data.count_in_row
+					else
+						memory = false
+					end
+					managers.job:set_memory(achievement, memory, true)
+				end
+			end
+			all_pass = all_pass and count_in_row_pass
 			if all_pass then
 				if achievement_data.stat then
 					managers.achievment:award_progress(achievement_data.stat)
@@ -458,8 +505,10 @@ function CopDamage:_show_death_hint(type)
 	if not CopDamage.is_civilian(type) or not self._unit:base().enemy then
 	end
 end
-function CopDamage:_comment_death(unit, type)
-	if type == "tank" then
+function CopDamage:_comment_death(unit, type, special_comment)
+	if special_comment then
+		PlayerStandard.say_line(unit:sound(), special_comment)
+	elseif type == "tank" then
 		PlayerStandard.say_line(unit:sound(), "g30x_any")
 	elseif type == "spooc" then
 		PlayerStandard.say_line(unit:sound(), "g33x_any")
@@ -1090,7 +1139,7 @@ function CopDamage:damage_melee(attack_data)
 	return result
 end
 function CopDamage:damage_mission(attack_data)
-	if self._dead or self._invulnerable then
+	if self._dead or self._invulnerable and not attack_data.forced then
 		return
 	end
 	local result
@@ -1263,6 +1312,7 @@ function CopDamage:die(attack_data)
 	if self._unit:base():char_tweak().die_sound_event then
 		self._unit:sound():play(self._unit:base():char_tweak().die_sound_event, nil, nil)
 	end
+	self:_on_death()
 end
 function CopDamage:set_mover_collision_state(state)
 	local change_state
@@ -1343,6 +1393,7 @@ function CopDamage:sync_damage_bullet(attacker_unit, damage_percent, i_body, hit
 			variant = attack_data.variant
 		}
 		if data.weapon_unit then
+			self:_check_special_death_conditions("bullet", body, attacker_unit, data.weapon_unit)
 			managers.statistics:killed_by_anyone(data)
 			if data.weapon_unit:base():weapon_tweak_data().is_shotgun and distance and distance < 500 then
 				shotgun_push = true
@@ -1771,6 +1822,9 @@ function CopDamage:_on_damage_received(damage_info)
 		managers.player:on_damage_dealt(self._unit, damage_info)
 	end
 	self:_update_debug_ws(damage_info)
+end
+function CopDamage:_on_death(variant)
+	managers.player:chk_store_armor_health_kill_counter(self._unit, variant)
 end
 function CopDamage:_call_listeners(damage_info)
 	self._listener_holder:call(damage_info.result.type, self._unit, damage_info)

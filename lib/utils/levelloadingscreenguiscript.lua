@@ -81,14 +81,15 @@ function LevelLoadingScreenGuiScript:init(scene_gui, res, progress, base_layer)
 		self._controller:set_center(background_safepanel:w() / 2, background_safepanel:h() / 2)
 		for id, data in pairs(self._coords) do
 			data.text = background_safepanel:text({
-				name = id,
+				name = data.id,
 				text = data.string,
 				font_size = 24,
 				font = "fonts/font_medium_mf",
 				align = data.align,
 				vertical = data.vertical,
 				halign = "center",
-				valign = "center"
+				valign = "center",
+				color = data.color
 			})
 			local _, _, w, h = data.text:text_rect()
 			data.text:set_size(w, h)

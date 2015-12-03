@@ -639,7 +639,8 @@ function CoreParticleEditorPanel:do_save(warn_on_overwrite)
 				managers.database:entry_relative_path(self._effect:name())
 			},
 			verbose = false,
-			send_idstrings = false
+			send_idstrings = false,
+			preprocessor_definitions = "preprocessor_definitions"
 		})
 		DB:reload()
 		managers.database:clear_all_cached_indices()

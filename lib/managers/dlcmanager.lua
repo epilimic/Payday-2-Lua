@@ -416,6 +416,9 @@ end
 function GenericDLCManager:has_west()
 	return Global.dlc_manager.all_dlc_data.west and Global.dlc_manager.all_dlc_data.west.verified
 end
+function GenericDLCManager:has_berry()
+	return Global.dlc_manager.all_dlc_data.berry and Global.dlc_manager.all_dlc_data.berry.verified
+end
 function GenericDLCManager:has_arena()
 	return Global.dlc_manager.all_dlc_data.arena and Global.dlc_manager.all_dlc_data.arena.verified
 end
@@ -1222,6 +1225,7 @@ function WINDLCManager:init()
 			kenaz = {app_id = "374300", no_install = true},
 			turtles = {app_id = "384021", no_install = true},
 			dragon = {app_id = "384020", no_install = true},
+			berry = {app_id = "422400", no_install = true},
 			xmas_soundtrack = {app_id = "267381", no_install = true},
 			bsides_soundtrack = {app_id = "368870", no_install = true},
 			twitch_pack = {app_id = "306110", no_install = true},

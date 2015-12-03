@@ -387,6 +387,37 @@ function CarryTweakData:init(tweak_data)
 	self.meth_half.name_id = "hud_carry_meth"
 	self.meth_half.bag_value = "meth_half"
 	self.meth_half.AI_carry = {SO_category = "enemies"}
+	self.masterpiece_painting = {}
+	self.masterpiece_painting.type = "light"
+	self.masterpiece_painting.name_id = "hud_carry_masterpiece_painting"
+	self.masterpiece_painting.bag_value = "masterpiece_painting"
+	self.masterpiece_painting.AI_carry = {SO_category = "enemies"}
+	self.breaching_charges = {}
+	self.breaching_charges.type = "medium"
+	self.breaching_charges.name_id = "hud_carry_breaching_charges"
+	self.breaching_charges.skip_exit_secure = true
+	self.breaching_charges.visual_object = "g_toolsbag"
+	self.breaching_charges.unit = "units/payday2/pickups/gen_pku_toolbag/gen_pku_toolbag"
+	self.prototype = {}
+	self.prototype.type = "medium"
+	self.prototype.name_id = "hud_carry_prototype"
+	self.prototype.AI_carry = {SO_category = "enemies"}
+	self.master_server = {}
+	self.master_server.type = "heavy"
+	self.master_server.name_id = "hud_carry_master_server"
+	self.master_server.bag_value = "master_server"
+	self.master_server.AI_carry = {SO_category = "enemies"}
+	self.lost_artifact = {}
+	self.lost_artifact.type = "medium"
+	self.lost_artifact.name_id = "hud_carry_lost_artifact"
+	self.lost_artifact.bag_value = "lost_artifact"
+	self.lost_artifact.AI_carry = {SO_category = "enemies"}
+	self.parachute = {}
+	self.parachute.type = "light"
+	self.parachute.name_id = "hud_carry_parachute"
+	self.parachute.visual_object = "g_chute"
+	self.parachute.unit = "units/pd2_dlc_jerry/pickups/gen_pku_parachute_bag/gen_pku_parachute_bag"
+	self.parachute.AI_carry = {SO_category = "enemies"}
 end
 function CarryTweakData:get_carry_ids()
 	local t = {}

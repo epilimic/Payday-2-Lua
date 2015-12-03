@@ -9,17 +9,27 @@ function MenuNodeButtonLayoutGui:_setup_panels(node)
 end
 function MenuNodeButtonLayoutGui:_setup()
 	self._coords = tweak_data:get_controller_help_coords() or {}
-	for id, data in pairs(self._coords) do
-		data.text = self.ws:panel():text({
-			text = managers.localization:to_upper_text(id),
-			font_size = self.font_size,
-			font = self.font,
-			layer = self.layers.items,
-			align = data.align,
-			vertical = data.vertical,
-			halign = "center",
-			valign = "center"
-		})
+	self._categories = {}
+	for category, _ in pairs(self._coords) do
+		table.insert(self._categories, category)
+	end
+	self._current_category = self.node:item("controls"):value()
+	for category, coords in pairs(self._coords) do
+		for button, data in pairs(coords) do
+			local c = data.id == "menu_button_unassigned" and Color(0.5, 0.5, 0.5) or Color.white
+			data.text = self.ws:panel():text({
+				visible = false,
+				text = managers.localization:to_upper_text(data.id),
+				font_size = self.font_size,
+				font = self.font,
+				layer = self.layers.items,
+				align = data.align,
+				vertical = data.vertical,
+				halign = "center",
+				valign = "center",
+				color = c
+			})
+		end
 	end
 	self._blur = managers.menu_component._fullscreen_ws:panel():panel()
 	self._blur:bitmap({
@@ -62,28 +72,31 @@ function MenuNodeButtonLayoutGui:_layout()
 	self._blur:set_size(managers.menu_component._fullscreen_ws:panel():w(), managers.menu_component._fullscreen_ws:panel():h())
 	self._controller:set_size(self._controller:w() * scale, self._controller:h() * scale)
 	self._controller:set_center(self.ws:panel():w() / 2, self.ws:panel():h() / 2)
-	for id, data in pairs(self._coords) do
-		local _, _, w, h = data.text:text_rect()
-		data.text:set_size(w, h)
-		if data.x then
-			local x = self._controller:x() + data.x * scale
-			local y = self._controller:y() + data.y * scale
-			if data.align == "left" then
-				data.text:set_left(x)
-			elseif data.align == "right" then
-				data.text:set_right(x)
-			elseif data.align == "center" then
-				data.text:set_center_x(x)
+	for category, coords in pairs(self._coords) do
+		for id, data in pairs(coords) do
+			local _, _, w, h = data.text:text_rect()
+			data.text:set_size(w, h)
+			data.text:set_visible(category == self._current_category)
+			if data.x then
+				local x = self._controller:x() + data.x * scale
+				local y = self._controller:y() + data.y * scale
+				if data.align == "left" then
+					data.text:set_left(x)
+				elseif data.align == "right" then
+					data.text:set_right(x)
+				elseif data.align == "center" then
+					data.text:set_center_x(x)
+				end
+				if data.vertical == "top" then
+					data.text:set_top(y)
+				elseif data.vertical == "bottom" then
+					data.text:set_bottom(y)
+				else
+					data.text:set_center_y(y)
+				end
 			end
-			if data.vertical == "top" then
-				data.text:set_top(y)
-			elseif data.vertical == "bottom" then
-				data.text:set_bottom(y)
-			else
-				data.text:set_center_y(y)
-			end
+			data.text:set_position(math.round(data.text:x()), math.round(data.text:y()))
 		end
-		data.text:set_position(math.round(data.text:x()), math.round(data.text:y()))
 	end
 end
 function MenuNodeButtonLayoutGui:_create_menu_item(row_item)
@@ -94,6 +107,10 @@ function MenuNodeButtonLayoutGui:_setup_item_panel_parent(safe_rect)
 end
 function MenuNodeButtonLayoutGui:_setup_item_panel(safe_rect, res)
 	MenuNodeButtonLayoutGui.super._setup_item_panel(self, safe_rect, res)
+end
+function MenuNodeButtonLayoutGui:set_current_category(category)
+	self._current_category = category
+	self:_layout()
 end
 function MenuNodeButtonLayoutGui:resolution_changed()
 	MenuNodeButtonLayoutGui.super.resolution_changed(self)

@@ -512,8 +512,7 @@ function JobManager:_check_add_heat_to_jobs(debug_job_id, ignore_debug_prints)
 		return
 	end
 	local job_heat_data = job_tweak_data.heat
-	if not job_heat_data and not ignore_debug_prints then
-		Application:error("[JobManager:_check_add_heat_to_jobs] Current job have no heat data in NarrativeTweakData.lua.", current_job)
+	if job_heat_data or not ignore_debug_prints then
 	end
 	local plvl = managers.experience:current_level()
 	local prank = managers.experience:current_rank()
@@ -1132,6 +1131,19 @@ function JobManager:get_max_jc_for_player()
 		max_jc = math.max(max_jc, jc)
 	end
 	return max_jc
+end
+function JobManager:is_current_job_competitive()
+	if not self._global.current_job then
+		return
+	end
+	return tweak_data.narrative:job_data(self._global.current_job.job_id).competitive
+end
+function JobManager:is_job_competitive_by_job_id(job_id)
+	if not job_id or not tweak_data.narrative.jobs[job_id] then
+		Application:error("[JobManager:is_job_competitive_by_job_id] no job id or no job", job_id)
+		return
+	end
+	return tweak_data.narrative:job_data(job_id).competitive and true or false
 end
 function JobManager:set_stage_success(success)
 	print("[JobManager:set_stage_success]", success, "on_last_stage", self:on_last_stage())

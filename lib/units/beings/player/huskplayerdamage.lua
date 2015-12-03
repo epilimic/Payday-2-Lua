@@ -3,6 +3,7 @@ function HuskPlayerDamage:init(unit)
 	self._unit = unit
 	self._spine2_obj = unit:get_object(Idstring("Spine2"))
 	self._listener_holder = EventListenerHolder:new()
+	self._mission_damage_blockers = {}
 end
 function HuskPlayerDamage:_call_listeners(damage_info)
 	CopDamage._call_listeners(self, damage_info)
@@ -41,6 +42,12 @@ function HuskPlayerDamage:arrested()
 end
 function HuskPlayerDamage:incapacitated()
 	return self._unit:movement():current_state_name() == "incapacitated"
+end
+function HuskPlayerDamage:set_mission_damage_blockers(type, state)
+	self._mission_damage_blockers[type] = state
+end
+function HuskPlayerDamage:get_mission_blocker(type)
+	return self._mission_damage_blockers[type]
 end
 function HuskPlayerDamage:dead()
 end

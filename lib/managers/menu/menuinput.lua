@@ -162,7 +162,7 @@ function MenuInput:mouse_moved(o, x, y, mouse_ws)
 		elseif selected_item.TYPE == "slider" then
 			managers.mouse_pointer:set_pointer_image("hand")
 		elseif selected_item.TYPE == "multi_choice" then
-			if select_row_item.arrow_right:inside(x, y) or select_row_item.arrow_left:inside(x, y) or select_row_item.gui_text:inside(x, y) or not select_row_item.choice_panel:inside(x, y) then
+			if select_row_item.arrow_right:visible() and select_row_item.arrow_right:inside(x, y) or select_row_item.arrow_left:visible() and select_row_item.arrow_left:inside(x, y) or select_row_item.arrow_right:visible() and select_row_item.arrow_left:visible() and select_row_item.gui_text:inside(x, y) then
 				managers.mouse_pointer:set_pointer_image("link")
 			else
 				managers.mouse_pointer:set_pointer_image("arrow")
@@ -214,6 +214,10 @@ end
 function MenuInput:input_multi_choice(item, controller, mouse_click)
 	local slider_delay_down = 0.1
 	local slider_delay_pressed = 0.2
+	local node_gui = managers.menu:active_menu().renderer:active_node_gui()
+	if node_gui and node_gui._listening_to_input then
+		return
+	end
 	if self:menu_right_input_bool() then
 		if item:next() then
 			self:post_event("selection_next")
@@ -275,6 +279,13 @@ function MenuInput:unregister_callback(input, name)
 	end
 	self._callback_map[input][name] = nil
 end
+function MenuInput:can_toggle_chat()
+	local item = self._logic:selected_item()
+	if item and item.TYPE == "input" then
+		return not item:focus()
+	end
+	return true
+end
 function MenuInput:mouse_pressed(o, button, x, y)
 	if not self._accept_input then
 		return
@@ -289,7 +300,7 @@ function MenuInput:mouse_pressed(o, button, x, y)
 	x, y = self:_modified_mouse_pos(x, y)
 	if button == Idstring("0") and managers.menu_component:input_focus() ~= true then
 		local node_gui = managers.menu:active_menu().renderer:active_node_gui()
-		if not node_gui then
+		if not node_gui or node_gui._listening_to_input then
 			return
 		end
 		if node_gui then
@@ -362,9 +373,6 @@ function MenuInput:mouse_pressed(o, button, x, y)
 							self:post_event("selection_next")
 							self._logic:trigger_item(true, item)
 						end
-					elseif not row_item.choice_panel:inside(x, y) then
-						self._item_input_action_map[item.TYPE](item, self._controller, true)
-						return node_gui.mouse_pressed and node_gui:mouse_pressed(button, x, y)
 					end
 				elseif row_item.type == "chat" then
 					local item = self._logic:selected_item()

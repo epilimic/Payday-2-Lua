@@ -309,6 +309,9 @@ function TaserLogicAttack._chk_reaction_to_attention_object(data, attention_data
 	if reaction < AIAttentionObject.REACT_SHOOT or not attention_data.criminal_record or not attention_data.is_person then
 		return reaction
 	end
+	if attention_data.is_human_player and not attention_data.unit:movement():is_taser_attack_allowed() then
+		return AIAttentionObject.REACT_COMBAT
+	end
 	if (attention_data.is_human_player or not attention_data.unit:movement():chk_action_forbidden("hurt")) and attention_data.verified and attention_data.verified_dis < data.internal_data.tase_distance * 0.9 then
 		if data.t > data.tase_delay_t then
 			return AIAttentionObject.REACT_SPECIAL_ATTACK

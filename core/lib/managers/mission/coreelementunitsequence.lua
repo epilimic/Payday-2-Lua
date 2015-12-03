@@ -18,7 +18,11 @@ function ElementUnitSequence:on_executed(instigator)
 	if not self._values.enabled then
 		return
 	end
-	self._unit:damage():run_sequence_simple("run_sequence")
+	local run_sequence = true
+	run_sequence = self._values.only_for_local_player and (not managers.player:player_unit() or instigator == managers.player:player_unit())
+	if run_sequence then
+		self._unit:damage():run_sequence_simple("run_sequence")
+	end
 	ElementUnitSequence.super.on_executed(self, instigator)
 end
 function ElementUnitSequence:save(data)

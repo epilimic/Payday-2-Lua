@@ -11,6 +11,7 @@ function PlayerDamage:init(unit)
 	self._bleed_out_health = Application:digest_value(tweak_data.player.damage.BLEED_OUT_HEALTH_INIT * managers.player:upgrade_value("player", "bleed_out_health_multiplier", 1), true)
 	self._god_mode = Global.god_mode
 	self._invulnerable = false
+	self._mission_damage_blockers = {}
 	self._gui = Overlay:newgui()
 	self._ws = self._gui:create_screen_workspace()
 	self._focus_delay_mul = 1
@@ -28,6 +29,7 @@ function PlayerDamage:init(unit)
 	managers.sequence:add_inflict_updator_body("fire", self._unit:key(), self._inflict_damage_body:key(), self._inflict_damage_body:extension().damage)
 	self._doh_data = tweak_data.upgrades.damage_to_hot_data or {}
 	self._damage_to_hot_stack = {}
+	self._armor_stored_health = 0
 end
 function PlayerDamage:post_init()
 	self:send_set_status()
@@ -36,7 +38,24 @@ function PlayerDamage:send_set_status()
 	self:_send_set_armor()
 	self:_send_set_health()
 end
+function PlayerDamage:force_into_bleedout()
+	self:set_health(0)
+	self:_chk_cheat_death()
+	self:_damage_screen()
+	self:_check_bleed_out()
+	managers.hud:set_player_health({
+		current = self:get_real_health(),
+		total = self:_max_health(),
+		revives = Application:digest_value(self._revives, false)
+	})
+	self:_send_set_health()
+	self:_set_health_effect()
+end
 function PlayerDamage:update(unit, t, dt)
+	if not self._armor_stored_health_max_set then
+		self._armor_stored_health_max_set = true
+		managers.hud:set_stored_health_max(math.min(self:max_armor_stored_health() / self:_max_health(), 1))
+	end
 	local is_berserker_active = managers.player:has_activate_temporary_upgrade("temporary", "berserker_damage_multiplier")
 	if self._check_berserker_done then
 		if not is_berserker_active then
@@ -47,17 +66,7 @@ function PlayerDamage:update(unit, t, dt)
 				total = self:_max_health(),
 				revives = Application:digest_value(self._revives, false)
 			})
-			self:set_health(0)
-			self:_chk_cheat_death()
-			self:_damage_screen()
-			self:_check_bleed_out()
-			managers.hud:set_player_health({
-				current = self:get_real_health(),
-				total = self:_max_health(),
-				revives = Application:digest_value(self._revives, false)
-			})
-			self:_send_set_health()
-			self:_set_health_effect()
+			self:force_into_bleedout()
 		else
 			local expire_time = managers.player:get_activate_temporary_expire_time("temporary", "berserker_damage_multiplier")
 			local total_time = managers.player:upgrade_value("temporary", "berserker_damage_multiplier")
@@ -75,12 +84,16 @@ function PlayerDamage:update(unit, t, dt)
 		end
 	end
 	if self._bleed_out_blocked_by_zipline and not self._unit:movement():zipline_unit() then
-		self:_check_bleed_out()
+		self:force_into_bleedout()
 		self._bleed_out_blocked_by_zipline = nil
+	end
+	if self._bleed_out_blocked_by_movement_state and not self._unit:movement():current_state():bleed_out_blocked() then
+		self:force_into_bleedout()
+		self._bleed_out_blocked_by_movement_state = nil
 	end
 	if self._regenerate_timer and not self._dead and not self._bleed_out and not self._check_berserker_done then
 		if not is_berserker_active and not self._bleed_out_blocked_by_zipline then
-			self._regenerate_timer = self._regenerate_timer - dt
+			self._regenerate_timer = self._regenerate_timer - dt * (self._regenerate_speed or 1)
 			local top_fade = math.clamp(self._hurt_value - 0.8, 0, 1) / 0.2
 			local hurt = self._hurt_value - (1 - top_fade) * ((1 + math.sin(t * 500)) / 2) / 10
 			managers.environment_controller:set_hurt_value(hurt)
@@ -200,7 +213,10 @@ function PlayerDamage:_regenerate_armor()
 	end
 	self:set_armor(self:_max_armor())
 	self._regenerate_timer = nil
+	self._regenerate_speed = nil
 	self:_send_set_armor()
+end
+function PlayerDamage:_inline_RIP1()
 end
 function PlayerDamage:restore_health(health_restored, is_static, chk_health_ratio)
 	if chk_health_ratio and managers.player:is_damage_health_ratio_active(self:health_ratio()) then
@@ -231,6 +247,42 @@ function PlayerDamage:restore_armor(armor_restored)
 		max = max_armor,
 		no_hint = true
 	})
+end
+function PlayerDamage:change_regenerate_speed(value, percent)
+	if self._regenerate_speed then
+		self._regenerate_speed = percent and self._regenerate_speed * value or self._regenerate_speed + value
+	end
+end
+function PlayerDamage:max_armor_stored_health()
+	local amount = managers.player:body_armor_value("skill_max_health_store", nil, 1)
+	local multiplier = managers.player:upgrade_value("player", "armor_max_health_store_multiplier", 1)
+	local max = amount * multiplier
+	return max
+end
+function PlayerDamage:can_store_armor_health()
+	return self:get_real_armor() > 0 and not self._dead and not self._bleed_out and not self._check_berserker_done
+end
+function PlayerDamage:armor_stored_health(amount)
+	return self._armor_stored_health
+end
+function PlayerDamage:add_armor_stored_health(amount)
+	self._armor_stored_health = math.min(self._armor_stored_health + amount, self:max_armor_stored_health())
+	if managers.hud and not self._check_berserker_done then
+		local stored_health_ratio = self._armor_stored_health / self:_max_health()
+		managers.hud:set_stored_health(stored_health_ratio)
+	end
+end
+function PlayerDamage:clear_armor_stored_health()
+	self._armor_stored_health = 0
+	if managers.hud and not self._check_berserker_done then
+		managers.hud:set_stored_health(0)
+	end
+end
+function PlayerDamage:consume_armor_stored_health(amount)
+	if self._armor_stored_health and not self._dead and not self._bleed_out and not self._check_berserker_done then
+		self:change_health(self._armor_stored_health)
+	end
+	self:clear_armor_stored_health()
 end
 function PlayerDamage:_regenerated(no_messiah)
 	self:set_health(self:_max_health())
@@ -289,6 +341,9 @@ function PlayerDamage:set_health(health)
 	return prev_health ~= Application:digest_value(self._health, false)
 end
 function PlayerDamage:set_armor(armor)
+	if self._armor and self:get_real_armor() == 0 and armor ~= 0 then
+		self:consume_armor_stored_health()
+	end
 	self._armor = Application:digest_value(math.clamp(armor, 0, self:_max_armor()), true)
 end
 function PlayerDamage:down_time()
@@ -438,7 +493,7 @@ function PlayerDamage:damage_bullet(attack_data)
 		end
 		self:_call_listeners(damage_info)
 		return
-	elseif self._invulnerable then
+	elseif self._invulnerable or self._mission_damage_blockers.invulnerable then
 		self:_call_listeners(damage_info)
 		return
 	elseif self:incapacitated() then
@@ -571,7 +626,7 @@ function PlayerDamage:damage_killzone(attack_data)
 	local damage_info = {
 		result = {type = "hurt", variant = "killzone"}
 	}
-	if self._god_mode or self._invulnerable then
+	if self._god_mode or self._invulnerable or self._mission_damage_blockers.invulnerable then
 		self:_call_listeners(damage_info)
 		return
 	elseif self:incapacitated() then
@@ -595,12 +650,12 @@ function PlayerDamage:damage_fall(data)
 	local damage_info = {
 		result = {type = "hurt", variant = "fall"}
 	}
-	if self._god_mode or self._invulnerable then
+	if self._god_mode or self._invulnerable or self._mission_damage_blockers.invulnerable then
 		self:_call_listeners(damage_info)
 		return
 	elseif self:incapacitated() then
 		return
-	elseif self._damage_fall_disabled then
+	elseif self._mission_damage_blockers.damage_fall_disabled then
 		return
 	end
 	local height_limit = 300
@@ -612,13 +667,16 @@ function PlayerDamage:damage_fall(data)
 	self._unit:sound():play("player_hit")
 	managers.environment_controller:hit_feedback_down()
 	managers.hud:on_hit_direction("down")
-	if self._bleed_out then
+	if self._bleed_out and self._unit:movement():current_state_name() ~= "jerry1" then
 		return
 	end
 	local health_damage_multiplier = 0
 	if die then
 		self._check_berserker_done = false
 		self:set_health(0)
+		if self._unit:movement():current_state_name() == "jerry1" then
+			self._revives = Application:digest_value(1, true)
+		end
 	else
 		health_damage_multiplier = managers.player:upgrade_value("player", "fall_damage_multiplier", 1) * managers.player:upgrade_value("player", "fall_health_damage_multiplier", 1)
 		self:change_health(-(tweak_data.player.fall_health_damage * health_damage_multiplier))
@@ -648,6 +706,7 @@ function PlayerDamage:damage_fall(data)
 	})
 	SoundDevice:set_rtpc("shield_status", 0)
 	self:_send_set_armor()
+	self._bleed_out_blocked_by_movement_state = nil
 	managers.hud:set_player_health({
 		current = self:get_real_health(),
 		total = self:_max_health(),
@@ -656,7 +715,7 @@ function PlayerDamage:damage_fall(data)
 	self:_send_set_health()
 	self:_set_health_effect()
 	self:_damage_screen()
-	self:_check_bleed_out()
+	self:_check_bleed_out(nil, true)
 	self:_call_listeners(damage_info)
 	return true
 end
@@ -664,7 +723,7 @@ function PlayerDamage:damage_explosion(attack_data)
 	local damage_info = {
 		result = {type = "hurt", variant = "explosion"}
 	}
-	if self._god_mode or self._invulnerable then
+	if self._god_mode or self._invulnerable or self._mission_damage_blockers.invulnerable then
 		self:_call_listeners(damage_info)
 		return
 	elseif self:incapacitated() then
@@ -689,7 +748,7 @@ function PlayerDamage:damage_fire(attack_data)
 	local damage_info = {
 		result = {type = "hurt", variant = "fire"}
 	}
-	if self._god_mode or self._invulnerable then
+	if self._god_mode or self._invulnerable or self._mission_damage_blockers.invulnerable then
 		self:_call_listeners(damage_info)
 		return
 	elseif self:incapacitated() then
@@ -732,10 +791,14 @@ end
 function PlayerDamage:is_berserker()
 	return not not self._check_berserker_done
 end
-function PlayerDamage:_check_bleed_out(can_activate_berserker)
+function PlayerDamage:_check_bleed_out(can_activate_berserker, ignore_movement_state)
 	if self:get_real_health() == 0 and not self._check_berserker_done then
 		if self._unit:movement():zipline_unit() then
 			self._bleed_out_blocked_by_zipline = true
+			return
+		end
+		if not ignore_movement_state and self._unit:movement():current_state():bleed_out_blocked() then
+			self._bleed_out_blocked_by_movement_state = true
 			return
 		end
 		if can_activate_berserker and not self._check_berserker_done then
@@ -831,6 +894,7 @@ function PlayerDamage:on_downed()
 	})
 	managers.hud:on_downed()
 	self:_stop_tinnitus()
+	self:clear_armor_stored_health()
 end
 function PlayerDamage:get_paused_counter_name_by_peer(peer_id)
 	return self._paused_counter_name_by_peer_map and self._paused_counter_name_by_peer_map[peer_id]
@@ -1012,8 +1076,11 @@ end
 function PlayerDamage:dead()
 	return self._dead
 end
-function PlayerDamage:set_damage_fall_disabled(disabled)
-	self._damage_fall_disabled = disabled
+function PlayerDamage:set_mission_damage_blockers(type, state)
+	self._mission_damage_blockers[type] = state
+end
+function PlayerDamage:get_mission_blocker(type)
+	return self._mission_damage_blockers[type]
 end
 function PlayerDamage:set_god_mode(state)
 	Global.god_mode = state
@@ -1060,11 +1127,15 @@ end
 function PlayerDamage:set_regenerate_timer_to_max()
 	local mul = managers.player:body_armor_regen_multiplier(alive(self._unit) and self._unit:movement():current_state()._moving, self:health_ratio())
 	self._regenerate_timer = tweak_data.player.damage.REGENERATE_TIME * mul
+	self._regenerate_speed = self._regenerate_speed or 1
 end
 function PlayerDamage:_send_set_health()
 	if self._unit:network() then
 		local hp = math.round(self:get_real_health() / self:_max_health() * 100)
 		self._unit:network():send("set_health", math.clamp(hp, 0, 100))
+		if hp ~= 100 then
+			managers.mission:call_global_event("player_damaged")
+		end
 	end
 end
 function PlayerDamage:_set_health_effect()

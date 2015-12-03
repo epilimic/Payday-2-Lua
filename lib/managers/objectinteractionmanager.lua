@@ -103,9 +103,7 @@ function ObjectInteractionManager:_update_targeted(player_pos, player_unit)
 	local last_active_locator = self._active_locator
 	local last_dot = last_active and self._current_dot or nil
 	local blocked = player_unit:movement():object_interaction_blocked()
-	local driving = managers.player:current_state() == "driving"
-	local bipod_deployed = managers.player:current_state() == "bipod"
-	if #self._close_units > 0 and not blocked and not driving and not bipod_deployed then
+	if #self._close_units > 0 and not blocked then
 		local active_unit
 		local current_dot = last_dot or 0.9
 		local closest_locator

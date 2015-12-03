@@ -38,6 +38,7 @@ function HUDPackageUnlockedItem:init(panel, row, params, hud_stage_end_screen)
 		if upgrade_def then
 			local category = Idstring(upgrade_def.category)
 			if category == Idstring("weapon") then
+				local weapon_id = upgrade_def.weapon_id
 				local weapon_name = managers.weapon_factory:get_weapon_name_by_factory_id(upgrade_def.factory_id)
 				local weapon_class = managers.localization:text("menu_" .. tweak_data.weapon[upgrade_def.weapon_id].category)
 				local weapon_category = managers.localization:text("bm_menu_" .. (tweak_data.weapon[upgrade_def.weapon_id].use_data.selection_index == 2 and "primaries" or "secondaries"))
@@ -57,6 +58,16 @@ function HUDPackageUnlockedItem:init(panel, row, params, hud_stage_end_screen)
 				bitmap_texture = guis_catalog .. "textures/pd2/blackmarket/icons/armors/" .. upgrade_def.armor_id
 				text_string = managers.localization:text("menu_es_package_armor", {
 					armor = managers.localization:to_upper_text(upgrade_def.name_id)
+				})
+			elseif category == Idstring("grenade") then
+				local guis_catalog = "guis/"
+				local bundle_folder = tweak_data.blackmarket.projectiles[upgrade] and tweak_data.blackmarket.projectiles[upgrade].texture_bundle_folder
+				if bundle_folder then
+					guis_catalog = guis_catalog .. "dlcs/" .. tostring(bundle_folder) .. "/"
+				end
+				bitmap_texture = guis_catalog .. "textures/pd2/blackmarket/icons/grenades/" .. upgrade
+				text_string = managers.localization:text("menu_es_package_projectile", {
+					projectile = managers.localization:to_upper_text(tweak_data.blackmarket.projectiles[upgrade].name_id)
 				})
 			elseif category == Idstring("melee_weapon") then
 				local bm_tweak_data = tweak_data.blackmarket.melee_weapons[upgrade]

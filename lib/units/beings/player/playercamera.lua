@@ -119,6 +119,12 @@ function PlayerCamera:_setup_sound_listener()
 		primary = true
 	})
 end
+function PlayerCamera:set_default_listener_object()
+	self:set_listener_object(self._camera_object)
+end
+function PlayerCamera:set_listener_object(object)
+	managers.listener:set_listener(self._listener_id, object, object, nil)
+end
 function PlayerCamera:position()
 	return self._m_cam_pos
 end

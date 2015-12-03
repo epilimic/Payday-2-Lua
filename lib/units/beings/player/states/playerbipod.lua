@@ -142,6 +142,9 @@ function PlayerBipod:_update_check_actions(t, dt)
 	self:_check_action_unmount_bipod(t, input)
 	self:_find_pickups(t)
 end
+function PlayerBipod:interaction_blocked()
+	return true
+end
 function PlayerBipod:_check_step(t)
 end
 function PlayerBipod:_check_action_reload(t, input)
@@ -172,9 +175,38 @@ function PlayerBipod:_check_action_unmount_bipod(t, input)
 		managers.player:set_player_state("standard")
 	end
 end
-function PlayerBipod:_check_change_weapon(...)
+function PlayerBipod:_check_change_weapon(t, input)
+	local new_action
+	local action_wanted = input.btn_switch_weapon_press
+	if action_wanted then
+		local action_forbidden = self:_changing_weapon()
+		action_forbidden = action_forbidden or self._use_item_expire_t or self._change_item_expire_t
+		action_forbidden = action_forbidden or self._unit:inventory():num_selections() == 1
+		if not action_forbidden then
+			local data = {}
+			data.next = true
+			self:exit(nil, "standard")
+			managers.player:set_player_state("standard")
+			new_action = true
+		end
+	end
+	return new_action
 end
-function PlayerBipod:_check_action_equip(...)
+function PlayerBipod:_check_action_equip(t, input)
+	local new_action
+	local selection_wanted = input.btn_primary_choice
+	if selection_wanted then
+		local action_forbidden = self:chk_action_forbidden("equip")
+		action_forbidden = action_forbidden or not self._ext_inventory:is_selection_available(selection_wanted) or self._use_item_expire_t or self:_changing_weapon()
+		if not action_forbidden then
+			local new_action = not self._ext_inventory:is_equipped(selection_wanted)
+			if new_action then
+				self:exit(nil, "standard")
+				managers.player:set_player_state("standard")
+			end
+		end
+	end
+	return new_action
 end
 function PlayerBipod:_check_action_steelsight(t, input)
 end

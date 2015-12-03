@@ -57,7 +57,7 @@ function IngameDriving:at_enter(old_state, ...)
 	managers.hud:show(PlayerBase.PLAYER_HUD)
 	managers.hud:show(PlayerBase.PLAYER_INFO_HUD)
 	managers.hud:show(PlayerBase.PLAYER_INFO_HUD_FULLSCREEN)
-	if tweak_data.achievement.drive_away then
+	if vehicle_ext:has_driving_seat() and tweak_data.achievement.drive_away then
 		managers.achievment:award(tweak_data.achievement.drive_away)
 	end
 end

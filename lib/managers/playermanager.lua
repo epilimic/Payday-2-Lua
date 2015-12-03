@@ -47,7 +47,9 @@ function PlayerManager:init()
 		civilian = "ingame_civilian",
 		carry = "ingame_standard",
 		bipod = "ingame_standard",
-		driving = "ingame_driving"
+		driving = "ingame_driving",
+		jerry1 = "ingame_freefall",
+		jerry2 = "ingame_parachuting"
 	}
 	self._DEFAULT_STATE = "mask_off"
 	self._current_state = self._DEFAULT_STATE
@@ -55,7 +57,9 @@ function PlayerManager:init()
 		"civilian",
 		"clean",
 		"mask_off",
-		"standard"
+		"standard",
+		"jerry1",
+		"jerry2"
 	}
 	self._current_sync_state = self._DEFAULT_STATE
 	local ids_player = Idstring("player")
@@ -309,7 +313,7 @@ function PlayerManager:set_player_state(state)
 	if state == self._current_state then
 		return
 	end
-	if state ~= "standard" and state ~= "carry" and state ~= "bipod" then
+	if state ~= "standard" and state ~= "carry" and state ~= "bipod" and state ~= "jerry1" and state ~= "jerry2" then
 		local unit = self:player_unit()
 		if unit then
 			unit:character_damage():disable_berserker()
@@ -444,39 +448,64 @@ function PlayerManager:on_killshot(killed_unit, variant)
 	if not player_unit then
 		return
 	end
+	if CopDamage.is_civilian(killed_unit:base()._tweak_table) then
+		return
+	end
 	local t = Application:time()
+	local damage_ext = player_unit:character_damage()
+	if managers.player:has_category_upgrade("player", "kill_change_regenerate_speed") then
+		local amount = managers.player:body_armor_value("skill_kill_change_regenerate_speed", nil, 1)
+		local multiplier = managers.player:upgrade_value("player", "kill_change_regenerate_speed", 0)
+		print("on_killshot:change_regenerate_timer", "armor", amount, "skill", multiplier, "percentage", tweak_data.upgrades.kill_change_regenerate_speed_percentage, "total", amount * multiplier)
+		damage_ext:change_regenerate_speed(amount * multiplier, tweak_data.upgrades.kill_change_regenerate_speed_percentage)
+	end
 	if self._on_killshot_t and t < self._on_killshot_t then
 		return
 	end
-	local damage_ext = player_unit:character_damage()
-	if not CopDamage.is_civilian(killed_unit:base()._tweak_table) then
-		local regen_armor_bonus = managers.player:upgrade_value("player", "killshot_regen_armor_bonus", 0)
-		local dist_sq = mvector3.distance_sq(player_unit:movement():m_pos(), killed_unit:movement():m_pos())
-		local close_combat_sq = tweak_data.upgrades.close_combat_distance * tweak_data.upgrades.close_combat_distance
-		if dist_sq <= close_combat_sq then
-			regen_armor_bonus = regen_armor_bonus + managers.player:upgrade_value("player", "killshot_close_regen_armor_bonus", 0)
-			local panic_chance = managers.player:upgrade_value("player", "killshot_close_panic_chance", 0)
-			if panic_chance > 0 or panic_chance == -1 then
-				local slotmask = managers.slot:get_mask("enemies")
-				local units = World:find_units_quick("sphere", player_unit:movement():m_pos(), tweak_data.upgrades.killshot_close_panic_range, slotmask)
-				for e_key, unit in pairs(units) do
-					if alive(unit) and unit:character_damage() and not unit:character_damage():dead() then
-						unit:character_damage():build_suppression(0, panic_chance)
-					end
+	local regen_armor_bonus = managers.player:upgrade_value("player", "killshot_regen_armor_bonus", 0)
+	local dist_sq = mvector3.distance_sq(player_unit:movement():m_pos(), killed_unit:movement():m_pos())
+	local close_combat_sq = tweak_data.upgrades.close_combat_distance * tweak_data.upgrades.close_combat_distance
+	if dist_sq <= close_combat_sq then
+		regen_armor_bonus = regen_armor_bonus + managers.player:upgrade_value("player", "killshot_close_regen_armor_bonus", 0)
+		local panic_chance = managers.player:upgrade_value("player", "killshot_close_panic_chance", 0)
+		if panic_chance > 0 or panic_chance == -1 then
+			local slotmask = managers.slot:get_mask("enemies")
+			local units = World:find_units_quick("sphere", player_unit:movement():m_pos(), tweak_data.upgrades.killshot_close_panic_range, slotmask)
+			for e_key, unit in pairs(units) do
+				if alive(unit) and unit:character_damage() and not unit:character_damage():dead() then
+					unit:character_damage():build_suppression(0, panic_chance)
 				end
 			end
 		end
-		if damage_ext and regen_armor_bonus > 0 then
-			damage_ext:restore_armor(regen_armor_bonus)
+	end
+	if damage_ext and regen_armor_bonus > 0 then
+		damage_ext:restore_armor(regen_armor_bonus)
+	end
+	local regen_health_bonus = 0
+	if variant == "melee" then
+		regen_health_bonus = regen_health_bonus + managers.player:upgrade_value("player", "melee_kill_life_leech", 0)
+	end
+	if damage_ext and regen_health_bonus > 0 then
+		damage_ext:restore_health(regen_health_bonus)
+	end
+	self._on_killshot_t = t + (tweak_data.upgrades.on_killshot_cooldown or 0)
+end
+function PlayerManager:chk_store_armor_health_kill_counter(killed_unit, variant)
+	local player_unit = self:player_unit()
+	if not player_unit then
+		return
+	end
+	if CopDamage.is_civilian(killed_unit:base()._tweak_table) then
+		return
+	end
+	local damage_ext = player_unit:character_damage()
+	if damage_ext and damage_ext:can_store_armor_health() and managers.player:has_category_upgrade("player", "armor_health_store_amount") then
+		self._armor_health_store_kill_counter = self._armor_health_store_kill_counter or 0
+		self._armor_health_store_kill_counter = self._armor_health_store_kill_counter + 1
+		if self._armor_health_store_kill_counter >= tweak_data.upgrades.armor_health_store_kill_amount then
+			self._armor_health_store_kill_counter = 0
+			damage_ext:add_armor_stored_health(managers.player:upgrade_value("player", "armor_health_store_amount", 0))
 		end
-		local regen_health_bonus = 0
-		if variant == "melee" then
-			regen_health_bonus = regen_health_bonus + managers.player:upgrade_value("player", "melee_kill_life_leech", 0)
-		end
-		if damage_ext and regen_health_bonus > 0 then
-			damage_ext:restore_health(regen_health_bonus)
-		end
-		self._on_killshot_t = t + (tweak_data.upgrades.on_killshot_cooldown or 0)
 	end
 end
 function PlayerManager:on_damage_dealt(unit, damage_info)
@@ -759,7 +788,7 @@ function PlayerManager:get_skill_exp_multiplier(whisper_mode)
 	if whisper_mode then
 		multiplier = multiplier + managers.player:team_upgrade_value("xp", "stealth_multiplier", 1) - 1
 	end
-	if managers.network:session() then
+	if managers.network:session() and not managers.job:is_current_job_competitive() then
 		local outfit, tweak
 		for _, peer in pairs(managers.network:session():all_peers()) do
 			if peer:has_blackmarket_outfit() and not peer:is_cheater() then
@@ -786,7 +815,7 @@ function PlayerManager:get_skill_money_multiplier(whisper_mode)
 		cash_skill_mulitplier = cash_skill_mulitplier * managers.player:team_upgrade_value("cash", "stealth_money_multiplier", 1)
 		bag_skill_mulitplier = bag_skill_mulitplier * managers.player:team_upgrade_value("cash", "stealth_bags_multiplier", 1)
 	end
-	if managers.network:session() then
+	if managers.network:session() and not managers.job:is_current_job_competitive() then
 		local multiplier = 1
 		local outfit, tweak
 		for _, peer in pairs(managers.network:session():all_peers()) do
@@ -2519,7 +2548,7 @@ function PlayerManager:_enter_vehicle(vehicle, peer_id, player, seat_name)
 	local rot = seat.object:rotation()
 	local pos = seat.object:position()
 	player:set_rotation(rot)
-	player:set_position(pos)
+	local pos = seat.object:position() + VehicleDrivingExt.PLAYER_CAPSULE_OFFSET
 	vehicle:link(Idstring(VehicleDrivingExt.SEAT_PREFIX .. seat_name), player)
 	if self:local_player() == player then
 		self:set_player_state("driving")

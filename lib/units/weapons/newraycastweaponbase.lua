@@ -335,6 +335,9 @@ function NewRaycastWeaponBase:_update_stats_values()
 	local stats_tweak_data = tweak_data.weapon.stats
 	local modifier_stats = self:weapon_tweak_data().stats_modifiers
 	local bonus_stats = self._cosmetics_bonus and self._cosmetics_data and self._cosmetics_data.bonus and tweak_data.economy.bonuses[self._cosmetics_data.bonus] and tweak_data.economy.bonuses[self._cosmetics_data.bonus].stats or {}
+	if managers.job:is_current_job_competitive() then
+		bonus_stats = {}
+	end
 	if stats.zoom then
 		stats.zoom = math.min(stats.zoom + managers.player:upgrade_value(self:weapon_tweak_data().category, "zoom_increase", 0), #stats_tweak_data.zoom)
 	end
@@ -693,7 +696,9 @@ function NewRaycastWeaponBase:is_bipod_usable()
 	if bipod_part and bipod_part[1] then
 		bipod_unit = bipod_part[1].unit:base()
 	end
-	retval = bipod_unit:is_usable()
+	if bipod_unit then
+		retval = bipod_unit:is_usable()
+	end
 	return retval
 end
 function NewRaycastWeaponBase:gadget_toggle_requires_stance_update()

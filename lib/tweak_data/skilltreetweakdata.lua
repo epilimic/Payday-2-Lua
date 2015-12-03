@@ -2850,6 +2850,70 @@ function SkillTreeTweakData:init()
 				name_id = "menu_deck12_9",
 				desc_id = "menu_deck12_9_desc"
 			}
+		},
+		{
+			name_id = "menu_st_spec_13",
+			desc_id = "menu_st_spec_13_desc",
+			{
+				upgrades = {
+					"player_armor_health_store_amount_1"
+				},
+				cost = 200,
+				icon_xy = {3, 7},
+				name_id = "menu_deck13_1",
+				desc_id = "menu_deck13_1_desc"
+			},
+			deck2,
+			{
+				upgrades = {
+					"player_armor_health_store_amount_2",
+					"player_passive_health_multiplier_1",
+					"player_level_2_dodge_addend_1",
+					"player_level_3_dodge_addend_1",
+					"player_level_4_dodge_addend_1"
+				},
+				cost = 400,
+				icon_xy = {4, 7},
+				name_id = "menu_deck13_3",
+				desc_id = "menu_deck13_3_desc"
+			},
+			deck4,
+			{
+				upgrades = {
+					"player_armor_max_health_store_multiplier",
+					"player_passive_health_multiplier_2",
+					"player_passive_dodge_chance_1"
+				},
+				cost = 1000,
+				icon_xy = {5, 7},
+				name_id = "menu_deck13_5",
+				desc_id = "menu_deck13_5_desc"
+			},
+			deck6,
+			{
+				upgrades = {
+					"player_armor_health_store_amount_3",
+					"player_passive_health_multiplier_3",
+					"player_level_2_dodge_addend_2",
+					"player_level_3_dodge_addend_2",
+					"player_level_4_dodge_addend_2"
+				},
+				cost = 2400,
+				icon_xy = {6, 7},
+				name_id = "menu_deck13_7",
+				desc_id = "menu_deck13_7_desc"
+			},
+			deck8,
+			{
+				upgrades = {
+					"player_kill_change_regenerate_speed",
+					"player_passive_loot_drop_multiplier"
+				},
+				cost = 4000,
+				icon_xy = {7, 7},
+				name_id = "menu_deck13_9",
+				desc_id = "menu_deck13_9_desc"
+			}
 		}
 	}
 end

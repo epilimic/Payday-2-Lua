@@ -863,7 +863,6 @@ function HUDStatsScreen:_animate_text_pulse(text, exp_gain_ring, exp_ring)
 	end
 end
 function HUDStatsScreen:_update_stats_screen_loot(loot_wrapper_panel)
-	print("HUDStatsScreen:_update_stats_screen_loot")
 	local mandatory_bags_data = managers.loot:get_mandatory_bags_data()
 	local secured_amount = managers.loot:get_secured_mandatory_bags_amount()
 	local x

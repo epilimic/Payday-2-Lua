@@ -82,6 +82,10 @@ function CriminalsManager:_get_unit_pos_rot(unit, check_zipline)
 			unit = zipline_unit
 		end
 	end
+	local state = unit:movement():current_state_name()
+	if state == "jerry1" or state == "jerry2" then
+		return nil
+	end
 	if unit:in_slot(managers.slot:get_mask("players")) and not unit:base().is_husk_player then
 		local rot = unit:camera():rotation()
 		return {
