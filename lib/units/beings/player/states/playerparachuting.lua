@@ -56,7 +56,7 @@ function PlayerParachuting:_update_movement(t, dt)
 		new_rot = Rotation(yaw, current_rot:pitch(), current_rot:roll())
 		self._unit:movement().fall_rotation = new_rot
 	end
-	if 0 < direction.y then
+	if 0 < direction.y and self._move_dir then
 		local old_pos = self._unit:position()
 		self._unit:set_position(old_pos + self._move_dir:normalized() * self._tweak_data.movement.forward_speed * dt)
 		self._ext_movement:set_m_pos(self._unit:position())

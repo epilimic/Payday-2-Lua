@@ -4188,7 +4188,8 @@ function DLCTweakData:init(tweak_data)
 		{
 			type_items = "weapon_mods",
 			item_entry = "wpn_fps_snp_model70_iron_sight",
-			amount = 1
+			amount = 1,
+			global_value = "normal"
 		}
 	}
 	self.berry = {}

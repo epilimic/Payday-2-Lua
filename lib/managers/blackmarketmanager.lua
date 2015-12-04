@@ -228,7 +228,7 @@ function BlackMarketManager:weapon_unlocked_by_crafted(category, slot)
 	if unlocked then
 		local is_any_part_dlc_locked = false
 		for part_id, dlc in pairs(crafted.global_values or {}) do
-			if not table.contains(cosmetic_blueprint, part_id) and dlc ~= "normal" and not managers.dlc:is_dlc_unlocked(dlc) then
+			if not table.contains(cosmetic_blueprint, part_id) and dlc ~= "normal" and dlc ~= "infamous" and not managers.dlc:is_dlc_unlocked(dlc) then
 				return false, dlc
 			end
 		end
@@ -4748,6 +4748,30 @@ function BlackMarketManager:load(data)
 		end
 		if not self._global.unlocked_weapon_slots then
 			self:_setup_unlocked_weapon_slots()
+		end
+		if self._global.inventory.infamous and self._global.inventory.infamous.weapon_mods then
+			for id, amount in pairs(self._global.inventory.infamous.weapon_mods) do
+				self._global.inventory.normal = self._global.inventory.normal or {}
+				self._global.inventory.normal.weapon_mods = self._global.inventory.normal.weapon_mods or {}
+				self._global.inventory.normal.weapon_mods[id] = (self._global.inventory.normal.weapon_mods[id] or 0) + amount
+			end
+			self._global.inventory.infamous.weapon_mods = nil
+		end
+		for _, category in ipairs({
+			"primaries",
+			"secondaries"
+		}) do
+			if self._global.crafted_items[category] then
+				for slot, crafted in pairs(self._global.crafted_items[category]) do
+					if crafted.global_values then
+						for id, global_value in pairs(crafted.global_values) do
+							if global_value == "infamous" then
+								crafted.global_values[id] = "normal"
+							end
+						end
+					end
+				end
+			end
 		end
 		self._global.new_drops = self._global.new_drops or {}
 		self._global.new_item_type_unlocked = self._global.new_item_type_unlocked or {}

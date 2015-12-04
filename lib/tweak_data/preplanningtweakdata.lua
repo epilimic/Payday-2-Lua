@@ -2386,7 +2386,7 @@ function PrePlanningTweakData:_create_locations(tweak_data)
 	}
 	self.locations.pbr = {
 		default_plans = {},
-		total_budget = 100,
+		total_budget = 6,
 		mission_briefing_texture = "guis/dlcs/berry/textures/pd2/pre_planning/mission_briefing_pbr",
 		start_location = {
 			group = "a",
