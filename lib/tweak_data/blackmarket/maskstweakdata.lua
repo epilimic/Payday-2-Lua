@@ -2398,6 +2398,20 @@ function BlackMarketTweakData:_init_masks()
 	self.masks.maui.value = 0
 	self.masks.maui.dlc = "berry"
 	self.masks.maui.texture_bundle_folder = "berry"
+	self.masks.rudeolph = {}
+	self.masks.rudeolph.unit = "units/pd2_dlc_cane/masks/rudeolph/msk_rudeolph"
+	self.masks.rudeolph.name_id = "bm_msk_rudeolph"
+	self.masks.rudeolph.type = "tiara"
+	self.masks.rudeolph.pcs = {}
+	self.masks.rudeolph.value = 0
+	self.masks.rudeolph.sort_number = 13
+	self.masks.greedy_the_elf = {}
+	self.masks.greedy_the_elf.unit = "units/pd2_dlc_cane/masks/greedy_the_elf/msk_greedy_the_elf"
+	self.masks.greedy_the_elf.name_id = "bm_msk_greedy_the_elf"
+	self.masks.greedy_the_elf.type = "helm"
+	self.masks.greedy_the_elf.pcs = {}
+	self.masks.greedy_the_elf.value = 0
+	self.masks.greedy_the_elf.sort_number = 13
 	if SystemInfo:platform() == Idstring("PS3") then
 		self.masks.sweettooth = {}
 		self.masks.sweettooth.unit = "units/pd2_dlc_consoles/masks/msk_sweettooth/msk_sweettooth"

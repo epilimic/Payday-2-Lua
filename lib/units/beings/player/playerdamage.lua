@@ -54,7 +54,7 @@ end
 function PlayerDamage:update(unit, t, dt)
 	if not self._armor_stored_health_max_set then
 		self._armor_stored_health_max_set = true
-		managers.hud:set_stored_health_max(math.min(self:max_armor_stored_health() / self:_max_health(), 1))
+		self:update_armor_stored_health()
 	end
 	local is_berserker_active = managers.player:has_activate_temporary_upgrade("temporary", "berserker_damage_multiplier")
 	if self._check_berserker_done then
@@ -248,12 +248,26 @@ function PlayerDamage:restore_armor(armor_restored)
 		no_hint = true
 	})
 end
+function PlayerDamage:update_armor_stored_health()
+	if managers.hud then
+		local max_health = self:_max_health()
+		managers.hud:set_stored_health_max(math.min(self:max_armor_stored_health() / max_health, 1))
+		if self._armor_stored_health then
+			self._armor_stored_health = math.min(self._armor_stored_health, self:max_armor_stored_health())
+			local stored_health_ratio = self._armor_stored_health / max_health
+			managers.hud:set_stored_health(stored_health_ratio)
+		end
+	end
+end
 function PlayerDamage:change_regenerate_speed(value, percent)
 	if self._regenerate_speed then
 		self._regenerate_speed = percent and self._regenerate_speed * value or self._regenerate_speed + value
 	end
 end
 function PlayerDamage:max_armor_stored_health()
+	if not managers.player:has_category_upgrade("player", "armor_health_store_amount") then
+		return 0
+	end
 	local amount = managers.player:body_armor_value("skill_max_health_store", nil, 1)
 	local multiplier = managers.player:upgrade_value("player", "armor_max_health_store_multiplier", 1)
 	local max = amount * multiplier
@@ -274,7 +288,7 @@ function PlayerDamage:add_armor_stored_health(amount)
 end
 function PlayerDamage:clear_armor_stored_health()
 	self._armor_stored_health = 0
-	if managers.hud and not self._check_berserker_done then
+	if managers.hud then
 		managers.hud:set_stored_health(0)
 	end
 end
@@ -325,6 +339,7 @@ function PlayerDamage:set_health(health)
 		local diff_health_ratio = prev_health_ratio - new_health_ratio
 		health = health + math.max(0, diff_health_ratio * max_health)
 		self._current_max_health = max_health
+		self:update_armor_stored_health()
 	end
 	local prev_health = self._health and Application:digest_value(self._health, false) or health
 	self._health = Application:digest_value(math.clamp(health, 0, max_health), true)

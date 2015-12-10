@@ -1166,9 +1166,17 @@ function HUDManager:set_access_camera_destroyed(destroyed, no_feed)
 end
 function HUDManager:start_access_camera()
 	self._hud_access_camera:start()
+	if self._hud_chat then
+		self._hud_chat:clear()
+	end
+	self._hud_chat = self._hud_chat_access or self._hud_chat
 end
 function HUDManager:stop_access_camera()
 	self._hud_access_camera:stop()
+	if self._hud_chat then
+		self._hud_chat:clear()
+	end
+	self._hud_chat = self._hud_chat_ingame or self._hud_chat
 end
 function HUDManager:access_camera_track(i, cam, pos)
 	self._hud_access_camera:draw_marker(i, self._workspace:world_to_screen(cam, pos))

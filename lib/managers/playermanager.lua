@@ -456,7 +456,6 @@ function PlayerManager:on_killshot(killed_unit, variant)
 	if managers.player:has_category_upgrade("player", "kill_change_regenerate_speed") then
 		local amount = managers.player:body_armor_value("skill_kill_change_regenerate_speed", nil, 1)
 		local multiplier = managers.player:upgrade_value("player", "kill_change_regenerate_speed", 0)
-		print("on_killshot:change_regenerate_timer", "armor", amount, "skill", multiplier, "percentage", tweak_data.upgrades.kill_change_regenerate_speed_percentage, "total", amount * multiplier)
 		damage_ext:change_regenerate_speed(amount * multiplier, tweak_data.upgrades.kill_change_regenerate_speed_percentage)
 	end
 	if self._on_killshot_t and t < self._on_killshot_t then
@@ -788,13 +787,18 @@ function PlayerManager:get_skill_exp_multiplier(whisper_mode)
 	if whisper_mode then
 		multiplier = multiplier + managers.player:team_upgrade_value("xp", "stealth_multiplier", 1) - 1
 	end
-	if managers.network:session() and not managers.job:is_current_job_competitive() then
+	if managers.network:session() then
 		local outfit, tweak
 		for _, peer in pairs(managers.network:session():all_peers()) do
 			if peer:has_blackmarket_outfit() and not peer:is_cheater() then
 				outfit = peer:blackmarket_outfit()
 				for _, weapon in ipairs({"primary", "secondary"}) do
-					if outfit[weapon] and outfit[weapon].cosmetics and outfit[weapon].cosmetics.bonus then
+					if managers.weapon_factory:has_perk("bonus", outfit[weapon].factory_id, outfit[weapon].blueprint) then
+						local custom_stats = managers.weapon_factory:get_custom_stats_from_weapon(outfit[weapon].factory_id, outfit[weapon].blueprint)
+						if custom_stats.exp_multiplier then
+							multiplier = multiplier + custom_stats.exp_multiplier - 1
+						end
+					elseif not managers.job:is_current_job_competitive() and outfit[weapon] and outfit[weapon].cosmetics and outfit[weapon].cosmetics.bonus then
 						tweak = tweak_data.blackmarket.weapon_skins[outfit[weapon].cosmetics.id]
 						tweak = tweak and tweak_data.economy.bonuses[tweak.bonus]
 						if tweak and tweak.exp_multiplier then
@@ -815,14 +819,19 @@ function PlayerManager:get_skill_money_multiplier(whisper_mode)
 		cash_skill_mulitplier = cash_skill_mulitplier * managers.player:team_upgrade_value("cash", "stealth_money_multiplier", 1)
 		bag_skill_mulitplier = bag_skill_mulitplier * managers.player:team_upgrade_value("cash", "stealth_bags_multiplier", 1)
 	end
-	if managers.network:session() and not managers.job:is_current_job_competitive() then
+	if managers.network:session() then
 		local multiplier = 1
 		local outfit, tweak
 		for _, peer in pairs(managers.network:session():all_peers()) do
 			if peer:has_blackmarket_outfit() and not peer:is_cheater() then
 				outfit = peer:blackmarket_outfit()
 				for _, weapon in ipairs({"primary", "secondary"}) do
-					if outfit[weapon] and outfit[weapon].cosmetics and outfit[weapon].cosmetics.bonus then
+					if managers.weapon_factory:has_perk("bonus", outfit[weapon].factory_id, outfit[weapon].blueprint) then
+						local custom_stats = managers.weapon_factory:get_custom_stats_from_weapon(outfit[weapon].factory_id, outfit[weapon].blueprint)
+						if custom_stats.money_multiplier then
+							multiplier = multiplier + custom_stats.money_multiplier - 1
+						end
+					elseif not managers.job:is_current_job_competitive() and outfit[weapon] and outfit[weapon].cosmetics and outfit[weapon].cosmetics.bonus then
 						tweak = tweak_data.blackmarket.weapon_skins[outfit[weapon].cosmetics.id]
 						tweak = tweak and tweak_data.economy.bonuses[tweak.bonus]
 						if tweak and tweak.money_multiplier then
@@ -1196,6 +1205,9 @@ end
 function PlayerManager:get_player_rule(rule)
 	return self._rules[rule] > 0
 end
+function PlayerManager:has_deployable_been_used()
+	return self._peer_used_deployable or false
+end
 function PlayerManager:update_deployable_equipment_to_peer(peer)
 	local peer_id = managers.network:session():local_peer():id()
 	if self._global.synced_deployables[peer_id] then
@@ -1212,6 +1224,9 @@ end
 function PlayerManager:set_synced_deployable_equipment(peer, deployable, amount)
 	local peer_id = peer:id()
 	local only_update_amount = self._global.synced_deployables[peer_id] and self._global.synced_deployables[peer_id].deployable == deployable
+	if not self._peer_used_deployable and self._global.synced_deployables[peer_id] and (self._global.synced_deployables[peer_id].deployable ~= deployable or self._global.synced_deployables[peer_id].amount ~= amount) then
+		self._peer_used_deployable = true
+	end
 	self._global.synced_deployables[peer_id] = {deployable = deployable, amount = amount}
 	local character_data = managers.criminals:character_data_by_peer_id(peer_id)
 	if character_data and character_data.panel_id then

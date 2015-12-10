@@ -2816,7 +2816,6 @@ function BlackMarketTweakData:_init_weapon_skins()
 	self.weapon_skins.plainsrider_bloodbath.desc_id = "bm_wskn_plainsrider_bloodbath_desc"
 	self.weapon_skins.plainsrider_bloodbath.weapon_id = "plainsrider"
 	self.weapon_skins.plainsrider_bloodbath.rarity = "common"
-	self.weapon_skins.plainsrider_bloodbath.bonus = "total_ammo_p3"
 	self.weapon_skins.plainsrider_bloodbath.bonus = "concealment_p1"
 	self.weapon_skins.plainsrider_bloodbath.reserve_quality = true
 	self.weapon_skins.plainsrider_bloodbath.texture_bundle_folder = "cash/safes/dinner"
@@ -3482,6 +3481,556 @@ function BlackMarketTweakData:_init_weapon_skins()
 			base_gradient = Idstring("units/payday2_cash/safes/dallas/base_gradient/base_dallas_001_df"),
 			pattern = Idstring("units/payday2_cash/safes/default/pattern/pattern_default_df"),
 			pattern_gradient = Idstring("units/payday2_cash/safes/default/pattern_gradient/gradient_default_df")
+		}
+	}
+	self.weapon_skins.akm_waves = {}
+	self.weapon_skins.akm_waves.name_id = "bm_wskn_akm_waves"
+	self.weapon_skins.akm_waves.desc_id = "bm_wskn_akm_waves_desc"
+	self.weapon_skins.akm_waves.weapon_id = "akm"
+	self.weapon_skins.akm_waves.rarity = "common"
+	self.weapon_skins.akm_waves.bonus = "spread_p1"
+	self.weapon_skins.akm_waves.reserve_quality = true
+	self.weapon_skins.akm_waves.texture_bundle_folder = "cash/safes/surf"
+	self.weapon_skins.akm_waves.base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_001_df")
+	self.weapon_skins.asval_waves = {}
+	self.weapon_skins.asval_waves.name_id = "bm_wskn_asval_waves"
+	self.weapon_skins.asval_waves.desc_id = "bm_wskn_asval_waves_desc"
+	self.weapon_skins.asval_waves.weapon_id = "asval"
+	self.weapon_skins.asval_waves.rarity = "common"
+	self.weapon_skins.asval_waves.bonus = "spread_p1"
+	self.weapon_skins.asval_waves.reserve_quality = true
+	self.weapon_skins.asval_waves.texture_bundle_folder = "cash/safes/surf"
+	self.weapon_skins.asval_waves.base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_002_df")
+	self.weapon_skins.asval_waves.types = {
+		foregrip = {
+			pattern_pos = Vector3(-0.404006, 0.797997, 0),
+			pattern_tweak = Vector3(1.68376, 1.5929, 1),
+			pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_003b_df"),
+			pattern_gradient = Idstring("units/payday2_cash/safes/surf/pattern_gradient/gradient_surf_003_df")
+		}
+	}
+	self.weapon_skins.m16_waves = {}
+	self.weapon_skins.m16_waves.name_id = "bm_wskn_m16_waves"
+	self.weapon_skins.m16_waves.desc_id = "bm_wskn_m16_waves_desc"
+	self.weapon_skins.m16_waves.weapon_id = "m16"
+	self.weapon_skins.m16_waves.rarity = "common"
+	self.weapon_skins.m16_waves.bonus = "recoil_p1"
+	self.weapon_skins.m16_waves.reserve_quality = true
+	self.weapon_skins.m16_waves.texture_bundle_folder = "cash/safes/surf"
+	self.weapon_skins.m16_waves.base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_003_df")
+	self.weapon_skins.baka_waves = {}
+	self.weapon_skins.baka_waves.name_id = "bm_wskn_baka_waves"
+	self.weapon_skins.baka_waves.desc_id = "bm_wskn_baka_waves_desc"
+	self.weapon_skins.baka_waves.weapon_id = "baka"
+	self.weapon_skins.baka_waves.rarity = "common"
+	self.weapon_skins.baka_waves.bonus = "recoil_p1"
+	self.weapon_skins.baka_waves.reserve_quality = true
+	self.weapon_skins.baka_waves.texture_bundle_folder = "cash/safes/surf"
+	self.weapon_skins.baka_waves.base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_005_df")
+	self.weapon_skins.baka_waves.pattern_gradient = Idstring("units/payday2_cash/safes/surf/pattern_gradient/gradient_surf_003_df")
+	self.weapon_skins.baka_waves.pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_003b_df")
+	self.weapon_skins.baka_waves.pattern_tweak = Vector3(1.96995, 0, 1)
+	self.weapon_skins.s552_waves = {}
+	self.weapon_skins.s552_waves.name_id = "bm_wskn_s552_waves"
+	self.weapon_skins.s552_waves.desc_id = "bm_wskn_s552_waves_desc"
+	self.weapon_skins.s552_waves.weapon_id = "s552"
+	self.weapon_skins.s552_waves.rarity = "common"
+	self.weapon_skins.s552_waves.bonus = "spread_p1"
+	self.weapon_skins.s552_waves.reserve_quality = true
+	self.weapon_skins.s552_waves.texture_bundle_folder = "cash/safes/surf"
+	self.weapon_skins.s552_waves.base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_005_df")
+	self.weapon_skins.s552_waves.pattern_gradient = Idstring("units/payday2_cash/safes/surf/pattern_gradient/gradient_surf_003_df")
+	self.weapon_skins.s552_waves.pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_003b_df")
+	self.weapon_skins.s552_waves.pattern_tweak = Vector3(2.30384, 0.768728, 1)
+	self.weapon_skins.s552_waves.pattern_pos = Vector3(-0.0701165, -0.27999, 0)
+	self.weapon_skins.usp_waves = {}
+	self.weapon_skins.usp_waves.name_id = "bm_wskn_usp_waves"
+	self.weapon_skins.usp_waves.desc_id = "bm_wskn_usp_waves_desc"
+	self.weapon_skins.usp_waves.weapon_id = "usp"
+	self.weapon_skins.usp_waves.rarity = "common"
+	self.weapon_skins.usp_waves.bonus = "spread_p1"
+	self.weapon_skins.usp_waves.reserve_quality = true
+	self.weapon_skins.usp_waves.texture_bundle_folder = "cash/safes/surf"
+	self.weapon_skins.usp_waves.base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_006_df")
+	self.weapon_skins.mac10_waves = {}
+	self.weapon_skins.mac10_waves.name_id = "bm_wskn_mac10_waves"
+	self.weapon_skins.mac10_waves.desc_id = "bm_wskn_mac10_waves_desc"
+	self.weapon_skins.mac10_waves.weapon_id = "mac10"
+	self.weapon_skins.mac10_waves.rarity = "uncommon"
+	self.weapon_skins.mac10_waves.bonus = "recoil_p1"
+	self.weapon_skins.mac10_waves.reserve_quality = true
+	self.weapon_skins.mac10_waves.texture_bundle_folder = "cash/safes/surf"
+	self.weapon_skins.mac10_waves.base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_007_df")
+	self.weapon_skins.mac10_waves.pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_009_df")
+	self.weapon_skins.mac10_waves.pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_001_df")
+	self.weapon_skins.mac10_waves.pattern_tweak = Vector3(9.60172, 3.13635, 1)
+	self.weapon_skins.mac10_waves.pattern_pos = Vector3(-0.127355, 0.177916, 0)
+	self.weapon_skins.mac10_waves.uv_offset_rot = Vector3(-1.23396, 0, 6.28319)
+	self.weapon_skins.mac10_waves.cubemap_pattern_control = Vector3(0.286907, 1, 0)
+	self.weapon_skins.mac10_waves.parts = {
+		wpn_fps_upg_fl_ass_peq15 = {
+			[Idstring("mtr_peq15"):key()] = {
+				pattern_pos = Vector3(0.36179, 0.405249, 0),
+				pattern_tweak = Vector3(1.73146, 1.54794, 1)
+			}
+		}
+	}
+	self.weapon_skins.aug_waves = {}
+	self.weapon_skins.aug_waves.name_id = "bm_wskn_aug_waves"
+	self.weapon_skins.aug_waves.desc_id = "bm_wskn_aug_waves_desc"
+	self.weapon_skins.aug_waves.weapon_id = "aug"
+	self.weapon_skins.aug_waves.rarity = "uncommon"
+	self.weapon_skins.aug_waves.bonus = "recoil_p1"
+	self.weapon_skins.aug_waves.reserve_quality = true
+	self.weapon_skins.aug_waves.texture_bundle_folder = "cash/safes/surf"
+	self.weapon_skins.aug_waves.base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_008_df")
+	self.weapon_skins.aug_waves.parts = {
+		wpn_fps_aug_body_aug = {
+			[Idstring("aug"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_004_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/surf/pattern_gradient/gradient_surf_005_df"),
+				pattern_pos = Vector3(-0.0244975, -0.00387842, 0),
+				pattern_tweak = Vector3(1, 3.16632, 1)
+			}
+		},
+		wpn_fps_aug_body_f90 = {
+			[Idstring("mtr_f90"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_004_df"),
+				pattern_pos = Vector3(0.00620103, 0.68352, 0),
+				pattern_tweak = Vector3(1.15908, 3.04644, 1),
+				pattern_gradient = Idstring("units/payday2_cash/safes/surf/pattern_gradient/gradient_surf_005_df")
+			}
+		}
+	}
+	self.weapon_skins.aug_waves.types = {
+		vertical_grip = {
+			base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_008_b_df")
+		}
+	}
+	self.weapon_skins.scar_waves = {}
+	self.weapon_skins.scar_waves.name_id = "bm_wskn_scar_waves"
+	self.weapon_skins.scar_waves.desc_id = "bm_wskn_scar_waves_desc"
+	self.weapon_skins.scar_waves.weapon_id = "scar"
+	self.weapon_skins.scar_waves.rarity = "uncommon"
+	self.weapon_skins.scar_waves.bonus = "spread_p1"
+	self.weapon_skins.scar_waves.reserve_quality = true
+	self.weapon_skins.scar_waves.texture_bundle_folder = "cash/safes/surf"
+	self.weapon_skins.scar_waves.base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_009_b_df")
+	self.weapon_skins.scar_waves.types = {
+		barrel_ext = {
+			pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_001_df"),
+			pattern_pos = Vector3(-0.0701165, 0.36871, 0),
+			pattern_gradient = Idstring("units/payday2_cash/safes/surf/pattern_gradient/gradient_surf_004_df"),
+			pattern_tweak = Vector3(0.586694, 4.72475, 1)
+		}
+	}
+	self.weapon_skins.scar_waves.parts = {
+		wpn_fps_ass_scar_body_standard = {
+			[Idstring("mtr_lower"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_009_df")
+			},
+			[Idstring("mtr_upper"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_001_df"),
+				pattern_pos = Vector3(0.177916, -0.909611, 0),
+				pattern_gradient = Idstring("units/payday2_cash/safes/surf/pattern_gradient/gradient_surf_004_df"),
+				pattern_tweak = Vector3(1.06368, 0, 1)
+			}
+		},
+		wpn_fps_upg_vg_ass_smg_afg = {
+			[Idstring("afg"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_009_df")
+			}
+		},
+		wpn_fps_ass_scar_m_standard = {
+			[Idstring("mtr_mag"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_009_df")
+			}
+		}
+	}
+	self.weapon_skins.colt_1911_waves = {}
+	self.weapon_skins.colt_1911_waves.name_id = "bm_wskn_colt_1911_waves"
+	self.weapon_skins.colt_1911_waves.desc_id = "bm_wskn_colt_1911_waves_desc"
+	self.weapon_skins.colt_1911_waves.weapon_id = "colt_1911"
+	self.weapon_skins.colt_1911_waves.rarity = "uncommon"
+	self.weapon_skins.colt_1911_waves.bonus = "spread_p1"
+	self.weapon_skins.colt_1911_waves.reserve_quality = true
+	self.weapon_skins.colt_1911_waves.texture_bundle_folder = "cash/safes/surf"
+	self.weapon_skins.colt_1911_waves.base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_010_df")
+	self.weapon_skins.colt_1911_waves.parts = {
+		wpn_fps_pis_1911_g_ergo = {
+			[Idstring("ergo"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_010_df")
+			}
+		},
+		wpn_fps_pis_1911_g_bling = {
+			[Idstring("bling"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_010_b_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/surf/pattern_gradient/gradient_surf_005_df"),
+				pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_002_df")
+			}
+		}
+	}
+	self.weapon_skins.colt_1911_waves.types = {
+		grip = {
+			base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_010_b_df")
+		},
+		barrel_ext = {
+			pattern_pos = Vector3(0, -0.327689, 0),
+			pattern_gradient = Idstring("units/payday2_cash/safes/surf/pattern_gradient/gradient_surf_005_df"),
+			pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_002_df"),
+			pattern_tweak = Vector3(1.68376, 0, 1)
+		},
+		slide = {
+			pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_002_df"),
+			pattern_pos = Vector3(-0.146434, -0.27045, 0),
+			pattern_gradient = Idstring("units/payday2_cash/safes/surf/pattern_gradient/gradient_surf_005_df"),
+			pattern_tweak = Vector3(3.7378, 0, 1)
+		}
+	}
+	self.weapon_skins.polymer_waves = {}
+	self.weapon_skins.polymer_waves.name_id = "bm_wskn_polymer_waves"
+	self.weapon_skins.polymer_waves.desc_id = "bm_wskn_polymer_waves_desc"
+	self.weapon_skins.polymer_waves.weapon_id = "polymer"
+	self.weapon_skins.polymer_waves.rarity = "rare"
+	self.weapon_skins.polymer_waves.bonus = "spread_p1"
+	self.weapon_skins.polymer_waves.reserve_quality = true
+	self.weapon_skins.polymer_waves.texture_bundle_folder = "cash/safes/surf"
+	self.weapon_skins.polymer_waves.base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_011_df")
+	self.weapon_skins.polymer_waves.default_blueprint = {
+		"wpn_fps_smg_polymer_body_standard",
+		"wpn_fps_smg_polymer_bolt_standard",
+		"wpn_fps_smg_polymer_dh_standard",
+		"wpn_fps_smg_polymer_extra_sling",
+		"wpn_fps_smg_polymer_fg_standard",
+		"wpn_fps_smg_polymer_barrel_standard",
+		"wpn_fps_smg_polymer_m_standard",
+		"wpn_fps_upg_ass_ns_surefire",
+		"wpn_fps_upg_o_reflex",
+		"wpn_fps_upg_m4_s_mk46"
+	}
+	self.weapon_skins.polymer_waves.parts = {
+		wpn_fps_smg_polymer_body_standard = {
+			[Idstring("mtr_body"):key()] = {
+				pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_004_df"),
+				pattern_pos = Vector3(-0.112275, 0.00566143, 0),
+				pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_checker_df"),
+				base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_011_b_df"),
+				pattern_tweak = Vector3(1.20678, 0, 1)
+			}
+		}
+	}
+	self.weapon_skins.polymer_waves.types = {
+		barrel_ext = {
+			pattern_pos = Vector3(0.0443599, 1.46578, 0),
+			pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_checker_df"),
+			pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_004_df"),
+			pattern_tweak = Vector3(0.443599, 0, 1)
+		}
+	}
+	self.weapon_skins.ak5_waves = {}
+	self.weapon_skins.ak5_waves.name_id = "bm_wskn_ak5_waves"
+	self.weapon_skins.ak5_waves.desc_id = "bm_wskn_ak5_waves_desc"
+	self.weapon_skins.ak5_waves.weapon_id = "ak5"
+	self.weapon_skins.ak5_waves.rarity = "rare"
+	self.weapon_skins.ak5_waves.bonus = "spread_p1"
+	self.weapon_skins.ak5_waves.reserve_quality = true
+	self.weapon_skins.ak5_waves.texture_bundle_folder = "cash/safes/surf"
+	self.weapon_skins.ak5_waves.base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_012_df")
+	self.weapon_skins.ak5_waves.pattern_gradient = Idstring("units/payday2_cash/safes/surf/pattern_gradient/gradient_surf_002_b_df")
+	self.weapon_skins.ak5_waves.pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_003c_df")
+	self.weapon_skins.ak5_waves.pattern_tweak = Vector3(4.25948, 0, 0)
+	self.weapon_skins.ak5_waves.pattern_pos = Vector3(-0.00333858, 0.225614, 0)
+	self.weapon_skins.ak5_waves.default_blueprint = {
+		"wpn_fps_ass_ak5_body_ak5",
+		"wpn_fps_ass_ak5_b_short",
+		"wpn_fps_ass_ak5_s_ak5b",
+		"wpn_fps_upg_o_cmore",
+		"wpn_fps_upg_m4_m_quad",
+		"wpn_fps_ass_ak5_fg_ak5c",
+		"wpn_fps_upg_ass_ns_surefire"
+	}
+	self.weapon_skins.ak5_waves.parts = {
+		wpn_fps_upg_o_cmore = {
+			[Idstring("cmore"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/surf/sticker/sticker_bodhi_df"),
+				uv_scale = Vector3(5.07782, 5.64992, 1),
+				uv_offset_rot = Vector3(-0.379387, 0.585123, 0)
+			}
+		}
+	}
+	self.weapon_skins.mosin_waves = {}
+	self.weapon_skins.mosin_waves.name_id = "bm_wskn_mosin_waves"
+	self.weapon_skins.mosin_waves.desc_id = "bm_wskn_mosin_waves_desc"
+	self.weapon_skins.mosin_waves.weapon_id = "mosin"
+	self.weapon_skins.mosin_waves.rarity = "rare"
+	self.weapon_skins.mosin_waves.bonus = "total_ammo_p1"
+	self.weapon_skins.mosin_waves.reserve_quality = true
+	self.weapon_skins.mosin_waves.texture_bundle_folder = "cash/safes/surf"
+	self.weapon_skins.mosin_waves.base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_013_df")
+	self.weapon_skins.mosin_waves.pattern_gradient = Idstring("units/payday2_cash/safes/surf/pattern_gradient/gradient_surf_001_df")
+	self.weapon_skins.mosin_waves.pattern = Idstring("units/payday2_cash/safes/dallas/pattern/pattern_wood_df")
+	self.weapon_skins.mosin_waves.pattern_tweak = Vector3(6.31052, 0, 1)
+	self.weapon_skins.mosin_waves.pattern_pos = Vector3(-0.0128784, -0.194133, 0)
+	self.weapon_skins.mosin_waves.default_blueprint = {
+		"wpn_fps_snp_mosin_m_standard",
+		"wpn_fps_snp_mosin_body_black",
+		"wpn_fps_upg_o_leupold",
+		"wpn_fps_snp_mosin_b_short"
+	}
+	self.weapon_skins.mosin_waves.parts = {
+		wpn_fps_snp_mosin_b_sniper = {
+			[Idstring("mtr_sniper"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_013_b_df"),
+				pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_001_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/sputnik/pattern_gradient/gradient_sput_002_df"),
+				pattern_tweak = Vector3(12.3682, 5.474, 1)
+			}
+		},
+		wpn_fps_snp_mosin_body_black = {
+			[Idstring("mtr_body"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/surf/sticker/sticker_waves_df"),
+				uv_scale = Vector3(1.20017, 4.45805, 1),
+				uv_offset_rot = Vector3(-0.00141802, 0.986171, 3.05149)
+			}
+		},
+		wpn_fps_snp_mosin_body_standard = {
+			[Idstring("mtr_body"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/surf/sticker/sticker_waves_df"),
+				uv_scale = Vector3(1.20017, 4.45805, 1),
+				uv_offset_rot = Vector3(-0.00141802, 0.986171, 3.05149)
+			}
+		}
+	}
+	self.weapon_skins.mosin_waves.types = {
+		barrel = {
+			base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_013_c_df")
+		}
+	}
+	self.weapon_skins.striker_waves = {}
+	self.weapon_skins.striker_waves.name_id = "bm_wskn_striker_waves"
+	self.weapon_skins.striker_waves.desc_id = "bm_wskn_striker_waves_desc"
+	self.weapon_skins.striker_waves.weapon_id = "striker"
+	self.weapon_skins.striker_waves.rarity = "epic"
+	self.weapon_skins.striker_waves.bonus = "spread_p1"
+	self.weapon_skins.striker_waves.reserve_quality = true
+	self.weapon_skins.striker_waves.texture_bundle_folder = "cash/safes/surf"
+	self.weapon_skins.striker_waves.base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_014_df")
+	self.weapon_skins.striker_waves.pattern_gradient = Idstring("units/payday2_cash/safes/shared/pattern_gradient/gradient_shared_007_df")
+	self.weapon_skins.striker_waves.pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_001_df")
+	self.weapon_skins.striker_waves.pattern_tweak = Vector3(7.78917, 2.32716, 1)
+	self.weapon_skins.striker_waves.default_blueprint = {
+		"wpn_fps_sho_striker_body_standard",
+		"wpn_fps_upg_o_cmore",
+		"wpn_fps_upg_shot_ns_king",
+		"wpn_fps_sho_striker_b_standard"
+	}
+	self.weapon_skins.striker_waves.parts = {
+		wpn_fps_sho_striker_b_standard = {
+			[Idstring("mtr_barrel"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/surf/sticker/sticker_waves_df"),
+				uv_scale = Vector3(0.644076, 1.83594, 0),
+				uv_offset_rot = Vector3(-0.62034, 0.623583, 3.13635)
+			}
+		},
+		wpn_fps_sho_striker_b_long = {
+			[Idstring("mtr_barrel"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/surf/sticker/sticker_waves_df"),
+				uv_scale = Vector3(0.644076, 1.83594, 0),
+				uv_offset_rot = Vector3(-0.62034, 0.623583, 3.13635)
+			}
+		},
+		wpn_fps_sho_striker_b_suppressed = {
+			[Idstring("mtr_barrel"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/surf/sticker/sticker_waves_df"),
+				uv_scale = Vector3(0.644076, 1.83594, 0),
+				uv_offset_rot = Vector3(-0.62034, 0.623583, 3.13635)
+			}
+		},
+		wpn_fps_sho_striker_body_standard = {
+			[Idstring("mtr_rail"):key()] = {
+				uv_scale = Vector3(3.40921, 0.882449, 1),
+				uv_offset_rot = Vector3(0.0268201, 0.931553, 1.62287)
+			},
+			[Idstring("mtr_body"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/surf/sticker/sticker_waves_df"),
+				uv_scale = Vector3(0.834774, 3.17083, 0),
+				uv_offset_rot = Vector3(0.206995, 0.951632, 3.15235)
+			}
+		},
+		wpn_fps_upg_o_cmore = {
+			[Idstring("cmore"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/surf/sticker/sticker_waves_df"),
+				uv_scale = Vector3(1.50222, 0.69175, 1),
+				uv_offset_rot = Vector3(0.349631, 0.902934, 1.36813)
+			}
+		},
+		wpn_fps_upg_o_aimpoint_2 = {
+			[Idstring("aimpoint"):key()] = {
+				uv_scale = Vector3(3.93363, 1, 1),
+				uv_offset_rot = Vector3(-0.0987357, 0.979251, 1.51798)
+			}
+		},
+		wpn_fps_upg_o_eotech = {
+			[Idstring("mtr_eotech"):key()] = {
+				uv_scale = Vector3(2.83711, 0.69175, 1),
+				uv_offset_rot = Vector3(0.0538995, 1.13189, 4.73974)
+			}
+		},
+		wpn_fps_upg_o_t1micro = {
+			[Idstring("mtr_t1micro"):key()] = {
+				uv_scale = Vector3(2.16967, 0.739425, 1),
+				uv_offset_rot = Vector3(0.153678, 0.998331, 1.50299)
+			}
+		},
+		wpn_fps_upg_o_acog = {
+			[Idstring("mtr_acog"):key()] = {
+				uv_scale = Vector3(2.26502, 0.596401, 1),
+				uv_offset_rot = Vector3(0.169376, 1.21774, 1.53296)
+			}
+		},
+		wpn_fps_upg_o_aimpoint = {
+			[Idstring("aimpoint"):key()] = {
+				uv_scale = Vector3(2.02664, 0.69175, 1),
+				uv_offset_rot = Vector3(0.134757, 1.06957, 4.76971)
+			}
+		},
+		wpn_fps_upg_o_specter = {
+			[Idstring("mtr_specter"):key()] = {
+				uv_scale = Vector3(2.26502, 0.644076, 1),
+				uv_offset_rot = Vector3(-0.0414975, 0.454567, 1.50299)
+			}
+		},
+		wpn_fps_upg_o_cs = {
+			[Idstring("mtr_cs"):key()] = {
+				uv_scale = Vector3(2.36004, 0.834774, 1),
+				uv_offset_rot = Vector3(0.032582, 1.31314, 1.50299)
+			}
+		},
+		wpn_fps_upg_o_reflex = {
+			[Idstring("reflex"):key()] = {
+				uv_scale = Vector3(1.17817, 0.413027, 1),
+				uv_offset_rot = Vector3(-0.00133858, 1.52125, 1.57791)
+			}
+		},
+		wpn_fps_upg_o_rx01 = {
+			[Idstring("rx01"):key()] = {
+				uv_scale = Vector3(2.55106, 0.69175, 1),
+				uv_offset_rot = Vector3(0.0915188, 0.530885, 4.64888)
+			}
+		},
+		wpn_fps_upg_o_rx30 = {
+			[Idstring("rx30"):key()] = {
+				uv_scale = Vector3(1.64524, 0.531727, 1),
+				uv_offset_rot = Vector3(0.220075, 1.399, 1.49997)
+			}
+		}
+	}
+	self.weapon_skins.striker_waves.types = {
+		sight = {
+			sticker = Idstring("units/payday2_cash/safes/surf/sticker/sticker_waves_df"),
+			uv_scale = Vector3(1.59757, 0.760425, 1),
+			uv_offset_rot = Vector3(0.244694, 1.24636, 1.50001)
+		}
+	}
+	self.weapon_skins.x_g22c_waves = {}
+	self.weapon_skins.x_g22c_waves.name_id = "bm_wskn_x_g22c_waves"
+	self.weapon_skins.x_g22c_waves.desc_id = "bm_wskn_x_g22c_waves_desc"
+	self.weapon_skins.x_g22c_waves.weapon_id = "x_g22c"
+	self.weapon_skins.x_g22c_waves.rarity = "epic"
+	self.weapon_skins.x_g22c_waves.bonus = "recoil_p1"
+	self.weapon_skins.x_g22c_waves.reserve_quality = true
+	self.weapon_skins.x_g22c_waves.texture_bundle_folder = "cash/safes/surf"
+	self.weapon_skins.x_g22c_waves.base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_015_df")
+	self.weapon_skins.x_g22c_waves.pattern_gradient = Idstring("units/payday2_cash/safes/surf/pattern_gradient/gradient_surf_005_df")
+	self.weapon_skins.x_g22c_waves.pattern = Idstring("units/payday2_cash/safes/surf/pattern/pattern_surf_002b_df")
+	self.weapon_skins.x_g22c_waves.pattern_tweak = Vector3(3.49631, 0, 1)
+	self.weapon_skins.x_g22c_waves.pattern_pos = Vector3(0.216075, -0.432626, 0)
+	self.weapon_skins.x_g22c_waves.cubemap_pattern_control = Vector3(0.3513, 1, 0)
+	self.weapon_skins.x_g22c_waves.default_blueprint = {
+		"wpn_fps_pis_g22c_b_standard",
+		"wpn_fps_pis_g22c_body_standard",
+		"wpn_fps_pis_g18c_m_mag_33rnd",
+		"wpn_fps_pis_g18c_g_ergo",
+		"wpn_fps_upg_fl_pis_crimson",
+		"wpn_fps_upg_ns_pis_ipsccomp"
+	}
+	self.weapon_skins.x_g22c_waves.parts = {
+		wpn_fps_pis_g22c_b_standard = {
+			[Idstring("mtr_g22c"):key()] = {
+				pattern_pos = Vector3(0, 0.35917, 0),
+				pattern_tweak = Vector3(2.68543, 0, 1)
+			}
+		},
+		wpn_fps_upg_fl_pis_crimson = {
+			[Idstring("mtr_crimson"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_009_df")
+			}
+		},
+		wpn_fps_upg_fl_pis_m3x = {
+			[Idstring("mtr_m3x"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_010_b_df")
+			}
+		}
+	}
+	self.weapon_skins.x_g22c_waves.types = {
+		lower_reciever = {
+			base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_015_b_df")
+		}
+	}
+	self.weapon_skins.r870_waves = {}
+	self.weapon_skins.r870_waves.name_id = "bm_wskn_r870_waves"
+	self.weapon_skins.r870_waves.desc_id = "bm_wskn_r870_waves_desc"
+	self.weapon_skins.r870_waves.weapon_id = "r870"
+	self.weapon_skins.r870_waves.rarity = "legendary"
+	self.weapon_skins.r870_waves.bonus = "spread_n1"
+	self.weapon_skins.r870_waves.reserve_quality = true
+	self.weapon_skins.r870_waves.texture_bundle_folder = "cash/safes/surf"
+	self.weapon_skins.r870_waves.unique_name_id = "bm_wskn_r870_waves"
+	self.weapon_skins.r870_waves.locked = true
+	self.weapon_skins.r870_waves.base_gradient = Idstring("units/payday2_cash/safes/surf/base_gradient/base_surf_017_df")
+	self.weapon_skins.r870_waves.default_blueprint = {
+		"wpn_fps_shot_r870_body_standard",
+		"wpn_fps_shot_r870_b_legendary",
+		"wpn_fps_shot_r870_fg_legendary",
+		"wpn_fps_shot_r870_s_legendary"
+	}
+	self.weapon_skins.r870_waves.parts = {
+		wpn_fps_shot_r870_body_standard = {
+			[Idstring("receiver"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/surf/sticker/sticker_legendary_big_df"),
+				uv_scale = Vector3(0.78745, 0.787775, 1),
+				uv_offset_rot = Vector3(-0.132736, 1.12235, 0)
+			}
+		},
+		wpn_fps_shot_r870_b_legendary = {
+			[Idstring("long_barrel"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/surf/sticker/sticker_legendary_big_df"),
+				uv_scale = Vector3(0.834774, 0.930124, 1),
+				uv_offset_rot = Vector3(-0.165514, 1.10327, 3.15133)
+			},
+			[Idstring("mtr_legendary_barrel"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/surf/sticker/sticker_legendary_big_df"),
+				uv_offset_rot = Vector3(0.184614, 1.15697, 1.61487),
+				uv_scale = Vector3(2.79044, 2.59874, 1),
+				base_gradient = Idstring("units/payday2_cash/safes/shared/base_gradient/base_tactical_001_df")
+			}
+		}
+	}
+	self.weapon_skins.r870_waves.types = {
+		foregrip = {
+			pattern_pos = Vector3(-0.842833, 0.130217, 0),
+			pattern_tweak = Vector3(2.92392, 0, 1),
+			pattern = Idstring("units/payday2_cash/safes/dallas/pattern/pattern_wood_df"),
+			pattern_gradient = Idstring("units/payday2_cash/safes/dallas/pattern_gradient/gradient_dallas_wood_002_df")
+		},
+		stock = {
+			sticker = Idstring("units/payday2_cash/safes/surf/sticker/sticker_legendary_small_df"),
+			uv_offset_rot = Vector3(-0.323229, 0.956632, 4.91956),
+			pattern_tweak = Vector3(2.73313, 1.5929, 1),
+			pattern_pos = Vector3(-0.127355, -0.585261, 0),
+			uv_scale = Vector3(19.9523, 20, 1),
+			pattern = Idstring("units/payday2_cash/safes/dallas/pattern/pattern_wood_df"),
+			pattern_gradient = Idstring("units/payday2_cash/safes/dallas/pattern_gradient/gradient_dallas_wood_002_df")
 		}
 	}
 end

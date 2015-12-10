@@ -123,7 +123,7 @@ function CopLogicPhalanxVip.register_in_group_ai(unit)
 	managers.groupai:state():register_phalanx_vip(unit)
 end
 function CopLogicPhalanxVip._set_final_health_limit(data)
-	data.unit:base():char_tweak().LOWER_HEALTH_PERCENTAGE_LIMIT = data.unit:base():char_tweak().FINAL_LOWER_HEALTH_PERCENTAGE_LIMIT
+	data.unit:character_damage():host_set_final_lower_health_percentage_limit()
 end
 function CopLogicPhalanxVip._chk_should_breakup(data)
 	local flee_health_ratio = tweak_data.group_ai.phalanx.vip.health_ratio_flee

@@ -3297,11 +3297,7 @@ function WeaponFactoryTweakData:_init_olympic()
 		name_id = "bm_wp_olympic_s_adjust",
 		a_obj = "a_s",
 		unit = "units/payday2/weapons/wpn_fps_smg_olympic_pts/wpn_fps_smg_olympic_s_adjust",
-		stats = {
-			value = 1,
-			recoil = 1,
-			spread_moving = 1
-		}
+		stats = {value = 1}
 	}
 	self.parts.wpn_fps_smg_olympic_fg_railed.third_unit = "units/payday2/weapons/wpn_third_smg_olympic_pts/wpn_third_smg_olympic_fg_railed"
 	self.parts.wpn_fps_smg_olympic_fg_olympic.third_unit = "units/payday2/weapons/wpn_third_smg_olympic_pts/wpn_third_smg_olympic_fg_olympic"
@@ -7302,7 +7298,10 @@ function WeaponFactoryTweakData:_init_r870()
 		"wpn_fps_upg_m4_s_mk46",
 		"wpn_fps_upg_m4_s_ubr",
 		"wpn_fps_upg_fl_ass_utg",
-		"wpn_fps_upg_ns_sho_salvo_large"
+		"wpn_fps_upg_ns_sho_salvo_large",
+		"wpn_fps_shot_r870_b_legendary",
+		"wpn_fps_shot_r870_s_legendary",
+		"wpn_fps_shot_r870_fg_legendary"
 	}
 	self.wpn_fps_shot_r870_npc = deep_clone(self.wpn_fps_shot_r870)
 	self.wpn_fps_shot_r870_npc.unit = "units/payday2/weapons/wpn_fps_shot_r870/wpn_fps_shot_r870_npc"
@@ -23904,6 +23903,48 @@ function WeaponFactoryTweakData:_init_legendary()
 		unatainable = true
 	}
 	self.parts.wpn_fps_smg_p90_b_legend.third_unit = "units/payday2_cash/safes/dallas/weapons/wpn_third_smg_p90_b_legendary/wpn_third_smg_p90_b_legend"
+	self.parts.wpn_fps_shot_r870_b_legendary = {
+		type = "barrel",
+		name_id = "bm_wp_r870_b_legend ",
+		a_obj = "a_b",
+		unit = "units/payday2_cash/safes/surf/weapons/wpn_fps_shot_r870_b_legend/wpn_fps_shot_r870_b_legendary",
+		stats = {
+			value = 1,
+			damage = 3,
+			extra_ammo = 2,
+			recoil = 10
+		},
+		unatainable = true,
+		stance_mod = {
+			wpn_fps_shot_r870 = {
+				translation = Vector3(0, 0, 0.8)
+			}
+		}
+	}
+	self.parts.wpn_fps_shot_r870_s_legendary = {
+		type = "stock",
+		name_id = "bm_wp_r870_b_legend ",
+		a_obj = "a_s",
+		unit = "units/payday2_cash/safes/surf/weapons/wpn_fps_shot_r870_fg_legend/wpn_fps_shot_r870_s_legendary",
+		stats = {value = 1},
+		unatainable = true
+	}
+	self.parts.wpn_fps_shot_r870_fg_legendary = {
+		type = "foregrip",
+		name_id = "bm_wp_r870_b_legend ",
+		a_obj = "a_fg",
+		unit = "units/payday2_cash/safes/surf/weapons/wpn_fps_shot_r870_fg_legend/wpn_fps_shot_r870_fg_legendary",
+		stats = {value = 1},
+		unatainable = true,
+		animations = {
+			reload_exit = "reload_exit",
+			fire = "recoil",
+			fire_steelsight = "recoil_zoom"
+		}
+	}
+	self.parts.wpn_fps_shot_r870_b_legendary.third_unit = "units/payday2_cash/safes/surf/weapons/wpn_fps_shot_r870_b_legend/wpn_third_shot_r870_b_legendary"
+	self.parts.wpn_fps_shot_r870_s_legendary.third_unit = "units/payday2_cash/safes/surf/weapons/wpn_fps_shot_r870_fg_legend/wpn_third_shot_r870_s_legendary"
+	self.parts.wpn_fps_shot_r870_fg_legendary.third_unit = "units/payday2_cash/safes/surf/weapons/wpn_fps_shot_r870_fg_legend/wpn_third_shot_r870_fg_legendary"
 end
 function WeaponFactoryTweakData:_init_cc_material_config()
 	local parts = self.parts

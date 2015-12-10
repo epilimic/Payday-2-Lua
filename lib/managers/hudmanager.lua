@@ -46,6 +46,7 @@ function HUDManager:init()
 	managers.user:add_setting_changed_callback("controller_mod", callback(self, self, "controller_mod_changed"), true)
 	self:_init_player_hud_values()
 	self._chatinput_changed_callback_handler = CoreEvent.CallbackEventHandler:new()
+	self._chat_focus = false
 	HUDManager.HIDEABLE_HUDS = {}
 	HUDManager.HIDEABLE_HUDS[PlayerBase.PLAYER_INFO_HUD_PD2:key()] = true
 	HUDManager.HIDEABLE_HUDS[PlayerBase.PLAYER_INFO_HUD_FULLSCREEN_PD2:key()] = true
@@ -346,9 +347,6 @@ function HUDManager:show(name)
 	else
 		Application:error("ERROR! Component " .. tostring(name) .. " isn't loaded!")
 	end
-	if name == PlayerBase.PLAYER_INFO_HUD_PD2 then
-		self._hud_chat = self._hud_chat_ingame or self._hud_chat
-	end
 end
 function HUDManager:hide(name)
 	if name == PlayerBase.PLAYER_INFO_HUD then
@@ -373,9 +371,8 @@ function HUDManager:hide(name)
 	elseif not component then
 		Application:error("ERROR! Component " .. tostring(name) .. " isn't loaded!")
 	end
-	if name == PlayerBase.PLAYER_INFO_HUD_PD2 then
-		self._hud_chat = self._hud_chat_access or self._hud_chat
-	end
+end
+function HUDManager:set_hud_chat(hud)
 end
 function HUDManager:visible(name)
 	if self._component_map[name:key()] then

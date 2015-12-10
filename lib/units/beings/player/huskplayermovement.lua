@@ -364,12 +364,43 @@ function HuskPlayerMovement:set_visual_deployable_equipment(deployable, amount)
 end
 function HuskPlayerMovement:set_visual_carry(carry_id)
 	if carry_id then
+		if tweak_data.carry[carry_id].visual_unit_name then
+			self:_create_carry_unit(tweak_data.carry[carry_id].visual_unit_name)
+			return
+		end
 		local object_name = tweak_data.carry[carry_id].visual_object or "g_lootbag"
 		self._current_visual_carry_object = self._unit:get_object(Idstring(object_name))
 		self._current_visual_carry_object:set_visibility(true)
 	elseif alive(self._current_visual_carry_object) then
 		self._current_visual_carry_object:set_visibility(false)
 		self._current_visual_carry_object = nil
+	else
+		self:_destroy_current_carry_unit()
+	end
+end
+function HuskPlayerMovement:_destroy_current_carry_unit()
+	if alive(self._current_carry_unit) then
+		self._current_carry_unit:set_slot(0)
+		self._current_carry_unit = nil
+	end
+end
+function HuskPlayerMovement:_create_carry_unit(unit_name)
+	self:_destroy_current_carry_unit()
+	self._current_carry_unit = safe_spawn_unit(Idstring(unit_name), self._unit:position())
+	local objects = {
+		"Spine",
+		"Spine1",
+		"Spine2",
+		"LeftShoulder",
+		"RightShoulder",
+		"LeftUpLeg",
+		"RightUpLeg"
+	}
+	self._unit:link(Idstring("Hips"), self._current_carry_unit, self._current_carry_unit:orientation_object():name())
+	for _, o_name in ipairs(objects) do
+		self._current_carry_unit:get_object(Idstring(o_name)):link(self._unit:get_object(Idstring(o_name)))
+		self._current_carry_unit:get_object(Idstring(o_name)):set_position(self._unit:get_object(Idstring(o_name)):position())
+		self._current_carry_unit:get_object(Idstring(o_name)):set_rotation(self._unit:get_object(Idstring(o_name)):rotation())
 	end
 end
 function HuskPlayerMovement:update(unit, t, dt)
@@ -2088,6 +2119,7 @@ function HuskPlayerMovement:pre_destroy(unit)
 		self._enemy_weapons_hot_listen_id = nil
 	end
 	self:anim_cbk_unspawn_melee_item()
+	self:_destroy_current_carry_unit()
 end
 function HuskPlayerMovement:set_attention_setting_enabled(setting_name, state)
 	return PlayerMovement.set_attention_setting_enabled(self, setting_name, state, false)

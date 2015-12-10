@@ -91,13 +91,6 @@ function ChallengeManager:_fetch_done_clbk(success, s)
 		self._global.validated = true
 	end
 end
-function ChallengeManager:debug_activate_all()
-	if Application:production_build() then
-		for key, challenge in pairs(self._global.challenges) do
-			self:activate_challenge(challenge.id, key, "debug")
-		end
-	end
-end
 function ChallengeManager:_load_challenges_from_xml()
 	local list = PackageManager:script_data(self.FILE_EXTENSION:id(), self.PATH:id())
 	local objectives, rewards
@@ -330,7 +323,7 @@ function ChallengeManager:on_give_all_rewards(id, key)
 end
 function ChallengeManager:_give_reward(reward)
 	reward.rewarded = true
-	local reward = #reward > 0 and loot_drop[math.random(#reward)] or reward
+	local reward = #reward > 0 and reward[math.random(#reward)] or reward
 	if reward.choose_weapon_reward then
 	else
 		local entry = tweak_data:get_raw_value("blackmarket", reward.type_items, reward.item_entry)

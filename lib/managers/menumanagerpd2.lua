@@ -329,6 +329,10 @@ function MenuCallbackHandler:_update_outfit_information()
 			kit_menu.renderer:set_slot_outfit(id, criminal_name, outfit_string)
 		end
 		local_peer:set_outfit_string(outfit_string)
+		local local_player = managers.player:local_player()
+		if alive(local_player) and local_player:character_damage() then
+			local_player:character_damage():update_armor_stored_health()
+		end
 		managers.network:session():check_send_outfit()
 	end
 end

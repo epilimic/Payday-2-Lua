@@ -289,6 +289,15 @@ function MissionAssetsManager:get_all_asset_ids(only_visible)
 	end
 	return asset_ids
 end
+function MissionAssetsManager:get_unlocked_asset_ids(only_can_unlock)
+	local asset_ids = {}
+	for _, asset in ipairs(self._global.assets) do
+		if asset.unlocked and (not only_can_unlock or asset.can_unlock) then
+			table.insert(asset_ids, asset.id)
+		end
+	end
+	return asset_ids
+end
 function MissionAssetsManager:get_default_asset_id()
 	return "none"
 end

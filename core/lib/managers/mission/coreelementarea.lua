@@ -356,7 +356,7 @@ function ElementAreaReportTrigger:update_area()
 			if alive(unit) then
 				if Network:is_client() then
 					self:_client_check_state(unit)
-				else
+				elseif Network:is_server() then
 					self:_check_state(unit)
 				end
 			end

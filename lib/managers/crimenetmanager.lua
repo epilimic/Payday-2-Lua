@@ -1485,6 +1485,7 @@ function CrimeNetGui:init(ws, fullscreeen_ws, node)
 	end
 	self._special_contracts_id = {}
 	self:add_special_contracts(node:parameters().no_casino)
+	do break end
 	if managers.features:can_announce("crimenet_hacked") then
 	else
 		managers.features:announce_feature("crimenet_welcome")

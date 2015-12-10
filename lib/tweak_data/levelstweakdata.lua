@@ -1003,6 +1003,16 @@ function LevelsTweakData:init()
 	}
 	self.pbr2.cube = "cube_apply_heist_bank"
 	self.pbr.max_bags = 20
+	self.cane = {}
+	self.cane.name_id = "heist_cane_hl"
+	self.cane.briefing_id = "heist_cane_briefing"
+	self.cane.briefing_dialog = "Play_pln_can_brf_01"
+	self.cane.world_name = "narratives/vlad/cane"
+	self.cane.intro_event = "Play_pln_can_intro_01"
+	self.cane.outro_event = "Play_vld_can_11"
+	self.cane.package = "packages/cane"
+	self.cane.cube = "cube_apply_heist_bank"
+	self.cane.max_bags = 3600
 	self.nail = {}
 	self.nail.name_id = "heist_nail_hl"
 	self.nail.briefing_id = "heist_nail_briefing"
@@ -1087,6 +1097,7 @@ function LevelsTweakData:init()
 		"driving_escapes_industry_day",
 		"driving_escapes_city_day",
 		"jolly",
+		"cane",
 		"red2",
 		"dinner",
 		"pbr",

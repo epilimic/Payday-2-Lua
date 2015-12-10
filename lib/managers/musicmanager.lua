@@ -283,7 +283,8 @@ function MusicManager:jukebox_default_tracks()
 		heist_dinner = "track_35",
 		heist_nail = "track_36",
 		heist_pbr = "all",
-		heist_pbr2 = "all"
+		heist_pbr2 = "all",
+		heist_cane = "track_39"
 	}
 	if managers.dlc:has_armored_transport() or managers.dlc:has_soundtrack_or_cce() then
 		default_options.heist_arm_cro = "track_09"

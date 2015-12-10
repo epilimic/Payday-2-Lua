@@ -539,10 +539,11 @@ function WeaponDescription._get_stats(name, category, slot, blueprint)
 	local silencer = false
 	local single_mod = false
 	local auto_mod = false
-	local blueprint = blueprint or slot and managers.blackmarket:get_weapon_blueprint(category, slot) or managers.weapon_factory:get_default_blueprint_by_factory_id(managers.weapon_factory:get_factory_id_by_weapon_id(name))
+	local factory_id = managers.weapon_factory:get_factory_id_by_weapon_id(name)
+	local blueprint = blueprint or slot and managers.blackmarket:get_weapon_blueprint(category, slot) or managers.weapon_factory:get_default_blueprint_by_factory_id(factory_id)
 	local cosmetics = managers.blackmarket:get_weapon_cosmetics(category, slot)
 	local bonus_stats = {}
-	bonus_stats = not cosmetics or not cosmetics.id or not cosmetics.bonus or managers.job:is_current_job_competitive() or tweak_data:get_raw_value("economy", "bonuses", tweak_data.blackmarket.weapon_skins[cosmetics.id].bonus, "stats") or {}
+	bonus_stats = not cosmetics or not cosmetics.id or not cosmetics.bonus or managers.job:is_current_job_competitive() or managers.weapon_factory:has_perk("bonus", factory_id, blueprint) or tweak_data:get_raw_value("economy", "bonuses", tweak_data.blackmarket.weapon_skins[cosmetics.id].bonus, "stats") or {}
 	if blueprint then
 		equipped_mods = deep_clone(blueprint)
 		local factory_id = managers.weapon_factory:get_factory_id_by_weapon_id(name)

@@ -441,6 +441,14 @@ function GuiTweakData:init()
 		store = 422400,
 		image = "guis/dlcs/berry/textures/pd2/content_updates/berry"
 	}
+	local cane = {
+		id = "cane",
+		name_id = "menu_content_cane",
+		desc_id = "menu_content_cane_desc",
+		date_id = "menu_content_cane_date",
+		webpage = "http://www.overkillsoftware.com/games/christmas2015/",
+		image = "guis/textures/pd2/content_updates/xmas2015"
+	}
 	self.content_updates = {
 		title_id = "menu_content_updates",
 		choice_id = "menu_content_updates_previous",
@@ -500,7 +508,8 @@ function GuiTweakData:init()
 			steel,
 			gordon,
 			berry,
-			rip
+			rip,
+			cane
 		}
 	elseif SystemInfo:platform() == Idstring("PS3") then
 		self.content_updates.item_list = {

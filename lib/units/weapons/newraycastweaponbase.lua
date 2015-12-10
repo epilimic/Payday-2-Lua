@@ -335,7 +335,7 @@ function NewRaycastWeaponBase:_update_stats_values()
 	local stats_tweak_data = tweak_data.weapon.stats
 	local modifier_stats = self:weapon_tweak_data().stats_modifiers
 	local bonus_stats = self._cosmetics_bonus and self._cosmetics_data and self._cosmetics_data.bonus and tweak_data.economy.bonuses[self._cosmetics_data.bonus] and tweak_data.economy.bonuses[self._cosmetics_data.bonus].stats or {}
-	if managers.job:is_current_job_competitive() then
+	if managers.job:is_current_job_competitive() or managers.weapon_factory:has_perk("bonus", self._factory_id, self._blueprint) then
 		bonus_stats = {}
 	end
 	if stats.zoom then

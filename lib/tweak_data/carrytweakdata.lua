@@ -363,30 +363,45 @@ function CarryTweakData:init(tweak_data)
 	self.nail_muriatic_acid = {}
 	self.nail_muriatic_acid.type = "light"
 	self.nail_muriatic_acid.name_id = "hud_int_equipment_acid"
+	self.nail_muriatic_acid.skip_exit_secure = true
 	self.nail_muriatic_acid.visual_object = "g_toolsbag"
 	self.nail_muriatic_acid.unit = "units/payday2/pickups/gen_pku_toolbag/gen_pku_toolbag"
 	self.nail_muriatic_acid.AI_carry = {SO_category = "enemies"}
 	self.nail_caustic_soda = {}
 	self.nail_caustic_soda.type = "light"
 	self.nail_caustic_soda.name_id = "hud_int_equipment_caustic_soda"
+	self.nail_caustic_soda.skip_exit_secure = true
 	self.nail_caustic_soda.visual_object = "g_toolsbag_large"
 	self.nail_caustic_soda.unit = "units/payday2/pickups/gen_pku_toolbag_large/gen_pku_toolbag_large"
 	self.nail_caustic_soda.AI_carry = {SO_category = "enemies"}
 	self.nail_hydrogen_chloride = {}
 	self.nail_hydrogen_chloride.type = "light"
 	self.nail_hydrogen_chloride.name_id = "hud_int_equipment_hydrogen_chloride"
+	self.nail_hydrogen_chloride.skip_exit_secure = true
 	self.nail_hydrogen_chloride.visual_object = "g_cagebag"
 	self.nail_hydrogen_chloride.unit = "units/payday2/pickups/gen_pku_cage_bag/gen_pku_cage_bag"
 	self.nail_hydrogen_chloride.AI_carry = {SO_category = "enemies"}
 	self.nail_euphadrine_pills = {}
 	self.nail_euphadrine_pills.type = "light"
 	self.nail_euphadrine_pills.name_id = "hud_carry_euphadrine_pills"
+	self.nail_euphadrine_pills.skip_exit_secure = true
 	self.nail_euphadrine_pills.AI_carry = {SO_category = "enemies"}
 	self.meth_half = {}
 	self.meth_half.type = "coke_light"
 	self.meth_half.name_id = "hud_carry_meth"
 	self.meth_half.bag_value = "meth_half"
 	self.meth_half.AI_carry = {SO_category = "enemies"}
+	self.equipment_bag_global_event = {}
+	self.equipment_bag_global_event.type = "medium"
+	self.equipment_bag_global_event.name_id = "hud_carry_equipment_bag"
+	self.equipment_bag_global_event.skip_exit_secure = true
+	self.equipment_bag_global_event.visual_object = "g_toolsbag"
+	self.equipment_bag_global_event.unit = "units/pd2_dlc_cane/pickups/gen_pku_toolbag_global_event/gen_pku_toolbag_global_event"
+	self.present = {}
+	self.present.type = "coke_light"
+	self.present.name_id = "hud_carry_present"
+	self.present.bag_value = "present"
+	self.present.AI_carry = {SO_category = "enemies"}
 	self.masterpiece_painting = {}
 	self.masterpiece_painting.type = "light"
 	self.masterpiece_painting.name_id = "hud_carry_masterpiece_painting"
@@ -415,6 +430,7 @@ function CarryTweakData:init(tweak_data)
 	self.parachute = {}
 	self.parachute.type = "light"
 	self.parachute.name_id = "hud_carry_parachute"
+	self.parachute.skip_exit_secure = true
 	self.parachute.visual_object = "g_chute"
 	self.parachute.unit = "units/pd2_dlc_jerry/pickups/gen_pku_parachute_bag/gen_pku_parachute_bag"
 	self.parachute.AI_carry = {SO_category = "enemies"}

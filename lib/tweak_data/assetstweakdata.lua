@@ -177,6 +177,7 @@ function AssetsTweakData:_init_assets(tweak_data)
 		"red2",
 		"pbr2",
 		"dinner",
+		"cane",
 		"nail"
 	}
 	self.grenade_crate.visible_if_locked = true
@@ -205,6 +206,7 @@ function AssetsTweakData:_init_assets(tweak_data)
 		"red2",
 		"pbr2",
 		"dinner",
+		"cane",
 		"nail"
 	}
 	self.ammo_bag.visible_if_locked = true
@@ -230,6 +232,7 @@ function AssetsTweakData:_init_assets(tweak_data)
 		"red2",
 		"pbr2",
 		"dinner",
+		"cane",
 		"nail"
 	}
 	self.health_bag.visible_if_locked = true

@@ -240,6 +240,36 @@ function EconomyTweakData:init()
 		}
 	}
 	self.contents.dallas_01_legendary.rarity = "legendary"
+	self.contents.surf_01 = {}
+	self.contents.surf_01.def_id = 10008
+	self.contents.surf_01.contains = {
+		weapon_skins = {
+			"akm_waves",
+			"asval_waves",
+			"m16_waves",
+			"baka_waves",
+			"s552_waves",
+			"usp_waves",
+			"mac10_waves",
+			"aug_waves",
+			"scar_waves",
+			"colt_1911_waves",
+			"polymer_waves",
+			"ak5_waves",
+			"mosin_waves",
+			"striker_waves",
+			"x_g22c_waves"
+		},
+		contents = {
+			"surf_01_legendary"
+		}
+	}
+	self.contents.surf_01_legendary = {}
+	self.contents.surf_01_legendary.def_id = 10009
+	self.contents.surf_01_legendary.contains = {
+		weapon_skins = {"r870_waves"}
+	}
+	self.contents.surf_01_legendary.rarity = "legendary"
 	self.safes.overkill_01 = {}
 	self.safes.overkill_01.def_id = 50000
 	self.safes.overkill_01.promo = true
@@ -288,6 +318,13 @@ function EconomyTweakData:init()
 	self.safes.dallas_01.unit_name = "units/payday2_cash/safes/dallas/safe/eco_safe_dallas"
 	self.safes.dallas_01.texture_bundle_folder = "cash/safes/dallas"
 	self.safes.dallas_01.market_link = "https://steamcommunity.com/market/listings/218620/Dallas%20Safe"
+	self.safes.surf_01 = {}
+	self.safes.surf_01.drill = "surf_01"
+	self.safes.surf_01.content = "surf_01"
+	self.safes.surf_01.name_id = "bm_menu_safe_surf_01"
+	self.safes.surf_01.unit_name = "units/payday2_cash/safes/surf/safe/eco_safe_surf"
+	self.safes.surf_01.texture_bundle_folder = "cash/safes/surf"
+	self.safes.surf_01.market_link = "https://steamcommunity.com/market/listings/218620/Surf%20Safe"
 	self.drills.overkill_01 = {}
 	self.drills.overkill_01.safe = "overkill_01"
 	self.drills.overkill_01.def_id = 70000
@@ -339,6 +376,14 @@ function EconomyTweakData:init()
 	self.drills.dallas_01.desc_id = "bm_menu_drill_dallas_01_desc"
 	self.drills.dallas_01.unit_name = "units/payday2_cash/safes/dallas/drill/eco_drill_dallas"
 	self.drills.dallas_01.texture_bundle_folder = "cash/safes/dallas"
+	self.drills.surf_01 = {}
+	self.drills.surf_01.def_id = 70006
+	self.drills.surf_01.safe = "surf_01"
+	self.drills.surf_01.promo = true
+	self.drills.surf_01.unit_name = "units/payday2_cash/safes/surf/drill/eco_drill_surf"
+	self.drills.surf_01.name_id = "bm_menu_drill_surf"
+	self.drills.surf_01.desc_id = "bm_menu_drill_surf_desc"
+	self.drills.surf_01.texture_bundle_folder = "cash/safes/surf"
 	self.bonuses = {}
 	self.bonuses.concealment_p1 = {}
 	self.bonuses.concealment_p1.name_id = "bm_menu_bonus_concealment"

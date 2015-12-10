@@ -3220,4 +3220,10 @@ function InteractionTweakData:init()
 	self.hold_place_strap.sound_start = "bar_attach_money_stack"
 	self.hold_place_strap.sound_interupt = "bar_attach_money_stack_cancel"
 	self.hold_place_strap.sound_done = "bar_attach_money_stack_finished"
+	self.hold_pku_present = {}
+	self.hold_pku_present.text_id = "hud_int_hold_bag_present"
+	self.hold_pku_present.action_text_id = "hud_action_bagging_present"
+	self.hold_pku_present.start_active = false
+	self.hold_pku_present.timer = 3
+	self.hold_pku_present.blocked_hint = "carry_block"
 end

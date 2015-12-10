@@ -2504,7 +2504,7 @@ function MenuNodeChooseWeaponRewardGui:_setup_item_panel(safe_rect, res)
 		layer = 1
 	})
 	icon:set_position(10, 10)
-	local droppable_parts = managers.blackmarket:get_lootdropable_mods_by_weapon_id(self.node:parameters().listed_weapon, self.node:parameters().listed_global_value)
+	local droppable_parts = managers.blackmarket:get_lootdropable_mods_by_weapon_id(self.node:parameters().listed_weapon, self.node:parameters().listed_global_value, true)
 	local count = 0
 	local inv_count = 0
 	for _, part_data in ipairs(droppable_parts) do

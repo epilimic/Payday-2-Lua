@@ -6717,6 +6717,15 @@ function CharacterTweakData:character_map()
 				"civ_male_butcher_1"
 			}
 		},
+		cane = {
+			path = "units/pd2_dlc_cane/characters/",
+			list = {
+				"civ_male_helper_1",
+				"civ_male_helper_2",
+				"civ_male_helper_3",
+				"civ_male_helper_4"
+			}
+		},
 		berry = {
 			path = "units/pd2_dlc_berry/characters/",
 			list = {

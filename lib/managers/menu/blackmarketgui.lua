@@ -5174,6 +5174,7 @@ function BlackMarketGui:update_info_text()
 		local is_bayonet = part_id and tweak_data.weapon.factory.parts[part_id].type == "bayonet" or perks and table.contains(perks, "bayonet")
 		local is_bipod = part_id and tweak_data.weapon.factory.parts[part_id].type == "bipod" or perks and table.contains(perks, "bipod")
 		local has_desc = part_id and tweak_data.weapon.factory.parts[part_id].has_description == true
+		updated_texts[4].resource_color = {}
 		if is_gadget or is_ammo or is_bayonet or is_bipod or has_desc then
 			local crafted = managers.blackmarket:get_crafted_category_slot(prev_data.category, prev_data.slot)
 			updated_texts[4].text = managers.weapon_factory:get_part_desc_by_part_id_from_weapon(part_id, crafted.factory_id, crafted.blueprint)
@@ -5186,9 +5187,13 @@ function BlackMarketGui:update_info_text()
 			else
 				updated_texts[4].text = "##" .. managers.localization:to_upper_text(tweak_data.lootdrop.global_values[slot_data.global_value].desc_id) .. "##"
 			end
-			updated_texts[4].resource_color = {
-				tweak_data.lootdrop.global_values[slot_data.global_value].color
-			}
+			table.insert(updated_texts[4].resource_color, tweak_data.lootdrop.global_values[slot_data.global_value].color)
+		end
+		if perks and table.contains(perks, "bonus") then
+			updated_texts[4].text = updated_texts[4].text .. [[
+
+##]] .. managers.localization:to_upper_text("bm_menu_disables_cosmetic_bonus") .. "##"
+			table.insert(updated_texts[4].resource_color, tweak_data.screen_colors.text)
 		end
 		updated_texts[4].below_stats = true
 	elseif identifier == self.identifiers.mask_mod then
@@ -5450,14 +5455,6 @@ function BlackMarketGui:update_info_text()
 					mods = tweak_data.screen_colors.text
 				}, true)
 				updated_texts[4].below_stats = true
-				Global.a = {
-					instance_id = 0,
-					entry = slot_data.name,
-					category = "weapon_skins",
-					quality = slot_data.cosmetic_quality,
-					bonus = slot_data.cosmetic_bonus
-				}
-				Global.b = tweak_data.blackmarket.weapon_skins[slot_data.name]
 			elseif slot_data.safe_entry then
 				local content_text, color_ranges = InventoryDescription.create_description_safe(slot_data.safe_entry, {}, true)
 				updated_texts[2].text = content_text

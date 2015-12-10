@@ -85,6 +85,7 @@ MissionEndState.at_enter = function(self, old_state, params)
 	managers.menu_component:set_max_lines_game_chat(7)
 	managers.hud:set_success_endscreen_hud(self._success, self._server_left)
 	managers.hud:show_endscreen_hud()
+	self:chk_complete_heist_achievements()
 	managers.groupai:state():set_AI_enabled(false)
 	local player = managers.player:player_unit()
 	if player then
@@ -106,458 +107,91 @@ MissionEndState.at_enter = function(self, old_state, params)
 	self._sound_listener:set_position(Vector3(0, -50000, 0))
 	self._sound_listener:activate(true)
 	local total_killed = managers.statistics:session_total_killed()
-	if self._success then
-		if not managers.statistics:is_dropin() then
-			local jordan_4 = managers.job:get_memory("jordan_4")
-			if not managers.game_play_central or not managers.game_play_central:get_heist_timer() then
-				local t = not jordan_4 and jordan_4 ~= nil or 0
-			end
-			local last_jump_t = managers.job:get_memory("last_jump_t", true) or 0
-			if last_jump_t and last_jump_t + tweak_data.achievement.complete_heist_achievements.jordan_4.jump_timer < t then
-				print("[achievement] Failed Achievement " .. "brooklyn_4")
-				managers.job:set_memory("jordan_4", false)
-			end
-			local ach_data = tweak_data.achievement.close_and_personal
-			local session_killed = managers.statistics:session_killed()
-			local has_type_stats = (ach_data.kill_type and not not total_killed[ach_data.kill_type])
-			if has_type_stats then
-				local total_kill_count = total_killed.count
-				local total_kill_type_count = total_killed[ach_data.kill_type]
-			if total_kill_count == total_kill_type_count then
-				end
-				local civilians = {"civilian", "civilian_female", "bank_manager"}
-				local count = nil
-				for i,name in ipairs(civilians) do
-					count = session_killed[name]
-					if count then
-						total_kill_count = total_kill_count - count.count
-						total_kill_type_count = total_kill_type_count - (count[ach_data.kill_type] or 0)
-					end
-				end
-			if total_kill_count == total_kill_type_count then
-				end
-				local count_pass = not ach_data.count or ach_data.count <= total_kill_count
-			if count_pass then
-				end
-				managers.achievment:award(ach_data.award)
-			end
-			local shotgun_one_o_one = tweak_data.achievement.shotgun_one_o_one
-			if shotgun_one_o_one.count <= total_killed.count then
-				local session_used_weapons = managers.statistics:session_used_weapons()
-				local passed = true
-				for _,weapon_id in ipairs(session_used_weapons) do
-					if not tweak_data.weapon[weapon_id] or tweak_data.weapon[weapon_id].category ~= "shotgun" then
-						passed = false
-				else
-					end
-				end
-			if passed then
-				end
-			if shotgun_one_o_one.accuracy <= managers.statistics:session_hit_accuracy() then
-				end
-				managers.achievment:award(shotgun_one_o_one.award)
-			end
-			local mask_pass, diff_pass, no_shots_pass, contract_pass, job_pass, jobs_pass, level_pass, levels_pass, stealth_pass, loud_pass, equipped_pass, job_value_pass, phalanx_vip_alive_pass, used_weapon_category_pass, equipped_team_pass, timer_pass, num_players_pass, pass_skills, killed_by_weapons_pass, killed_by_melee_pass, killed_by_grenade_pass, civilians_killed_pass, complete_job_pass, memory_pass, all_pass, weapon_data, memory, level_id, stage, num_skills = nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil
-			local killed_by_weapons = managers.statistics:session_killed_by_weapons()
-			local killed_by_melee = managers.statistics:session_killed_by_melee()
-			local killed_by_grenade = managers.statistics:session_killed_by_grenade()
-			local civilians_killed = managers.statistics:session_total_civilian_kills()
-			local phalanx_vip_alive = false
-			if not managers.enemy:all_enemies() then
-				for _,enemy in pairs({}) do
-				end
-				phalanx_vip_alive = not alive(enemy.unit) or enemy.unit:base()._tweak_table == "phalanx_vip"
-				if phalanx_vip_alive then
-					do return end
-				end
-			end
-			for achievement,achievement_data in pairs(tweak_data.achievement.complete_heist_achievements) do
-				level_id = managers.job:has_active_job() and managers.job:current_level_id() or ""
-				if achievement_data.difficulty then
-					diff_pass = table.contains(achievement_data.difficulty, Global.game_settings.difficulty)
-					diff_pass = diff_pass
-				end
-				mask_pass = not achievement_data.mask or managers.blackmarket:equipped_mask().mask_id == achievement_data.mask
-				job_pass = not achievement_data.job or not managers.statistics:started_session_from_beginning() or (not managers.job:on_last_stage() and not achievement_data.need_full_job) or managers.job:current_real_job_id() == achievement_data.job
-				if achievement_data.jobs and managers.statistics:started_session_from_beginning() and (managers.job:on_last_stage() or achievement_data.need_full_job) then
-					jobs_pass = table.contains(achievement_data.jobs, managers.job:current_real_job_id())
-				end
-				jobs_pass = jobs_pass
-				level_pass = not achievement_data.level_id or achievement_data.level_id == level_id
-				if achievement_data.levels then
-					levels_pass = table.contains(achievement_data.levels, level_id)
-					levels_pass = levels_pass
-				end
-				contract_pass = not achievement_data.contract or managers.job:current_contact_id() == achievement_data.contract
-				if achievement_data.complete_job and managers.statistics:started_session_from_beginning() then
-					complete_job_pass = managers.job:on_last_stage()
-				end
-				complete_job_pass = complete_job_pass
-				no_shots_pass = not achievement_data.no_shots or managers.statistics:session_total_shots(achievement_data.no_shots) == 0
-				if achievement_data.stealth and managers.groupai then
-					stealth_pass = managers.groupai:state():whisper_mode()
-				end
-				stealth_pass = stealth_pass
-				if achievement_data.loud and managers.groupai then
-					loud_pass = not managers.groupai:state():whisper_mode()
-				end
-				loud_pass = loud_pass
-				timer_pass = not achievement_data.timer or not managers.game_play_central or managers.game_play_central:get_heist_timer() <= achievement_data.timer
-				num_players_pass = not achievement_data.num_players or achievement_data.num_players <= managers.network:session():amount_of_players()
-				job_value_pass = not achievement_data.job_value or managers.mission:get_job_value(achievement_data.job_value.key) == achievement_data.job_value.value
-				memory_pass = not achievement_data.memory or managers.job:get_memory(achievement, achievement_data.memory.is_shortterm) == achievement_data.memory.value
-				if achievement_data.phalanx_vip_alive then
-					phalanx_vip_alive_pass = phalanx_vip_alive
-					phalanx_vip_alive_pass = phalanx_vip_alive_pass
-				end
-				used_weapon_category_pass = true
-				if achievement_data.used_weapon_category then
-					local used_weapons = managers.statistics:session_used_weapons()
-				if used_weapons then
-					end
-					local category = achievement_data.used_weapon_category
-					do
-						local weapon_tweak = nil
-						for _,weapon_id in ipairs(used_weapons) do
-							weapon_tweak = tweak_data.weapon[weapon_id]
-							if not weapon_tweak or weapon_tweak.category ~= category and (category ~= "pistol" or weapon_tweak.category ~= "akimbo") then
-								used_weapon_category_pass = false
-							end
-					else
+	self._criminals_completed = self._success and params.num_winners or 0
+	managers.statistics:stop_session({success = self._success, type = self._type})
+	managers.statistics:send_statistics()
+	managers.hud:set_statistics_endscreen_hud(self._criminals_completed, self._success)
+	if managers.statistics:started_session_from_beginning() then
+		local job = nil
+		for achievement,achievement_data in pairs(tweak_data.achievement.complete_heist_stats_achievements) do
+			if Global.game_settings.difficulty == achievement_data.difficulty then
+				local available_jobs = nil
+				if achievement_data.contact == "all" then
+					available_jobs = {}
+					for _,list in pairs(tweak_data.achievement.job_list) do
+						for _,job in pairs(list) do
+							table.insert(available_jobs, job)
 						end
 					end
-				end
-				killed_by_weapons_pass = not achievement_data.killed_by_weapons
-				if achievement_data.killed_by_weapons == 0 then
-					if killed_by_weapons ~= 0 then
-						killed_by_weapons_pass = not achievement_data.killed_by_weapons
 				else
-					end
+					available_jobs = deep_clone(tweak_data.achievement.job_list[achievement_data.contact])
 				end
-				killed_by_weapons_pass = achievement_data.killed_by_weapons <= killed_by_weapons
-				killed_by_melee_pass = not achievement_data.killed_by_melee
-				if achievement_data.killed_by_melee == 0 then
-					if killed_by_melee ~= 0 then
-						killed_by_melee_pass = not achievement_data.killed_by_melee
-				else
-					end
-				end
-				killed_by_melee_pass = achievement_data.killed_by_melee <= killed_by_melee
-				killed_by_grenade_pass = not achievement_data.killed_by_grenade
-				if achievement_data.killed_by_grenade == 0 then
-					if killed_by_grenade ~= 0 then
-						killed_by_grenade_pass = not achievement_data.killed_by_grenade
-				else
-					end
-				end
-				killed_by_grenade_pass = achievement_data.killed_by_grenade <= killed_by_grenade
-				civilians_killed_pass = not achievement_data.civilians_killed
-				if achievement_data.civilians_killed == 0 then
-					if civilians_killed ~= 0 then
-						civilians_killed_pass = not achievement_data.civilians_killed
-				else
-					end
-				end
-				civilians_killed_pass = achievement_data.civilians_killed <= civilians_killed
-				pass_skills = not achievement_data.num_skills
-				if not pass_skills then
-					num_skills = 0
-					for tree,data in ipairs(tweak_data.skilltree.trees) do
-						local points = managers.skilltree:get_tree_progress(tree)
-						num_skills = num_skills + points
-					end
-					pass_skills = num_skills <= achievement_data.num_skills
-				end
-				if achievement_data.equipped then
-					equipped_pass = false
-					equipped_pass = equipped_pass
-				end
-				if achievement_data.equipped then
-					for category,data in pairs(achievement_data.equipped) do
-						weapon_data = managers.blackmarket:equipped_item(category)
-						if (category == "grenades" or category == "armors") and data == weapon_data then
-							equipped_pass = true
-						elseif data.weapon_id and weapon_data and weapon_data.weapon_id and data.weapon_id == weapon_data.weapon_id then
-							equipped_pass = true
-						if data.blueprint then
-							end
-						if weapon_data.blueprint then
-							end
-							for _,part_or_parts in ipairs(data.blueprint) do
-								if type(part_or_parts) == "string" and not table.contains(weapon_data.blueprint, part_or_parts) then
-									equipped_pass = false
-								end
-							else
-								for _,part_or_parts in (for generator) do
-								end
-								local found_one = false
-								for _,part_id in ipairs(part_or_parts) do
-									if table.contains(weapon_data.blueprint, part_id) then
-										found_one = true
-								else
-									end
-								end
-								if not found_one then
-									equipped_pass = false
-							else
-								end
-							end
-						end
-					end
-					equipped_team_pass = true
-					if achievement_data.equipped_team then
-						local pass_armor, pass_deployable, pass_mask, pass_melee_weapon, pass_primary, pass_secondary, pass_primaries, pass_secondaries, pass_primary_unmodded, pass_secondary_unmodded, pass_skills, pass_melee_weapons, pass_primary_category, pass_secondary_category, pass_masks, pass_armors, pass_characters = nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil
-						local ad = achievement_data.equipped_team
-						do
-							local oufit = nil
-							for _,peer in pairs(managers.network:session():all_peers()) do
-								oufit = peer:blackmarket_outfit()
-								pass_deployable = not ad.deployable or ad.deployable == oufit.deployable
-								pass_armor = not ad.armor or (ad.armor == oufit.armor and ad.armor == oufit.armor_current)
-								if ad.armors and table.contains(ad.armors, oufit.armor) then
-									pass_armors = table.contains(ad.armors, oufit.armor_current)
-								end
-								pass_armors = pass_armors
-								pass_mask = not ad.mask or ad.mask == oufit.mask.mask_id
-								if ad.masks then
-									pass_masks = table.contains(ad.masks, oufit.mask.mask_id)
-									pass_masks = pass_masks
-								end
-								pass_melee_weapon = not ad.melee_weapon or ad.melee_weapon == oufit.melee_weapon
-								if ad.melee_weapons then
-									pass_melee_weapons = table.contains(ad.melee_weapons, oufit.melee_weapon)
-									pass_melee_weapons = pass_melee_weapons
-								end
-								pass_primary = not ad.primary or ad.primary == oufit.primary.factory_id
-								if ad.primaries then
-									pass_primaries = table.contains(ad.primaries, oufit.primary.factory_id)
-									pass_primaries = pass_primaries
-								end
-								if ad.primary_unmodded then
-									pass_primary_unmodded = managers.weapon_factory:is_weapon_unmodded(oufit.primary.factory_id, oufit.primary.blueprint)
-									pass_primary_unmodded = pass_primary_unmodded
-								end
-								pass_primary_category = not ad.primary_category or ad.primary_category == tweak_data:get_raw_value("weapon", managers.weapon_factory:get_weapon_id_by_factory_id(oufit.primary.factory_id), "category")
-								pass_secondary = not ad.secondary or ad.secondary == oufit.secondary.factory_id
-								if ad.secondaries then
-									pass_secondaries = table.contains(ad.secondaries, oufit.secondary.factory_id)
-									pass_secondaries = pass_secondaries
-								end
-								if ad.secondary_unmodded then
-									pass_secondary_unmodded = managers.weapon_factory:is_weapon_unmodded(oufit.secondary.factory_id, oufit.secondary.blueprint)
-									pass_secondary_unmodded = pass_secondary_unmodded
-								end
-								pass_secondary_category = not ad.secondary_category or ad.secondary_category == tweak_data:get_raw_value("weapon", managers.weapon_factory:get_weapon_id_by_factory_id(oufit.secondary.factory_id), "category")
-								if ad.characters then
-									pass_characters = table.contains(ad.characters, peer:character())
-									pass_characters = pass_characters
-								end
-								pass_skills = not ad.num_skills
-								if not pass_skills then
-									num_skills = 0
-									if not oufit.skills.skills then
-										for tree,points in ipairs({0}) do
-										end
-										num_skills = num_skills + (tonumber(points) or 0)
-									end
-									pass_skills = num_skills <= ad.num_skills
-								end
-								if ad.reverse_deployable then
-									pass_deployable = not pass_deployable
-								end
-								if not pass_armor or not pass_armors or not pass_deployable or not pass_mask or not pass_masks or not pass_melee_weapon or not pass_primary or not pass_secondary or not pass_primaries or not pass_secondaries or not pass_primary_unmodded or not pass_secondary_unmodded or not pass_skills or not pass_melee_weapons or not pass_characters or not pass_primary_category or not pass_secondary_category then
-									equipped_team_pass = false
-								end
-						else
-							end
-						end
-					end
-					all_pass = not job_pass or not jobs_pass or not level_pass or not levels_pass or not contract_pass or not diff_pass or not mask_pass or not no_shots_pass or not stealth_pass or not loud_pass or not equipped_pass or not equipped_team_pass or not num_players_pass or not pass_skills or not timer_pass or not killed_by_weapons_pass or not killed_by_melee_pass or not killed_by_grenade_pass or not complete_job_pass or not job_value_pass or not memory_pass or not phalanx_vip_alive_pass or used_weapon_category_pass
-					if all_pass and achievement_data.need_full_job and managers.job:has_active_job() then
-						if not managers.job:interupt_stage() then
-							memory = managers.job:get_memory(achievement)
-							if not memory then
-								memory = {}
-								for i = 1, #managers.job:current_job_chain_data() do
-									memory[i] = false
-								end
-							end
-							stage = managers.job:current_stage()
-							memory[stage] = not not (all_pass)
-							managers.job:set_memory(achievement, memory)
-							if managers.job:on_last_stage() then
-								for stage,passed in pairs(memory) do
-									if not passed then
-										all_pass = false
-									end
-							else
-								end
-							end
-						else
-							all_pass = false
-						end
-					else
-						if managers.job:on_last_stage() then
-							for stage,passed in pairs(memory) do
-								if not passed then
-									all_pass = false
-								end
+				for id = #available_jobs, 1, -1 do
+					job = available_jobs[id]
+					if type(job) == "table" then
+						for _,job_id in ipairs(job) do
+							if managers.statistics:completed_job(job_id, achievement_data.difficulty) > 0 then
+								table.remove(available_jobs, id)
 						else
 							end
 						end
 					else
-						all_pass = false
-					end
-					if all_pass then
-						if achievement_data.stat then
-							managers.achievment:award_progress(achievement_data.stat)
+						if managers.statistics:completed_job(job, achievement_data.difficulty) > 0 then
+							table.remove(available_jobs, id)
 						end
-					elseif achievement_data.award then
-						managers.achievment:award(achievement_data.award)
-					elseif achievement_data.challenge_stat then
-						managers.challenge:award_progress(achievement_data.challenge_stat)
-					elseif achievement_data.challenge_award then
-						managers.challenge:award(achievement_data.challenge_award)
-					else
-						Application:debug("[MissionEndState] complete_heist_achievements:", achievement)
 					end
 				end
-			if managers.blackmarket:check_frog_1(managers.blackmarket) then
+			if table.size(available_jobs) == 0 then
 				end
-			if managers.job:on_last_stage() then
+				if achievement_data.stat then
+					managers.achievment:award_progress(achievement_data.stat)
 				end
-				managers.achievment:award("frog_1")
+			elseif achievement_data.award then
+				managers.achievment:award(achievement_data.award)
+			elseif achievement_data.challenge_stat then
+				managers.challenge:award_progress(achievement_data.challenge_stat)
+			elseif achievement_data.challenge_award then
+				managers.challenge:award(achievement_data.challenge_award)
 			end
-			local masks_pass, level_pass, job_pass, jobs_pass, difficulty_pass, difficulties_pass, all_pass, memory, level_id, stage = nil, nil, nil, nil, nil, nil, nil, nil, nil, nil
-			for achievement,achievement_data in pairs(tweak_data.achievement.four_mask_achievements) do
-				level_id = managers.job:has_active_job() and managers.job:current_level_id() or ""
-				masks_pass = not not achievement_data.masks
-				level_pass = not achievement_data.level_id or achievement_data.level_id == level_id
-				job_pass = not achievement_data.job or not managers.statistics:started_session_from_beginning() or not managers.job:on_last_stage() or managers.job:current_real_job_id() == achievement_data.job
-				if achievement_data.jobs and managers.statistics:started_session_from_beginning() and managers.job:on_last_stage() then
-					jobs_pass = table.contains(achievement_data.jobs, managers.job:current_real_job_id())
-				end
-				jobs_pass = jobs_pass
-				difficulty_pass = not achievement_data.difficulty or Global.game_settings.difficulty == achievement_data.difficulty
-				if achievement_data.difficulties then
-					difficulties_pass = table.contains(achievement_data.difficulties, Global.game_settings.difficulty)
-					difficulties_pass = difficulties_pass
-					all_pass = not masks_pass or not level_pass or not job_pass or not jobs_pass or not difficulty_pass or difficulties_pass
-					if all_pass then
-						local available_masks = deep_clone(achievement_data.masks)
-						for _,peer in pairs(managers.network:session():all_peers()) do
-							local current_mask = peer:mask_id()
-							for id,mask_id in ipairs(available_masks) do
-								if current_mask == mask_id then
-									table.remove(available_masks, id)
-							else
-								end
-							end
-						end
-					if #available_masks == 0 then
-						end
-						if achievement_data.stat then
-							managers.achievment:award_progress(achievement_data.stat)
-						end
-					elseif achievement_data.award then
-						managers.achievment:award(achievement_data.award)
-					elseif achievement_data.challenge_stat then
-						managers.challenge:award_progress(achievement_data.challenge_stat)
-					elseif achievement_data.challenge_award then
-						managers.challenge:award(achievement_data.challenge_award)
-					end
-				end
-			end
-			self._criminals_completed = self._success and params.num_winners or 0
-			managers.statistics:stop_session({success = self._success, type = self._type})
-			managers.statistics:send_statistics()
-			managers.hud:set_statistics_endscreen_hud(self._criminals_completed, self._success)
-			if managers.statistics:started_session_from_beginning() then
-				local job = nil
-				for achievement,achievement_data in pairs(tweak_data.achievement.complete_heist_stats_achievements) do
-					if Global.game_settings.difficulty == achievement_data.difficulty then
-						local available_jobs = nil
-						if achievement_data.contact == "all" then
-							available_jobs = {}
-							for _,list in pairs(tweak_data.achievement.job_list) do
-								for _,job in pairs(R20_PC1785) do
-									table.insert(available_jobs, job)
-								end
-							end
-						else
-							available_jobs = deep_clone(tweak_data.achievement.job_list[achievement_data.contact])
-						end
-						for id = #available_jobs, 1, -1 do
-							job = available_jobs[id]
-							if type(job) == "table" then
-								for _,job_id in ipairs(job) do
-									if 0 < managers.statistics:completed_job(job_id, achievement_data.difficulty) then
-										table.remove(available_jobs, id)
-								else
-									end
-								end
-							else
-								if 0 < managers.statistics:completed_job(job, achievement_data.difficulty) then
-									table.remove(available_jobs, id)
-								end
-							end
-						end
-					if table.size(available_jobs) == 0 then
-						end
-						if achievement_data.stat then
-							managers.achievment:award_progress(achievement_data.stat)
-						end
-					elseif achievement_data.award then
-						managers.achievment:award(achievement_data.award)
-					elseif achievement_data.challenge_stat then
-						managers.challenge:award_progress(achievement_data.challenge_stat)
-					elseif achievement_data.challenge_award then
-						managers.challenge:award(achievement_data.challenge_award)
-					end
-				end
-			end
-			if not self._success or not managers.music:jukebox_menu_track("heistresult") then
-				managers.music:post_event(managers.music:jukebox_menu_track("heistlost"))
-			end
-			local ghost_bonus = 0
-			if self._type == "victory" or self._type == "gameover" then
-				if not params or params then
-					local total_xp_bonus, bonuses = self:_get_xp_dissected(self._success, params.num_winners, params.personal_win)
-				end
-				self._bonuses = bonuses
-				self:completion_bonus_done(total_xp_bonus)
-				managers.job:clear_saved_ghost_bonus()
-				managers.experience:mission_xp_process(self._success, managers.job:on_last_stage())
-				ghost_bonus = managers.job:accumulate_ghost_bonus(ghost_bonus)
-			end
-			local is_xb1 = SystemInfo:platform() == Idstring("XB1")
-			if self._success then
-				local gage_assignment_state = managers.gage_assignment:on_mission_completed()
-				local hud_ghost_bonus = 0
-				if managers.job:on_last_stage() then
-					managers.job:check_add_heat_to_jobs()
-					managers.job:activate_accumulated_ghost_bonus()
-					hud_ghost_bonus = managers.job:get_saved_ghost_bonus()
-					if is_xb1 and not is_safe_house then
-						XboxLive:write_hero_stat("heists", 1)
-					end
-				else
-					hud_ghost_bonus = ghost_bonus
-				end
-				managers.hud:set_special_packages_endscreen_hud({ghost_bonus = hud_ghost_bonus, gage_assignment = gage_assignment_state, challenge_completed = managers.challenge:any_challenge_completed()})
-			end
-			if is_xb1 then
-				XboxLive:write_hero_stat("kills", total_killed.count)
-				XboxLive:write_hero_stat("time", managers.statistics:get_session_time_seconds())
-			end
-			if Network:is_server() then
-				managers.network:session():set_state("game_end")
-			end
-			 -- WARNING: missing end command somewhere! Added here
 		end
-		 -- WARNING: missing end command somewhere! Added here
 	end
-	-- WARNING: F->nextEndif is not empty. Unhandled nextEndif->addr = 1630 
+	if not self._success or not managers.music:jukebox_menu_track("heistresult") then
+		managers.music:post_event(managers.music:jukebox_menu_track("heistlost"))
+	end
+	local ghost_bonus = 0
+	if self._type == "victory" or self._type == "gameover" then
+		if not params or params then
+			local total_xp_bonus, bonuses = self:_get_xp_dissected(self._success, params.num_winners, params.personal_win)
+		end
+		self._bonuses = bonuses
+		self:completion_bonus_done(total_xp_bonus)
+		managers.job:clear_saved_ghost_bonus()
+		managers.experience:mission_xp_process(self._success, managers.job:on_last_stage())
+		ghost_bonus = managers.job:accumulate_ghost_bonus(ghost_bonus)
+	end
+	local is_xb1 = SystemInfo:platform() == Idstring("XB1")
+	if self._success then
+		local gage_assignment_state = managers.gage_assignment:on_mission_completed()
+		local hud_ghost_bonus = 0
+		if managers.job:on_last_stage() then
+			managers.job:check_add_heat_to_jobs()
+			managers.job:activate_accumulated_ghost_bonus()
+			hud_ghost_bonus = managers.job:get_saved_ghost_bonus()
+			if is_xb1 and not is_safe_house then
+				XboxLive:write_hero_stat("heists", 1)
+			end
+		else
+			hud_ghost_bonus = ghost_bonus
+		end
+		managers.hud:set_special_packages_endscreen_hud({ghost_bonus = hud_ghost_bonus, gage_assignment = gage_assignment_state, challenge_completed = managers.challenge:any_challenge_completed()})
+	end
+	if is_xb1 then
+		XboxLive:write_hero_stat("kills", total_killed.count)
+		XboxLive:write_hero_stat("time", managers.statistics:get_session_time_seconds())
+	end
+	if Network:is_server() then
+		managers.network:session():set_state("game_end")
+	end
 end
 
 MissionEndState.is_success = function(self)
@@ -926,6 +560,378 @@ end
 
 MissionEndState.on_disconnected = function(self)
 	IngameCleanState.on_disconnected(self)
+end
+
+MissionEndState.chk_complete_heist_achievements = function(self)
+	local player = managers.player:player_unit()
+	local total_killed = managers.statistics:session_total_killed()
+	if self._success then
+		if not managers.statistics:is_dropin() then
+			local jordan_4 = managers.job:get_memory("jordan_4")
+			if not managers.game_play_central or not managers.game_play_central:get_heist_timer() then
+				local t = not jordan_4 and jordan_4 ~= nil or 0
+			end
+			local last_jump_t = managers.job:get_memory("last_jump_t", true) or 0
+			if last_jump_t and last_jump_t + tweak_data.achievement.complete_heist_achievements.jordan_4.jump_timer < t then
+				print("[achievement] Failed Achievement " .. "brooklyn_4")
+				managers.job:set_memory("jordan_4", false)
+			end
+			local ach_data = tweak_data.achievement.close_and_personal
+			local session_killed = managers.statistics:session_killed()
+			local has_type_stats = (ach_data.kill_type and not not total_killed[ach_data.kill_type])
+			if has_type_stats then
+				local total_kill_count = total_killed.count
+				local total_kill_type_count = total_killed[ach_data.kill_type]
+			if total_kill_count == total_kill_type_count then
+				end
+				local civilians = {"civilian", "civilian_female", "bank_manager"}
+				local count = nil
+				for i,name in ipairs(civilians) do
+					count = session_killed[name]
+					if count then
+						total_kill_count = total_kill_count - count.count
+						total_kill_type_count = total_kill_type_count - (count[ach_data.kill_type] or 0)
+					end
+				end
+			if total_kill_count == total_kill_type_count then
+				end
+				local count_pass = not ach_data.count or ach_data.count <= total_kill_count
+			if count_pass then
+				end
+				managers.achievment:award(ach_data.award)
+			end
+			local shotgun_one_o_one = tweak_data.achievement.shotgun_one_o_one
+			if shotgun_one_o_one.count <= total_killed.count then
+				local session_used_weapons = managers.statistics:session_used_weapons()
+				local passed = true
+				for _,weapon_id in ipairs(session_used_weapons) do
+					if not tweak_data.weapon[weapon_id] or tweak_data.weapon[weapon_id].category ~= "shotgun" then
+						passed = false
+				else
+					end
+				end
+			if passed then
+				end
+			if shotgun_one_o_one.accuracy <= managers.statistics:session_hit_accuracy() then
+				end
+				managers.achievment:award(shotgun_one_o_one.award)
+			end
+			local mask_pass, diff_pass, no_shots_pass, contract_pass, job_pass, jobs_pass, level_pass, levels_pass, stealth_pass, loud_pass, equipped_pass, job_value_pass, phalanx_vip_alive_pass, used_weapon_category_pass, equipped_team_pass, timer_pass, num_players_pass, pass_skills, killed_by_weapons_pass, killed_by_melee_pass, killed_by_grenade_pass, civilians_killed_pass, complete_job_pass, memory_pass, all_pass, weapon_data, memory, level_id, stage, num_skills = nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil
+			local killed_by_weapons = managers.statistics:session_killed_by_weapons()
+			local killed_by_melee = managers.statistics:session_killed_by_melee()
+			local killed_by_grenade = managers.statistics:session_killed_by_grenade()
+			local civilians_killed = managers.statistics:session_total_civilian_kills()
+			local phalanx_vip_alive = false
+			if not managers.enemy:all_enemies() then
+				for _,enemy in pairs({}) do
+				end
+				phalanx_vip_alive = not alive(enemy.unit) or enemy.unit:base()._tweak_table == "phalanx_vip"
+				if phalanx_vip_alive then
+					do return end
+				end
+			end
+			for achievement,achievement_data in pairs(tweak_data.achievement.complete_heist_achievements) do
+				level_id = managers.job:has_active_job() and managers.job:current_level_id() or ""
+				if achievement_data.difficulty then
+					diff_pass = table.contains(achievement_data.difficulty, Global.game_settings.difficulty)
+					diff_pass = diff_pass
+				end
+				mask_pass = not achievement_data.mask or managers.blackmarket:equipped_mask().mask_id == achievement_data.mask
+				job_pass = not achievement_data.job or not managers.statistics:started_session_from_beginning() or (not managers.job:on_last_stage() and not achievement_data.need_full_job) or managers.job:current_real_job_id() == achievement_data.job
+				if achievement_data.jobs and managers.statistics:started_session_from_beginning() and (managers.job:on_last_stage() or achievement_data.need_full_job) then
+					jobs_pass = table.contains(achievement_data.jobs, managers.job:current_real_job_id())
+				end
+				jobs_pass = jobs_pass
+				level_pass = not achievement_data.level_id or achievement_data.level_id == level_id
+				if achievement_data.levels then
+					levels_pass = table.contains(achievement_data.levels, level_id)
+					levels_pass = levels_pass
+				end
+				contract_pass = not achievement_data.contract or managers.job:current_contact_id() == achievement_data.contract
+				if achievement_data.complete_job and managers.statistics:started_session_from_beginning() then
+					complete_job_pass = managers.job:on_last_stage()
+				end
+				complete_job_pass = complete_job_pass
+				no_shots_pass = not achievement_data.no_shots or managers.statistics:session_total_shots(achievement_data.no_shots) == 0
+				if achievement_data.stealth and managers.groupai then
+					stealth_pass = managers.groupai:state():whisper_mode()
+				end
+				stealth_pass = stealth_pass
+				if achievement_data.loud and managers.groupai then
+					loud_pass = not managers.groupai:state():whisper_mode()
+				end
+				loud_pass = loud_pass
+				timer_pass = not achievement_data.timer or not managers.game_play_central or managers.game_play_central:get_heist_timer() <= achievement_data.timer
+				num_players_pass = not achievement_data.num_players or achievement_data.num_players <= managers.network:session():amount_of_players()
+				job_value_pass = not achievement_data.job_value or managers.mission:get_job_value(achievement_data.job_value.key) == achievement_data.job_value.value
+				memory_pass = not achievement_data.memory or managers.job:get_memory(achievement, achievement_data.memory.is_shortterm) == achievement_data.memory.value
+				if achievement_data.phalanx_vip_alive then
+					phalanx_vip_alive_pass = phalanx_vip_alive
+					phalanx_vip_alive_pass = phalanx_vip_alive_pass
+				end
+				used_weapon_category_pass = true
+				if achievement_data.used_weapon_category then
+					local used_weapons = managers.statistics:session_used_weapons()
+				if used_weapons then
+					end
+					local category = achievement_data.used_weapon_category
+					do
+						local weapon_tweak = nil
+						for _,weapon_id in ipairs(used_weapons) do
+							weapon_tweak = tweak_data.weapon[weapon_id]
+							if not weapon_tweak or weapon_tweak.category ~= category and (category ~= "pistol" or weapon_tweak.category ~= "akimbo") then
+								used_weapon_category_pass = false
+							end
+					else
+						end
+					end
+				end
+				killed_by_weapons_pass = not achievement_data.killed_by_weapons
+				if achievement_data.killed_by_weapons == 0 then
+					if killed_by_weapons ~= 0 then
+						killed_by_weapons_pass = not achievement_data.killed_by_weapons
+				else
+					end
+				end
+				killed_by_weapons_pass = achievement_data.killed_by_weapons <= killed_by_weapons
+				killed_by_melee_pass = not achievement_data.killed_by_melee
+				if achievement_data.killed_by_melee == 0 then
+					if killed_by_melee ~= 0 then
+						killed_by_melee_pass = not achievement_data.killed_by_melee
+				else
+					end
+				end
+				killed_by_melee_pass = achievement_data.killed_by_melee <= killed_by_melee
+				killed_by_grenade_pass = not achievement_data.killed_by_grenade
+				if achievement_data.killed_by_grenade == 0 then
+					if killed_by_grenade ~= 0 then
+						killed_by_grenade_pass = not achievement_data.killed_by_grenade
+				else
+					end
+				end
+				killed_by_grenade_pass = achievement_data.killed_by_grenade <= killed_by_grenade
+				civilians_killed_pass = not achievement_data.civilians_killed
+				if achievement_data.civilians_killed == 0 then
+					if civilians_killed ~= 0 then
+						civilians_killed_pass = not achievement_data.civilians_killed
+				else
+					end
+				end
+				civilians_killed_pass = achievement_data.civilians_killed <= civilians_killed
+				pass_skills = not achievement_data.num_skills
+				if not pass_skills then
+					num_skills = 0
+					for tree,data in ipairs(tweak_data.skilltree.trees) do
+						local points = managers.skilltree:get_tree_progress(tree)
+						num_skills = num_skills + points
+					end
+					pass_skills = num_skills <= achievement_data.num_skills
+				end
+				if achievement_data.equipped then
+					equipped_pass = false
+					equipped_pass = equipped_pass
+				end
+				if achievement_data.equipped then
+					for category,data in pairs(achievement_data.equipped) do
+						weapon_data = managers.blackmarket:equipped_item(category)
+						if (category == "grenades" or category == "armors") and data == weapon_data then
+							equipped_pass = true
+						elseif data.weapon_id and weapon_data and weapon_data.weapon_id and data.weapon_id == weapon_data.weapon_id then
+							equipped_pass = true
+						if data.blueprint then
+							end
+						if weapon_data.blueprint then
+							end
+							for _,part_or_parts in ipairs(data.blueprint) do
+								if type(part_or_parts) == "string" and not table.contains(weapon_data.blueprint, part_or_parts) then
+									equipped_pass = false
+								end
+							else
+								for _,part_or_parts in (for generator) do
+								end
+								local found_one = false
+								for _,part_id in ipairs(part_or_parts) do
+									if table.contains(weapon_data.blueprint, part_id) then
+										found_one = true
+								else
+									end
+								end
+								if not found_one then
+									equipped_pass = false
+							else
+								end
+							end
+						end
+					end
+					equipped_team_pass = true
+					if achievement_data.equipped_team then
+						local pass_armor, pass_deployable, pass_mask, pass_melee_weapon, pass_primary, pass_secondary, pass_primaries, pass_secondaries, pass_primary_unmodded, pass_secondary_unmodded, pass_skills, pass_melee_weapons, pass_primary_category, pass_secondary_category, pass_masks, pass_armors, pass_characters = nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil
+						local ad = achievement_data.equipped_team
+						do
+							local oufit = nil
+							for _,peer in pairs(managers.network:session():all_peers()) do
+								oufit = peer:blackmarket_outfit()
+								pass_deployable = not ad.deployable or ad.deployable == oufit.deployable
+								pass_armor = not ad.armor or (ad.armor == oufit.armor and ad.armor == oufit.armor_current)
+								if ad.armors and table.contains(ad.armors, oufit.armor) then
+									pass_armors = table.contains(ad.armors, oufit.armor_current)
+								end
+								pass_armors = pass_armors
+								pass_mask = not ad.mask or ad.mask == oufit.mask.mask_id
+								if ad.masks then
+									pass_masks = table.contains(ad.masks, oufit.mask.mask_id)
+									pass_masks = pass_masks
+								end
+								pass_melee_weapon = not ad.melee_weapon or ad.melee_weapon == oufit.melee_weapon
+								if ad.melee_weapons then
+									pass_melee_weapons = table.contains(ad.melee_weapons, oufit.melee_weapon)
+									pass_melee_weapons = pass_melee_weapons
+								end
+								pass_primary = not ad.primary or ad.primary == oufit.primary.factory_id
+								if ad.primaries then
+									pass_primaries = table.contains(ad.primaries, oufit.primary.factory_id)
+									pass_primaries = pass_primaries
+								end
+								if ad.primary_unmodded then
+									pass_primary_unmodded = managers.weapon_factory:is_weapon_unmodded(oufit.primary.factory_id, oufit.primary.blueprint)
+									pass_primary_unmodded = pass_primary_unmodded
+								end
+								pass_primary_category = not ad.primary_category or ad.primary_category == tweak_data:get_raw_value("weapon", managers.weapon_factory:get_weapon_id_by_factory_id(oufit.primary.factory_id), "category")
+								pass_secondary = not ad.secondary or ad.secondary == oufit.secondary.factory_id
+								if ad.secondaries then
+									pass_secondaries = table.contains(ad.secondaries, oufit.secondary.factory_id)
+									pass_secondaries = pass_secondaries
+								end
+								if ad.secondary_unmodded then
+									pass_secondary_unmodded = managers.weapon_factory:is_weapon_unmodded(oufit.secondary.factory_id, oufit.secondary.blueprint)
+									pass_secondary_unmodded = pass_secondary_unmodded
+								end
+								pass_secondary_category = not ad.secondary_category or ad.secondary_category == tweak_data:get_raw_value("weapon", managers.weapon_factory:get_weapon_id_by_factory_id(oufit.secondary.factory_id), "category")
+								if ad.characters then
+									pass_characters = table.contains(ad.characters, peer:character())
+									pass_characters = pass_characters
+								end
+								pass_skills = not ad.num_skills
+								if not pass_skills then
+									num_skills = 0
+									if not oufit.skills.skills then
+										for tree,points in ipairs({0}) do
+										end
+										num_skills = num_skills + (tonumber(points) or 0)
+									end
+									pass_skills = num_skills <= ad.num_skills
+								end
+								if ad.reverse_deployable then
+									pass_deployable = not pass_deployable
+								end
+								if not pass_armor or not pass_armors or not pass_deployable or not pass_mask or not pass_masks or not pass_melee_weapon or not pass_primary or not pass_secondary or not pass_primaries or not pass_secondaries or not pass_primary_unmodded or not pass_secondary_unmodded or not pass_skills or not pass_melee_weapons or not pass_characters or not pass_primary_category or not pass_secondary_category then
+									equipped_team_pass = false
+								end
+						else
+							end
+						end
+					end
+					all_pass = not job_pass or not jobs_pass or not level_pass or not levels_pass or not contract_pass or not diff_pass or not mask_pass or not no_shots_pass or not stealth_pass or not loud_pass or not equipped_pass or not equipped_team_pass or not num_players_pass or not pass_skills or not timer_pass or not killed_by_weapons_pass or not killed_by_melee_pass or not killed_by_grenade_pass or not complete_job_pass or not job_value_pass or not memory_pass or not phalanx_vip_alive_pass or used_weapon_category_pass
+					if all_pass and achievement_data.need_full_job and managers.job:has_active_job() then
+						if not managers.job:interupt_stage() then
+							memory = managers.job:get_memory(achievement)
+							if not memory then
+								memory = {}
+								for i = 1, #managers.job:current_job_chain_data() do
+									memory[i] = false
+								end
+							end
+							stage = managers.job:current_stage()
+							memory[stage] = not not (all_pass)
+							managers.job:set_memory(achievement, memory)
+							if managers.job:on_last_stage() then
+								for stage,passed in pairs(memory) do
+									if not passed then
+										all_pass = false
+									end
+							else
+								end
+							end
+						else
+							all_pass = false
+						end
+					else
+						if managers.job:on_last_stage() then
+							for stage,passed in pairs(memory) do
+								if not passed then
+									all_pass = false
+								end
+						else
+							end
+						end
+					else
+						all_pass = false
+					end
+					if all_pass then
+						if achievement_data.stat then
+							managers.achievment:award_progress(achievement_data.stat)
+						end
+					elseif achievement_data.award then
+						managers.achievment:award(achievement_data.award)
+					elseif achievement_data.challenge_stat then
+						managers.challenge:award_progress(achievement_data.challenge_stat)
+					elseif achievement_data.challenge_award then
+						managers.challenge:award(achievement_data.challenge_award)
+					else
+						Application:debug("[MissionEndState] complete_heist_achievements:", achievement)
+					end
+				end
+			if managers.blackmarket:check_frog_1(managers.blackmarket) then
+				end
+			if managers.job:on_last_stage() then
+				end
+				managers.achievment:award("frog_1")
+			end
+			local masks_pass, level_pass, job_pass, jobs_pass, difficulty_pass, difficulties_pass, all_pass, memory, level_id, stage = nil, nil, nil, nil, nil, nil, nil, nil, nil, nil
+			for achievement,achievement_data in pairs(tweak_data.achievement.four_mask_achievements) do
+				level_id = managers.job:has_active_job() and managers.job:current_level_id() or ""
+				masks_pass = not not achievement_data.masks
+				level_pass = not achievement_data.level_id or achievement_data.level_id == level_id
+				job_pass = not achievement_data.job or not managers.statistics:started_session_from_beginning() or not managers.job:on_last_stage() or managers.job:current_real_job_id() == achievement_data.job
+				if achievement_data.jobs and managers.statistics:started_session_from_beginning() and managers.job:on_last_stage() then
+					jobs_pass = table.contains(achievement_data.jobs, managers.job:current_real_job_id())
+				end
+				jobs_pass = jobs_pass
+				difficulty_pass = not achievement_data.difficulty or Global.game_settings.difficulty == achievement_data.difficulty
+				if achievement_data.difficulties then
+					difficulties_pass = table.contains(achievement_data.difficulties, Global.game_settings.difficulty)
+					difficulties_pass = difficulties_pass
+					all_pass = not masks_pass or not level_pass or not job_pass or not jobs_pass or not difficulty_pass or difficulties_pass
+					if all_pass then
+						local available_masks = deep_clone(achievement_data.masks)
+						for _,peer in pairs(managers.network:session():all_peers()) do
+							local current_mask = peer:mask_id()
+							for id,mask_id in ipairs(available_masks) do
+								if current_mask == mask_id then
+									table.remove(available_masks, id)
+							else
+								end
+							end
+						end
+					if #available_masks == 0 then
+						end
+						if achievement_data.stat then
+							managers.achievment:award_progress(achievement_data.stat)
+						end
+					elseif achievement_data.award then
+						managers.achievment:award(achievement_data.award)
+					elseif achievement_data.challenge_stat then
+						managers.challenge:award_progress(achievement_data.challenge_stat)
+					elseif achievement_data.challenge_award then
+						managers.challenge:award(achievement_data.challenge_award)
+					end
+				end
+			end
+			 -- WARNING: missing end command somewhere! Added here
+		end
+		 -- WARNING: missing end command somewhere! Added here
+	end
+	-- WARNING: F->nextEndif is not empty. Unhandled nextEndif->addr = 1311 
 end
 
 

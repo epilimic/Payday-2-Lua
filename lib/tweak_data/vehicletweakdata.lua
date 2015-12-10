@@ -5,6 +5,7 @@ function VehicleTweakData:init(tweak_data)
 	self:_init_data_forklift()
 	self:_init_data_forklift_2()
 	self:_init_data_box_truck_1()
+	self:_init_data_mower_1()
 	self:_init_data_boat_rib_1()
 	self:_init_data_blackhawk_1()
 end
@@ -272,6 +273,47 @@ function VehicleTweakData:_init_data_box_truck_1()
 	self.box_truck_1.interact_distance = 350
 	self.box_truck_1.driver_camera_offset = Vector3(0, 0.2, 2.5)
 	self.box_truck_1.fov = 75
+end
+function VehicleTweakData:_init_data_mower_1()
+	self.mower_1 = {}
+	self.mower_1.name = "Lawn Mower"
+	self.mower_1.hud_label_offset = 80
+	self.mower_1.animations = {
+		vehicle_id = "mower_1",
+		driver = "drive_mower_1_driver"
+	}
+	self.mower_1.sound = {
+		bump_treshold = 5,
+		lateral_slip_treshold = 10,
+		longitudal_slip_treshold = 10,
+		engine_sound_event = "forklift",
+		engine_start = "forklift_start",
+		door_close = "sit_down_in_forklift",
+		going_reverse = "forklift_reverse_warning",
+		going_reverse_stop = "forklift_reverse_warning_stop",
+		slip = "car_skid_01",
+		slip_stop = "car_skid_stop_01",
+		bump = "car_bumper_01",
+		bump_rtpc = "car_bump_vel",
+		hit = "car_hit_gen_01",
+		hit_rtpc = "car_hit_vel",
+		engine_speed_rtpc = "car_falcogini_speed",
+		engine_rpm_rtpc = "car_falcogini_rpm"
+	}
+	self.mower_1.seats = {
+		driver = {name = "driver", driving = true}
+	}
+	self.mower_1.loot_points = {
+		loot_left = {name = "loot"}
+	}
+	self.mower_1.damage = {max_health = 9000000}
+	self.mower_1.max_speed = 20
+	self.mower_1.max_rpm = 1600
+	self.mower_1.loot_drop_point = "v_repair_engine"
+	self.mower_1.max_loot_bags = 1
+	self.mower_1.interact_distance = 350
+	self.mower_1.driver_camera_offset = Vector3(0, 0, 3.5)
+	self.mower_1.fov = 70
 end
 function VehicleTweakData:_init_data_boat_rib_1()
 	self.boat_rib_1 = {}

@@ -532,7 +532,7 @@ function HUDLootScreen:make_lootdrop(lootdrop_data)
 	local item_panel = panel:child("item")
 	local item_id = lootdrop_data[4]
 	local category = lootdrop_data[3]
-	if category == "weapon_mods" then
+	if category == "weapon_mods" or category == "weapon_bonus" then
 		category = "mods"
 	end
 	if category == "colors" then
@@ -702,9 +702,13 @@ function HUDLootScreen:begin_choose_card(peer_id, card_id)
 	main_text:set_h(hh + 2)
 	local lootdrop_data = self._peer_data[peer_id].lootdrops
 	local item_category = lootdrop_data[3]
+	local item_id = lootdrop_data[4]
 	local item_pc = lootdrop_data[6]
 	local left_pc = lootdrop_data[7]
 	local right_pc = lootdrop_data[8]
+	if item_category == "weapon_mods" and managers.weapon_factory:get_type_from_part_id(item_id) == "bonus" then
+		item_category = "weapon_bonus"
+	end
 	local cards = {}
 	local card_one = card_id
 	cards[card_one] = wait_for_lootdrop and 3 or item_pc
@@ -722,7 +726,8 @@ function HUDLootScreen:begin_choose_card(peer_id, card_id)
 		textures = 7,
 		xp = 4,
 		safes = 8,
-		drills = 9
+		drills = 9,
+		weapon_bonus = 10
 	}
 	local card_nums = {
 		"upcard_mask",
@@ -733,7 +738,8 @@ function HUDLootScreen:begin_choose_card(peer_id, card_id)
 		"upcard_color",
 		"upcard_pattern",
 		"upcard_safe",
-		"upcard_drill"
+		"upcard_drill",
+		"upcard_weapon_bonus"
 	}
 	for i, pc in ipairs(cards) do
 		local my_card = i == card_id
@@ -783,7 +789,8 @@ function HUDLootScreen:begin_flip_card(peer_id)
 		textures = 7,
 		xp = 4,
 		safes = 8,
-		drills = 9
+		drills = 9,
+		weapon_bonus = 10
 	}
 	local card_nums = {
 		"upcard_mask",
@@ -794,11 +801,16 @@ function HUDLootScreen:begin_flip_card(peer_id)
 		"upcard_color",
 		"upcard_pattern",
 		"upcard_safe",
-		"upcard_drill"
+		"upcard_drill",
+		"upcard_weapon_bonus"
 	}
 	local lootdrop_data = self._peer_data[peer_id].lootdrops
 	local item_category = lootdrop_data[3]
+	local item_id = lootdrop_data[4]
 	local item_pc = lootdrop_data[6]
+	if item_category == "weapon_mods" and managers.weapon_factory:get_type_from_part_id(item_id) == "bonus" then
+		item_category = "weapon_bonus"
+	end
 	local card_i = type_to_card[item_category] or math.max(item_pc, 1)
 	local texture, rect, coords = tweak_data.hud_icons:get_icon_data(card_nums[card_i] or "downcard_overkill_deck")
 	local panel = self._peers_panel:child("peer" .. tostring(peer_id))

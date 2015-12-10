@@ -81,6 +81,7 @@ function MoneyTweakData:init(tweak_data)
 	self.bag_values.masterpiece_painting = 10000
 	self.bag_values.master_server = 10000
 	self.bag_values.lost_artifact = 10000
+	self.bag_values.present = 2049
 	self.bag_value_multiplier = self._create_value_table(self.cut_lootbag_bonus / 5 / self.offshore_rate / self.bag_values.default, self.cut_lootbag_bonus / self.offshore_rate / self.bag_values.default, 7, true, 0.85)
 	self.stage_completion = self._create_value_table(self.cut_stage_complete / 7 / self.offshore_rate, self.cut_stage_complete / self.offshore_rate, 7, true, 1)
 	self.job_completion = self._create_value_table(self.cut_job_complete / 7 / self.offshore_rate, self.cut_job_complete / self.offshore_rate, 7, true, 1)

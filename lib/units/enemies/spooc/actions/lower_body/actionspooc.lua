@@ -119,7 +119,7 @@ function ActionSpooc:init(action_desc, common_data)
 	else
 		self:_wait()
 	end
-	if Global.level_data.level_id == "pines" then
+	if Global.level_data.level_id == "pines" or Global.level_data.level_id == "cane" then
 		self._unit:sound():play("cloaker_detect_christmas_mono", nil, nil)
 	else
 		self._unit:sound():play("cloaker_detect_mono", nil, nil)
@@ -129,7 +129,7 @@ function ActionSpooc:init(action_desc, common_data)
 end
 function ActionSpooc:on_exit()
 	if self._unit:character_damage():dead() then
-		if Global.level_data.level_id == "pines" then
+		if Global.level_data.level_id == "pines" or Global.level_data.level_id == "cane" then
 			self._unit:sound():play("cloaker_detect_christmas_stop", nil, nil)
 		else
 			self._unit:sound():play("cloaker_detect_stop", nil, nil)
@@ -797,7 +797,7 @@ function ActionSpooc:anim_act_clbk(anim_act)
 			return
 		end
 		self._stroke_t = TimerManager:game():time()
-		if Global.level_data.level_id == "pines" then
+		if Global.level_data.level_id == "pines" or Global.level_data.level_id == "cane" then
 			self._unit:sound():play("cloaker_detect_christmas_stop", nil, nil)
 		else
 			self._unit:sound():play("cloaker_detect_stop", nil, nil)

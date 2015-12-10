@@ -4295,6 +4295,30 @@ function DLCTweakData:init(tweak_data)
 			amount = 1
 		}
 	}
+	self.ach_cane_3 = {}
+	self.ach_cane_3.dlc = "has_achievement"
+	self.ach_cane_3.achievement_id = "cane_3"
+	self.ach_cane_3.content = {}
+	self.ach_cane_3.content.loot_global_value = "normal"
+	self.ach_cane_3.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "rudeolph",
+			amount = 1
+		}
+	}
+	self.ach_cane_4 = {}
+	self.ach_cane_4.dlc = "has_achievement"
+	self.ach_cane_4.achievement_id = "cane_4"
+	self.ach_cane_4.content = {}
+	self.ach_cane_4.content.loot_global_value = "normal"
+	self.ach_cane_4.content.loot_drops = {
+		{
+			type_items = "masks",
+			item_entry = "greedy_the_elf",
+			amount = 1
+		}
+	}
 	self.pdcon_2015 = {}
 	self.pdcon_2015.dlc = "has_pdcon_2015"
 	self.pdcon_2015.content = {}

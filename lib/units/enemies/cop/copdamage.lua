@@ -19,6 +19,7 @@ CopDamage._HEALTH_GRANULARITY = 512
 CopDamage.WEAPON_TYPE_GRANADE = 1
 CopDamage.WEAPON_TYPE_BULLET = 2
 CopDamage.WEAPON_TYPE_FLAMER = 3
+CopDamage.EVENT_IDS = {FINAL_LOWER_HEALTH_PERCENTAGE_LIMIT = 1}
 CopDamage.DEBUG_HP = CopDamage.DEBUG_HP or false
 CopDamage._hurt_severities = {
 	none = false,
@@ -95,6 +96,7 @@ function CopDamage:init(unit)
 		effect = Idstring("effects/payday2/particles/character/taser_hittarget"),
 		parent = self._spine2_obj
 	}
+	self:_set_lower_health_percentage_limit(self._char_tweak.LOWER_HEALTH_PERCENTAGE_LIMIT)
 end
 function CopDamage:get_last_time_unit_got_fire_damage()
 	return self._last_time_unit_got_fire_damage
@@ -2094,6 +2096,10 @@ function CopDamage:save(data)
 		data.char_dmg = data.char_dmg or {}
 		data.char_dmg.is_converted = true
 	end
+	if self._lower_health_percentage_limit then
+		data.char_dmg = data.char_dmg or {}
+		data.char_dmg.lower_health_percentage_limit = self._lower_health_percentage_limit
+	end
 end
 function CopDamage:load(data)
 	if not data.char_dmg then
@@ -2111,19 +2117,34 @@ function CopDamage:load(data)
 		managers.groupai:state():sync_converted_enemy(self._unit)
 		self._unit:contour():add("friendly", false)
 	end
+	if data.char_dmg.lower_health_percentage_limit then
+		self:_set_lower_health_percentage_limit(data.char_dmg.lower_health_percentage_limit)
+	end
 end
 function CopDamage:_apply_damage_to_health(damage)
 	self._health = self._health - damage
 	self._health_ratio = self._health / self._HEALTH_INIT
 end
+function CopDamage:host_set_final_lower_health_percentage_limit()
+	self:_set_lower_health_percentage_limit(self._char_tweak.FINAL_LOWER_HEALTH_PERCENTAGE_LIMIT)
+	managers.network:session():send_to_peers_synched("sync_unit_event_id_16", self._unit, "character_damage", CopDamage.EVENT_IDS.FINAL_LOWER_HEALTH_PERCENTAGE_LIMIT)
+end
+function CopDamage:sync_net_event(event_id)
+	if event_id == CopDamage.EVENT_IDS.FINAL_LOWER_HEALTH_PERCENTAGE_LIMIT then
+		self:_set_lower_health_percentage_limit(self._char_tweak.FINAL_LOWER_HEALTH_PERCENTAGE_LIMIT)
+	end
+end
+function CopDamage:_set_lower_health_percentage_limit(lower_health_percentage_limit)
+	self._lower_health_percentage_limit = lower_health_percentage_limit
+end
 function CopDamage:_apply_min_health_limit(damage, damage_percent)
-	local lower_health_percentage_limit = self._unit:base():char_tweak().LOWER_HEALTH_PERCENTAGE_LIMIT
+	local lower_health_percentage_limit = self._lower_health_percentage_limit
 	if lower_health_percentage_limit then
 		local real_damage_percent = damage_percent / self._HEALTH_GRANULARITY
 		local new_health_ratio = self._health_ratio - real_damage_percent
 		if lower_health_percentage_limit > new_health_ratio then
 			real_damage_percent = self._health_ratio - lower_health_percentage_limit
-			damage_percent = real_damage_percent * self._HEALTH_GRANULARITY
+			damage_percent = math.ceil(real_damage_percent * self._HEALTH_GRANULARITY)
 			damage = damage_percent * self._HEALTH_INIT_PRECENT
 		end
 	end

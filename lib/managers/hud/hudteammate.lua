@@ -250,7 +250,7 @@ function HUDTeammate:init(i, teammates_panel, is_player, width)
 			layer = 1
 		})
 		radial_rip_bg:set_color(Color(1, 0, 0, 0))
-		radial_rip_bg:set_visible(managers.player:has_category_upgrade("player", "armor_health_store_amount"))
+		radial_rip_bg:hide()
 	end
 	local x, y, w, h = radial_health_panel:shape()
 	teammate_panel:bitmap({
@@ -1360,6 +1360,7 @@ function HUDTeammate:set_stored_health_max(stored_health_ratio)
 	local radial_rip_bg = radial_health_panel:child("radial_rip_bg")
 	if alive(radial_rip_bg) then
 		local red = math.min(stored_health_ratio, 1)
+		radial_rip_bg:set_visible(red > 0)
 		radial_rip_bg:set_color(Color(1, red, 1, 1))
 	end
 end
@@ -1376,7 +1377,6 @@ function HUDTeammate:set_stored_health(stored_health_ratio)
 			radial_rip:stop()
 			radial_rip:set_rotation((1 - radial_health:color().r) * 360)
 			radial_rip_bg:set_rotation((1 - radial_health:color().r) * 360)
-			print(red)
 			if red < radial_rip:color().red then
 				radial_rip:set_color(Color(1, red, 1, 1))
 			else

@@ -1662,7 +1662,7 @@ function TeamLoadoutItem:set_slot_outfit(slot, criminal_name, outfit)
 				end
 			end
 		end
-		if outfit.primary.cosmetics and outfit.primary.cosmetics.bonus and not managers.job:is_current_job_competitive() then
+		if outfit.primary.cosmetics and outfit.primary.cosmetics.bonus and not managers.job:is_current_job_competitive() and not managers.weapon_factory:has_perk("bonus", outfit.primary.factory_id, outfit.primary.blueprint) then
 			local bonus_data = tweak_data.economy.bonuses[tweak_data.blackmarket.weapon_skins[outfit.primary.cosmetics.id].bonus]
 			if bonus_data and (bonus_data.exp_multiplier or bonus_data.money_multiplier) then
 				local perk_object = player_slot.panel:bitmap({
@@ -1737,7 +1737,7 @@ function TeamLoadoutItem:set_slot_outfit(slot, criminal_name, outfit)
 				end
 			end
 		end
-		if outfit.secondary.cosmetics and outfit.secondary.cosmetics.bonus and not managers.job:is_current_job_competitive() then
+		if outfit.secondary.cosmetics and outfit.secondary.cosmetics.bonus and not managers.job:is_current_job_competitive() and not managers.weapon_factory:has_perk("bonus", outfit.primary.factory_id, outfit.primary.blueprint) then
 			local bonus_data = tweak_data.economy.bonuses[tweak_data.blackmarket.weapon_skins[outfit.secondary.cosmetics.id].bonus]
 			if bonus_data and (bonus_data.exp_multiplier or bonus_data.money_multiplier) then
 				local perk_object = player_slot.panel:bitmap({

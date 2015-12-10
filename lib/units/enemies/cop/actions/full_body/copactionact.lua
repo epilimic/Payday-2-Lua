@@ -84,7 +84,9 @@ CopActionAct._act_redirects.enemy_spawn = {
 	"e_sp_over_1m_dwn_12m",
 	"e_sp_climb_over_4m",
 	"e_sp_dwn_22m",
+	"e_sp_down_13m",
 	"e_sp_dwn_21m",
+	"e_sp_down_4_5m",
 	"e_sp_up_ 2_75_fwd_2_7_dwn_2_75m",
 	"e_sp_over_3m",
 	"e_sp_over_3m_fwd_4m",
@@ -584,6 +586,7 @@ CopActionAct._act_redirects.SO = {
 	"cm_so_ss_goto_trunk",
 	"cm_so_ss_enter_limo",
 	"cf_so_use_key",
+	"cm_so_over_3_35m",
 	"cm_so_point_up_shrug",
 	"cm_so_escort_get_up_hesitant",
 	"cm_so_investigate_hi",
@@ -1089,5 +1092,13 @@ function CopActionAct:_sync_anim_play()
 end
 function CopActionAct:_set_updator(func_name)
 	self.update = func_name and self[func_name] or nil
+end
+function CopActionAct:anim_act_clbk(trigger)
+	if trigger == "fire_blank" then
+		local weapon_unit = self._unit:inventory():equipped_unit()
+		if weapon_unit and weapon_unit:base().fire_blank then
+			weapon_unit:base():fire_blank(weapon_unit:rotation():y(), true)
+		end
+	end
 end
 CopActionAct._apply_freefall = CopActionWalk._apply_freefall
