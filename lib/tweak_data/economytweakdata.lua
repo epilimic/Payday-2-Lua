@@ -241,7 +241,7 @@ function EconomyTweakData:init()
 	}
 	self.contents.dallas_01_legendary.rarity = "legendary"
 	self.contents.surf_01 = {}
-	self.contents.surf_01.def_id = 10008
+	self.contents.surf_01.def_id = 10010
 	self.contents.surf_01.contains = {
 		weapon_skins = {
 			"akm_waves",
@@ -265,7 +265,7 @@ function EconomyTweakData:init()
 		}
 	}
 	self.contents.surf_01_legendary = {}
-	self.contents.surf_01_legendary.def_id = 10009
+	self.contents.surf_01_legendary.def_id = 10011
 	self.contents.surf_01_legendary.contains = {
 		weapon_skins = {"r870_waves"}
 	}
@@ -379,7 +379,7 @@ function EconomyTweakData:init()
 	self.drills.surf_01 = {}
 	self.drills.surf_01.def_id = 70006
 	self.drills.surf_01.safe = "surf_01"
-	self.drills.surf_01.promo = true
+	self.drills.surf_01.price = "2.49"
 	self.drills.surf_01.unit_name = "units/payday2_cash/safes/surf/drill/eco_drill_surf"
 	self.drills.surf_01.name_id = "bm_menu_drill_surf"
 	self.drills.surf_01.desc_id = "bm_menu_drill_surf_desc"

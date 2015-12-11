@@ -1073,7 +1073,7 @@ function BlackMarketTweakData:_init_melee_weapons()
 	self.melee_weapons.bowie.sounds.hit_gen = "knife_hit_gen"
 	self.melee_weapons.bowie.sounds.hit_body = "knife_hit_body"
 	self.melee_weapons.bowie.sounds.charge = "knife_charge"
-	self.melee_weapons.bowie.stats.concealment = 230
+	self.melee_weapons.bowie.stats.concealment = 30
 	self.melee_weapons.microphone = deep_clone(self.melee_weapons.kabar)
 	self.melee_weapons.microphone.name_id = "bm_melee_microphone"
 	self.melee_weapons.microphone.dlc = "arena"
