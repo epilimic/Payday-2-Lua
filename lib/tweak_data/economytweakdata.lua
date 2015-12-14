@@ -324,7 +324,7 @@ function EconomyTweakData:init()
 	self.safes.surf_01.name_id = "bm_menu_safe_surf_01"
 	self.safes.surf_01.unit_name = "units/payday2_cash/safes/surf/safe/eco_safe_surf"
 	self.safes.surf_01.texture_bundle_folder = "cash/safes/surf"
-	self.safes.surf_01.market_link = "https://steamcommunity.com/market/listings/218620/Surf%20Safe"
+	self.safes.surf_01.market_link = "https://steamcommunity.com/market/listings/218620/Bodhi%20Safe"
 	self.drills.overkill_01 = {}
 	self.drills.overkill_01.safe = "overkill_01"
 	self.drills.overkill_01.def_id = 70000
