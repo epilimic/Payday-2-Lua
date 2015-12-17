@@ -450,6 +450,9 @@ function ConnectionNetworkHandler:sync_outfit(outfit_string, outfit_version, out
 	if kit_menu then
 		kit_menu.renderer:set_slot_outfit(peer:id(), peer:character(), outfit_string)
 	end
+	if managers.menu_component then
+		managers.menu_component:peer_outfit_updated(peer:id())
+	end
 end
 function ConnectionNetworkHandler:sync_profile(level, rank, sender)
 	local peer = self._verify_sender(sender)

@@ -6942,62 +6942,66 @@ function MenuCrimeNetChallengeInitiator:setup_node(node)
 	})
 	self:create_divider(node, 2)
 	if not managers.challenge:is_retrieving() and managers.challenge:is_validated() then
-		local challenges = {}
-		local categories = {}
-		local category
-		local current_timestamp = managers.challenge:get_timestamp()
-		local timestamp, interval, expire_timestamp, expire_time
-		for assignment, data in pairs(managers.challenge:get_all_active_challenges()) do
-			timestamp = data.timestamp
-			interval = data.interval
-			expire_timestamp = interval + timestamp
-			expire_time = expire_timestamp - current_timestamp
-			if expire_time >= 0 then
-				category = data.category or "daily"
-				table.insert(categories, category)
-				challenges[category] = challenges[category] or {}
-				table.insert(challenges[category], data)
-			end
-		end
-		categories = table.list_union(categories)
-		table.sort(categories)
-		local node_data
-		local selected_item = node:selected_item() and node:selected_item():name()
-		for _, category in ipairs(categories) do
-			self:create_divider(node, category, managers.localization:text("menu_challenge_div_cat_" .. category), nil, tweak_data.screen_colors.text)
-			node_data = {}
-			local hightlight_color, row_item_color, marker_color, icon, icon_rotation, icon_visible_callback
-			for assignment, challenge in ipairs(challenges[category]) do
-				hightlight_color = challenge.rewarded and tweak_data.screen_colors.text:with_alpha(0.5) or challenge.completed and tweak_data.screen_colors.challenge_completed_color
-				row_item_color = challenge.rewarded and tweak_data.screen_colors.text:with_alpha(0.5) or challenge.completed and tweak_data.screen_colors.challenge_completed_color
-				marker_color = challenge.rewarded and tweak_data.screen_colors.text:with_alpha(0.5) or challenge.completed and tweak_data.screen_colors.challenge_completed_color:with_alpha(0.15)
-				icon = selected_item ~= challenge.id and (challenge.rewarded and "guis/textures/menu_singletick" or challenge.completed and "guis/textures/pd2/icon_reward") or nil
-				icon_rotation = selected_item ~= challenge.id and (challenge.rewarded and 360 or challenge.completed and 360) or nil
-				icon_visible_callback = "is_current_challenge"
-				table.insert(node_data, {
-					name_lozalized = challenge.name_s or managers.localization:text(challenge.name_id),
-					interval = challenge.interval,
-					id = challenge.id,
-					completed = challenge.completed,
-					hightlight_color = hightlight_color,
-					row_item_color = row_item_color,
-					marker_color = marker_color,
-					icon = icon,
-					icon_rotation = icon_rotation,
-					icon_visible_callback = icon_visible_callback
-				})
-			end
-			table.sort(node_data, function(x, y)
-				if x.completed ~= y.completed then
-					return x.completed
+		do
+			local challenges = {}
+			local categories = {}
+			local category
+			local current_timestamp = managers.challenge:get_timestamp()
+			local timestamp, interval, expire_timestamp, expire_time
+			for assignment, data in pairs(managers.challenge:get_all_active_challenges()) do
+				timestamp = data.timestamp
+				interval = data.interval
+				expire_timestamp = interval + timestamp
+				expire_time = expire_timestamp - current_timestamp
+				if expire_time >= 0 then
+					category = data.category or "daily"
+					table.insert(categories, category)
+					challenges[category] = challenges[category] or {}
+					table.insert(challenges[category], data)
 				end
-				if x.interval ~= y.interval then
-					return x.interval < y.interval
-				end
-				return x.name_lozalized < y.name_lozalized
+			end
+			categories = table.list_union(categories)
+			table.sort(categories, function(x, y)
+				return challenges[x][1].interval < challenges[y][1].interval
 			end)
-			for assignment, data in ipairs(node_data) do
-				self:create_item(node, data)
+			local node_data
+			local selected_item = node:selected_item() and node:selected_item():name()
+			for _, category in ipairs(categories) do
+				self:create_divider(node, category, managers.localization:text("menu_challenge_div_cat_" .. category), nil, tweak_data.screen_colors.text)
+				node_data = {}
+				local hightlight_color, row_item_color, marker_color, icon, icon_rotation, icon_visible_callback
+				for assignment, challenge in ipairs(challenges[category]) do
+					hightlight_color = challenge.rewarded and tweak_data.screen_colors.text:with_alpha(0.5) or challenge.completed and tweak_data.screen_colors.challenge_completed_color
+					row_item_color = challenge.rewarded and tweak_data.screen_colors.text:with_alpha(0.5) or challenge.completed and tweak_data.screen_colors.challenge_completed_color
+					marker_color = challenge.rewarded and tweak_data.screen_colors.text:with_alpha(0.5) or challenge.completed and tweak_data.screen_colors.challenge_completed_color:with_alpha(0.15)
+					icon = selected_item ~= challenge.id and (challenge.rewarded and "guis/textures/menu_singletick" or challenge.completed and "guis/textures/pd2/icon_reward") or nil
+					icon_rotation = selected_item ~= challenge.id and (challenge.rewarded and 360 or challenge.completed and 360) or nil
+					icon_visible_callback = "is_current_challenge"
+					table.insert(node_data, {
+						name_lozalized = challenge.name_s or managers.localization:text(challenge.name_id),
+						interval = challenge.interval,
+						id = challenge.id,
+						completed = challenge.completed,
+						hightlight_color = hightlight_color,
+						row_item_color = row_item_color,
+						marker_color = marker_color,
+						icon = icon,
+						icon_rotation = icon_rotation,
+						icon_visible_callback = icon_visible_callback
+					})
+				end
+				table.sort(node_data, function(x, y)
+					if x.completed ~= y.completed then
+						return x.completed
+					end
+					if x.interval ~= y.interval then
+						return x.interval < y.interval
+					end
+					return x.name_lozalized < y.name_lozalized
+				end)
+				for assignment, data in ipairs(node_data) do
+					self:create_item(node, data)
+				end
 			end
 		end
 	else

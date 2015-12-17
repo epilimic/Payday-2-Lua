@@ -795,8 +795,12 @@ function PlayerManager:get_skill_exp_multiplier(whisper_mode)
 				for _, weapon in ipairs({"primary", "secondary"}) do
 					if managers.weapon_factory:has_perk("bonus", outfit[weapon].factory_id, outfit[weapon].blueprint) then
 						local custom_stats = managers.weapon_factory:get_custom_stats_from_weapon(outfit[weapon].factory_id, outfit[weapon].blueprint)
-						if custom_stats.exp_multiplier then
-							multiplier = multiplier + custom_stats.exp_multiplier - 1
+						if custom_stats then
+							for part_id, stats in pairs(custom_stats) do
+								if stats.exp_multiplier then
+									multiplier = multiplier + stats.exp_multiplier - 1
+								end
+							end
 						end
 					elseif not managers.job:is_current_job_competitive() and outfit[weapon] and outfit[weapon].cosmetics and outfit[weapon].cosmetics.bonus then
 						tweak = tweak_data.blackmarket.weapon_skins[outfit[weapon].cosmetics.id]
@@ -828,8 +832,12 @@ function PlayerManager:get_skill_money_multiplier(whisper_mode)
 				for _, weapon in ipairs({"primary", "secondary"}) do
 					if managers.weapon_factory:has_perk("bonus", outfit[weapon].factory_id, outfit[weapon].blueprint) then
 						local custom_stats = managers.weapon_factory:get_custom_stats_from_weapon(outfit[weapon].factory_id, outfit[weapon].blueprint)
-						if custom_stats.money_multiplier then
-							multiplier = multiplier + custom_stats.money_multiplier - 1
+						if custom_stats then
+							for part_id, stats in pairs(custom_stats) do
+								if stats.exp_multiplier then
+									multiplier = multiplier + stats.money_multiplier - 1
+								end
+							end
 						end
 					elseif not managers.job:is_current_job_competitive() and outfit[weapon] and outfit[weapon].cosmetics and outfit[weapon].cosmetics.bonus then
 						tweak = tweak_data.blackmarket.weapon_skins[outfit[weapon].cosmetics.id]

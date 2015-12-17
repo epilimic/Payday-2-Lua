@@ -15,12 +15,12 @@ function BlackMarketTweakData:init(tweak_data)
 	self:_init_characters()
 	self:_init_cash()
 	self:_init_xp()
-	self:_init_weapon_mods(tweak_data)
 	self:_init_armors()
 	self:_init_deployables(tweak_data)
 	self:_init_projectiles()
 	self:_init_melee_weapons()
 	self:_init_weapon_skins()
+	self:_init_weapon_mods(tweak_data)
 end
 function BlackMarketTweakData:print_missing_strings(skip_print_id)
 	if Application:production_build() then
@@ -65,6 +65,9 @@ function BlackMarketTweakData:_add_desc_from_name_macro(tweak_data)
 	end
 end
 function BlackMarketTweakData:_init_weapon_mods(tweak_data)
+	if self.weapon_skins then
+		tweak_data.weapon.factory:create_bonuses(tweak_data, self.weapon_skins)
+	end
 	self.weapon_mods = {}
 	for id, data in pairs(tweak_data.weapon.factory.parts) do
 		if is_nextgen_console then

@@ -1579,6 +1579,25 @@ function MenuManager:dialog_gage_assignment_completed(params)
 	dialog_data.font_size = tweak_data.menu.pd2_small_font_size
 	managers.system_menu:show_new_unlock(dialog_data)
 end
+function MenuManager:show_challenge_warn_choose_reward(params)
+	local dialog_data = {}
+	dialog_data.title = managers.localization:text("dialog_challenge_warn_choose_reward_title")
+	dialog_data.text = managers.localization:text("dialog_challenge_warn_choose_reward", {
+		reward = params.reward
+	})
+	local yes_button = {}
+	yes_button.text = managers.localization:text("dialog_yes")
+	yes_button.callback_func = params.yes_func
+	local no_button = {}
+	no_button.text = managers.localization:text("dialog_no")
+	no_button.cancel_button = true
+	dialog_data.button_list = {yes_button, no_button}
+	dialog_data.texture = params.image
+	dialog_data.image_w = 128
+	dialog_data.image_h = 128
+	dialog_data.image_valign = "center"
+	managers.system_menu:show_new_unlock(dialog_data)
+end
 function MenuManager:show_challenge_reward(reward)
 	local category = reward.type_items
 	local id = reward.item_entry

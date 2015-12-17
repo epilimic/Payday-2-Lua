@@ -4033,4 +4033,505 @@ function BlackMarketTweakData:_init_weapon_skins()
 			pattern_gradient = Idstring("units/payday2_cash/safes/dallas/pattern_gradient/gradient_dallas_wood_002_df")
 		}
 	}
+	self.weapon_skins.saiga_ginger = {}
+	self.weapon_skins.saiga_ginger.name_id = "bm_wskn_saiga_ginger"
+	self.weapon_skins.saiga_ginger.desc_id = "bm_wskn_saiga_ginger_desc"
+	self.weapon_skins.saiga_ginger.weapon_id = "saiga"
+	self.weapon_skins.saiga_ginger.rarity = "common"
+	self.weapon_skins.saiga_ginger.bonus = "total_ammo_p1"
+	self.weapon_skins.saiga_ginger.reserve_quality = true
+	self.weapon_skins.saiga_ginger.texture_bundle_folder = "cash/safes/flake"
+	self.weapon_skins.saiga_ginger.base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_001_df")
+	self.weapon_skins.saiga_ginger.pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/flake_pattern_gradient_01_df")
+	self.weapon_skins.saiga_ginger.pattern = Idstring("units/payday2_cash/safes/flake/pattern/flake_pattern_01_df")
+	self.weapon_skins.saiga_ginger.pattern_tweak = Vector3(0.491297, 1.17332, 1)
+	self.weapon_skins.saiga_ginger.pattern_pos = Vector3(-0.642499, 0, 0)
+	self.weapon_skins.saiga_ginger.cubemap_pattern_control = Vector3(1, 0, 0)
+	self.weapon_skins.p226_ginger = {}
+	self.weapon_skins.p226_ginger.name_id = "bm_wskn_p226_ginger"
+	self.weapon_skins.p226_ginger.desc_id = "bm_wskn_p226_ginger_desc"
+	self.weapon_skins.p226_ginger.weapon_id = "p226"
+	self.weapon_skins.p226_ginger.rarity = "common"
+	self.weapon_skins.p226_ginger.bonus = "spread_p1"
+	self.weapon_skins.p226_ginger.reserve_quality = true
+	self.weapon_skins.p226_ginger.texture_bundle_folder = "cash/safes/flake"
+	self.weapon_skins.p226_ginger.base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_002_df")
+	self.weapon_skins.p226_ginger.pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/flake_pattern_gradient_01_df")
+	self.weapon_skins.p226_ginger.pattern = Idstring("units/payday2_cash/safes/flake/pattern/flake_pattern_01_df")
+	self.weapon_skins.p226_ginger.pattern_tweak = Vector3(2.39924, 1.26323, 0)
+	self.weapon_skins.p226_ginger.pattern_pos = Vector3(-0.480324, -0.480324, 0)
+	self.weapon_skins.new_mp5_ginger = {}
+	self.weapon_skins.new_mp5_ginger.name_id = "bm_wskn_new_mp5_ginger"
+	self.weapon_skins.new_mp5_ginger.desc_id = "bm_wskn_new_mp5_ginger_desc"
+	self.weapon_skins.new_mp5_ginger.weapon_id = "new_mp5"
+	self.weapon_skins.new_mp5_ginger.rarity = "common"
+	self.weapon_skins.new_mp5_ginger.bonus = "spread_p1"
+	self.weapon_skins.new_mp5_ginger.reserve_quality = true
+	self.weapon_skins.new_mp5_ginger.texture_bundle_folder = "cash/safes/flake"
+	self.weapon_skins.new_mp5_ginger.base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_003_df")
+	self.weapon_skins.new_mp5_ginger.pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/gradient_flake_003b_df")
+	self.weapon_skins.new_mp5_ginger.pattern = Idstring("units/payday2_cash/safes/flake/pattern/flake_pattern_03_df")
+	self.weapon_skins.new_mp5_ginger.pattern_tweak = Vector3(1, 0, 0)
+	self.weapon_skins.new_mp5_ginger.types = {
+		foregrip = {
+			base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_003c_df")
+		},
+		stock = {
+			base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_003c_df")
+		}
+	}
+	self.weapon_skins.m249_ginger = {}
+	self.weapon_skins.m249_ginger.name_id = "bm_wskn_m249_ginger"
+	self.weapon_skins.m249_ginger.desc_id = "bm_wskn_m249_ginger_desc"
+	self.weapon_skins.m249_ginger.weapon_id = "m249"
+	self.weapon_skins.m249_ginger.rarity = "common"
+	self.weapon_skins.m249_ginger.bonus = "spread_p1"
+	self.weapon_skins.m249_ginger.reserve_quality = true
+	self.weapon_skins.m249_ginger.texture_bundle_folder = "cash/safes/flake"
+	self.weapon_skins.m249_ginger.base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_004_df")
+	self.weapon_skins.m249_ginger.pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/gradient_flake_002_df")
+	self.weapon_skins.m249_ginger.pattern = Idstring("units/payday2_cash/safes/flake/pattern/pattern_xmasknit_01_df")
+	self.weapon_skins.m249_ginger.pattern_tweak = Vector3(2.64073, 0, 0)
+	self.weapon_skins.m249_ginger.pattern_pos = Vector3(0.159836, 0.445409, 0)
+	self.weapon_skins.m249_ginger.types = {
+		gadget = {
+			pattern_tweak = Vector3(0.777488, 0, 1)
+		},
+		barrel = {
+			pattern_pos = Vector3(-0.308609, -0.127355, 0),
+			pattern_tweak = Vector3(0.348202, 0, 1)
+		},
+		stock = {
+			pattern_pos = Vector3(0.158836, 0.0252805, 0),
+			pattern_tweak = Vector3(1.30217, 0, 1)
+		},
+		upper_reciever = {
+			pattern_pos = Vector3(-0.105196, 0.0853599, 0),
+			pattern_tweak = Vector3(1.21038, 0, 1)
+		},
+		magazine = {
+			base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_004_b_df")
+		},
+		lower_reciever = {
+			base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_004_b_df")
+		},
+		barrel_ext = {
+			pattern_pos = Vector3(0, 0.0323599, 0),
+			pattern_tweak = Vector3(0.703091, 0, 1)
+		}
+	}
+	self.weapon_skins.x_b92fs_ginger = {}
+	self.weapon_skins.x_b92fs_ginger.name_id = "bm_wskn_x_b92fs_ginger"
+	self.weapon_skins.x_b92fs_ginger.desc_id = "bm_wskn_x_b92fs_ginger_desc"
+	self.weapon_skins.x_b92fs_ginger.weapon_id = "x_b92fs"
+	self.weapon_skins.x_b92fs_ginger.rarity = "uncommon"
+	self.weapon_skins.x_b92fs_ginger.bonus = "recoil_p1"
+	self.weapon_skins.x_b92fs_ginger.reserve_quality = true
+	self.weapon_skins.x_b92fs_ginger.texture_bundle_folder = "cash/safes/flake"
+	self.weapon_skins.x_b92fs_ginger.base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_005_df")
+	self.weapon_skins.x_b92fs_ginger.pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/gradient_flake_001_df")
+	self.weapon_skins.x_b92fs_ginger.pattern = Idstring("units/payday2_cash/safes/flake/pattern/pattern_xmasknit_02_df")
+	self.weapon_skins.x_b92fs_ginger.pattern_tweak = Vector3(1.37487, 3.14536, 1)
+	self.weapon_skins.x_b92fs_ginger.pattern_pos = Vector3(0.0764394, 0.447488, 0)
+	self.weapon_skins.x_b92fs_ginger.parts = {
+		wpn_fps_pis_beretta_g_engraved = {
+			[Idstring("mtr_engraved"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_005_b_df")
+			}
+		},
+		wpn_fps_pis_beretta_sl_brigadier = {
+			[Idstring("brig"):key()] = {
+				pattern_pos = Vector3(-0.032, -0.27599, 0)
+			}
+		},
+		wpn_fps_pis_beretta_sl_std = {
+			[Idstring("std_slide"):key()] = {
+				pattern_pos = Vector3(0.14444, 0.428488, 0)
+			}
+		},
+		wpn_fps_pis_beretta_body_rail = {
+			[Idstring("front_rail"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_005_b_df"),
+				pattern_pos = Vector3(0.00620103, 0, 0)
+			}
+		},
+		wpn_fps_pis_beretta_body_beretta = {
+			[Idstring("body"):key()] = {
+				pattern_pos = Vector3(-0.039, -0.26572, 0),
+				pattern_tweak = Vector3(1.96995, 0, 1)
+			}
+		}
+	}
+	self.weapon_skins.x_b92fs_ginger.types = {
+		gadget = {
+			base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_005_b_df")
+		},
+		lower_reciever = {
+			pattern_pos = Vector3(0.00620103, 0.0157406, 0)
+		},
+		barrel_ext = {
+			base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_005_b_df")
+		},
+		magazine = {
+			base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_005_b_df")
+		}
+	}
+	self.weapon_skins.ksg_ginger = {}
+	self.weapon_skins.ksg_ginger.name_id = "bm_wskn_ksg_ginger"
+	self.weapon_skins.ksg_ginger.desc_id = "bm_wskn_ksg_ginger_desc"
+	self.weapon_skins.ksg_ginger.weapon_id = "ksg"
+	self.weapon_skins.ksg_ginger.rarity = "uncommon"
+	self.weapon_skins.ksg_ginger.bonus = "spread_n1"
+	self.weapon_skins.ksg_ginger.reserve_quality = true
+	self.weapon_skins.ksg_ginger.texture_bundle_folder = "cash/safes/flake"
+	self.weapon_skins.ksg_ginger.base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_006_df")
+	self.weapon_skins.ksg_ginger.pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/gradient_flake_002_df")
+	self.weapon_skins.ksg_ginger.pattern = Idstring("units/payday2_cash/safes/flake/pattern/pattern_xmasknit_02_df")
+	self.weapon_skins.ksg_ginger.parts = {
+		wpn_fps_sho_ksg_body_standard = {
+			[Idstring("mat_body"):key()] = {
+				pattern_pos = Vector3(0.155297, 0.339011, 0),
+				pattern_tweak = Vector3(2.20844, 1.57791, 1)
+			}
+		},
+		wpn_fps_sho_ksg_fg_short = {
+			[Idstring("mat_pump"):key()] = {
+				pattern_pos = Vector3(0.0322805, 0.387789, 0),
+				pattern_tweak = Vector3(1.73146, 1.62287, 1)
+			}
+		},
+		wpn_fps_upg_ns_sho_salvo_large = {
+			[Idstring("mtr_salvo_large"):key()] = {
+				pattern_pos = Vector3(0.012, -0.995468, 0),
+				pattern_tweak = Vector3(1.11138, 1.5769, 1)
+			}
+		}
+	}
+	self.weapon_skins.ksg_ginger.types = {
+		sight = {
+			pattern_tweak = Vector3(0.825187, 1.56293, 1)
+		},
+		foregrip = {
+			pattern_pos = Vector3(-0.006, 0.055, 0),
+			pattern_tweak = Vector3(1.54067, 1.54396, 1)
+		},
+		gadget = {
+			pattern_pos = Vector3(0.35917, 0.511806, 0),
+			pattern_tweak = Vector3(0.634393, 1.57791, 1)
+		},
+		barrel = {
+			pattern_pos = Vector3(0.0784394, 0.797997, 0),
+			pattern_tweak = Vector3(1.25447, 1.5929, 1)
+		},
+		barrel_ext = {
+			pattern_tweak = Vector3(0.348202, 1.57791, 1)
+		}
+	}
+	self.weapon_skins.m1928_ginger = {}
+	self.weapon_skins.m1928_ginger.name_id = "bm_wskn_m1928_ginger"
+	self.weapon_skins.m1928_ginger.desc_id = "bm_wskn_m1928_ginger_desc"
+	self.weapon_skins.m1928_ginger.weapon_id = "m1928"
+	self.weapon_skins.m1928_ginger.rarity = "uncommon"
+	self.weapon_skins.m1928_ginger.bonus = "spread_p1"
+	self.weapon_skins.m1928_ginger.reserve_quality = true
+	self.weapon_skins.m1928_ginger.texture_bundle_folder = "cash/safes/flake"
+	self.weapon_skins.m1928_ginger.base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_003b_df")
+	self.weapon_skins.m1928_ginger.pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/gradient_flake_003b_df")
+	self.weapon_skins.m1928_ginger.pattern = Idstring("units/payday2_cash/safes/flake/pattern/flake_pattern_09_df")
+	self.weapon_skins.m1928_ginger.pattern_tweak = Vector3(7.55068, 1.87761, 0)
+	self.weapon_skins.m1928_ginger.pattern_pos = Vector3(-0.0796564, -0.508943, 0)
+	self.weapon_skins.m1928_ginger.uv_scale = Vector3(1, 1, 0)
+	self.weapon_skins.m1928_ginger.types = {
+		foregrip = {
+			pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/gradient_flake_003_df"),
+			pattern_tweak = Vector3(4.25948, 0.25924, 1)
+		},
+		stock = {
+			pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/gradient_flake_003_df"),
+			pattern_tweak = Vector3(4.64107, 0, 1)
+		},
+		grip = {
+			pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/gradient_flake_003_df"),
+			pattern_tweak = Vector3(3.35321, 1.38311, 1)
+		}
+	}
+	self.weapon_skins.g22c_ginger = {}
+	self.weapon_skins.g22c_ginger.name_id = "bm_wskn_g22c_ginger"
+	self.weapon_skins.g22c_ginger.desc_id = "bm_wskn_g22c_ginger_desc"
+	self.weapon_skins.g22c_ginger.weapon_id = "g22c"
+	self.weapon_skins.g22c_ginger.rarity = "rare"
+	self.weapon_skins.g22c_ginger.bonus = "spread_p1"
+	self.weapon_skins.g22c_ginger.reserve_quality = true
+	self.weapon_skins.g22c_ginger.texture_bundle_folder = "cash/safes/flake"
+	self.weapon_skins.g22c_ginger.base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_008_df")
+	self.weapon_skins.g22c_ginger.pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/gradient_flake_002_df")
+	self.weapon_skins.g22c_ginger.pattern = Idstring("units/payday2_cash/safes/flake/pattern/pattern_xmasknit_02_df")
+	self.weapon_skins.g22c_ginger.uv_scale = Vector3(1, 1, 0)
+	self.weapon_skins.g22c_ginger.cubemap_pattern_control = Vector3(0.630336, 0.635106, 0)
+	self.weapon_skins.g22c_ginger.default_blueprint = {
+		"wpn_fps_pis_g22c_body_standard",
+		"wpn_fps_upg_fl_pis_crimson",
+		"wpn_fps_pis_g18c_g_ergo",
+		"wpn_fps_pis_g18c_m_mag_33rnd",
+		"wpn_fps_upg_o_rmr",
+		"wpn_fps_pis_g22c_b_standard",
+		"wpn_fps_upg_ns_pis_ipsccomp"
+	}
+	self.weapon_skins.g22c_ginger.parts = {
+		wpn_fps_pis_g22c_b_standard = {
+			[Idstring("mtr_g22c"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/flake/sticker/sticker_g22c_df"),
+				uv_offset_rot = Vector3(0.109058, 1.05979, 0),
+				pattern_pos = Vector3(0.099598, 0.306472, 0),
+				uv_scale = Vector3(2.26502, 2.26502, 0),
+				pattern_tweak = Vector3(1.77916, 0, 1)
+			}
+		},
+		wpn_fps_upg_ns_pis_large_kac = {
+			[Idstring("silencer"):key()] = {
+				pattern_pos = Vector3(-0.089196, 0.177455, 0)
+			}
+		},
+		wpn_fps_upg_ns_pis_medium_gem = {
+			[Idstring("silencer"):key()] = {
+				pattern_pos = Vector3(-0.0656563, 0.165297, 0)
+			}
+		},
+		wpn_fps_pis_g18c_co_1 = {
+			[Idstring("comp1"):key()] = {
+				pattern_pos = Vector3(0.288853, 0.273773, 0),
+				pattern_tweak = Vector3(0.872886, 1.54794, 1)
+			}
+		},
+		wpn_fps_upg_ns_ass_filter = {
+			[Idstring("mtr_filter"):key()] = {
+				pattern_pos = Vector3(0.0157406, -0.572721, 0),
+				pattern_tweak = Vector3(1.20678, 0, 1)
+			}
+		},
+		wpn_fps_upg_ns_pis_meatgrinder = {
+			[Idstring("mtr_strikeface"):key()] = {
+				pattern_pos = Vector3(-0.251371, 0.226694, 0)
+			}
+		},
+		wpn_fps_upg_ns_pis_jungle = {
+			[Idstring("mtr_jungle"):key()] = {
+				pattern_pos = Vector3(0.330551, 0.242694, 0),
+				pattern_tweak = Vector3(1.25447, 0, 1)
+			}
+		},
+		wpn_fps_upg_pis_ns_flash = {
+			[Idstring("mtr_flash"):key()] = {
+				pattern_pos = Vector3(0.168376, 0.473726, 0),
+				pattern_tweak = Vector3(1.39757, 0, 1)
+			}
+		},
+		wpn_fps_upg_ns_pis_large = {
+			[Idstring("large"):key()] = {
+				pattern_pos = Vector3(0, -0.433086, 0),
+				pattern_tweak = Vector3(1.39757, 0, 1)
+			}
+		},
+		wpn_fps_pis_g22c_body_standard = {
+			[Idstring("mtr_magwell"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_008_b_df")
+			}
+		}
+	}
+	self.weapon_skins.g22c_ginger.types = {
+		gadget = {
+			base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_008_b_df"),
+			pattern = Idstring("units/payday2_cash/safes/flake/pattern/pattern_xmasknit_01_df"),
+			pattern_tweak = Vector3(0.968283, 0, 1)
+		},
+		lower_reciever = {
+			pattern_pos = Vector3(0, 0.890235, 0),
+			pattern = Idstring("units/payday2_cash/safes/flake/pattern/pattern_xmasknit_01_df"),
+			pattern_tweak = Vector3(1.68376, 0, 1)
+		},
+		upper_reciever = {
+			pattern_tweak = Vector3(1.39757, 0, 1)
+		},
+		sight = {
+			pattern = Idstring("units/payday2_cash/safes/flake/pattern/pattern_xmasknit_01_df")
+		},
+		barrel_ext = {
+			pattern_pos = Vector3(0, 0.159836, 0)
+		},
+		grip = {
+			base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_008_b_df")
+		}
+	}
+	self.weapon_skins.wa2000_ginger = {}
+	self.weapon_skins.wa2000_ginger.name_id = "bm_wskn_wa2000_ginger"
+	self.weapon_skins.wa2000_ginger.desc_id = "bm_wskn_wa2000_ginger_desc"
+	self.weapon_skins.wa2000_ginger.weapon_id = "wa2000"
+	self.weapon_skins.wa2000_ginger.rarity = "rare"
+	self.weapon_skins.wa2000_ginger.bonus = "recoil_p1"
+	self.weapon_skins.wa2000_ginger.reserve_quality = true
+	self.weapon_skins.wa2000_ginger.texture_bundle_folder = "cash/safes/flake"
+	self.weapon_skins.wa2000_ginger.base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_009_df")
+	self.weapon_skins.wa2000_ginger.pattern = Idstring("units/payday2_cash/safes/flake/pattern/flake_pattern_01_df")
+	self.weapon_skins.wa2000_ginger.pattern_tweak = Vector3(0.825187, 0, 0)
+	self.weapon_skins.wa2000_ginger.pattern_pos = Vector3(-0.652039, 0.0825188, 0)
+	self.weapon_skins.wa2000_ginger.uv_scale = Vector3(1, 1, 0)
+	self.weapon_skins.wa2000_ginger.default_blueprint = {
+		"wpn_fps_snp_wa2000_body_standard",
+		"wpn_fps_snp_wa2000_m_standard",
+		"wpn_fps_snp_wa2000_s_standard",
+		"wpn_fps_snp_wa2000_b_long",
+		"wpn_fps_snp_wa2000_g_walnut",
+		"wpn_fps_upg_o_leupold",
+		"wpn_fps_upg_o_45iron"
+	}
+	self.weapon_skins.wa2000_ginger.types = {
+		stock = {
+			base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_009b_df"),
+			pattern_tweak = Vector3(1, 0, 0)
+		},
+		grip = {
+			sticker = Idstring("units/payday2_cash/safes/flake/sticker/flake_sticker_helper_df"),
+			uv_offset_rot = Vector3(-0.259451, 0.664901, 0),
+			pattern_tweak = Vector3(4.73647, 0, 0),
+			pattern_pos = Vector3(-0.337228, -0.575721, 0),
+			uv_scale = Vector3(14.5651, 13.3732, 1),
+			pattern = Idstring("units/payday2_cash/safes/dallas/pattern/pattern_wood_df"),
+			pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/gradient_flake_009_df")
+		}
+	}
+	self.weapon_skins.akmsu_ginger = {}
+	self.weapon_skins.akmsu_ginger.name_id = "bm_wskn_akmsu_ginger"
+	self.weapon_skins.akmsu_ginger.desc_id = "bm_wskn_akmsu_ginger_desc"
+	self.weapon_skins.akmsu_ginger.weapon_id = "akmsu"
+	self.weapon_skins.akmsu_ginger.rarity = "epic"
+	self.weapon_skins.akmsu_ginger.bonus = "spread_p1"
+	self.weapon_skins.akmsu_ginger.reserve_quality = true
+	self.weapon_skins.akmsu_ginger.texture_bundle_folder = "cash/safes/flake"
+	self.weapon_skins.akmsu_ginger.base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_010_df")
+	self.weapon_skins.akmsu_ginger.pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/flake_pattern_gradient_01_df")
+	self.weapon_skins.akmsu_ginger.pattern = Idstring("units/payday2_cash/safes/flake/pattern/flake_pattern_01_df")
+	self.weapon_skins.akmsu_ginger.pattern_tweak = Vector3(1.39757, 0, 1)
+	self.weapon_skins.akmsu_ginger.pattern_pos = Vector3(0.664441, -0.127355, 0)
+	self.weapon_skins.akmsu_ginger.default_blueprint = {
+		"wpn_fps_smg_akmsu_body_lowerreceiver",
+		"wpn_fps_ass_akm_body_upperreceiver_vanilla",
+		"wpn_fps_smg_akmsu_b_standard",
+		"wpn_fps_upg_o_cmore",
+		"wpn_fps_upg_ass_ns_surefire",
+		"wpn_fps_upg_o_ak_scopemount",
+		"wpn_fps_smg_akmsu_fg_rail",
+		"wpn_fps_upg_ak_s_solidstock",
+		"wpn_fps_upg_ak_m_quad"
+	}
+	self.weapon_skins.akmsu_ginger.parts = {
+		wpn_fps_upg_m4_s_ubr = {
+			[Idstring("mtr_ubr"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/flake/sticker/flake_sticker_wonderland_df"),
+				uv_scale = Vector3(1.59757, 1.54989, 1),
+				uv_offset_rot = Vector3(0, 1.06511, 0)
+			}
+		},
+		wpn_upg_ak_s_psl = {
+			[Idstring("psl"):key()] = {
+				pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/flake_pattern_gradient_01_df"),
+				pattern_tweak = Vector3(0, 0, 1)
+			}
+		},
+		wpn_fps_upg_ak_s_solidstock = {
+			[Idstring("mtr_solid"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/flake/sticker/flake_sticker_wonderland_df"),
+				uv_offset_rot = Vector3(0.0443599, 0.998331, 0),
+				pattern_pos = Vector3(0, -0.29907, 0),
+				uv_scale = Vector3(1.1685, 1.26385, 1),
+				base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_001_df"),
+				pattern_tweak = Vector3(0, 0, 1)
+			}
+		},
+		wpn_fps_upg_ak_m_quad = {
+			[Idstring("mtr_quadstack"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/flake/sticker/flake_sticker_wonderland_df"),
+				uv_scale = Vector3(0.882449, 0.882449, 1),
+				uv_offset_rot = Vector3(-0.232292, 1.2082, 0)
+			}
+		}
+	}
+	self.weapon_skins.akmsu_ginger.types = {
+		sight = {
+			pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/flake_pattern_gradient_01_df"),
+			pattern_tweak = Vector3(0, 0, 1)
+		},
+		magazine = {
+			sticker = Idstring("units/payday2_cash/safes/flake/sticker/flake_sticker_wonderland_df"),
+			uv_scale = Vector3(1.02547, 1.02547, 1),
+			uv_offset_rot = Vector3(-0.232292, 1.17005, 0),
+			pattern_tweak = Vector3(0, 0, 1)
+		},
+		stock = {
+			base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_001_df"),
+			uv_offset_rot = Vector3(0.00620103, 1.03649, 0),
+			pattern_pos = Vector3(-0.814214, 0, 0),
+			uv_scale = Vector3(1.26385, 1.1685, 1),
+			sticker = Idstring("units/payday2_cash/safes/flake/sticker/flake_sticker_wonderland_df"),
+			pattern_tweak = Vector3(0, 0, 1)
+		}
+	}
+	self.weapon_skins.x_1911_ginger = {}
+	self.weapon_skins.x_1911_ginger.name_id = "bm_wskn_x_1911_ginger"
+	self.weapon_skins.x_1911_ginger.desc_id = "bm_wskn_x_1911_ginger_desc"
+	self.weapon_skins.x_1911_ginger.weapon_id = "x_1911"
+	self.weapon_skins.x_1911_ginger.rarity = "legendary"
+	self.weapon_skins.x_1911_ginger.bonus = "recoil_p1"
+	self.weapon_skins.x_1911_ginger.reserve_quality = true
+	self.weapon_skins.x_1911_ginger.texture_bundle_folder = "cash/safes/flake"
+	self.weapon_skins.x_1911_ginger.unique_name_id = "bm_wskn_x_1911_ginger"
+	self.weapon_skins.x_1911_ginger.locked = true
+	self.weapon_skins.x_1911_ginger.base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_005_b_df")
+	self.weapon_skins.x_1911_ginger.default_blueprint = {
+		"wpn_fps_pis_1911_g_legendary",
+		"wpn_fps_pis_1911_fl_legendary",
+		"wpn_fps_pis_1911_body_standard",
+		"wpn_fps_pis_1911_b_long",
+		"wpn_fps_pis_1911_o_long",
+		"wpn_fps_pis_1911_m_standard"
+	}
+	self.weapon_skins.x_1911_ginger.parts = {
+		wpn_fps_pis_1911_o_long = {
+			[Idstring("sights"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_003_df")
+			}
+		},
+		wpn_fps_pis_1911_b_long = {
+			[Idstring("slide_long"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/flake/sticker/flake_sticker_swirl_df"),
+				pattern = Idstring("units/payday2_cash/safes/flake/pattern/flake_pattern_04_df"),
+				base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_003_df"),
+				uv_offset_rot = Vector3(-0.146434, 1.01741, 0),
+				pattern_pos = Vector3(0.301932, 0, 0),
+				uv_scale = Vector3(1.78827, 2.88479, 1),
+				pattern_tweak = Vector3(1.06368, 0, 1),
+				pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/pattern_gradient_001_df")
+			},
+			[Idstring("barrel_vented"):key()] = {
+				base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_003_df")
+			}
+		},
+		wpn_fps_pis_1911_fl_legendary = {
+			[Idstring("mtr_legend_laser"):key()] = {
+				sticker = Idstring("units/payday2_cash/safes/flake/sticker/flake_sticker_swirl_df"),
+				uv_offset_rot = Vector3(0.158836, 1.00787, 3.36112),
+				pattern_tweak = Vector3(1.87455, 0, 1),
+				pattern = Idstring("units/payday2_cash/safes/flake/pattern/flake_pattern_04_df"),
+				uv_scale = Vector3(2.78944, 6.03132, 1),
+				base_gradient = Idstring("units/payday2_cash/safes/flake/base_gradient/base_flake_003_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/flake/pattern_gradient/pattern_gradient_001_df")
+			}
+		},
+		wpn_fps_pis_1911_g_legendary = {
+			[Idstring("mtr_legend_grip"):key()] = {
+				pattern_tweak = Vector3(5.21345, 3.04644, 1),
+				pattern = Idstring("units/payday2_cash/safes/dallas/pattern/pattern_wood_df"),
+				pattern_gradient = Idstring("units/payday2_cash/safes/dallas/pattern_gradient/gradient_dallas_wood_001_df")
+			}
+		}
+	}
 end

@@ -1689,6 +1689,15 @@ function HudIconsTweakData:init()
 			180
 		}
 	}
+	self.upcard_weapon_bonus = {
+		texture = "guis/textures/pd2/lootscreen/loot_cards",
+		texture_rect = {
+			640,
+			0,
+			128,
+			180
+		}
+	}
 	self.ace_of_spade = {
 		texture = "guis/textures/pd2/lootscreen/loot_cards",
 		texture_rect = {

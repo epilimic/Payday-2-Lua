@@ -2490,6 +2490,28 @@ Play the full version soon to get your full PAYDAY!]],
 			job = "cane",
 			equipped_team = {primary_category = "shotgun", secondary_category = "shotgun"}
 		},
+		flake_1 = {
+			award = "flake_1",
+			jobs = {
+				"framing_frame",
+				"framing_frame_prof"
+			},
+			need_full_job = true,
+			difficulty = {
+				"overkill_145",
+				"overkill_290"
+			},
+			equipped_team = {
+				num_skills = 0,
+				primaries = {
+					"wpn_fps_snp_model70"
+				},
+				secondaries = {
+					"wpn_fps_pis_judge"
+				},
+				armor = "level_4"
+			}
+		},
 		bain_jobs = {
 			challenge_stat = "bain_jobs",
 			complete_job = true,
@@ -2520,7 +2542,67 @@ Play the full version soon to get your full PAYDAY!]],
 			complete_job = true,
 			contract = "the_butcher"
 		},
-		any_jobs = {challenge_stat = "any_jobs", complete_job = true}
+		any_jobs = {challenge_stat = "any_jobs", complete_job = true},
+		monthly_rats = {
+			challenge_award = "monthly_rats",
+			jobs = {"alex", "alex_prof"},
+			need_full_job = true,
+			difficulty = {
+				"overkill_145",
+				"overkill_290"
+			},
+			equipped_team = {
+				num_skills = 0,
+				primaries = {
+					"wpn_fps_ass_amcar"
+				},
+				secondaries = {
+					"wpn_fps_pis_g17"
+				},
+				armor = "level_4"
+			}
+		},
+		monthly_firestarter = {
+			challenge_award = "monthly_firestarter",
+			jobs = {
+				"firestarter",
+				"firestarter_prof"
+			},
+			need_full_job = true,
+			difficulty = {
+				"overkill_145",
+				"overkill_290"
+			},
+			equipped_team = {
+				num_skills = 0,
+				primaries = {
+					"wpn_fps_ass_amcar"
+				},
+				secondaries = {
+					"wpn_fps_pis_g17"
+				},
+				armor = "level_4"
+			}
+		},
+		monthly_shadowraid = {
+			challenge_award = "monthly_shadowraid",
+			job = "kosugi",
+			need_full_job = true,
+			difficulty = {
+				"overkill_145",
+				"overkill_290"
+			},
+			equipped_team = {
+				num_skills = 0,
+				primaries = {
+					"wpn_fps_ass_amcar"
+				},
+				secondaries = {
+					"wpn_fps_pis_g17"
+				},
+				armor = "level_4"
+			}
+		}
 	}
 	self.achievement.complete_heist_statistics_achievements = {
 		immortal_ballot = {
@@ -2864,6 +2946,16 @@ Play the full version soon to get your full PAYDAY!]],
 				},
 				drills = {
 					"event_dinner"
+				}
+			}
+		},
+		flake_1 = {
+			rewards = {
+				safes = {
+					"event_flake"
+				},
+				drills = {
+					"event_flake"
 				}
 			}
 		}

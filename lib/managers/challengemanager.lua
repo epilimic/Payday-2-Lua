@@ -125,7 +125,21 @@ function ChallengeManager:_load_challenges_from_xml()
 						rewarded = false
 					})
 				elseif data._meta == "rewards" then
-					local reward_data = {rewarded = false}
+					local texture_rect
+					if data.texture_rect then
+						texture_rect = string.split(data.texture_rect, ",")
+						for i = 1, #texture_rect do
+							texture_rect[i] = tonumber(texture_rect[i])
+						end
+					end
+					local reward_data = {
+						rewarded = false,
+						name_id = data.name_id,
+						name_s = data.name_s,
+						texture_path = data.texture_path,
+						texture_rect = texture_rect,
+						smart_loot = data.smart_loot
+					}
 					for _, reward in ipairs(data) do
 						table.insert(reward_data, {
 							name_id = reward.name_id,
@@ -152,9 +166,10 @@ function ChallengeManager:_load_challenges_from_xml()
 				objective_s = challenge.objective_s,
 				reward_id = challenge.reward_id,
 				reward_s = challenge.reward_s,
+				rewards = rewards,
+				reward_type = challenge.reward_type or "all",
 				interval = challenge.interval or false,
-				objectives = objectives,
-				rewards = rewards
+				objectives = objectives
 			}
 		else
 			Application:debug("[ChallengeManager:_load_challenges_from_xml] Unrecognized entry in xml", "meta", challenge._meta, "id", challenge.id)
@@ -290,7 +305,7 @@ function ChallengeManager:on_give_reward(id, key, reward_index)
 	if active_challenge and active_challenge.completed and not active_challenge.rewarded then
 		local reward = active_challenge.rewards[reward_index]
 		if reward and not reward.rewarded then
-			reward = self:_give_reward(reward)
+			reward = self:_give_reward(active_challenge, reward)
 			local all_rewarded = true
 			for _, reward in ipairs(active_challenge.rewards) do
 				if not reward.rewarded then
@@ -314,16 +329,52 @@ function ChallengeManager:on_give_all_rewards(id, key)
 	if active_challenge and active_challenge.completed and not active_challenge.rewarded then
 		local rewards = {}
 		for _, reward in ipairs(active_challenge.rewards) do
-			table.insert(rewards, self:_give_reward(reward))
+			table.insert(rewards, self:_give_reward(active_challenge, reward))
 		end
 		active_challenge.rewarded = true
 		self._any_challenge_rewarded = true
 		return rewards
 	end
 end
-function ChallengeManager:_give_reward(reward)
+function ChallengeManager:_give_reward(challenge, reward)
+	if not challenge or reward.rewarded then
+		return reward
+	end
 	reward.rewarded = true
-	local reward = #reward > 0 and reward[math.random(#reward)] or reward
+	local reward = reward
+	if #reward > 0 then
+		local rewards = reward
+		if rewards.smart_loot then
+			local amount_in_inventory
+			local loot_table = {}
+			local limited_loot_table = {}
+			local most_limited_loot_table = {}
+			local entry, global_value
+			for _, reward in ipairs(rewards) do
+				entry = tweak_data:get_raw_value("blackmarket", reward.type_items, reward.item_entry)
+				global_value = reward.global_value or entry.infamous and "infamous" or entry.global_value or entry.dlc or entry.dlcs and entry.dlcs[math.random(#entry.dlcs)] or "normal"
+				amount_in_inventory = managers.blackmarket:get_item_amount(global_value, reward.type_items, reward.item_entry, true)
+				table.insert(loot_table, reward)
+				if tweak_data.blackmarket.weapon_mods[reward.item_entry] and tweak_data.blackmarket.weapon_mods[reward.item_entry].max_in_inventory and amount_in_inventory < tweak_data.blackmarket.weapon_mods[reward.item_entry].max_in_inventory then
+					table.insert(limited_loot_table, reward)
+				end
+				if amount_in_inventory == 0 then
+					table.insert(most_limited_loot_table, reward)
+				end
+			end
+			if #most_limited_loot_table > 0 then
+				reward = most_limited_loot_table[math.random(#most_limited_loot_table)]
+			elseif #limited_loot_table > 0 then
+				reward = limited_loot_table[math.random(#limited_loot_table)]
+			elseif #loot_table > 0 then
+				reward = loot_table[math.random(#loot_table)]
+			else
+				reward = rewards[math.random(#rewards)]
+			end
+		else
+			reward = rewards[math.random(#rewards)]
+		end
+	end
 	if reward.choose_weapon_reward then
 	else
 		local entry = tweak_data:get_raw_value("blackmarket", reward.type_items, reward.item_entry)
@@ -333,6 +384,11 @@ function ChallengeManager:_give_reward(reward)
 				cat_print("jansve", "[ChallengeManager:_give_rewards]", i .. "  give", reward.type_items, reward.item_entry, global_value)
 				managers.blackmarket:add_to_inventory(global_value, reward.type_items, reward.item_entry)
 			end
+		end
+	end
+	if challenge.reward_type == "single" then
+		for _, reward in ipairs(challenge.rewards) do
+			reward.rewarded = true
 		end
 	end
 	return reward

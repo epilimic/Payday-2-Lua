@@ -1220,12 +1220,21 @@ MenuComponentManager.mouse_moved = function(self, o, x, y)
 	return false, wanted_pointer
 end
 
+MenuComponentManager.peer_outfit_updated = function(self, peer_id)
+	if self._contract_gui then
+		self._contract_gui:refresh()
+	end
+end
+
 MenuComponentManager.on_peer_removed = function(self, peer, reason)
 	if self._lootdrop_gui then
 		self._lootdrop_gui:on_peer_removed(peer, reason)
 	end
 	if self._lootdrop_casino_gui then
 		self._lootdrop_casino_gui:on_peer_removed(peer, reason)
+	end
+	if self._contract_gui then
+		self._contract_gui:refresh()
 	end
 end
 
@@ -2369,7 +2378,7 @@ MenuComponentManager.get_texture_from_mod_type = function(self, type, sub_type, 
 		texture = "guis/textures/pd2/blackmarket/inv_mod_" .. (sub_type or (is_auto and "autofire") or "singlefire")
 	elseif type == "sight" then
 		texture = "guis/textures/pd2/blackmarket/inv_mod_scope"
-	elseif type == "ammo" or type == "bonus" then
+	elseif type == "ammo" then
 		if not sub_type then
 			texture = "guis/textures/pd2/blackmarket/inv_mod_" .. tostring(not equipped or type)
 			do return end
@@ -2381,13 +2390,21 @@ MenuComponentManager.get_texture_from_mod_type = function(self, type, sub_type, 
 				texture = "guis/textures/pd2/blackmarket/inv_mod_" .. tostring(sub_type or type)
 			end
 			texture = "guis/textures/pd2/blackmarket/inv_mod_" .. tostring(sub_type or type)
-		else
-			texture = "guis/textures/pd2/blackmarket/inv_mod_" .. type
+		elseif type == "bonus" then
+			if not sub_type then
+				texture = "guis/textures/pd2/blackmarket/inv_mod_" .. tostring(not equipped or type)
+				do return end
+				texture = "guis/textures/pd2/blackmarket/inv_mod_bonus"
+				texture = "guis/textures/pd2/blackmarket/inv_mod_" .. tostring(sub_type or type)
+			else
+				texture = "guis/textures/pd2/blackmarket/inv_mod_" .. type
+			end
+			return texture
+			 -- WARNING: missing end command somewhere! Added here
 		end
-		return texture
 		 -- WARNING: missing end command somewhere! Added here
 	end
-	-- WARNING: F->nextEndif is not empty. Unhandled nextEndif->addr = 51 
+	-- WARNING: F->nextEndif is not empty. Unhandled nextEndif->addr = 49 91 
 end
 
 MenuComponentManager.create_weapon_mod_icon_list = function(self, weapon, category, factory_id, slot)

@@ -270,6 +270,33 @@ function EconomyTweakData:init()
 		weapon_skins = {"r870_waves"}
 	}
 	self.contents.surf_01_legendary.rarity = "legendary"
+	self.contents.event_flake = {}
+	self.contents.event_flake.def_id = 10012
+	self.contents.event_flake.contains = {
+		weapon_skins = {
+			"saiga_ginger",
+			"p226_ginger",
+			"new_mp5_ginger",
+			"m249_ginger",
+			"x_b92fs_ginger",
+			"ksg_ginger",
+			"m1928_ginger",
+			"g22c_ginger",
+			"wa2000_ginger",
+			"akmsu_ginger"
+		},
+		contents = {
+			"event_flake_legendary"
+		}
+	}
+	self.contents.event_flake_legendary = {}
+	self.contents.event_flake_legendary.def_id = 10013
+	self.contents.event_flake_legendary.contains = {
+		weapon_skins = {
+			"x_1911_ginger"
+		}
+	}
+	self.contents.event_flake_legendary.rarity = "legendary"
 	self.safes.overkill_01 = {}
 	self.safes.overkill_01.def_id = 50000
 	self.safes.overkill_01.promo = true
@@ -325,6 +352,15 @@ function EconomyTweakData:init()
 	self.safes.surf_01.unit_name = "units/payday2_cash/safes/surf/safe/eco_safe_surf"
 	self.safes.surf_01.texture_bundle_folder = "cash/safes/surf"
 	self.safes.surf_01.market_link = "https://steamcommunity.com/market/listings/218620/Bodhi%20Safe"
+	self.safes.event_flake = {}
+	self.safes.event_flake.def_id = 50007
+	self.safes.event_flake.promo = true
+	self.safes.event_flake.drill = "event_flake"
+	self.safes.event_flake.content = "event_flake"
+	self.safes.event_flake.name_id = "bm_menu_safe_event_flake"
+	self.safes.event_flake.unit_name = "units/payday2_cash/safes/flake/safe/eco_safe_event_flake"
+	self.safes.event_flake.texture_bundle_folder = "cash/safes/flake"
+	self.safes.event_flake.achievement = "flake_1"
 	self.drills.overkill_01 = {}
 	self.drills.overkill_01.safe = "overkill_01"
 	self.drills.overkill_01.def_id = 70000
@@ -384,6 +420,15 @@ function EconomyTweakData:init()
 	self.drills.surf_01.name_id = "bm_menu_drill_surf"
 	self.drills.surf_01.desc_id = "bm_menu_drill_surf_desc"
 	self.drills.surf_01.texture_bundle_folder = "cash/safes/surf"
+	self.drills.event_flake = {}
+	self.drills.event_flake.def_id = 70007
+	self.drills.event_flake.safe = "event_flake"
+	self.drills.event_flake.promo = true
+	self.drills.event_flake.unit_name = "units/payday2_cash/safes/flake/drill/eco_drill_flake"
+	self.drills.event_flake.name_id = "bm_menu_drill_event_flake"
+	self.drills.event_flake.desc_id = "bm_menu_drill_event_flake_desc"
+	self.drills.event_flake.texture_bundle_folder = "cash/safes/flake"
+	self.drills.event_flake.achievement = "flake_1"
 	self.bonuses = {}
 	self.bonuses.concealment_p1 = {}
 	self.bonuses.concealment_p1.name_id = "bm_menu_bonus_concealment"

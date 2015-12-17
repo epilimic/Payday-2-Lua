@@ -575,6 +575,18 @@ function MenuSceneManager:_setup_bg()
 			self:set_character(character_id)
 		end
 	end
+	local a = self._bg_unit:get_object(Idstring("a_reference"))
+	self._snow_effect = World:effect_manager():spawn({
+		effect = Idstring("effects/payday2/menu/menu_snow_xmas_5x5"),
+		position = Vector3(0, 0, 0),
+		rotation = Rotation()
+	})
+	self._xmas_tree = World:spawn_unit(Idstring("units/pd2_dlc2/props/com_props_christmas_tree/com_prop_christmas_tree"), a:position() + Vector3(-150, 250, -50), Rotation(-45 + (math.random(2) - 1) * 180, 0, 0))
+	self._snow_pile = World:spawn_unit(Idstring("units/pd2_dlc_cane/props/cne_prop_snow_pile_01/cne_prop_snow_pile_01"), a:position() + Vector3(-35, 275, -75), Rotation(305, 0, 0))
+	local e_money = self._bg_unit:effect_spawner(Idstring("e_money"))
+	if e_money then
+		e_money:set_enabled(false)
+	end
 	self:_setup_lobby_characters()
 end
 function MenuSceneManager:_set_player_character_unit(unit_name)
