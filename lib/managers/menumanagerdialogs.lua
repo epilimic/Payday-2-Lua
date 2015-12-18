@@ -1614,6 +1614,19 @@ function MenuManager:show_challenge_reward(reward)
 	elseif category == "xp" then
 		local xp = tweak_data:get_value("experience_manager", "loot_drop_value", td.value_id) or 0
 		params.xp = managers.experience:experience_string(xp * amount)
+	elseif category == "weapon_mods" then
+		params.item = name_string
+		params.amount = managers.money:add_decimal_marks_to_string(tostring(amount))
+		local list_of_weapons = managers.weapon_factory:get_weapons_uses_part(id) or {}
+		if table.size(list_of_weapons) <= 4 then
+			local s = " ("
+			for _, factory_id in pairs(list_of_weapons) do
+				s = s .. managers.weapon_factory:get_weapon_name_by_factory_id(factory_id)
+				s = s .. ", "
+			end
+			s = s:sub(1, -3) .. ")"
+			params.item = params.item .. s
+		end
 	else
 		params.item = name_string
 		params.amount = managers.money:add_decimal_marks_to_string(tostring(amount))

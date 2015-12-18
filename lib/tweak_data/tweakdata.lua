@@ -2509,7 +2509,7 @@ Play the full version soon to get your full PAYDAY!]],
 				secondaries = {
 					"wpn_fps_pis_judge"
 				},
-				armor = "level_4"
+				armor = "level_1"
 			}
 		},
 		bain_jobs = {
@@ -2559,7 +2559,7 @@ Play the full version soon to get your full PAYDAY!]],
 				secondaries = {
 					"wpn_fps_pis_g17"
 				},
-				armor = "level_4"
+				armor = "level_1"
 			}
 		},
 		monthly_firestarter = {
@@ -2581,7 +2581,7 @@ Play the full version soon to get your full PAYDAY!]],
 				secondaries = {
 					"wpn_fps_pis_g17"
 				},
-				armor = "level_4"
+				armor = "level_1"
 			}
 		},
 		monthly_shadowraid = {
@@ -2600,7 +2600,7 @@ Play the full version soon to get your full PAYDAY!]],
 				secondaries = {
 					"wpn_fps_pis_g17"
 				},
-				armor = "level_4"
+				armor = "level_1"
 			}
 		}
 	}
